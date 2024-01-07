@@ -2,7 +2,6 @@ module Federails
   module Client
     class ActivitiesController < Federails::ClientController
       before_action :authenticate_user!, only: [:feed]
-      # layout 'layouts/application'
 
       # GET /app/activities
       # GET /app/activities.json
