@@ -17,7 +17,7 @@ RSpec.describe Federails::Server::WebFingerController, type: :acceptance do
            template: { type: :string, description: 'URL template', required: false },
          } }
 
-  on_get '/.well-known/webfinger?resource=:resource', 'List activities' do
+  on_get '/.well-known/webfinger', 'List activities' do
     path_params fields: { resource: { type: :string, description: 'actor address, e.g.: "acct:user@server.tld"' } }
 
     # Test that JRD is delivered in response to application/jrd+json
