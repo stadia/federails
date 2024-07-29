@@ -8,22 +8,24 @@ Federails::Engine.routes.draw do
     end
   end
 
-  scope Federails.configuration.client_routes_path, module: :client, as: :client do
-    resources :activities, only: [:index, :feed]
-    resources :actors, only: [:index, :show] do
-      collection do
-        get :lookup, to: 'actors#lookup'
+  if Federails.configuration.client_routes_path
+    scope Federails.configuration.client_routes_path, module: :client, as: :client do
+      resources :activities, only: [:index, :feed]
+      resources :actors, only: [:index, :show] do
+        collection do
+          get :lookup, to: 'actors#lookup'
+        end
+        resources :activities, only: [:index]
       end
-      resources :activities, only: [:index]
-    end
-    get :feed, to: 'activities#feed'
-    resources :followings, only: [:create, :destroy] do
-      collection do
-        post :follow, to: 'followings#follow'
-      end
+      get :feed, to: 'activities#feed'
+      resources :followings, only: [:create, :destroy] do
+        collection do
+          post :follow, to: 'followings#follow'
+        end
 
-      member do
-        put :accept, to: 'followings#accept'
+        member do
+          put :accept, to: 'followings#accept'
+        end
       end
     end
   end

@@ -90,6 +90,18 @@ With `routes_path = 'federation'`, routes will be:
 ...
 ```
 
+Some routes can be disabled in configuration if you don't want to expose particular features:
+
+```
+Federails.configure do |config|
+  # Disable routing for .well-known and nodeinfo
+  config.enable_discovery = false
+
+  # Disable web client UI routes
+  config.client_routes_path = nil
+end
+```
+
 ### Migrations
 
 Copy the migrations:
