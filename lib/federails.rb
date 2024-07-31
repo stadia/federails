@@ -24,12 +24,12 @@ module Federails
       :site_port,
       :enable_discovery,
       :app_layout,
-      :user_class,
+      :user_class, # @deprecated
       :server_routes_path,
       :client_routes_path,
-      :user_profile_url_method,
-      :user_name_field,
-      :user_username_field,
+      :user_profile_url_method, # @deprecated
+      :user_name_field, # @deprecated
+      :user_username_field, # @deprecated
     ].each { |key| Configuration.send :"#{key}=", config[key] }
   end
 end

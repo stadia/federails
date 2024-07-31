@@ -29,7 +29,8 @@ module Federails
     mattr_accessor :app_layout
     @@app_layout = nil
 
-    # User model
+    # User class name
+    # @deprecated Kept for upgrade compatibility only
     mattr_accessor :user_class
     @@user_class = '::User'
 
@@ -41,32 +42,28 @@ module Federails
     mattr_accessor :client_routes_path
     @@client_routes_path = :app
 
-    # Method to use for links to user profiles.
+    # Method to use for links to user profiles
+    # @deprecated Set profile_url_method option on acts_as_federails_actor instead
     mattr_accessor :user_profile_url_method
     @@user_profile_url_method = nil
 
     # Attribute in the user model to use as the user's name
+    # @deprecated Set name_field option on acts_as_federails_actor instead
     #
     # It only have sense if you have a separate username attribute
     mattr_accessor :user_name_field
     @@user_name_field = nil
 
     # Attribute in the user model to use as the username for local actors
+    # @deprecated Set username_field option on acts_as_federails_actor instead
     mattr_accessor :user_username_field
     @@user_username_field = :id
 
     ##
     # @return [String] Table used for user model
+    # @deprecated Kept for upgrade compatibility only
     def self.user_table
-      user_model.table_name
-    end
-
-    ##
-    # @return [ActiveRecord::Base]
-    def self.user_model
-      raise 'User class is not defined' unless @@user_class
-
-      @@user_class.constantize
+      @@user_class&.constantize&.table_name
     end
 
     def self.site_host=(value)

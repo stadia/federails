@@ -7,12 +7,8 @@ defaults: &defaults
   site_port: 3000
   enable_discovery: true
   app_layout: 'layouts/application'
-  user_class: '::User'
   server_routes_path: federation
   client_routes_path: app
-  user_profile_url_method: ~
-  user_name_field: ~
-  user_username_field: id
 
 development:
   <<: *defaults
