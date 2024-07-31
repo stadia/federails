@@ -109,7 +109,7 @@ Federails provides a concern to include in your "user" model or whatever will pu
 
 class User < ApplicationRecord
   # Include the concern here:
-  include Federails::User
+  include Federails::Entity
 end
 ```
 

@@ -28,9 +28,9 @@ module Federails
     context 'when creating local actors' do
       it 'fails to create the same local actor twice' do
         user = FactoryBot.create :user
-        duplicate = described_class.new(user: user)
+        duplicate = described_class.new(entity: user)
         duplicate.validate
-        expect(duplicate.errors.details[:user_id][0][:error]).to eq :taken
+        expect(duplicate.errors.details[:entity_id][0][:error]).to eq :taken
       end
     end
 

@@ -3,17 +3,17 @@ require 'fediverse/webfinger'
 
 module Federails
   class Actor < ApplicationRecord # rubocop:disable Metrics/ClassLength
-    validates :federated_url, presence: { unless: :user_id }, uniqueness: { unless: :user_id }
-    validates :username, presence: { unless: :user_id }
-    validates :server, presence: { unless: :user_id }
-    validates :inbox_url, presence: { unless: :user_id }
-    validates :outbox_url, presence: { unless: :user_id }
-    validates :followers_url, presence: { unless: :user_id }
-    validates :followings_url, presence: { unless: :user_id }
-    validates :profile_url, presence: { unless: :user_id }
-    validates :user_id, uniqueness: true, if: :local?
+    validates :federated_url, presence: { unless: :entity }, uniqueness: { unless: :entity }
+    validates :username, presence: { unless: :entity }
+    validates :server, presence: { unless: :entity }
+    validates :inbox_url, presence: { unless: :entity }
+    validates :outbox_url, presence: { unless: :entity }
+    validates :followers_url, presence: { unless: :entity }
+    validates :followings_url, presence: { unless: :entity }
+    validates :profile_url, presence: { unless: :entity }
+    validates :entity_id, uniqueness: { scope: :entity_type }, if: :local?
 
-    belongs_to :user, class_name: Federails.configuration.user_class, optional: true # rubocop:disable Rails/ReflectionClassName
+    belongs_to :entity, polymorphic: true, optional: true
     # FIXME: Handle this with something like undelete
     has_many :activities, dependent: :destroy
     has_many :following_followers, class_name: 'Federails::Following', foreign_key: :target_actor_id, dependent: :destroy, inverse_of: :target_actor
@@ -21,10 +21,10 @@ module Federails
     has_many :followers, source: :actor, through: :following_followers
     has_many :follows, source: :target_actor, through: :following_follows
 
-    scope :local, -> { where.not(user_id: nil) }
+    scope :local, -> { where.not(entity: nil) }
 
     def local?
-      user_id.present?
+      entity.present?
     end
 
     def federated_url
@@ -69,7 +69,7 @@ module Federails
       method = Federails.configuration.user_profile_url_method
       return Federails::Engine.routes.url_helpers.server_actor_url self unless method
 
-      Rails.application.routes.send method, user
+      Rails.application.routes.send method, entity
     end
 
     def at_address

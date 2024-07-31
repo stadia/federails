@@ -4,7 +4,7 @@
   <p>
     <%
       follow = current_user.actor.follows? @actor
-      if @actor.user_id == current_user.id
+      if @actor.entity == current_user
     %>
       <button role="button" disabled="disabled">That's you</button>
     <% elsif follow %>
@@ -72,7 +72,7 @@
 <hr>
 
 <h2>Follows</h2>
-<% if current_user && current_user.id == @actor.user_id %>
+<% if current_user && current_user == @actor.entity %>
   <%= render 'federails/client/followings/form', following: Federails::Following.new %>
 <% end %>
 
