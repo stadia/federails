@@ -12,8 +12,8 @@ json.services inbound:  [],
 # FIXME: Don't hardcode this
 json.openRegistrations true
 json.usage users: {
-  total:          Federails::Configuration.user_model.count,
-  activeMonth:    Federails::Configuration.user_model.where(created_at: ((30.days.ago)...Time.current)).count,
-  activeHalfyear: Federails::Configuration.user_model.where(created_at: ((180.days.ago)...Time.current)).count,
+  total:          @total,
+  activeMonth:    @active_month,
+  activeHalfyear: @active_halfyear,
 }
 json.metadata({})
