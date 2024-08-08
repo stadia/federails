@@ -75,6 +75,14 @@ module Federails
       @@site_port = value
       Federails::Engine.routes.default_url_options[:port] = value
     end
+
+    # List of entity types
+    mattr_reader :entity_types
+    @@entity_types = {}
+
+    def self.register_entity(klass, config = {})
+      @@entity_types[klass.name] = config.merge(class: klass)
+    end
   end
   # rubocop:enable Style/ClassVars
 end

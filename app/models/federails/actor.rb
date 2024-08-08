@@ -34,11 +34,11 @@ module Federails
     def username
       return attributes['username'] unless local?
 
-      user.send(Federails.configuration.user_username_field).to_s
+      entity.send(entity_configuration[:username_field]).to_s
     end
 
     def name
-      value = (user.send(Federails.configuration.user_name_field).to_s if local? && Federails.configuration.user_name_field)
+      value = (entity.send(entity_configuration[:name_field]).to_s if local?)
 
       value || attributes['name'] || username
     end
@@ -66,10 +66,10 @@ module Federails
     def profile_url
       return attributes['profile_url'].presence unless local?
 
-      method = Federails.configuration.user_profile_url_method
+      method = entity_configuration[:profile_url_method]
       return Federails::Engine.routes.url_helpers.server_actor_url self unless method
 
-      Rails.application.routes.send method, entity
+      Rails.application.routes.url_helpers.send method, [entity]
     end
 
     def at_address
@@ -85,6 +85,10 @@ module Federails
       return list.first if list.count == 1
 
       false
+    end
+
+    def entity_configuration
+      Federails::Configuration.entity_types[entity.class.name]
     end
 
     class << self
