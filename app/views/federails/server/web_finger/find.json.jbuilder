@@ -11,10 +11,10 @@ links = [
 
 # User profile URL if configured
 # TODO: Add a profile controller/action in dummy to test this
-if Federails::Configuration.user_profile_url_method
+if @user.actor.profile_url
   links.push rel:  'https://webfinger.net/rel/profile-page',
              type: 'text/html',
-             href: send(Federails::Configuration.user_profile_url_method, @user)
+             href: @user.actor.profile_url
 end
 
 json.links links

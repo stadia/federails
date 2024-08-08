@@ -92,11 +92,15 @@ module Federails
     end
 
     class << self
-      def find_by_account(account)
+      def find_by_account(account) # rubocop:todo Metrics/AbcSize
         parts = Fediverse::Webfinger.split_account account
 
         if Fediverse::Webfinger.local_user? parts
-          actor = Federails.configuration.user_model.find_by!({ Federails.configuration.user_username_field => parts[:username] }).actor
+          actor = nil
+          Federails::Configuration.entity_types.each_value do |entity|
+            actor ||= entity[:class].find_by(entity[:username_field] => parts[:username])&.actor
+          end
+          raise ActiveRecord::RecordNotFound if actor.nil?
         else
           actor = find_by username: parts[:username], server: parts[:domain]
           actor ||= Fediverse::Webfinger.fetch_actor(parts[:username], parts[:domain])

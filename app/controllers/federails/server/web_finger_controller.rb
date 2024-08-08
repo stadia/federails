@@ -4,9 +4,17 @@ module Federails
   module Server
     class WebFingerController < ServerController
       def find
-        filter = {}
-        filter[Federails::Configuration.user_username_field] = username
-        @user = Federails::Configuration.user_model.find_by!(filter)
+        resource = params.require(:resource)
+        case resource
+        when %r{^https?://.+}
+          @user = Federails::Actor.find_by_federation_url(resource)&.entity
+        when /^acct:.+/
+          Federails::Configuration.entity_types.each_value do |entity|
+            @user ||= entity[:class].find_by(entity[:username_field] => username)
+          end
+        end
+        raise ActiveRecord::RecordNotFound if @user.nil?
+
         render formats: [:json]
       end
 
