@@ -8,7 +8,7 @@ module Federails
         # @return [String] Host and port of the current instance
         def localhost
           uri = URI.parse Federails.configuration.site_host
-          host_and_port uri.host, Federails.configuration.site_port
+          host_and_port (uri.host || 'localhost'), Federails.configuration.site_port
         end
 
         ##
@@ -20,7 +20,6 @@ module Federails
         def local_url?(url)
           uri = URI.parse url
           host = host_and_port uri.host, uri.port
-
           localhost == host
         end
 
