@@ -16,6 +16,7 @@ module Federails
     belongs_to :entity, polymorphic: true, optional: true
     # FIXME: Handle this with something like undelete
     has_many :activities, dependent: :destroy
+    has_many :activities_as_entity, class_name: 'Federails::Activity', as: :entity, dependent: :destroy
     has_many :following_followers, class_name: 'Federails::Following', foreign_key: :target_actor_id, dependent: :destroy, inverse_of: :target_actor
     has_many :following_follows, class_name: 'Federails::Following', dependent: :destroy, inverse_of: :actor
     has_many :followers, source: :actor, through: :following_followers
