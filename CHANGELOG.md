@@ -28,7 +28,19 @@ Please, keep them in this order when updating.
 
 ## [Unreleased]
 
+## [0.1.0]
+
+As we're still in early development, don't forget to check the readme and possible configuration in `lib/federails/configuration.rb`.
+As always, feedback and propositions are welcome.
+
+### Changed
+
+- Actors subject is now polymorphic
+- Some client and server routes can be made optional
+
 ### Added
+
+- [Pundit](https://github.com/varvet/pundit/) is now used to validate access to actions
 
 #### Project
 
@@ -47,6 +59,10 @@ Please, keep them in this order when updating.
 - Add and configure Devise
 - Create dummy page and layout
 - Create seeds
+
+### Fixed
+
+A lot of small fixes were made in different areas of the library.
 
 ## [0.0.1]
 
