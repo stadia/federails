@@ -39,19 +39,26 @@ module Fediverse
 
       private
 
+      def server_and_port(id)
+        uri = URI.parse id
+        if uri.port && [80, 443].exclude?(uri.port)
+          "#{uri.host}:#{uri.port}"
+        else
+          uri.host
+        end
+      end
+
       def webfinger_to_actor(data)
-        uri    = URI.parse data['id']
-        server = uri.host
-        server += ":#{uri.port}" if uri.port && [80, 443].exclude?(uri.port)
         Federails::Actor.new federated_url:  data['id'],
                              username:       data['preferredUsername'],
                              name:           data['name'],
-                             server:         server,
+                             server:         server_and_port(data['id']),
                              inbox_url:      data['inbox'],
                              outbox_url:     data['outbox'],
                              followers_url:  data['followers'],
                              followings_url: data['following'],
-                             profile_url:    data['url']
+                             profile_url:    data['url'],
+                             public_key:     data.dig('publicKey', 'publicKeyPem')
       end
 
       def get_json(url, payload = {})

@@ -132,6 +132,13 @@ module Fediverse
         end
       end
 
+      it 'saves public key' do
+        VCR.use_cassette 'fediverse/webfinger/fetch_actor_url_get' do
+          actor = described_class.fetch_actor_url('https://mamot.fr/users/mtancoigne')
+          expect(actor.public_key).to include 'BEGIN PUBLIC KEY'
+        end
+      end
+
       it 'raises an error when failing' do
         VCR.use_cassette 'fediverse/webfinger/webfinger_get_404' do
           expect do
