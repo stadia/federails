@@ -20,8 +20,13 @@ RSpec.describe Federails::Server::ActorsController, type: :acceptance do
       'application/ld+json; profile="https://www.w3.org/ns/activitystreams"; charset=utf-8'
   end
 
+  entity :public_key,
+         id:           { type: :string, description: 'Unique identifier' },
+         owner:        { type: :string, description: 'URL of the key owner' },
+         publicKeyPem: { type: :string, description: 'The key itself in PEM format' }
+
   entity :actor,
-         '@context':        { type: :string, description: 'JSON-LD contexts' },
+         '@context':        { type: :array, description: 'JSON-LD contexts' },
          id:                { type: :string, description: 'Federated id' },
          type:              { type: :string, description: 'Actor type' },
          name:              { type: :string, description: 'Human name' },
@@ -30,7 +35,8 @@ RSpec.describe Federails::Server::ActorsController, type: :acceptance do
          outbox:            { type: :string, description: 'Federated outbox URL' },
          followers:         { type: :string, description: 'URL to the followers list' },
          following:         { type: :string, description: 'URL to the followings list' },
-         url:               { type: :string, required: false, description: 'URL to a human readable profile' }
+         url:               { type: :string, required: false, description: 'URL to a human readable profile' },
+         publicKey:         { type: :object, required: false, description: 'Public key used for signing messages', attributes: :public_key }
 
   entity :actors_ordered_collection_page,
          # Base
