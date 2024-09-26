@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_10_02_094500) do
+ActiveRecord::Schema[7.1].define(version: 2024_10_02_094501) do
   create_table "federails_activities", force: :cascade do |t|
     t.string "entity_type", null: false
     t.integer "entity_id", null: false
@@ -39,6 +39,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_02_094500) do
     t.datetime "updated_at", null: false
     t.string "entity_type", default: "User"
     t.string "uuid"
+    t.text "public_key"
+    t.text "private_key"
     t.index ["entity_type", "entity_id"], name: "index_federails_actors_on_entity", unique: true
     t.index ["federated_url"], name: "index_federails_actors_on_federated_url", unique: true
     t.index ["uuid"], name: "index_federails_actors_on_uuid", unique: true
