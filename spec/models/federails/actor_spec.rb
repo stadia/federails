@@ -44,6 +44,16 @@ module Federails
         duplicate.validate
         expect(duplicate.errors.details[:entity_id][0][:error]).to eq :taken
       end
+
+      it 'creates a new RSA keypair with public key' do
+        user = FactoryBot.create :user
+        expect(user.actor.public_key).to include 'BEGIN PUBLIC KEY'
+      end
+
+      it 'creates a new RSA keypair with private key' do
+        user = FactoryBot.create :user
+        expect(user.actor.private_key).to include 'BEGIN RSA PRIVATE KEY'
+      end
     end
 
     describe '#find_by_account' do

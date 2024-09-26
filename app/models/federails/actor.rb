@@ -150,5 +150,40 @@ module Federails
         end
       end
     end
+
+    def public_key
+      ensure_key_pair_exists!
+      self[:public_key]
+    end
+
+    def private_key
+      ensure_key_pair_exists!
+      self[:private_key]
+    end
+
+    def key_id
+      "#{federated_url}#main-key"
+    end
+
+    private
+
+    def ensure_key_pair_exists!
+      return if self[:private_key].present? || !local?
+
+      update!(generate_key_pair)
+    end
+
+    def generate_key_pair
+      rsa_key = OpenSSL::PKey::RSA.new 2048
+      cipher  = OpenSSL::Cipher.new('AES-128-CBC')
+      {
+        private_key: if Rails.application.credentials.secret_key_base
+                       rsa_key.to_pem(cipher, Rails.application.credentials.secret_key_base)
+                     else
+                       rsa_key.to_pem
+                     end,
+        public_key:  rsa_key.public_key.to_pem,
+      }
+    end
   end
 end
