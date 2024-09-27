@@ -1,6 +1,15 @@
 module Fediverse
   class Notifier
     class << self
+      def post_to_inbox(message, inbox_url)
+        Faraday.post(
+          inbox_url,
+          message,
+          'Content-Type' => Mime[:activitypub].to_s,
+          'Accept'       => Mime[:activitypub].to_s
+        )
+      end
+
       def post_to_inboxes(activity)
         actors = activity.recipients
 
@@ -13,7 +22,7 @@ module Fediverse
         )
         actors.each do |actor|
           Rails.logger.debug { "Sending activity ##{activity.id} to #{actor.inbox_url}" }
-          Faraday.post actor.inbox_url, message, 'Content-Type' => 'application/json', 'Accept' => 'application/json'
+          post_to_inbox(message, actor.inbox_url)
         end
       end
     end
