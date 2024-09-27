@@ -2,6 +2,23 @@ require 'rails_helper'
 
 RSpec.describe Federails::Server::ActorsController, type: :acceptance do
   resource 'Federation/Actors', 'Actors management'
+  let(:headers) { { accept: 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"' } }
+  let(:actor) { FactoryBot.create(:user).actor }
+  let(:following) do
+    FactoryBot.create_list(:user, 2).each do |user|
+      Federails::Following.create actor: actor, target_actor: user.actor
+    end
+  end
+  let(:followers) do
+    FactoryBot.create_list(:user, 2).each do |user|
+      Federails::Following.create actor: user.actor, target_actor: actor
+    end
+  end
+
+  before do
+    RSpec::Rails::Api::Metadata.default_expected_content_type =
+      'application/ld+json; profile="https://www.w3.org/ns/activitystreams"; charset=utf-8'
+  end
 
   entity :actor,
          '@context':        { type: :string, description: 'JSON-LD contexts' },
@@ -42,27 +59,15 @@ RSpec.describe Federails::Server::ActorsController, type: :acceptance do
   parameters :actor_path_params,
              id: { type: :integer, description: 'Actor record identifier (not the federation id).' }
 
-  let(:actor) { FactoryBot.create(:user).actor }
-  let(:following) do
-    FactoryBot.create_list(:user, 2).each do |user|
-      Federails::Following.create actor: actor, target_actor: user.actor
-    end
-  end
-  let(:followers) do
-    FactoryBot.create_list(:user, 2).each do |user|
-      Federails::Following.create actor: user.actor, target_actor: actor
-    end
-  end
-
   on_get '/federation/actors/:id', 'Display one actor' do
     path_params defined: :actor_path_params
 
     for_code 200, expect_one: :actor do |url|
-      test_response_of url, path_params: { id: actor.id }
+      test_response_of url, path_params: { id: actor.id }, headers: headers
     end
 
-    for_code 404, expect_one: :error do |url|
-      test_response_of url, path_params: { id: 0 }
+    for_code 404, with_content_type: Mime[:activitypub] do |url|
+      test_response_of url, path_params: { id: 0 }, headers: headers
     end
   end
 
@@ -71,12 +76,12 @@ RSpec.describe Federails::Server::ActorsController, type: :acceptance do
 
     for_code 200, expect_one: :actors_ordered_collection do |url|
       followers
-      test_response_of url, path_params: { id: actor.id }
+      test_response_of url, path_params: { id: actor.id }, headers: headers
     end
 
-    for_code 404, expect_one: :error do |url|
+    for_code 404, with_content_type: Mime[:activitypub] do |url|
       followers
-      test_response_of url, path_params: { id: 0 }
+      test_response_of url, path_params: { id: 0 }, headers: headers
     end
   end
 
@@ -85,12 +90,12 @@ RSpec.describe Federails::Server::ActorsController, type: :acceptance do
 
     for_code 200, expect_one: :actors_ordered_collection do |url|
       following
-      test_response_of url, path_params: { id: actor.id }
+      test_response_of url, path_params: { id: actor.id }, headers: headers
     end
 
-    for_code 404, expect_one: :error do |url|
+    for_code 404, with_content_type: Mime[:activitypub] do |url|
       following
-      test_response_of url, path_params: { id: 0 }
+      test_response_of url, path_params: { id: 0 }, headers: headers
     end
   end
 end
