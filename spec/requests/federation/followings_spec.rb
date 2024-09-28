@@ -24,12 +24,20 @@ RSpec.describe '/federation/followings', type: :request do
   end
 
   describe 'GET /show' do
+    let(:actor) { FactoryBot.create(:user).actor }
+    let(:target_actor) { FactoryBot.create(:user).actor }
+    let(:following) { FactoryBot.create :following, actor: actor, target_actor: target_actor }
+
     it 'renders a successful response' do
-      actor = FactoryBot.create(:user).actor
-      target_actor = FactoryBot.create(:user).actor
-      following = FactoryBot.create :following, actor: actor, target_actor: target_actor
-      get federails.server_actor_following_url(actor, following, format: :json)
+      get federails.server_actor_following_url(actor, following), headers: { accept: Mime[:activitypub] }
       expect(response).to be_successful
+    end
+
+    ACTIVITYPUB_CONTENT_TYPES.each do |accept|
+      it "responds with LD in response to a #{accept} request" do
+        get federails.server_actor_following_url(actor, following), headers: { accept: accept }
+        expect(response.content_type).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"; charset=utf-8'
+      end
     end
   end
 end
