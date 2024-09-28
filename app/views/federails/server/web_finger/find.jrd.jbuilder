@@ -4,7 +4,7 @@ links = [
   # Federation actor URL
   {
     rel:  'self',
-    type: 'application/activity+json',
+    type: Mime[:activitypub].to_s,
     href: @user.actor.federated_url,
   },
 ]

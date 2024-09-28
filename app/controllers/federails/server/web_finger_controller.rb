@@ -15,11 +15,11 @@ module Federails
         end
         raise ActiveRecord::RecordNotFound if @user.nil?
 
-        render formats: [:json]
+        render formats: [:jrd]
       end
 
       def host_meta
-        render content_type: 'application/xrd+xml', formats: [:xml]
+        render formats: [:xrd]
       end
 
       # TODO: complete missing endpoints
