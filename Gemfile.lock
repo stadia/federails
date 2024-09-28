@@ -280,7 +280,7 @@ GEM
       rspec-expectations (~> 3.12)
       rspec-mocks (~> 3.12)
       rspec-support (~> 3.12)
-    rspec-rails-api (0.6.0)
+    rspec-rails-api (0.8.0)
     rspec-rfc-helper (0.2.0)
       rspec (~> 3.0)
     rspec-support (3.12.1)
@@ -342,7 +342,7 @@ GEM
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.5.0)
-    uri (0.13.0)
+    uri (0.13.1)
     vcr (6.2.0)
     warden (1.2.9)
       rack (>= 2.0.9)
@@ -365,7 +365,7 @@ DEPENDENCIES
   federails!
   jbuilder
   rspec-rails
-  rspec-rails-api
+  rspec-rails-api (~> 0.8)
   rspec-rfc-helper
   rubocop
   rubocop-faker
