@@ -11,6 +11,10 @@ module Federails
     def error_fallback(exception, fallback_message, status)
       message = exception&.message || fallback_message
       respond_to do |format|
+        format.jrd { head status }
+        format.xrd { head status }
+        format.activitypub { head status }
+        format.nodeinfo { head status }
         format.json { render json: { error: message }, status: status }
         format.html { raise exception }
       end
