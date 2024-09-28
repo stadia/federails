@@ -20,12 +20,12 @@ module Federails
       # POST /federation/actors/1/inbox
       def create
         payload = payload_from_params
-        return render json: {}, status: :unprocessable_entity unless payload
+        return head :unprocessable_entity unless payload
 
         if Fediverse::Inbox.dispatch_request(payload)
-          render json: {}, status: :created
+          head :created
         else
-          render json: {}, status: :unprocessable_entity
+          head :unprocessable_entity
         end
       end
 

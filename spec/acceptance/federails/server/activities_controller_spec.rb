@@ -2,6 +2,16 @@ require 'rails_helper'
 
 RSpec.describe Federails::Server::ActivitiesController, type: :acceptance do
   resource 'Federation/Activities', 'Activities management'
+  let(:headers) { { accept: 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"' } }
+  let(:actor) { FactoryBot.create(:user).actor }
+  let(:following) { FactoryBot.create :following, actor: actor }
+  let(:following_activity) { following.activities.last }
+
+  before do
+    RSpec::Rails::Api::Metadata.default_expected_content_type =
+      'application/ld+json; profile="https://www.w3.org/ns/activitystreams"; charset=utf-8'
+  end
+
   activity_base = {
     id:     { type: :string, description: 'Federated id for this activity' },
     type:   { type: :string, description: 'Activity type' },
@@ -42,12 +52,6 @@ RSpec.describe Federails::Server::ActivitiesController, type: :acceptance do
                                                           '@context': { type: :string, description: 'JSON-LD contexts' },
                                                         })
 
-  let(:actor) { FactoryBot.create(:user).actor }
-  let(:distant_actor) { FactoryBot.create :distant_actor }
-  # A local actor follows a distant one
-  let(:following) { FactoryBot.create :following, actor: actor }
-  let(:following_activity) { following.activities.last }
-
   on_get '/federation/actors/:actor_id/activities/:id', 'Display an activity' do
     path_params fields: {
       actor_id: { type: :integer, description: 'Actor identifier. Not the JSON-LD identifier' },
@@ -55,11 +59,11 @@ RSpec.describe Federails::Server::ActivitiesController, type: :acceptance do
     }
 
     for_code 200, expect_one: :activity_with_context do |url|
-      test_response_of url, path_params: { actor_id: following_activity.actor_id, id: following_activity.id }
+      test_response_of url, path_params: { actor_id: following_activity.actor_id, id: following_activity.id }, headers: headers
     end
 
-    for_code 404, expect_one: :error do |url|
-      test_response_of url, path_params: { actor_id: following_activity.actor_id, id: 0 }
+    for_code 404, with_content_type: Mime[:activitypub] do |url|
+      test_response_of url, path_params: { actor_id: following_activity.actor_id, id: 0 }, headers: headers
     end
   end
 
@@ -69,20 +73,16 @@ RSpec.describe Federails::Server::ActivitiesController, type: :acceptance do
     }
 
     for_code 200, expect_one: :ordered_collection do |url|
-      test_response_of url, path_params: { actor_id: following_activity.actor_id }
+      test_response_of url, path_params: { actor_id: following_activity.actor_id }, headers: headers
     end
 
-    for_code 404, expect_one: :error do |url|
-      test_response_of url, path_params: { actor_id: 0 }
+    for_code 404, with_content_type: Mime[:activitypub] do |url|
+      test_response_of url, path_params: { actor_id: 0 }, headers: headers
     end
   end
 
-  on_post '/federation/actors/:actor_id/inbox', "Actor's inbox" do
-    path_params fields: {
-      actor_id: { type: :integer, description: 'Actor identifier. Not the JSON-LD identifier' },
-    }
-    request_params defined: :inbox_request_params
-
+  on_post '/federation/actors/:actor_id/inbox', "Actor's inbox" do # rubocop:todo RSpec/MultipleMemoizedHelpers
+    let(:distant_actor) { FactoryBot.create :distant_actor }
     let(:inbox_payload) do
       {
         '@context' => 'https://www.w3.org/ns/activitystreams',
@@ -95,13 +95,18 @@ RSpec.describe Federails::Server::ActivitiesController, type: :acceptance do
       }
     end
 
-    for_code 201, expect_one: :empty_object do |url|
+    path_params fields: {
+      actor_id: { type: :integer, description: 'Actor identifier. Not the JSON-LD identifier' },
+    }
+    request_params defined: :inbox_request_params
+
+    for_code 201, with_content_type: Mime[:activitypub] do |url|
       allow(Fediverse::Inbox).to receive(:dispatch_request).and_return true
-      test_response_of url, path_params: { actor_id: distant_actor.id }, payload: inbox_payload
+      test_response_of url, path_params: { actor_id: distant_actor.id }, payload: inbox_payload, headers: headers
     end
 
-    for_code 422, expect_one: :empty_object do |url|
-      test_response_of url, path_params: { actor_id: distant_actor.id }, payload: {}
+    for_code 422, with_content_type: Mime[:activitypub] do |url|
+      test_response_of url, path_params: { actor_id: distant_actor.id }, payload: {}, headers: headers
     end
   end
 end
