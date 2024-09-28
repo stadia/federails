@@ -2,7 +2,7 @@ module Federails
   module Server
     class NodeinfoController < ServerController
       def index
-        render formats: [:json]
+        render formats: [:nodeinfo]
       end
 
       def show # rubocop:todo Metrics/AbcSize
@@ -15,7 +15,7 @@ module Federails
           @active_month += model.where(created_at: ((30.days.ago)...Time.current)).count
           @active_halfyear += model.where(created_at: ((180.days.ago)...Time.current)).count
         end
-        render formats: [:json]
+        render formats: [:nodeinfo]
       end
     end
   end
