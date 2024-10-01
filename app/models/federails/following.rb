@@ -9,6 +9,7 @@ module Federails
     # FIXME: Handle this with something like undelete
     has_many :activities, as: :entity, dependent: :destroy
 
+    after_create :after_follow
     after_create :create_activity
     after_destroy :destroy_activity
 
@@ -31,6 +32,12 @@ module Federails
     end
 
     private
+
+    def after_follow
+      target_actor&.entity&.run_callbacks :followed, :after do
+        self
+      end
+    end
 
     def create_activity
       Activity.create! actor: actor, action: 'Create', entity: self

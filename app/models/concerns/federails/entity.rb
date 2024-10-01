@@ -2,7 +2,18 @@ module Federails
   module Entity
     extend ActiveSupport::Concern
 
-    included do
+    included do # rubocop:todo Metrics/BlockLength
+      include ActiveSupport::Callbacks
+      define_callbacks :followed
+
+      # Define a method that will be called after the entity receives a follow request
+      # @param method [Symbol] The name of the method to call, or a block that will be called directly
+      # @example
+      #   after_followed :accept_follow
+      def self.after_followed(method)
+        set_callback :followed, :after, method
+      end
+
       has_one :actor, class_name: 'Federails::Actor', as: :entity, dependent: :destroy
 
       after_create :create_actor
