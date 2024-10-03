@@ -28,6 +28,8 @@ Please, keep them in this order when updating.
 
 ## [Unreleased]
 
+- Added support for remote following in webfinger responses and client UI
+
 ## [0.1.0]
 
 As we're still in early development, don't forget to check the readme and possible configuration in `lib/federails/configuration.rb`.
@@ -67,4 +69,3 @@ A lot of small fixes were made in different areas of the library.
 ## [0.0.1]
 
 Creation of an empty engine
-
