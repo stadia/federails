@@ -32,6 +32,7 @@ Please, keep them in this order when updating.
 
 - Actors now automatically generate RSA keypairs as required, and public keys are stored for remote actors.
 - Added support for remote following in webfinger responses and client UI
+- Outgoing activities are signed using the actor's RSA key.
 
 ## [0.1.0]
 
