@@ -17,4 +17,8 @@ if @user.actor.profile_url
              href: @user.actor.profile_url
 end
 
+# Remote following
+links.push rel: 'http://ostatus.org/schema/1.0/subscribe',
+            template: "#{new_client_following_url}?uri={uri}"
+
 json.links links

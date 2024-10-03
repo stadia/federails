@@ -11,9 +11,10 @@ RSpec.describe Federails::Server::WebFingerController, type: :acceptance do
   entity :webfinger,
          subject: { type: :string, description: 'Subject to find' },
          links:   { type: :array, description: 'List of available links for the actor', of: {
-           rel:  { type: :string, description: 'Link descriptor' },
-           type: { type: :string, description: 'Media type' },
-           href: { type: :string, description: 'URL' },
+           rel:      { type: :string, description: 'Link descriptor' },
+           type:     { type: :string, description: 'Media type', required: false },
+           href:     { type: :string, description: 'URL', required: false },
+           template: { type: :string, description: 'URL template', required: false },
          } }
 
   on_get '/.well-known/webfinger?resource=:resource', 'List activities' do

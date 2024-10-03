@@ -49,6 +49,12 @@ RSpec.describe '/well-known', type: :request do
         expect(self_link['type']).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"'
         expect(self_link['href']).to eq user.actor.federated_url
       end
+
+      it 'includes ostatus subscribe template for remote following' do # rubocop:disable RSpec/MultipleExpectations
+        remote_follow = result['links'].find { |x| x['rel'] == 'http://ostatus.org/schema/1.0/subscribe' }
+        expect(remote_follow).to be_present
+        expect(remote_follow['template']).to eq 'http://www.example.com/app/followings/new?uri={uri}'
+      end
     end
   end
 
