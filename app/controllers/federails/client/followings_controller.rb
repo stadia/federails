@@ -4,6 +4,14 @@ module Federails
       before_action :authenticate_user!
       before_action :set_following, only: [:accept, :destroy]
 
+      # GET /app/followings/new?uri={uri}
+      def new
+        # Find actor (and fetch if necessary)
+        actor = Actor.find_or_create_by_federation_url(params[:uri])
+        # Redirect to local profile page which will have a follow button on it
+        redirect_to federails.client_actor_url(actor)
+      end
+
       # PUT /app/followings/:id/accept
       # PUT /app/followings/:id/accept.json
       def accept

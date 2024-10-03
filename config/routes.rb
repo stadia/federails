@@ -18,7 +18,7 @@ Federails::Engine.routes.draw do
         resources :activities, only: [:index]
       end
       get :feed, to: 'activities#feed'
-      resources :followings, only: [:create, :destroy] do
+      resources :followings, only: [:new, :create, :destroy] do
         collection do
           post :follow, to: 'followings#follow'
         end

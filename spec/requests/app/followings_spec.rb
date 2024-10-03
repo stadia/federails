@@ -26,6 +26,26 @@ RSpec.describe '/followings', type: :request do
     { target_actor: nil }
   end
 
+  describe 'GET /new' do
+    context 'with unauthenticated user' do
+      it 'redirects to the login page' do
+        post federails.client_followings_url, params: { following: valid_attributes }
+        expect(response).to redirect_to(new_user_session_url)
+      end
+    end
+
+    context 'with authenticated user' do
+      before { sign_in signed_in_user }
+
+      context 'with valid parameters' do
+        it 'redirects to the actors profile' do
+          get federails.new_client_following_url, params: { uri: target_actor.federated_url }
+          expect(response).to redirect_to(federails.client_actor_url(target_actor))
+        end
+      end
+    end
+  end
+
   describe 'POST /create' do
     context 'with unauthenticated user' do
       it 'redirects to the login page' do
