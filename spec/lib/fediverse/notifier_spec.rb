@@ -46,6 +46,10 @@ module Fediverse
       it 'adds a signature to outgoing requests' do
         expect(request.headers['Signature']).to be_present
       end
+
+      it 'adds a verifiable signature to outgoing requests' do
+        expect(Fediverse::Signature.verify(sender: local_actor, request: request)).to be_truthy
+      end
     end
   end
 end

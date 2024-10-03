@@ -16,6 +16,23 @@ module Fediverse
         }.map { |k, v| "#{k}=\"#{v}\"" }.join(',')
       end
 
+      def verify(sender:, request:)
+        raise 'Unsigned headers' unless request.headers['Signature']
+
+        signature_header = request.headers['Signature'].split(',').to_h do |pair|
+          /\A(?<key>[\w]+)="(?<value>.*)"\z/ =~ pair
+          [key, value]
+        end
+
+        headers   = signature_header['headers']
+        signature = Base64.decode64(signature_header['signature'])
+        key       = OpenSSL::PKey::RSA.new(sender.public_key)
+
+        comparison_string = signature_payload(request: request, headers: headers)
+
+        key.verify(OpenSSL::Digest.new('SHA256'), signature, comparison_string)
+      end
+
       private
 
       def signature_payload(request:, headers:)
