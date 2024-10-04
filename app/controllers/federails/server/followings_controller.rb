@@ -10,7 +10,8 @@ module Federails
 
       # Use callbacks to share common setup or constraints between actions.
       def set_following
-        @following = Following.find_by!(actor_id: params[:actor_id], id: params[:id])
+        actor = Actor.find_param(params[:actor_id])
+        @following = Following.find_by!(actor: actor, uuid: params[:id])
         authorize @following, policy_class: Federails::Server::FollowingPolicy
       end
     end

@@ -8,7 +8,7 @@ module Federails
       # GET /app/activities.json
       def index
         @activities = policy_scope(Federails::Activity, policy_scope_class: Federails::Client::ActivityPolicy::Scope).all
-        @activities = @activities.where actor_id: params[:actor_id] if params[:actor_id]
+        @activities = @activities.where actor: Actor.find_param(params[:actor_id]) if params[:actor_id]
       end
 
       # GET /app/feed

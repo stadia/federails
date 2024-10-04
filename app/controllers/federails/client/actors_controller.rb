@@ -25,7 +25,7 @@ module Federails
 
       # Use callbacks to share common setup or constraints between actions.
       def set_actor
-        @actor = Federails::Actor.find(params[:id])
+        @actor = Federails::Actor.find_param(params[:id])
         authorize @actor, policy_class: Federails::Client::ActorPolicy
       end
 

@@ -70,7 +70,7 @@ module Federails
 
       # Use callbacks to share common setup or constraints between actions.
       def set_following
-        @following = Following.find(params[:id])
+        @following = Following.find_param(params[:id])
         authorize @following, policy_class: Federails::Client::FollowingPolicy
       end
 

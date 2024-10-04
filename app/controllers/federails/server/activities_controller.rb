@@ -8,7 +8,7 @@ module Federails
       # GET /federation/activities
       # GET /federation/actors/1/outbox.json
       def outbox
-        @actor            = Actor.find(params[:actor_id])
+        @actor            = Actor.find_param(params[:actor_id])
         @activities       = policy_scope(Federails::Activity, policy_scope_class: Federails::Server::ActivityPolicy::Scope).where(actor: @actor).order(created_at: :desc)
         @total_activities = @activities.count
         @activities       = @activities.page(params[:page])
@@ -33,7 +33,7 @@ module Federails
 
       # Use callbacks to share common setup or constraints between actions.
       def set_activity
-        @activity = Activity.find_by!(actor_id: params[:actor_id], id: params[:id])
+        @activity = Actor.find_param(params[:actor_id]).activities.find_param(params[:id])
       end
 
       # Only allow a list of trusted parameters through.
