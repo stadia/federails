@@ -59,11 +59,11 @@ RSpec.describe Federails::Server::ActivitiesController, type: :acceptance do
     }
 
     for_code 200, expect_one: :activity_with_context do |url|
-      test_response_of url, path_params: { actor_id: following_activity.actor_id, id: following_activity.id }, headers: headers
+      test_response_of url, path_params: { actor_id: following_activity.actor.to_param, id: following_activity.to_param }, headers: headers
     end
 
     for_code 404, with_content_type: Mime[:activitypub] do |url|
-      test_response_of url, path_params: { actor_id: following_activity.actor_id, id: 0 }, headers: headers
+      test_response_of url, path_params: { actor_id: following_activity.actor.to_param, id: 0 }, headers: headers
     end
   end
 
@@ -73,7 +73,7 @@ RSpec.describe Federails::Server::ActivitiesController, type: :acceptance do
     }
 
     for_code 200, expect_one: :ordered_collection do |url|
-      test_response_of url, path_params: { actor_id: following_activity.actor_id }, headers: headers
+      test_response_of url, path_params: { actor_id: following_activity.actor.to_param }, headers: headers
     end
 
     for_code 404, with_content_type: Mime[:activitypub] do |url|
@@ -102,11 +102,11 @@ RSpec.describe Federails::Server::ActivitiesController, type: :acceptance do
 
     for_code 201, with_content_type: Mime[:activitypub] do |url|
       allow(Fediverse::Inbox).to receive(:dispatch_request).and_return true
-      test_response_of url, path_params: { actor_id: distant_actor.id }, payload: inbox_payload, headers: headers
+      test_response_of url, path_params: { actor_id: distant_actor.to_param }, payload: inbox_payload, headers: headers
     end
 
     for_code 422, with_content_type: Mime[:activitypub] do |url|
-      test_response_of url, path_params: { actor_id: distant_actor.id }, payload: {}, headers: headers
+      test_response_of url, path_params: { actor_id: distant_actor.to_param }, payload: {}, headers: headers
     end
   end
 end

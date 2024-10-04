@@ -63,7 +63,7 @@ RSpec.describe Federails::Server::ActorsController, type: :acceptance do
     path_params defined: :actor_path_params
 
     for_code 200, expect_one: :actor do |url|
-      test_response_of url, path_params: { id: actor.id }, headers: headers
+      test_response_of url, path_params: { id: actor.to_param }, headers: headers
     end
 
     for_code 404, with_content_type: Mime[:activitypub] do |url|
@@ -76,7 +76,7 @@ RSpec.describe Federails::Server::ActorsController, type: :acceptance do
 
     for_code 200, expect_one: :actors_ordered_collection do |url|
       followers
-      test_response_of url, path_params: { id: actor.id }, headers: headers
+      test_response_of url, path_params: { id: actor.to_param }, headers: headers
     end
 
     for_code 404, with_content_type: Mime[:activitypub] do |url|
@@ -90,7 +90,7 @@ RSpec.describe Federails::Server::ActorsController, type: :acceptance do
 
     for_code 200, expect_one: :actors_ordered_collection do |url|
       following
-      test_response_of url, path_params: { id: actor.id }, headers: headers
+      test_response_of url, path_params: { id: actor.to_param }, headers: headers
     end
 
     for_code 404, with_content_type: Mime[:activitypub] do |url|

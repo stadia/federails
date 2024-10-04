@@ -28,11 +28,11 @@ RSpec.describe Federails::Server::FollowingsController, type: :acceptance do
 
   on_get '/federation/actors/:actor_id/followings/:id', 'Display a following' do
     for_code 200, expect_one: :following do |url|
-      test_response_of url, path_params: { actor_id: following.actor_id, id: following.id }, headers: headers
+      test_response_of url, path_params: { actor_id: following.actor.to_param, id: following.to_param }, headers: headers
     end
 
     for_code 404, with_content_type: Mime[:activitypub] do |url|
-      test_response_of url, path_params: { actor_id: following.actor_id, id: 0 }, headers: headers
+      test_response_of url, path_params: { actor_id: following.actor.to_param, id: 0 }, headers: headers
     end
   end
 end
