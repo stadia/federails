@@ -3,6 +3,8 @@ require 'fediverse/webfinger'
 
 module Federails
   class Actor < ApplicationRecord # rubocop:disable Metrics/ClassLength
+    include Federails::HasUuid
+
     validates :federated_url, presence: { unless: :entity }, uniqueness: { unless: :entity }
     validates :username, presence: { unless: :entity }
     validates :server, presence: { unless: :entity }
@@ -112,7 +114,7 @@ module Federails
 
       def find_by_federation_url(federated_url)
         local_route = Utils::Host.local_route federated_url
-        return find local_route[:id] if local_route && local_route[:controller] == 'federails/server/actors' && local_route[:action] == 'show'
+        return find_param(local_route[:id]) if local_route && local_route[:controller] == 'federails/server/actors' && local_route[:action] == 'show'
 
         actor = find_by federated_url: federated_url
         return actor if actor

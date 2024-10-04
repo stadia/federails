@@ -1,5 +1,7 @@
 module Federails
   class Following < ApplicationRecord
+    include Federails::HasUuid
+
     enum status: { pending: 0, accepted: 1 }
 
     validates :target_actor_id, uniqueness: { scope: [:actor_id, :target_actor_id] }

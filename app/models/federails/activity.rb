@@ -1,5 +1,7 @@
 module Federails
   class Activity < ApplicationRecord
+    include Federails::HasUuid
+
     belongs_to :entity, polymorphic: true
     belongs_to :actor
 

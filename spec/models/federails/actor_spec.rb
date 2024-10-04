@@ -16,6 +16,18 @@ module Federails
       FileUtils.rm_f error_cassette_file
     end
 
+    context 'when actors without UUIDs exist' do
+      let(:actor) do
+        actor = described_class.new distant_actor_attributes
+        actor.uuid = nil
+        actor
+      end
+
+      it 'creates a UUID on demand' do
+        expect(actor.uuid).to be_present
+      end
+    end
+
     context 'when creating distant actors' do
       it 'fails to create the same actor twice' do
         described_class.create! distant_actor_attributes
