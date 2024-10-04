@@ -17,7 +17,10 @@ module Federails
 
     # Override UUID accessor to provide lazy initialization of UUIDs for old data
     def uuid
-      generate_uuid and save! if self[:uuid].blank?
+      if self[:uuid].blank?
+        generate_uuid
+        save!
+      end
       self[:uuid]
     end
 

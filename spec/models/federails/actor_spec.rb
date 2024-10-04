@@ -17,14 +17,16 @@ module Federails
     end
 
     context 'when actors without UUIDs exist' do
-      let(:actor) do
-        actor = described_class.new distant_actor_attributes
-        actor.uuid = nil
-        actor
+      before do
+        existing_distant_actor.update_columns(uuid: nil) # rubocop:disable Rails/SkipsModelValidations
       end
 
-      it 'creates a UUID on demand' do
-        expect(actor.uuid).to be_present
+      it 'creates a UUID on demand' do # rubocop:disable RSpec/MultipleExpectations
+        # Check it's generated on demand
+        uuid = existing_distant_actor.uuid
+        expect(uuid).to be_present
+        # Check it was saved
+        expect(existing_distant_actor.reload.uuid).to eq uuid
       end
     end
 
