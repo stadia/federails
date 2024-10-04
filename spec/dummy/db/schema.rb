@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_31_145400) do
+ActiveRecord::Schema[7.1].define(version: 2024_10_02_094500) do
   create_table "federails_activities", force: :cascade do |t|
     t.string "entity_type", null: false
     t.integer "entity_id", null: false
@@ -18,8 +18,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_31_145400) do
     t.integer "actor_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "uuid"
     t.index ["actor_id"], name: "index_federails_activities_on_actor_id"
     t.index ["entity_type", "entity_id"], name: "index_federails_activities_on_entity"
+    t.index ["uuid"], name: "index_federails_activities_on_uuid", unique: true
   end
 
   create_table "federails_actors", force: :cascade do |t|
@@ -36,8 +38,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_31_145400) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "entity_type", default: "User"
+    t.string "uuid"
     t.index ["entity_type", "entity_id"], name: "index_federails_actors_on_entity", unique: true
     t.index ["federated_url"], name: "index_federails_actors_on_federated_url", unique: true
+    t.index ["uuid"], name: "index_federails_actors_on_uuid", unique: true
   end
 
   create_table "federails_followings", force: :cascade do |t|
@@ -47,9 +51,11 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_31_145400) do
     t.string "federated_url"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "uuid"
     t.index ["actor_id", "target_actor_id"], name: "index_federails_followings_on_actor_id_and_target_actor_id", unique: true
     t.index ["actor_id"], name: "index_federails_followings_on_actor_id"
     t.index ["target_actor_id"], name: "index_federails_followings_on_target_actor_id"
+    t.index ["uuid"], name: "index_federails_followings_on_uuid", unique: true
   end
 
   create_table "users", force: :cascade do |t|
