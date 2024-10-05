@@ -27,7 +27,7 @@ module Federails
       :user_class, # @deprecated
       :server_routes_path,
       :client_routes_path,
-      :remote_follow_url,
+      :remote_follow_url_method,
       :user_profile_url_method, # @deprecated
       :user_name_field, # @deprecated
       :user_username_field, # @deprecated

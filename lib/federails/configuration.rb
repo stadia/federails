@@ -42,9 +42,9 @@ module Federails
     mattr_accessor :client_routes_path
     @@client_routes_path = :app
 
-    # Custom URL to use for remote-following requests
-    mattr_accessor :remote_follow_url
-    @@remote_follow_url = nil
+    # Route method for remote-following requests
+    mattr_accessor :remote_follow_url_method
+    @@remote_follow_url_method = :new_client_following_url
 
     # Method to use for links to user profiles
     # @deprecated Set profile_url_method option on acts_as_federails_actor instead

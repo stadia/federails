@@ -19,6 +19,6 @@ end
 
 # Remote following
 links.push rel:      'http://ostatus.org/schema/1.0/subscribe',
-           template: "#{Federails.configuration.remote_follow_url || new_client_following_url}?uri={uri}"
+           template: "#{send(Federails.configuration.remote_follow_url_method)}?uri={uri}"
 
 json.links links

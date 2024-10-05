@@ -105,11 +105,11 @@ end
 #### Remote following
 
 By default, remote follow requests (where you press a follow button on another server and get redirected home to complete the follow)
-will use the built-in client paths. If you're not using the client, or want to provide your own user interface, you can set the path like this, assuming that `my_remote_follow_url` is a valid route in your app. A `uri` query parameter template will be automatically appended, you don't need to specify that.
+will use the built-in client paths. If you're not using the client, or want to provide your own user interface, you can set the path like this, assuming that `new_follow_url` is a valid route in your app. A `uri` query parameter template will be automatically appended, you don't need to specify that.
 
 ```
 Federails.configure do |config|
-  config.remote_follow_url = my_remote_follow_url
+  config.remote_follow_url_method = :new_follow_url
 end
 ```
 
