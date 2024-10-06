@@ -31,7 +31,7 @@ module Federails
       :user_profile_url_method, # @deprecated
       :user_name_field, # @deprecated
       :user_username_field, # @deprecated
-    ].each { |key| Configuration.send :"#{key}=", config[key] }
+    ].each { |key| Configuration.send :"#{key}=", config[key] if config.key?(key) }
   end
 end
 # rubocop:enable Style/ClassVars
