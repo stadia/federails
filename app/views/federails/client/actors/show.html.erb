@@ -61,7 +61,7 @@
 <p>
   <b>Home page:</b>
   <% if @actor.local? && Federails::Configuration.user_profile_url_method %>
-    <%= link_to @actor.send(Federails::Configuration.user_username_field), send(Federails::Configuration.user_profile_url_method, @actor.user) %>
+    <%= link_to @actor.send(Federails::Configuration.user_username_field), Rails.application.routes.url_helpers.send(Federails::Configuration.user_profile_url_method, @actor.user) %>
   <% elsif @actor.profile_url %>
     <%= link_to @actor.name, @actor.profile_url %>
   <% else %>
