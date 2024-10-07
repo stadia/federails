@@ -101,6 +101,18 @@ module Fediverse
           end.to raise_error ActiveRecord::RecordNotFound
         end
       end
+
+      it 'fetches remote follow URL template' do
+        VCR.use_cassette 'fediverse/webfinger/webfinger_get_200' do
+          expect(described_class.remote_follow_url('mtancoigne', 'mamot.fr')).to eq 'https://mamot.fr/authorize_interaction?uri={uri}'
+        end
+      end
+
+      it 'generates a complete remote follow URL if local actor URL is provided' do
+        VCR.use_cassette 'fediverse/webfinger/webfinger_get_200' do
+          expect(described_class.remote_follow_url('mtancoigne', 'mamot.fr', actor_url: 'https://example.com')).to eq 'https://mamot.fr/authorize_interaction?uri=https%3A%2F%2Fexample.com'
+        end
+      end
     end
 
     describe '#fetch_actor_url' do

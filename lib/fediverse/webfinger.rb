@@ -30,14 +30,31 @@ module Fediverse
 
       # Returns actor id
       def webfinger(username, domain)
-        scheme = Federails.configuration.force_ssl ? 'https' : 'http'
-        json = get_json "#{scheme}://#{domain}/.well-known/webfinger", resource: "acct:#{username}@#{domain}"
+        json = webfinger_response(username, domain)
         link = json['links'].find { |l| l['type'] == 'application/activity+json' }
 
         link['href'] if link
       end
 
+      # Returns remote follow link template, or complete link if actor_url is provided
+      def remote_follow_url(username, domain, actor_url: nil)
+        json = webfinger_response(username, domain)
+        link = json['links'].find { |l| l['rel'] == 'http://ostatus.org/schema/1.0/subscribe' }
+        return nil if link&.dig('template').nil?
+
+        if actor_url
+          link['template'].gsub('{uri}', CGI.escape(actor_url))
+        else
+          link['template']
+        end
+      end
+
       private
+
+      def webfinger_response(username, domain)
+        scheme = Federails.configuration.force_ssl ? 'https' : 'http'
+        get_json "#{scheme}://#{domain}/.well-known/webfinger", resource: "acct:#{username}@#{domain}"
+      end
 
       def server_and_port(id)
         uri = URI.parse id
