@@ -15,22 +15,15 @@ module Federails
 
     after_create_commit :post_to_inboxes
 
-    def recipients # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity
+    def recipients
       return [] unless actor.local?
 
-      actors = []
-      case action
-      when 'Create'
-        actors.push(entity.target_actor) if entity_type == 'Federails::Following'
-        # FIXME: Move this to dummy, somehow
-        actors.push(*actor.followers) if entity_type == 'Note'
-      when 'Accept'
-        actors.push(entity.actor) if entity_type == 'Federails::Following'
-      when 'Undo'
-        actors.push(entity.target_actor) if entity_type == 'Federails::Following'
+      case entity_type
+      when 'Federails::Following'
+        [(action == 'Accept' ? entity.actor : entity.target_actor)]
+      else
+        actor.followers
       end
-
-      actors
     end
 
     private
