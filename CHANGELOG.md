@@ -28,13 +28,15 @@ Please, keep them in this order when updating.
 
 ## [Unreleased]
 
+## [0.2.0] 2024-10-13 - Sign messages, handle signed messages and remote following
+
 ### Added
 
 - Actors now automatically generate RSA keypairs as required, and public keys are stored for remote actors.
 - Added support for remote following in webfinger responses and client UI
 - Outgoing activities are signed using the actor's RSA key.
 
-## [0.1.0]
+## [0.1.0] 2024-09-04
 
 As we're still in early development, don't forget to check the readme and possible configuration in `lib/federails/configuration.rb`.
 As always, feedback and propositions are welcome.
