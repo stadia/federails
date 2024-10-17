@@ -23,6 +23,7 @@ module Federails
       :site_host,
       :site_port,
       :enable_discovery,
+      :open_registrations,
       :app_layout,
       :user_class, # @deprecated
       :server_routes_path,

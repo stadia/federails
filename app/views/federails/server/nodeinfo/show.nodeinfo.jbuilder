@@ -9,8 +9,7 @@ json.protocols [
 # http://nodeinfo.diaspora.software/ns/schema/2.0 for possible values
 json.services inbound:  [],
               outbound: []
-# FIXME: Don't hardcode this
-json.openRegistrations true
+json.openRegistrations Federails::Configuration.open_registrations
 if @has_user_counts
   json.usage users: {
     total:          @total,

@@ -6,6 +6,7 @@ defaults: &defaults
   site_host: http://localhost
   site_port: 3000
   enable_discovery: true
+  open_registrations: false
   app_layout: 'layouts/application'
   server_routes_path: federation
   client_routes_path: app

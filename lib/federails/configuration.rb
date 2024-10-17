@@ -25,6 +25,10 @@ module Federails
     mattr_accessor :enable_discovery
     @@enable_discovery = true
 
+    # Does the site allow open registrations? (only used for nodeinfo reporting)
+    mattr_accessor :open_registrations
+    @@open_registrations = false
+
     # Site port
     mattr_accessor :app_layout
     @@app_layout = nil

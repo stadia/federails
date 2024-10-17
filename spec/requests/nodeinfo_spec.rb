@@ -44,5 +44,18 @@ RSpec.describe '/nodeinfo', type: :request do
         expect(json.dig('usage', 'users', 'activeHalfyear')).to eq 2
       end
     end
+
+    it 'shows closed registrations by default' do
+      get federails.show_node_info_url
+      expect(JSON.parse(response.body)['openRegistrations']).to be false # rubocop:disable Rails/ResponseParsedBody
+    end
+
+    it 'shows open registrations if set' do
+      prev = Federails::Configuration.open_registrations
+      Federails::Configuration.open_registrations = true
+      get federails.show_node_info_url
+      expect(JSON.parse(response.body)['openRegistrations']).to be true # rubocop:disable Rails/ResponseParsedBody
+      Federails::Configuration.open_registrations = prev
+    end
   end
 end
