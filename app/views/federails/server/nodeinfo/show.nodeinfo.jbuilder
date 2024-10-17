@@ -11,9 +11,11 @@ json.services inbound:  [],
               outbound: []
 # FIXME: Don't hardcode this
 json.openRegistrations true
-json.usage users: {
-  total:          @total,
-  activeMonth:    @active_month,
-  activeHalfyear: @active_halfyear,
-}
+if @has_user_counts
+  json.usage users: {
+    total:          @total,
+    activeMonth:    @active_month,
+    activeHalfyear: @active_halfyear,
+  }
+end
 json.metadata({})

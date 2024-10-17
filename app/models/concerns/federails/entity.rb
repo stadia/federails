@@ -23,7 +23,11 @@ module Federails
       # @param name_field [Symbol] The method or attribute name that returns the preferred name for ActivityPub
       # @param profile_url_method [Symbol] The route method name that will generate the profile URL for ActivityPub
       # @param actor_type [String] The ActivityStreams Actor type for this entity; defaults to 'Person'
-      # @param include_in_user_count [boolean] Should this entity be included in the nodeinfo user count? Defaults to true
+      # @param user_count_method [Symbol] A class method to call to count active users. Leave unspecified to leave this
+      #  entity out of user counts. Method signature should accept a single parameter which will specify a date range
+      #  If parameter is nil, the total user count should be returned. If the parameter is specified, the number of users
+      #  active during the time period should be returned.
+      # @deprecated @param include_in_user_count [boolean] No longer used; replace with `user_count_method`.
       # @example
       #   acts_as_federails_actor username_field: :username, name_field: :display_name, profile_url_method: :url_for, actor_type: 'Person'
       def self.acts_as_federails_actor(
@@ -31,15 +35,15 @@ module Federails
         name_field: Federails::Configuration.user_name_field,
         profile_url_method: Federails.configuration.user_profile_url_method,
         actor_type: 'Person',
-        include_in_user_count: true
+        user_count_method: nil
       )
         Federails::Configuration.register_entity(
           self,
-          username_field:        username_field,
-          name_field:            name_field,
-          profile_url_method:    profile_url_method,
-          actor_type:            actor_type,
-          include_in_user_count: include_in_user_count
+          username_field:     username_field,
+          name_field:         name_field,
+          profile_url_method: profile_url_method,
+          actor_type:         actor_type,
+          user_count_method:  user_count_method
         )
       end
 

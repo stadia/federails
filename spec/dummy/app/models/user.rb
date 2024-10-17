@@ -1,7 +1,7 @@
 class User < ApplicationRecord
   include Federails::Entity
 
-  acts_as_federails_actor username_field: :id, name_field: :email
+  acts_as_federails_actor username_field: :id, name_field: :email, user_count_method: :user_count
 
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
@@ -10,4 +10,15 @@ class User < ApplicationRecord
 
   after_followed :accept_follow
   def accept_follow; end
+
+  def self.user_count(range)
+    if range.nil?
+      # No range, return total user count
+      User.count
+    else
+      # Normally we'd want to return *active* users in the range, but we don't have that in this example
+      # so we will list users that have been changed.
+      User.where(updated_at: range).count
+    end
+  end
 end
