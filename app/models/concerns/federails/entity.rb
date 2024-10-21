@@ -14,6 +14,16 @@ module Federails
         set_callback :followed, :after, method
       end
 
+      # Define a method that will be called after an activity has been received
+      # @param activity_type [String] The activity action to handle, e.g. 'Create'. If you specify '*', the handler will be called for any activity type.
+      # @param object_type [String] The object type to handle, e.g. 'Note'. If you specify '*', the handler will be called for any object type.
+      # @param method [Symbol] The name of the class method to call. The method will receive the complete activity payload as a parameter.
+      # @example
+      #   after_activity_received 'Create', 'Note', :create_note
+      def self.after_activity_received(activity_type, object_type, method)
+        Fediverse::Inbox.register_handler(activity_type, object_type, self, method)
+      end
+
       has_one :actor, class_name: 'Federails::Actor', as: :entity, dependent: :destroy
 
       after_create :create_actor, if: -> { Federails::Configuration.entity_types[self.class.name][:auto_create_actors] }
