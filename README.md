@@ -92,7 +92,7 @@ With `routes_path = 'federation'`, routes will be:
 
 Some routes can be disabled in configuration if you don't want to expose particular features:
 
-```
+```rb
 Federails.configure do |config|
   # Disable routing for .well-known and nodeinfo
   config.enable_discovery = false
@@ -107,7 +107,7 @@ end
 By default, remote follow requests (where you press a follow button on another server and get redirected home to complete the follow)
 will use the built-in client paths. If you're not using the client, or want to provide your own user interface, you can set the path like this, assuming that `new_follow_url` is a valid route in your app. A `uri` query parameter template will be automatically appended, you don't need to specify that.
 
-```
+```rb
 Federails.configure do |config|
   config.remote_follow_url_method = :new_follow_url
 end
