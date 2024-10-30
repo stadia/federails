@@ -29,7 +29,7 @@ module Federails
     mattr_accessor :open_registrations
     @@open_registrations = false
 
-    # Site port
+    # Application layout
     mattr_accessor :app_layout
     @@app_layout = nil
 
