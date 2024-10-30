@@ -154,6 +154,20 @@ actor.following
 #...
 ```
 
+### Using the Federails client
+
+Federails comes with a client, enabled by default, that provides basic views to display and interact with Federails data,
+accessible on `/app` by default (changeable with the configuration option `client_routes_path`)
+
+If it's a good starting point, it might be disabled once you made your own integration by setting `client_routes_path`
+to a `nil` value.
+
+If you want to override the client's views, copy them in your application:
+
+```sh
+rails generate federails:copy_client_views
+```
+
 ## Common questions
 
 - **I override the base controller and the links breaks in my layout**
