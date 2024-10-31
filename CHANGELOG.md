@@ -38,7 +38,7 @@ Please, keep them in this order when updating.
 ### Removed
 
 - As actors' subject is a polymorphic relation, these Federails configuration options were removed: `user_class`, 
-  `user_table` and `user_profile_url_method`
+  `user_table`, `user_profile_url_method` and `user_name_field`
 
 ## [0.2.0] 2024-10-13 - Sign messages, handle signed messages and remote following
 

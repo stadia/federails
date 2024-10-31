@@ -10,3 +10,5 @@ First of all, read the [CHANGELOG](./CHANGELOG.md)
   - `db/migrate<timestamp>_change_actor_entity_rel_to_polymorphic.rb`
 - If you used the `user_profile_url_method` configuration option, remove it and use the `acts_as_federails_actor`'s
   `profile_url_method` parameter.
+- `acts_as_federails_actor`'s `name_field` is now required. If you used the default value you should use the value used 
+  as `Federails::Configuration.user_name_field` as replacement.

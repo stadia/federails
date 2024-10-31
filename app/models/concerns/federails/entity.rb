@@ -43,8 +43,8 @@ module Federails
       #   acts_as_federails_actor username_field: :username, name_field: :display_name, profile_url_method: :url_for, actor_type: 'Person'
       # rubocop:disable Metrics/ParameterLists
       def self.acts_as_federails_actor(
+        name_field:,
         username_field: Federails::Configuration.user_username_field,
-        name_field: Federails::Configuration.user_name_field,
         profile_url_method: nil,
         actor_type: 'Person',
         user_count_method: nil,
