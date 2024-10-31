@@ -59,10 +59,13 @@
 </p>
 
 <p>
-  <b>Home page:</b>
-  <% if @actor.local? && Federails::Configuration.user_profile_url_method %>
-    <%= link_to @actor.send(Federails::Configuration.user_username_field), Rails.application.routes.url_helpers.send(Federails::Configuration.user_profile_url_method, @actor.user) %>
+  <% if @actor.local? && @actor.entity_configuration[:profile_url_method] %>
+    <b>Home page:</b>
+    <%= link_to @actor.send(Federails::Configuration.user_username_field),
+                Rails.application.routes.url_helpers.send(@actor.entity_configuration[:profile_url_method], @actor.user)
+    %>
   <% elsif @actor.profile_url %>
+    <b>Federation profile URL (JSON):</b>
     <%= link_to @actor.name, @actor.profile_url %>
   <% else %>
     (No homepage)

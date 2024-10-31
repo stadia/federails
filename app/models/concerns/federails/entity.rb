@@ -45,7 +45,7 @@ module Federails
       def self.acts_as_federails_actor(
         username_field: Federails::Configuration.user_username_field,
         name_field: Federails::Configuration.user_name_field,
-        profile_url_method: Federails.configuration.user_profile_url_method,
+        profile_url_method: nil,
         actor_type: 'Person',
         user_count_method: nil,
         auto_create_actors: true

@@ -49,11 +49,6 @@ module Federails
     mattr_accessor :remote_follow_url_method
     @@remote_follow_url_method = 'federails.new_client_following_url'
 
-    # Method to use for links to user profiles
-    # @deprecated Set profile_url_method option on acts_as_federails_actor instead
-    mattr_accessor :user_profile_url_method
-    @@user_profile_url_method = nil
-
     # Attribute in the user model to use as the user's name
     # @deprecated Set name_field option on acts_as_federails_actor instead
     #
