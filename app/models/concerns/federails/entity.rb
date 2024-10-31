@@ -41,7 +41,6 @@ module Federails
       #  entity out of user counts. Method signature should accept a single parameter which will specify a date range
       #  If parameter is nil, the total user count should be returned. If the parameter is specified, the number of users
       #  active during the time period should be returned.
-      # @deprecated @param include_in_user_count [boolean] No longer used; replace with `user_count_method`.
       # @param auto_create_actors [Boolean] Whether to automatically create an actor when the entity is created
       # @example
       #   acts_as_federails_actor username_field: :username, name_field: :display_name, profile_url_method: :url_for, actor_type: 'Person'
