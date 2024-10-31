@@ -1,5 +1,5 @@
 module Federails
-  module ApplicationHelper
+  module ServerHelper
     def remote_follow_url
       method_name = Federails.configuration.remote_follow_url_method.to_s
       if method_name.starts_with? 'federails.'

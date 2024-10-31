@@ -2,7 +2,7 @@ require 'fediverse/inbox'
 
 module Federails
   module Server
-    class ActivitiesController < ServerController
+    class ActivitiesController < Federails::ServerController
       before_action :set_activity, only: [:show]
 
       # GET /federation/activities

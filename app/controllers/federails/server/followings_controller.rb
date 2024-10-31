@@ -1,6 +1,6 @@
 module Federails
   module Server
-    class FollowingsController < ServerController
+    class FollowingsController < Federails::ServerController
       before_action :set_following, only: [:show]
 
       # GET /federation/actors/1/followings/1.json

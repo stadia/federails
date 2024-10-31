@@ -17,7 +17,7 @@ module Fediverse
       private
 
       def payload(activity)
-        Federails::ApplicationController.renderer.new.render(
+        Federails::ServerController.renderer.new.render(
           template: 'federails/server/activities/show',
           assigns:  { activity: activity },
           format:   :json

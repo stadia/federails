@@ -1,6 +1,6 @@
 module Federails
   module Client
-    class ActivitiesController < Federails::ApplicationController
+    class ActivitiesController < Federails::ClientController
       before_action :authenticate_user!, only: [:feed]
       # layout 'layouts/application'
 

@@ -1,10 +1,11 @@
 module Federails
-  class ApplicationController < ActionController::Base
+  class ServerController < ::ActionController::Base # rubocop:disable Rails/ApplicationController
     include Pundit::Authorization
 
-    rescue_from ActiveRecord::RecordNotFound, with: :error_not_found
+    protect_from_forgery with: :null_session
+    helper Federails::ServerHelper
 
-    layout Federails.configuration.app_layout if Federails.configuration.app_layout
+    rescue_from ActiveRecord::RecordNotFound, with: :error_not_found
 
     private
 

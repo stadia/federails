@@ -2,7 +2,7 @@ require 'fediverse/webfinger'
 
 module Federails
   module Server
-    class WebFingerController < ServerController
+    class WebFingerController < Federails::ServerController
       def find
         resource = params.require(:resource)
         case resource

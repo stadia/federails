@@ -1,6 +1,6 @@
 module Federails
   module Server
-    class NodeinfoController < ServerController
+    class NodeinfoController < Federails::ServerController
       def index
         render formats: [:nodeinfo]
       end

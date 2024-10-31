@@ -1,6 +1,6 @@
 module Federails
   module Server
-    class ActorsController < ServerController
+    class ActorsController < Federails::ServerController
       before_action :set_actor, only: [:show, :followers, :following]
 
       # GET /federation/actors/1

@@ -1,6 +1,6 @@
 module Federails
   module Client
-    class ActorsController < Federails::ApplicationController
+    class ActorsController < Federails::ClientController
       before_action :set_actor, only: [:show]
 
       # GET /app/actors

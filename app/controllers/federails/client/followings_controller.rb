@@ -1,6 +1,6 @@
 module Federails
   module Client
-    class FollowingsController < Federails::ApplicationController
+    class FollowingsController < Federails::ClientController
       before_action :authenticate_user!
       before_action :set_following, only: [:accept, :destroy]
 
