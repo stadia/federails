@@ -91,7 +91,9 @@ module Federails
     end
 
     def entity_configuration
-      Federails::Configuration.entity_types[entity.class.name]
+      raise("Entity not configured for #{entity_type}. Did you use \"acts_as_federails_actor\"?") unless Federails::Configuration.entity_types.key? entity_type
+
+      Federails::Configuration.entity_types[entity_type]
     end
 
     class << self

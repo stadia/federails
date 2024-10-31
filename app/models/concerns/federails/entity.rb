@@ -26,7 +26,11 @@ module Federails
 
       has_one :actor, class_name: 'Federails::Actor', as: :entity, dependent: :destroy
 
-      after_create :create_actor, if: -> { Federails::Configuration.entity_types[self.class.name][:auto_create_actors] }
+      after_create :create_actor, if: lambda {
+        raise("Entity not configured for #{self.class.name}. Did you use \"acts_as_federails_actor\"?") unless Federails::Configuration.entity_types.key? self.class.name
+
+        Federails::Configuration.entity_types[self.class.name][:auto_create_actors]
+      }
 
       # Configures the mapping between entity and actor
       # @param username_field [Symbol] The method or attribute name that returns the preferred username for ActivityPub
@@ -61,10 +65,6 @@ module Federails
         )
       end
       # rubocop:enable Metrics/ParameterLists
-
-      # Automatically run default acts_as_federails_actor
-      # this can be optionally called again with different configuration in the entity
-      acts_as_federails_actor
 
       # Add custom data to actor responses.
       # Override in your own model to add extra data, which will be merged into the actor response

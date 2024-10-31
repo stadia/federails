@@ -12,3 +12,5 @@ First of all, read the [CHANGELOG](./CHANGELOG.md)
   `profile_url_method` parameter.
 - `acts_as_federails_actor`'s `name_field` is now required. If you used the default value you should use the value used 
   as `Federails::Configuration.user_name_field` as replacement.
+- In models including `Federails::Entity`, manually call `acts_as_federails_actor` to configure it properly if it's not
+  yet done.  

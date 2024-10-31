@@ -5,14 +5,19 @@ module Federails
     self.table_name = 'users'
     include Federails::Entity
 
-    acts_as_federails_actor
+    acts_as_federails_actor username_field: :id, name_field: :email
   end
 
   class FakeModelWithoutAutoCreation < ApplicationRecord
     self.table_name = 'users'
     include Federails::Entity
 
-    acts_as_federails_actor auto_create_actors: false
+    acts_as_federails_actor username_field: :id, name_field: :email, auto_create_actors: false
+  end
+
+  class FakeModelWithoutConfig < ApplicationRecord
+    self.table_name = 'users'
+    include Federails::Entity
   end
 
   RSpec.describe Entity do
@@ -21,6 +26,13 @@ module Federails
         aggregate_failures do
           expect(Federails::Configuration.entity_types).to have_key 'Federails::FakeModel'
           expect(Federails::Configuration.entity_types).to have_key 'Federails::FakeModelWithoutAutoCreation'
+        end
+      end
+
+      context 'when not called in model' do
+        it 'raises an error when accessing entity configuration' do
+          instance = FakeModelWithoutConfig.new email: Faker::Internet.unique.email
+          expect { instance.save }.to raise_error(/Entity not configured/)
         end
       end
     end

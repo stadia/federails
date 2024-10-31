@@ -39,6 +39,7 @@ Please, keep them in this order when updating.
 
 - As actors' subject is a polymorphic relation, these Federails configuration options were removed: `user_class`, 
   `user_table`, `user_profile_url_method` and `user_name_field`
+- `acts_as_federails_actor` is not automatically called when `Federails::Entity` concern is included in models.
 
 ## [0.2.0] 2024-10-13 - Sign messages, handle signed messages and remote following
 
