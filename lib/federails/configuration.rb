@@ -49,11 +49,6 @@ module Federails
     mattr_accessor :remote_follow_url_method
     @@remote_follow_url_method = 'federails.new_client_following_url'
 
-    # Attribute in the user model to use as the username for local actors
-    # @deprecated Set username_field option on acts_as_federails_actor instead
-    mattr_accessor :user_username_field
-    @@user_username_field = :id
-
     def self.site_host=(value)
       @@site_host = value
       Federails::Engine.routes.default_url_options[:host] = value
