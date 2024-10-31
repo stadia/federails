@@ -33,11 +33,6 @@ module Federails
     mattr_accessor :app_layout
     @@app_layout = nil
 
-    # User class name
-    # @deprecated Kept for upgrade compatibility only
-    mattr_accessor :user_class
-    @@user_class = '::User'
-
     # Route path for the federation URLs (to "Federails::Server::*" controllers)
     mattr_accessor :server_routes_path
     @@server_routes_path = :federation
@@ -70,13 +65,6 @@ module Federails
     # @deprecated Set username_field option on acts_as_federails_actor instead
     mattr_accessor :user_username_field
     @@user_username_field = :id
-
-    ##
-    # @return [String] Table used for user model
-    # @deprecated Kept for upgrade compatibility only
-    def self.user_table
-      @@user_class&.constantize&.table_name
-    end
 
     def self.site_host=(value)
       @@site_host = value

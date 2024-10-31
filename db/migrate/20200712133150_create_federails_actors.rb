@@ -11,14 +11,12 @@ class CreateFederailsActors < ActiveRecord::Migration[7.0]
       t.string :followings_url
       t.string :profile_url
 
-      t.references :user, null: true, foreign_key: { to_table: Federails.configuration.user_table }
+      t.integer :entity_id, null: true
+      t.string :entity_type, null: true
 
       t.timestamps
       t.index :federated_url, unique: true
+      t.index [:entity_type, :entity_id], name: 'index_federails_actors_on_entity', unique: true
     end
-    remove_foreign_key :federails_actors, :users if foreign_key_exists?(:federails_actors, :users)
-    remove_index :federails_actors, :user_id
-    add_index :federails_actors, :user_id, unique: true
-    add_foreign_key :federails_actors, :users
   end
 end

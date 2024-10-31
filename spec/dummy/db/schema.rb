@@ -35,9 +35,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_02_094501) do
     t.string "followings_url"
     t.string "profile_url"
     t.integer "entity_id"
+    t.string "entity_type"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "entity_type", default: "User"
     t.string "uuid"
     t.text "public_key"
     t.text "private_key"

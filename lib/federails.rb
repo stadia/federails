@@ -25,7 +25,6 @@ module Federails
       :enable_discovery,
       :open_registrations,
       :app_layout,
-      :user_class, # @deprecated
       :server_routes_path,
       :client_routes_path,
       :remote_follow_url_method,

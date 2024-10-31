@@ -34,6 +34,11 @@ Please, keep them in this order when updating.
   `base_client_controller` option
 - New generator: `federails:copy_client_views`, that copies all the client views in `app/views/federails/client` for override
 - Added `auto_create_actors` option for `acts_as_federails_actor` method to disable automatic actor creation.
+- 
+### Removed
+
+- As actors' subject is a polymorphic relation, these Federails configuration options were removed: `user_class` and 
+  `user_table` 
 
 ## [0.2.0] 2024-10-13 - Sign messages, handle signed messages and remote following
 
