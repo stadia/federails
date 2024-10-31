@@ -16,7 +16,7 @@ module Federails
 
       has_one :actor, class_name: 'Federails::Actor', as: :entity, dependent: :destroy
 
-      after_create :create_actor
+      after_create :create_actor, if: -> { Federails::Configuration.entity_types[self.class.name][:auto_create_actors] }
 
       # Configures the mapping between entity and actor
       # @param username_field [Symbol] The method or attribute name that returns the preferred username for ActivityPub
@@ -28,14 +28,17 @@ module Federails
       #  If parameter is nil, the total user count should be returned. If the parameter is specified, the number of users
       #  active during the time period should be returned.
       # @deprecated @param include_in_user_count [boolean] No longer used; replace with `user_count_method`.
+      # @param auto_create_actors [Boolean] Whether to automatically create an actor when the entity is created
       # @example
       #   acts_as_federails_actor username_field: :username, name_field: :display_name, profile_url_method: :url_for, actor_type: 'Person'
+      # rubocop:disable Metrics/ParameterLists
       def self.acts_as_federails_actor(
         username_field: Federails::Configuration.user_username_field,
         name_field: Federails::Configuration.user_name_field,
         profile_url_method: Federails.configuration.user_profile_url_method,
         actor_type: 'Person',
-        user_count_method: nil
+        user_count_method: nil,
+        auto_create_actors: true
       )
         Federails::Configuration.register_entity(
           self,
@@ -43,9 +46,11 @@ module Federails
           name_field:         name_field,
           profile_url_method: profile_url_method,
           actor_type:         actor_type,
-          user_count_method:  user_count_method
+          user_count_method:  user_count_method,
+          auto_create_actors: auto_create_actors
         )
       end
+      # rubocop:enable Metrics/ParameterLists
 
       # Automatically run default acts_as_federails_actor
       # this can be optionally called again with different configuration in the entity

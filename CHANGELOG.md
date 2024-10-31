@@ -33,6 +33,7 @@ Please, keep them in this order when updating.
 - Base controller for client controllers can be specified to something different from `ActionController::Base` with the 
   `base_client_controller` option
 - New generator: `federails:copy_client_views`, that copies all the client views in `app/views/federails/client` for override
+- Added `auto_create_actors` option for `acts_as_federails_actor` method to disable automatic actor creation.
 
 ## [0.2.0] 2024-10-13 - Sign messages, handle signed messages and remote following
 
