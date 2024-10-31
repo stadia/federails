@@ -10,6 +10,7 @@ defaults: &defaults
   app_layout: 'layouts/application'
   server_routes_path: federation
   client_routes_path: app
+  base_client_controller: '::ApplicationController'
 
 development:
   <<: *defaults

@@ -32,6 +32,7 @@ module Federails
       :user_profile_url_method, # @deprecated
       :user_name_field, # @deprecated
       :user_username_field, # @deprecated
+      :base_client_controller,
     ].each { |key| Configuration.send :"#{key}=", config[key] if config.key?(key) }
   end
 end

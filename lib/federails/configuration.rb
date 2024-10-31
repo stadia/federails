@@ -46,6 +46,10 @@ module Federails
     mattr_accessor :client_routes_path
     @@client_routes_path = :app
 
+    # Default controller to use as base for client controllers
+    mattr_accessor :base_client_controller
+    @@base_client_controller = 'ActionController::Base'
+
     # Route method for remote-following requests
     mattr_accessor :remote_follow_url_method
     @@remote_follow_url_method = 'federails.new_client_following_url'
