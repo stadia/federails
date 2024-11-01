@@ -31,5 +31,14 @@ module Federails
       :base_client_controller,
     ].each { |key| Configuration.send :"#{key}=", config[key] if config.key?(key) }
   end
+
+  # @return [Boolean] True if the given model is a possible entity
+  #
+  # @example
+  #   puts "Follow #{some_actor.name}" if actor_entity? current_user
+  def self.actor_entity?(class_or_instance)
+    klass = class_or_instance.is_a?(Class) ? class_or_instance.name : class_or_instance.class.name
+    Configuration.entity_types.key? klass
+  end
 end
 # rubocop:enable Style/ClassVars

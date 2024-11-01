@@ -57,7 +57,7 @@ module Federails
     end
 
     def user_with_actor?
-      @user && Federails::Configuration.entity_types[@user.class.name] && !!@user.actor
+      @user && Federails.actor_entity?(@user) && !!@user.actor
     end
   end
 end
