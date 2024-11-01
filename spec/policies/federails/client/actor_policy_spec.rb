@@ -9,10 +9,10 @@ RSpec.describe Federails::Client::ActorPolicy, type: :policy do
   permissions '.scope' do
     it 'returns all the actors' do
       FactoryBot.create_list :user, 2
-      FactoryBot.create :distant_actor # Should be ignored
+      FactoryBot.create :distant_actor
 
       # Plus the one created in the "before :suite" in rails helper
-      expect(scope.count).to eq 3
+      expect(scope.count).to eq 4
     end
   end
 

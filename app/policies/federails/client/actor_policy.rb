@@ -7,7 +7,7 @@ module Federails
 
       class Scope < Scope
         def resolve
-          scope.local
+          scope
         end
       end
     end

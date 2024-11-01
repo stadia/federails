@@ -36,6 +36,15 @@ Please, keep them in this order when updating.
 - Added `auto_create_actors` option for `acts_as_federails_actor` method to disable automatic actor creation.
 - Added helper method `Federails.actor_entity?` to check if a given class/instance may have associated actors
 
+### Changed
+
+- Client: reworked the views:
+  - Extracted some sections in reusable partials
+  - Improved listings with no entries
+  - Improved conditional display for some sections
+  - Handled the case where the current user does not have an associated actor
+  - Handled the case where the current user's class is not configured with `acts_as_federails_actor`
+
 ### Removed
 
 - As actors' subject is a polymorphic relation, these Federails configuration options were removed: `user_class`, 

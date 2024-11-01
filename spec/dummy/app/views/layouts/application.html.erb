@@ -11,23 +11,19 @@
 
   <body>
     <nav>
-      Federails:
-      [<strong>Actors:</strong> <%= link_to 'All', federails.client_actors_url %>]
-      [<strong>Activities:</strong> <%= link_to 'All', federails.client_activities_url %>]
-    </nav>
-
-    <nav>
       <% if !current_user %>
         <%= link_to 'Login', main_app.new_user_session_url %>
         <%= link_to 'Register', main_app.new_user_registration_url %>
       <% else %>
-        <%= link_to 'Feed', federails.client_feed_url %>
-        |
-        <%= link_to 'You', federails.client_actor_path(current_user.actor) %>
-        ||
         <%= current_user.email %>
         <%= button_to 'Logout', main_app.destroy_user_session_url, method: :delete, form: { style: 'display: inline-block;' } %>
       <% end %>
+    </nav>
+
+    <hr>
+
+    <nav>
+      <%= render 'federails/client/common/client_links', user: current_user %>
     </nav>
 
     <hr>
