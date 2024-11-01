@@ -18,4 +18,10 @@ RSpec.describe Federails::Client::ActivityPolicy, type: :policy do
 
     it_behaves_like 'an action for everyone'
   end
+
+  permissions :feed? do
+    let(:policy_subject) { Federails::Activity }
+
+    it_behaves_like 'an action for federable instances only'
+  end
 end

@@ -2,6 +2,7 @@ module Federails
   module Client
     class ActivitiesController < Federails::ClientController
       before_action :authenticate_user!, only: [:feed]
+      before_action :authorize_action!
 
       # GET /app/activities
       # GET /app/activities.json
@@ -14,6 +15,12 @@ module Federails
       # GET /app/feed.json
       def feed
         @activities = Activity.feed_for(current_user.actor)
+      end
+
+      private
+
+      def authorize_action!
+        authorize(Federails::Activity, policy_class: Federails::Client::ActivityPolicy)
       end
     end
   end

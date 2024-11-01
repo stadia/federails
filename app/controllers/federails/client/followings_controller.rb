@@ -2,6 +2,7 @@ module Federails
   module Client
     class FollowingsController < Federails::ClientController
       before_action :authenticate_user!
+      before_action :skip_authorization, only: [:new, :create]
       before_action :set_following, only: [:accept, :destroy]
 
       # GET /app/followings/new?uri={uri}
@@ -40,9 +41,10 @@ module Federails
       # POST /app/followings/follow
       # POST /app/followings/follow.json
       def follow
+        authorize Federails::Following, policy_class: Federails::Client::FollowingPolicy
+
         begin
           @following = Following.new_from_account following_account_params, actor: current_user.actor
-          authorize @following, policy_class: Federails::Client::FollowingPolicy
         rescue ::ActiveRecord::RecordNotFound
           # Renders a 422 instead of a 404
           respond_to do |format|

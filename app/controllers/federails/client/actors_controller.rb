@@ -6,6 +6,8 @@ module Federails
       # GET /app/actors
       # GET /app/actors.json
       def index
+        authorize Federails::Actor, policy_class: Federails::Client::ActorPolicy
+
         @actors = policy_scope(Federails::Actor, policy_scope_class: Federails::Client::ActorPolicy::Scope).all
       end
 

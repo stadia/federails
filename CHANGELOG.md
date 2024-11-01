@@ -41,6 +41,10 @@ Please, keep them in this order when updating.
   `user_table`, `user_profile_url_method`, `user_name_field` and `user_username_field`
 - `acts_as_federails_actor` is not automatically called when `Federails::Entity` concern is included in models.
 
+### Fixed
+
+- Client controllers: enforce authorization calls on controller actions
+
 ## [0.2.0] 2024-10-13 - Sign messages, handle signed messages and remote following
 
 ### Added
