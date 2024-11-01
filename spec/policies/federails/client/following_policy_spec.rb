@@ -3,15 +3,15 @@ require 'pundit/rspec'
 
 RSpec.describe Federails::Client::FollowingPolicy, type: :policy do
   let(:user) { FactoryBot.create :user }
-  let(:owner) { FactoryBot.create :user }
+  let(:signed_in_user) { FactoryBot.create :user }
   let(:unrelated_user) { FactoryBot.create :user }
-  let(:scope) { Federails::Client::FollowingPolicy::Scope.new(owner, Federails::Following).resolve }
-  let(:following) { FactoryBot.create :following, actor: user.actor, target_actor: owner.actor }
+  let(:scope) { Federails::Client::FollowingPolicy::Scope.new(signed_in_user, Federails::Following).resolve }
+  let(:following) { FactoryBot.create :following, actor: user.actor, target_actor: signed_in_user.actor }
 
   permissions '.scope' do
     it 'returns the followings where user is involved' do
       following
-      FactoryBot.create :following, actor: owner.actor, target_actor: user.actor
+      FactoryBot.create :following, actor: signed_in_user.actor, target_actor: user.actor
       FactoryBot.create :following, actor: user.actor, target_actor: unrelated_user.actor
 
       expect(scope.count).to eq 2
@@ -27,7 +27,7 @@ RSpec.describe Federails::Client::FollowingPolicy, type: :policy do
 
     context 'when authenticated' do
       it 'grants access' do
-        expect(described_class).to permit(owner, Federails::Following)
+        expect(described_class).to permit(signed_in_user, Federails::Following)
       end
     end
   end
@@ -45,7 +45,7 @@ RSpec.describe Federails::Client::FollowingPolicy, type: :policy do
       end
 
       it 'grants access to owner' do
-        expect(described_class).to permit(owner, following)
+        expect(described_class).to permit(signed_in_user, following)
       end
     end
   end
