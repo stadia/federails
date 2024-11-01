@@ -14,16 +14,8 @@ RSpec.describe Federails::Client::ActivityPolicy, type: :policy do
   end
 
   permissions :index? do
-    context 'when unauthenticated' do
-      it 'grants access' do
-        expect(described_class).to permit(nil, Federails::Activity)
-      end
-    end
+    let(:policy_subject) { Federails::Activity }
 
-    context 'when authenticated' do
-      it 'grants access' do
-        expect(described_class).to permit(signed_in_user, Federails::Activity)
-      end
-    end
+    it_behaves_like 'an action for everyone'
   end
 end

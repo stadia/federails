@@ -1,6 +1,7 @@
 require 'rails_helper'
 require 'pundit/rspec'
 
+# rubocop:disable RSpec/MultipleMemoizedHelpers
 RSpec.describe Federails::Client::FollowingPolicy, type: :policy do
   let(:user) { FactoryBot.create :user }
   let(:signed_in_user) { FactoryBot.create :user }
@@ -19,28 +20,18 @@ RSpec.describe Federails::Client::FollowingPolicy, type: :policy do
   end
 
   permissions :create?, :follow? do
-    context 'when unauthenticated' do
-      it 'denies access' do
-        expect(described_class).not_to permit(nil, Federails::Following)
-      end
-    end
+    let(:policy_subject) { Federails::Following }
 
-    context 'when authenticated' do
-      it 'grants access' do
-        expect(described_class).to permit(signed_in_user, Federails::Following)
-      end
-    end
+    it_behaves_like 'an action for authenticated users only'
   end
 
   permissions :destroy? do
-    context 'when unauthenticated' do
-      it 'denies access' do
-        expect(described_class).not_to permit(nil, following)
-      end
-    end
+    let(:policy_subject) { following }
+
+    it_behaves_like 'denies access when unauthenticated'
 
     context 'when authenticated' do
-      it 'denies access to non-owners' do
+      it 'denies access to non-owner' do
         expect(described_class).not_to permit(unrelated_user, following)
       end
 
@@ -50,3 +41,4 @@ RSpec.describe Federails::Client::FollowingPolicy, type: :policy do
     end
   end
 end
+# rubocop:enable RSpec/MultipleMemoizedHelpers

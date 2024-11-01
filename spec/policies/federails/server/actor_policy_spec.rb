@@ -14,16 +14,8 @@ RSpec.describe Federails::Server::ActorPolicy, type: :policy do
   end
 
   permissions :show? do
-    context 'when unauthenticated' do
-      it 'grants access' do
-        expect(described_class).to permit(nil, signed_in_user.actor)
-      end
-    end
+    let(:policy_subject) { signed_in_user.actor }
 
-    context 'when authenticated' do
-      it 'grants access' do
-        expect(described_class).to permit(signed_in_user, signed_in_user.actor)
-      end
-    end
+    it_behaves_like 'an action for everyone'
   end
 end

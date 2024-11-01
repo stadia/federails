@@ -3,6 +3,7 @@ require 'pundit/rspec'
 
 RSpec.describe Federails::Client::ActorPolicy, type: :policy do
   let(:signed_in_user) { FactoryBot.create :user }
+  let(:other_actor) { FactoryBot.create(:user).actor }
   let(:scope) { Federails::Client::ActorPolicy::Scope.new(nil, Federails::Actor).resolve }
 
   permissions '.scope' do
@@ -16,30 +17,14 @@ RSpec.describe Federails::Client::ActorPolicy, type: :policy do
   end
 
   permissions :index? do
-    context 'when unauthenticated' do
-      it 'grants access' do
-        expect(described_class).to permit(nil, Federails::Actor)
-      end
-    end
+    let(:policy_subject) { Federails::Actor }
 
-    context 'when authenticated' do
-      it 'grants access' do
-        expect(described_class).to permit(signed_in_user, Federails::Actor)
-      end
-    end
+    it_behaves_like 'an action for everyone'
   end
 
   permissions :show? do
-    context 'when unauthenticated' do
-      it 'grants access' do
-        expect(described_class).to permit(nil, signed_in_user.actor)
-      end
-    end
+    let(:policy_subject) { other_actor }
 
-    context 'when authenticated' do
-      it 'grants access' do
-        expect(described_class).to permit(signed_in_user, signed_in_user.actor)
-      end
-    end
+    it_behaves_like 'an action for everyone'
   end
 end
