@@ -2,6 +2,8 @@ module Federails
   class ServerController < ::ActionController::Base # rubocop:disable Rails/ApplicationController
     include Pundit::Authorization
 
+    after_action :verify_authorized
+
     protect_from_forgery with: :null_session
     helper Federails::ServerHelper
 
