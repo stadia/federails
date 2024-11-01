@@ -55,5 +55,9 @@ module Federails
 
       @record.actor_id == @user.actor.id
     end
+
+    def user_with_actor?
+      @user && Federails::Configuration.entity_types[@user.class.name] && !!@user.actor
+    end
   end
 end

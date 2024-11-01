@@ -26,9 +26,9 @@ module Federails
       private
 
       def in_following?
-        return false if @user.blank?
+        return false unless user_with_actor?
 
-        @record.actor_id == @user.actor.id || @record.target_actor_id == @user.actor.id
+        @record.actor_id == @user.actor&.id || @record.target_actor_id == @user.actor&.id
       end
     end
   end
