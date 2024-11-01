@@ -1,7 +1,5 @@
 # Compliance status: ActivityPub RFC
 
-Report generated on 2023-11-21 10:31:01 +0100
-
 Source specification: [https://www.w3.org/TR/activitypub/](https://www.w3.org/TR/activitypub/)
 
 | status | id | section | verb | text |
