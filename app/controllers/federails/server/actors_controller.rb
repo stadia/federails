@@ -7,11 +7,15 @@ module Federails
       # GET /federation/actors/1.json
       def show; end
 
+      # GET /federation/actors/:id/followers
+      # GET /federation/actors/:id/followers.json
       def followers
         @actors = @actor.followers.order(created_at: :desc)
         followings_queries
       end
 
+      # GET /federation/actors/:id/followers
+      # GET /federation/actors/:id/followers.json
       def following
         @actors = @actor.follows.order(created_at: :desc)
         followings_queries
