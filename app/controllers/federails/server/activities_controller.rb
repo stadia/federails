@@ -8,6 +8,8 @@ module Federails
       # GET /federation/activities
       # GET /federation/actors/1/outbox.json
       def outbox
+        authorize Federails::Activity, policy_class: Federails::Server::ActivityPolicy
+
         @actor            = Actor.find_param(params[:actor_id])
         @activities       = policy_scope(Federails::Activity, policy_scope_class: Federails::Server::ActivityPolicy::Scope).where(actor: @actor).order(created_at: :desc)
         @total_activities = @activities.count
@@ -19,6 +21,8 @@ module Federails
 
       # POST /federation/actors/1/inbox
       def create
+        skip_authorization
+
         payload = payload_from_params
         return head :unprocessable_entity unless payload
 
@@ -34,6 +38,7 @@ module Federails
       # Use callbacks to share common setup or constraints between actions.
       def set_activity
         @activity = Actor.find_param(params[:actor_id]).activities.find_param(params[:id])
+        authorize @activity, policy_class: Federails::Server::ActivityPolicy
       end
 
       # Only allow a list of trusted parameters through.

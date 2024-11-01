@@ -44,6 +44,7 @@ Please, keep them in this order when updating.
 ### Fixed
 
 - Client controllers: enforce authorization calls on controller actions
+- Server controllers: enforce authorization calls on controller actions
 
 ## [0.2.0] 2024-10-13 - Sign messages, handle signed messages and remote following
 

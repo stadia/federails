@@ -4,6 +4,8 @@ module Federails
   module Server
     class WebFingerController < Federails::ServerController
       def find
+        skip_authorization
+
         resource = params.require(:resource)
         case resource
         when %r{^https?://.+}
@@ -19,6 +21,8 @@ module Federails
       end
 
       def host_meta
+        skip_authorization
+
         render formats: [:xrd]
       end
 

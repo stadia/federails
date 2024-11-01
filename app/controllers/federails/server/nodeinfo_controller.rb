@@ -2,10 +2,14 @@ module Federails
   module Server
     class NodeinfoController < Federails::ServerController
       def index
+        skip_authorization
+
         render formats: [:nodeinfo]
       end
 
       def show # rubocop:todo Metrics/AbcSize
+        skip_authorization
+
         @total = @active_halfyear = @active_month = 0
         @has_user_counts = false
         Federails::Configuration.entity_types.each_value do |config|
