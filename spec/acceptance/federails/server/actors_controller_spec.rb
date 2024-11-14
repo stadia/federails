@@ -26,17 +26,18 @@ RSpec.describe Federails::Server::ActorsController, type: :acceptance do
          publicKeyPem: { type: :string, description: 'The key itself in PEM format' }
 
   entity :actor,
-         '@context':        { type: :array, description: 'JSON-LD contexts' },
-         id:                { type: :string, description: 'Federated id' },
-         type:              { type: :string, description: 'Actor type' },
-         name:              { type: :string, description: 'Human name' },
-         preferredUsername: { type: :string, description: 'Immutable username' },
-         inbox:             { type: :string, description: 'Federated inbox URL' },
-         outbox:            { type: :string, description: 'Federated outbox URL' },
-         followers:         { type: :string, description: 'URL to the followers list' },
-         following:         { type: :string, description: 'URL to the followings list' },
-         url:               { type: :string, required: false, description: 'URL to a human readable profile' },
-         publicKey:         { type: :object, required: false, description: 'Public key used for signing messages', attributes: :public_key }
+         '@context':         { type: :array, description: 'JSON-LD contexts' },
+         id:                 { type: :string, description: 'Federated id' },
+         type:               { type: :string, description: 'Actor type' },
+         name:               { type: :string, description: 'Human name' },
+         preferredUsername:  { type: :string, description: 'Immutable username' },
+         inbox:              { type: :string, description: 'Federated inbox URL' },
+         outbox:             { type: :string, description: 'Federated outbox URL' },
+         followers:          { type: :string, description: 'URL to the followers list' },
+         following:          { type: :string, description: 'URL to the followings list' },
+         url:                { type: :string, required: false, description: 'URL to a human readable profile' },
+         publicKey:          { type: :object, required: false, description: 'Public key used for signing messages', attributes: :public_key },
+         attributionDomains: { type: :array, required: false, description: 'Extension used to test custom data' }
 
   entity :actors_ordered_collection_page,
          # Base

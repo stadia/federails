@@ -21,4 +21,19 @@ class User < ApplicationRecord
       User.where(updated_at: range).count
     end
   end
+
+  def to_activitypub_object
+    {
+      '@context':         {
+        toot:               'http://joinmastodon.org/ns#',
+        attributionDomains: {
+          '@id':   'toot:attributionDomains',
+          '@type': '@id',
+        },
+      },
+      attributionDomains: [
+        'example.com',
+      ],
+    }
+  end
 end

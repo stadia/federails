@@ -1,7 +1,11 @@
-json.set! '@context', [
+actor_data = actor.entity.to_activitypub_object
+
+json.set! '@context', ([
   'https://www.w3.org/ns/activitystreams',
   'https://w3id.org/security/v1',
-]
+] + [
+  actor_data&.delete(:@context),
+].flatten).compact
 
 json.id actor.federated_url
 json.name actor.name
@@ -19,3 +23,4 @@ if actor.public_key
     json.publicKeyPem actor.public_key
   end
 end
+json.merge! actor_data
