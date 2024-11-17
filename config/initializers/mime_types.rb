@@ -3,7 +3,7 @@ Mime::Type.register 'application/jrd+json', :jrd
 Mime::Type.register 'application/xrd+xml', :xrd
 
 # ActivityPub: https://www.w3.org/TR/activitypub/#retrieving-objects
-Mime::Type.register 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"', :activitypub, ['application/activity+json', 'application/json']
+Mime::Type.register 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"', :activitypub, ['application/activity+json']
 
 # Nodeinfo: https://github.com/jhass/nodeinfo/blob/main/PROTOCOL.md#retrieval
 Mime::Type.register 'application/json; profile="http://nodeinfo.diaspora.software/ns/schema/2.0#"', :nodeinfo

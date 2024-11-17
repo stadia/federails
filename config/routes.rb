@@ -34,7 +34,7 @@ Federails::Engine.routes.draw do
     end
   end
 
-  scope Federails.configuration.server_routes_path, module: :server, as: :server do
+  scope Federails.configuration.server_routes_path, module: :server, as: :server, defaults: { format: :activitypub } do
     resources :actors, only: [:show] do
       member do
         get :followers
