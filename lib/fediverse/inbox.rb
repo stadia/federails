@@ -25,10 +25,10 @@ module Fediverse
       private
 
       def get_handlers(activity_type, object_type)
-        @@handlers.dig(activity_type, object_type)
-                  .merge(@@handlers.dig(activity_type, '*'))
-                  .merge(@@handlers.dig('*', '*'))
-                  .merge(@@handlers.dig('*', object_type))
+        {}.merge(@@handlers.dig(activity_type, object_type) || {})
+          .merge(@@handlers.dig(activity_type, '*') || {})
+          .merge(@@handlers.dig('*', '*') || {})
+          .merge(@@handlers.dig('*', object_type) || {})
       end
 
       def handle_create_follow_request(activity)
