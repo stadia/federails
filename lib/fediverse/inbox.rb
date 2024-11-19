@@ -11,7 +11,7 @@ module Fediverse
       end
 
       def dispatch_request(payload)
-        handlers = get_handlers(payload['type'], payload.dig('object', 'type'))
+        handlers = get_handlers(payload['type'], payload['object'].is_a?(Hash) ? payload.dig('object', 'type') : nil)
         handlers.each_pair do |klass, method|
           klass.send method, payload
         end
