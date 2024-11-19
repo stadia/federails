@@ -10,7 +10,11 @@ Federails::Engine.routes.draw do
 
   if Federails.configuration.client_routes_path
     scope Federails.configuration.client_routes_path, module: :client, as: :client do
-      resources :activities, only: [:index, :feed]
+      resources :activities, only: [:index] do
+        collection do
+          get :feed, to: 'activities#feed'
+        end
+      end
       resources :actors, only: [:index, :show] do
         collection do
           get :lookup, to: 'actors#lookup'
