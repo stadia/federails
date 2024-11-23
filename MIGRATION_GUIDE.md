@@ -2,6 +2,8 @@
 
 ## Next
 
+## From 0.2.0 to 0.3.0
+
 First of all, read the [CHANGELOG](./CHANGELOG.md)
 
 - Deprecated configuration options were removed; leading to a change in migrations. You will _need_ to update existing
