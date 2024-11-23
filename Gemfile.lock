@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    federails (0.2.0)
+    federails (0.3.0)
       faraday
       faraday-follow_redirects
       json-ld (>= 3.2.0)
