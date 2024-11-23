@@ -28,6 +28,10 @@ Please, keep them in this order when updating.
 
 ## [Unreleased]
 
+### Changed
+
+- Methods included in `Federails::Entity` are renamed with `federails` in them to avoid confusion and make projects with _actors_ able to use the gem
+
 ## [0.3.0] 2024-11-23
 
 ### Added

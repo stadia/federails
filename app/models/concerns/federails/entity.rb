@@ -24,9 +24,9 @@ module Federails
         Fediverse::Inbox.register_handler(activity_type, object_type, self, method)
       end
 
-      has_one :actor, class_name: 'Federails::Actor', as: :entity, dependent: :destroy
+      has_one :federails_actor, class_name: 'Federails::Actor', as: :entity, dependent: :destroy
 
-      after_create :create_actor, if: lambda {
+      after_create :create_federails_actor, if: lambda {
         raise("Entity not configured for #{self.class.name}. Did you use \"acts_as_federails_actor\"?") unless Federails::Configuration.entity_types.key? self.class.name
 
         Federails::Configuration.entity_types[self.class.name][:auto_create_actors]
@@ -90,7 +90,7 @@ module Federails
 
       private
 
-      def create_actor
+      def create_federails_actor
         Federails::Actor.create! entity: self
       end
     end
