@@ -27,7 +27,7 @@ class User < ApplicationRecord
   # Creates the actor or destroys it, depending on the condition
   def create_or_destroy_actor!
     create_actor if should_create_actor?
-    actor.destroy! if role != :community_manager && role_previously_was == :community_manager && self.actor.present?
+    actor.destroy! if role != :community_manager && role_previously_was == :community_manager && self.federails_actor.present?
   end
 end
 ```

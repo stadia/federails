@@ -7,13 +7,13 @@ RSpec.describe Federails::Client::FollowingPolicy, type: :policy do
   let(:signed_in_user) { FactoryBot.create :user }
   let(:unrelated_user) { FactoryBot.create :user }
   let(:scope) { Federails::Client::FollowingPolicy::Scope.new(signed_in_user, Federails::Following).resolve }
-  let(:following) { FactoryBot.create :following, actor: user.actor, target_actor: signed_in_user.actor }
+  let(:following) { FactoryBot.create :following, actor: user.federails_actor, target_actor: signed_in_user.federails_actor }
 
   permissions '.scope' do
     it 'returns the followings where user is involved' do
       following
-      FactoryBot.create :following, actor: signed_in_user.actor, target_actor: user.actor
-      FactoryBot.create :following, actor: user.actor, target_actor: unrelated_user.actor
+      FactoryBot.create :following, actor: signed_in_user.federails_actor, target_actor: user.federails_actor
+      FactoryBot.create :following, actor: user.federails_actor, target_actor: unrelated_user.federails_actor
 
       expect(scope.count).to eq 2
     end

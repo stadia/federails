@@ -10,13 +10,13 @@ RSpec.describe '/well-known', type: :request do
     end
 
     it 'renders a successful response given HTTP URI' do
-      get federails.webfinger_url, params: { resource: user.actor.federated_url }
+      get federails.webfinger_url, params: { resource: user.federails_actor.federated_url }
       expect(response).to be_successful
     end
 
     ['application/jrd+json', 'application/json'].each do |accept|
       it "responds with JRD in response to a #{accept} request" do
-        get federails.webfinger_url, params: { resource: user.actor.federated_url }, headers: { accept: accept }
+        get federails.webfinger_url, params: { resource: user.federails_actor.federated_url }, headers: { accept: accept }
         expect(response.content_type).to eq 'application/jrd+json; charset=utf-8'
       end
 
@@ -40,14 +40,14 @@ RSpec.describe '/well-known', type: :request do
         html_profile = result['links'].find { |x| x['rel'] == 'https://webfinger.net/rel/profile-page' }
         expect(html_profile).to be_present
         expect(html_profile['type']).to eq 'text/html'
-        expect(html_profile['href']).to eq user.actor.profile_url
+        expect(html_profile['href']).to eq user.federails_actor.profile_url
       end
 
       it 'includes self link to activitypub actor' do # rubocop:disable RSpec/MultipleExpectations
         self_link = result['links'].find { |x| x['rel'] == 'self' }
         expect(self_link).to be_present
         expect(self_link['type']).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"'
-        expect(self_link['href']).to eq user.actor.federated_url
+        expect(self_link['href']).to eq user.federails_actor.federated_url
       end
 
       it 'includes ostatus subscribe template for remote following' do # rubocop:disable RSpec/MultipleExpectations

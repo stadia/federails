@@ -103,7 +103,7 @@ module Federails
         if Fediverse::Webfinger.local_user? parts
           actor = nil
           Federails::Configuration.entity_types.each_value do |entity|
-            actor ||= entity[:class].find_by(entity[:username_field] => parts[:username])&.actor
+            actor ||= entity[:class].find_by(entity[:username_field] => parts[:username])&.federails_actor
           end
           raise ActiveRecord::RecordNotFound if actor.nil?
         else

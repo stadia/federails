@@ -15,9 +15,9 @@ require 'rails_helper'
 # rubocop:disable RSpec/MultipleMemoizedHelpers
 RSpec.describe '/followings', type: :request do
   let(:signed_in_user) { User.find_by email: 'user@example.com' }
-  let(:target_actor) { FactoryBot.create(:user).actor }
-  let(:following) { FactoryBot.create :following, actor: signed_in_user.actor, target_actor: target_actor }
-  let(:incoming_following) { FactoryBot.create :following, actor: target_actor, target_actor: signed_in_user.actor }
+  let(:target_actor) { FactoryBot.create(:user).federails_actor }
+  let(:following) { FactoryBot.create :following, actor: signed_in_user.federails_actor, target_actor: target_actor }
+  let(:incoming_following) { FactoryBot.create :following, actor: target_actor, target_actor: signed_in_user.federails_actor }
   # Following. As you add validations to Following, be sure to
   # adjust the attributes here as well.
   let(:valid_attributes) { FactoryBot.build(:following, actor: nil, target_actor: target_actor).attributes }
@@ -66,7 +66,7 @@ RSpec.describe '/followings', type: :request do
 
         it 'redirects to the actors profile' do
           post federails.client_followings_url, params: { following: valid_attributes }
-          expect(response).to redirect_to(federails.client_actor_url(signed_in_user.actor))
+          expect(response).to redirect_to(federails.client_actor_url(signed_in_user.federails_actor))
         end
       end
 
@@ -79,7 +79,7 @@ RSpec.describe '/followings', type: :request do
 
         it 'redirects to the actors profile' do
           post federails.client_followings_url, params: { following: invalid_attributes }
-          expect(response).to redirect_to(federails.client_actor_url(signed_in_user.actor))
+          expect(response).to redirect_to(federails.client_actor_url(signed_in_user.federails_actor))
         end
       end
     end
@@ -105,7 +105,7 @@ RSpec.describe '/followings', type: :request do
 
         it 'redirects to the actor' do
           post federails.follow_client_followings_url(account: target_actor.username)
-          expect(response).to redirect_to(federails.client_actor_url(signed_in_user.actor))
+          expect(response).to redirect_to(federails.client_actor_url(signed_in_user.federails_actor))
         end
       end
 
@@ -179,7 +179,7 @@ RSpec.describe '/followings', type: :request do
 
       it 'redirects to the actors profile' do
         delete federails.client_following_url(following)
-        expect(response).to redirect_to(federails.client_actor_url(signed_in_user.actor))
+        expect(response).to redirect_to(federails.client_actor_url(signed_in_user.federails_actor))
       end
     end
   end

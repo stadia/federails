@@ -32,7 +32,7 @@ module Federails
       # POST /app/followings.json
       def create
         @following = Following.new(following_params)
-        @following.actor = current_user.actor
+        @following.actor = current_user.federails_actor
         authorize @following, policy_class: Federails::Client::FollowingPolicy
 
         save_and_render
@@ -44,7 +44,7 @@ module Federails
         authorize Federails::Following, policy_class: Federails::Client::FollowingPolicy
 
         begin
-          @following = Following.new_from_account following_account_params, actor: current_user.actor
+          @following = Following.new_from_account following_account_params, actor: current_user.federails_actor
         rescue ::ActiveRecord::RecordNotFound
           # Renders a 422 instead of a 404
           respond_to do |format|
@@ -86,7 +86,7 @@ module Federails
       end
 
       def save_and_render # rubocop:disable Metrics/AbcSize
-        url = federails.client_actor_url current_user.actor
+        url = federails.client_actor_url current_user.federails_actor
 
         respond_to do |format|
           if @following.save

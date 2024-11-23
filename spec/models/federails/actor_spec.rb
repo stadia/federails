@@ -49,12 +49,12 @@ module Federails
 
       it 'creates a new RSA keypair with public key' do
         user = FactoryBot.create :user
-        expect(user.actor.public_key).to include 'BEGIN PUBLIC KEY'
+        expect(user.federails_actor.public_key).to include 'BEGIN PUBLIC KEY'
       end
 
       it 'creates a new RSA keypair with private key' do
         user = FactoryBot.create :user
-        expect(user.actor.private_key).to include 'BEGIN RSA PRIVATE KEY'
+        expect(user.federails_actor.private_key).to include 'BEGIN RSA PRIVATE KEY'
       end
     end
 
@@ -62,7 +62,7 @@ module Federails
       it 'returns local actors' do
         user = FactoryBot.create :user
         result = described_class.find_by_account("#{user.id}@localhost")
-        expect(result).to eq user.actor
+        expect(result).to eq user.federails_actor
       end
 
       it 'returns distant actors' do
@@ -114,8 +114,8 @@ module Federails
     describe '#find_by_federation_url' do
       it 'returns local actors' do
         user = FactoryBot.create :user
-        result = described_class.find_by_federation_url(user.actor.federated_url)
-        expect(result).to eq user.actor
+        result = described_class.find_by_federation_url(user.federails_actor.federated_url)
+        expect(result).to eq user.federails_actor
       end
 
       it 'returns distant actors' do

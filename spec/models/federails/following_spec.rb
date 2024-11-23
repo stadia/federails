@@ -3,8 +3,8 @@ require 'rails_helper'
 module Federails
   RSpec.describe Following, type: :model do
     context 'with a follow relationship in place' do
-      let(:actor) { FactoryBot.create(:user).actor }
-      let(:other_actor) { FactoryBot.create(:user).actor }
+      let(:actor) { FactoryBot.create(:user).federails_actor }
+      let(:other_actor) { FactoryBot.create(:user).federails_actor }
       let(:following) { described_class.create actor: actor, target_actor: other_actor }
 
       it 'fails to create the same following twice' do
@@ -21,7 +21,7 @@ module Federails
       it 'executes after_followed callback in target' do
         # auto_accept is set up as our callback method
         allow(target).to receive(:accept_follow)
-        described_class.create actor: user.actor, target_actor: target.actor
+        described_class.create actor: user.federails_actor, target_actor: target.federails_actor
         expect(target).to have_received(:accept_follow).once
       end
     end

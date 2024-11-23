@@ -14,7 +14,7 @@ RSpec.describe Federails::Server::ActorPolicy, type: :policy do
   end
 
   permissions :show? do
-    let(:policy_subject) { signed_in_user.actor }
+    let(:policy_subject) { signed_in_user.federails_actor }
 
     it_behaves_like 'an action for everyone'
   end

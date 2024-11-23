@@ -14,7 +14,7 @@ module Federails
       # GET /app/feed
       # GET /app/feed.json
       def feed
-        @activities = Activity.feed_for(current_user.actor)
+        @activities = Activity.feed_for(current_user.federails_actor)
       end
 
       private

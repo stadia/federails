@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe Federails::Server::ActivitiesController, type: :acceptance do
   resource 'Federation/Activities', 'Activities management'
   let(:headers) { { accept: 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"' } }
-  let(:actor) { FactoryBot.create(:user).actor }
+  let(:actor) { FactoryBot.create(:user).federails_actor }
   let(:following) { FactoryBot.create :following, actor: actor }
   let(:following_activity) { following.activities.last }
 

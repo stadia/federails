@@ -145,7 +145,7 @@ an existing model with existing data, you will need to generate the correspondin
 Usage example:
 
 ```rb
-actor = User.find(1).actor
+actor = User.find(1).federails_actor
 
 actor.inbox
 actor.outbox

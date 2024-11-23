@@ -17,19 +17,19 @@ RSpec.describe '/federation/actors', type: :request do
   let(:other_user) { FactoryBot.create :user }
 
   before do
-    Federails::Following.create actor: user.actor, target_actor: other_user.actor
-    Federails::Following.create actor: other_user.actor, target_actor: user.actor
+    Federails::Following.create actor: user.federails_actor, target_actor: other_user.federails_actor
+    Federails::Following.create actor: other_user.federails_actor, target_actor: user.federails_actor
   end
 
   describe 'GET /show' do
     it 'renders a successful response' do
-      get federails.server_actor_url(user.actor), headers: { accept: Mime[:activitypub] }
+      get federails.server_actor_url(user.federails_actor), headers: { accept: Mime[:activitypub] }
       expect(response).to be_successful
     end
 
     ACTIVITYPUB_CONTENT_TYPES.each do |accept|
       it "responds with LD in response to a #{accept} request" do
-        get federails.server_actor_url(user.actor), headers: { accept: accept }
+        get federails.server_actor_url(user.federails_actor), headers: { accept: accept }
         expect(response.content_type).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"; charset=utf-8'
       end
     end
@@ -37,13 +37,13 @@ RSpec.describe '/federation/actors', type: :request do
 
   describe 'GET /followers' do
     it 'renders a successful response' do
-      get federails.followers_server_actor_url(user.actor), headers: { accept: Mime[:activitypub] }
+      get federails.followers_server_actor_url(user.federails_actor), headers: { accept: Mime[:activitypub] }
       expect(response).to be_successful
     end
 
     ACTIVITYPUB_CONTENT_TYPES.each do |accept|
       it "responds with LD in response to a #{accept} request" do
-        get federails.followers_server_actor_url(user.actor), headers: { accept: accept }
+        get federails.followers_server_actor_url(user.federails_actor), headers: { accept: accept }
         expect(response.content_type).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"; charset=utf-8'
       end
     end
@@ -51,13 +51,13 @@ RSpec.describe '/federation/actors', type: :request do
 
   describe 'GET /following' do
     it 'renders a successful response' do
-      get federails.following_server_actor_url(user.actor), headers: { accept: Mime[:activitypub] }
+      get federails.following_server_actor_url(user.federails_actor), headers: { accept: Mime[:activitypub] }
       expect(response).to be_successful
     end
 
     ACTIVITYPUB_CONTENT_TYPES.each do |accept|
       it "responds with LD in response to a #{accept} request" do
-        get federails.following_server_actor_url(user.actor), headers: { accept: accept }
+        get federails.following_server_actor_url(user.federails_actor), headers: { accept: accept }
         expect(response.content_type).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"; charset=utf-8'
       end
     end

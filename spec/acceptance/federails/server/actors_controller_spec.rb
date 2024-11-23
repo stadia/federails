@@ -3,15 +3,15 @@ require 'rails_helper'
 RSpec.describe Federails::Server::ActorsController, type: :acceptance do
   resource 'Federation/Actors', 'Actors management'
   let(:headers) { { accept: 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"' } }
-  let(:actor) { FactoryBot.create(:user).actor }
+  let(:actor) { FactoryBot.create(:user).federails_actor }
   let(:following) do
     FactoryBot.create_list(:user, 2).each do |user|
-      Federails::Following.create actor: actor, target_actor: user.actor
+      Federails::Following.create actor: actor, target_actor: user.federails_actor
     end
   end
   let(:followers) do
     FactoryBot.create_list(:user, 2).each do |user|
-      Federails::Following.create actor: user.actor, target_actor: actor
+      Federails::Following.create actor: user.federails_actor, target_actor: actor
     end
   end
 

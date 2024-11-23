@@ -2,7 +2,7 @@ require 'rails_helper'
 require 'fediverse/signature'
 
 RSpec.describe Fediverse::Signature do
-  let(:actor) { FactoryBot.create(:user).actor }
+  let(:actor) { FactoryBot.create(:user).federails_actor }
 
   context 'when signing requests' do
     let(:request) do

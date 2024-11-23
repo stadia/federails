@@ -6,8 +6,8 @@ RSpec.describe Federails::Server::FollowingsController, type: :acceptance do
   let(:headers) { { accept: 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"' } }
   let(:user) { FactoryBot.create :user }
   let(:following) do
-    target_actor = FactoryBot.create(:user).actor
-    FactoryBot.create :following, actor: user.actor, target_actor: target_actor
+    target_actor = FactoryBot.create(:user).federails_actor
+    FactoryBot.create :following, actor: user.federails_actor, target_actor: target_actor
   end
 
   before do

@@ -24,8 +24,8 @@ RSpec.describe '/federation/followings', type: :request do
   end
 
   describe 'GET /show' do
-    let(:actor) { FactoryBot.create(:user).actor }
-    let(:target_actor) { FactoryBot.create(:user).actor }
+    let(:actor) { FactoryBot.create(:user).federails_actor }
+    let(:target_actor) { FactoryBot.create(:user).federails_actor }
     let(:following) { FactoryBot.create :following, actor: actor, target_actor: target_actor }
 
     it 'renders a successful response' do
