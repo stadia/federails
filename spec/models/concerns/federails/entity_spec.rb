@@ -38,7 +38,7 @@ module Federails
     end
 
     describe 'hooks' do
-      describe 'after_create: create_actor' do
+      describe 'after_create: create_federails_actor' do
         context 'with default values' do
           let(:instance) { FakeModel.new email: Faker::Internet.unique.email }
 

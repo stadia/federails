@@ -15,18 +15,18 @@ class User < ApplicationRecord
                           #...other configuration
                           auto_create_actors: false
 
-  after_create :create_actor, if: :should_create_actor?
-  after_update :create_or_destroy_actor!
+  after_create :create_federails_actor, if: :create_federails_actor?
+  after_update :create_or_destroy_federails_actor!
   
   private
 
-  def should_create_actor?
+  def create_federails_actor?
     role == :community_manager && role_previously_was != :community_manager
   end
 
   # Creates the actor or destroys it, depending on the condition
-  def create_or_destroy_actor!
-    create_actor if should_create_actor?
+  def create_or_destroy_federails_actor!
+    create_federails_actor if create_federails_actor?
     actor.destroy! if role != :community_manager && role_previously_was == :community_manager && self.federails_actor.present?
   end
 end
