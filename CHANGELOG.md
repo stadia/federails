@@ -32,6 +32,10 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 As we're still in a kind of early development, some changes to Federails internals are listed.
 
+### Added
+
+- Added `Federails.actor_entity(class_or_instance)` method which returns the configuration
+
 ### Changed
 
 - Methods included in `Federails::Entity` are renamed with `federails` in them to avoid confusion and make projects with _actors_ able to use the gem

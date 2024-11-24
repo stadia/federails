@@ -29,7 +29,7 @@ module Federails
       after_create :create_federails_actor, if: lambda {
         raise("Entity not configured for #{self.class.name}. Did you use \"acts_as_federails_actor\"?") unless Federails.actor_entity? self
 
-        Federails::Configuration.actor_types[self.class.name][:auto_create_actors]
+        Federails.actor_entity(self)[:auto_create_actors]
       }
 
       # Configures the mapping between entity and actor

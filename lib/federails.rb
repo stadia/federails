@@ -41,6 +41,14 @@ module Federails
       Configuration.actor_types.key? class_or_instance_name(class_or_instance)
     end
 
+    # @return [Hash] The configuration for the given actor entity
+    def actor_entity(class_or_instance)
+      klass = class_or_instance_name(class_or_instance)
+      raise "#{klass} is not a configured actor entity" unless Configuration.actor_types.key?(klass)
+
+      Configuration.actor_types[klass]
+    end
+
     private
 
     # @return [String] Class name of the provided class or instance

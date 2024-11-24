@@ -7,6 +7,7 @@
 - Rename `Federails::Entity` to `Federails::ActorEntity`.
 - Rename `Federails::Configuration.register_entity` to `Federails::Configuration.register_actor_class`
 - Rename `Federails::Configuration.entity_types` to `Federails::Configuration.actor_types`
+- If you use `Federails::Configuration.actor_types[entity_type]`, you can replace it with `Federails.actor_entity(class_or_instance)`
 
 ## From 0.2.0 to 0.3.0
 
