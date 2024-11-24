@@ -30,10 +30,13 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ## [Unreleased]
 
+As we're still in a kind of early development, some changes to Federails internals are listed.
+
 ### Changed
 
 - Methods included in `Federails::Entity` are renamed with `federails` in them to avoid confusion and make projects with _actors_ able to use the gem
 - [**BREAKING**] Concern `Federails::Entity` has been renamed to `Federails::ActorEntity`
+- Internal method `Federails::Configuration.register_entity` has been renamed to `Federails::Configuration.register_actor_class`.
 
 ## [0.3.0] 2024-11-23
 

@@ -53,7 +53,7 @@ module Federails
         user_count_method: nil,
         auto_create_actors: true
       )
-        Federails::Configuration.register_entity(
+        Federails::Configuration.register_actor_class(
           self,
           username_field:     username_field,
           name_field:         name_field,

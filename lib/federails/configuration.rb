@@ -63,7 +63,7 @@ module Federails
     mattr_reader :entity_types
     @@entity_types = {}
 
-    def self.register_entity(klass, config = {})
+    def self.register_actor_class(klass, config = {})
       @@entity_types[klass.name] = config.merge(class: klass)
     end
   end
