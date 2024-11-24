@@ -24,6 +24,8 @@ Quick remainder of the possible sections:
   in case of rework, dependencies change
 
 Please, keep them in this order when updating.
+
+Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to stand out.
 -->
 
 ## [Unreleased]
@@ -31,6 +33,7 @@ Please, keep them in this order when updating.
 ### Changed
 
 - Methods included in `Federails::Entity` are renamed with `federails` in them to avoid confusion and make projects with _actors_ able to use the gem
+- [**BREAKING**] Concern `Federails::Entity` has been renamed to `Federails::ActorEntity`
 
 ## [0.3.0] 2024-11-23
 

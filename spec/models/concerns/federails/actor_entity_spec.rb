@@ -3,24 +3,24 @@ require 'rails_helper'
 module Federails
   class FakeModel < ApplicationRecord
     self.table_name = 'users'
-    include Federails::Entity
+    include Federails::ActorEntity
 
     acts_as_federails_actor username_field: :id, name_field: :email
   end
 
   class FakeModelWithoutAutoCreation < ApplicationRecord
     self.table_name = 'users'
-    include Federails::Entity
+    include Federails::ActorEntity
 
     acts_as_federails_actor username_field: :id, name_field: :email, auto_create_actors: false
   end
 
   class FakeModelWithoutConfig < ApplicationRecord
     self.table_name = 'users'
-    include Federails::Entity
+    include Federails::ActorEntity
   end
 
-  RSpec.describe Entity do
+  RSpec.describe ActorEntity do
     describe '#acts_as_federails_actor' do
       it 'sets the class configuration in the Federails configuration' do
         aggregate_failures do

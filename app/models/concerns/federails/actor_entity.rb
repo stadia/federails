@@ -1,5 +1,5 @@
 module Federails
-  module Entity
+  module ActorEntity
     extend ActiveSupport::Concern
 
     included do # rubocop:todo Metrics/BlockLength

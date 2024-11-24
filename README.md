@@ -132,7 +132,7 @@ Federails provides a concern to include in your "user" model or whatever will pu
 
 class User < ApplicationRecord
   # Include the concern here:
-  include Federails::Entity
+  include Federails::ActorEntity
 
   # Configure field names
   acts_as_federails_actor username_field: :username, name_field: :name, profile_url_method: :user_url

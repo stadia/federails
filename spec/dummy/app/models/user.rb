@@ -1,5 +1,5 @@
 class User < ApplicationRecord
-  include Federails::Entity
+  include Federails::ActorEntity
 
   acts_as_federails_actor username_field:    :id,
                           name_field:        :email,

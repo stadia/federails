@@ -9,7 +9,7 @@ Let's say we have some users and only the community managers can be actors.
 # app/models/users.rb
 
 class User < ApplicationRecord
-  include Federails::Entity
+  include Federails::ActorEntity
 
   acts_as_federails_actor username_field: :username,
                           #...other configuration
@@ -17,7 +17,7 @@ class User < ApplicationRecord
 
   after_create :create_federails_actor, if: :create_federails_actor?
   after_update :create_or_destroy_federails_actor!
-  
+
   private
 
   def create_federails_actor?
