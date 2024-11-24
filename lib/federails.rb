@@ -38,16 +38,21 @@ module Federails
     # @example
     #   puts "Follow #{some_actor.name}" if actor_entity? current_user
     def actor_entity?(class_or_instance)
-      klass = case class_or_instance
-              when String
-                class_or_instance
-              when Class
-                class_or_instance.name
-              else
-                class_or_instance.class.name
-              end
+      Configuration.actor_types.key? class_or_instance_name(class_or_instance)
+    end
 
-      Configuration.actor_types.key? klass
+    private
+
+    # @return [String] Class name of the provided class or instance
+    def class_or_instance_name(class_or_instance)
+      case class_or_instance
+      when String
+        class_or_instance
+      when Class
+        class_or_instance.name
+      else
+        class_or_instance.class.name
+      end
     end
   end
 end
