@@ -27,7 +27,7 @@ module Federails
       has_one :federails_actor, class_name: 'Federails::Actor', as: :entity, dependent: :destroy
 
       after_create :create_federails_actor, if: lambda {
-        raise("Entity not configured for #{self.class.name}. Did you use \"acts_as_federails_actor\"?") unless Federails::Configuration.actor_types.key? self.class.name
+        raise("Entity not configured for #{self.class.name}. Did you use \"acts_as_federails_actor\"?") unless Federails.actor_entity? self
 
         Federails::Configuration.actor_types[self.class.name][:auto_create_actors]
       }
