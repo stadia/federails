@@ -6,7 +6,7 @@
 - Method `create_actor`, included on related entities has been renamed to `create_federails_actor`. Update your usages accordingly.
 - Rename `Federails::Entity` to `Federails::ActorEntity`.
 - Rename `Federails::Configuration.register_entity` to `Federails::Configuration.register_actor_class`
-
+- Rename `Federails::Configuration.entity_types` to `Federails::Configuration.actor_types`
 
 ## From 0.2.0 to 0.3.0
 

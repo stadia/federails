@@ -59,12 +59,12 @@ module Federails
       Federails::Engine.routes.default_url_options[:port] = value
     end
 
-    # List of entity types
-    mattr_reader :entity_types
-    @@entity_types = {}
+    # List of actor types (classes using Federails::ActorEntity)
+    mattr_reader :actor_types
+    @@actor_types = {}
 
     def self.register_actor_class(klass, config = {})
-      @@entity_types[klass.name] = config.merge(class: klass)
+      @@actor_types[klass.name] = config.merge(class: klass)
     end
   end
   # rubocop:enable Style/ClassVars

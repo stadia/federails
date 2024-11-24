@@ -15,11 +15,11 @@ RSpec.describe '/nodeinfo', type: :request do
     end
 
     it 'does not include user data if no method is set' do
-      prev = Federails::Configuration.entity_types.dig('User', :user_count_method)
-      Federails::Configuration.entity_types['User'][:user_count_method] = nil
+      prev = Federails::Configuration.actor_types.dig('User', :user_count_method)
+      Federails::Configuration.actor_types['User'][:user_count_method] = nil
       get federails.show_node_info_url
       expect(JSON.parse(response.body)).not_to have_key :users # rubocop:disable Rails/ResponseParsedBody
-      Federails::Configuration.entity_types['User'][:user_count_method] = prev
+      Federails::Configuration.actor_types['User'][:user_count_method] = prev
     end
 
     context 'with some users' do

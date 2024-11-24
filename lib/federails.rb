@@ -38,7 +38,7 @@ module Federails
   #   puts "Follow #{some_actor.name}" if actor_entity? current_user
   def self.actor_entity?(class_or_instance)
     klass = class_or_instance.is_a?(Class) ? class_or_instance.name : class_or_instance.class.name
-    Configuration.entity_types.key? klass
+    Configuration.actor_types.key? klass
   end
 end
 # rubocop:enable Style/ClassVars

@@ -24,8 +24,8 @@ module Federails
     describe '#acts_as_federails_actor' do
       it 'sets the class configuration in the Federails configuration' do
         aggregate_failures do
-          expect(Federails::Configuration.entity_types).to have_key 'Federails::FakeModel'
-          expect(Federails::Configuration.entity_types).to have_key 'Federails::FakeModelWithoutAutoCreation'
+          expect(Federails::Configuration.actor_types).to have_key 'Federails::FakeModel'
+          expect(Federails::Configuration.actor_types).to have_key 'Federails::FakeModelWithoutAutoCreation'
         end
       end
 

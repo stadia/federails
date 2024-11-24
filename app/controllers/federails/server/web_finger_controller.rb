@@ -11,7 +11,7 @@ module Federails
         when %r{^https?://.+}
           @user = Federails::Actor.find_by_federation_url(resource)&.entity
         when /^acct:.+/
-          Federails::Configuration.entity_types.each_value do |entity|
+          Federails::Configuration.actor_types.each_value do |entity|
             @user ||= entity[:class].find_by(entity[:username_field] => username)
           end
         end

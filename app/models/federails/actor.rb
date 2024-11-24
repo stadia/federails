@@ -91,9 +91,9 @@ module Federails
     end
 
     def entity_configuration
-      raise("Entity not configured for #{entity_type}. Did you use \"acts_as_federails_actor\"?") unless Federails::Configuration.entity_types.key? entity_type
+      raise("Entity not configured for #{entity_type}. Did you use \"acts_as_federails_actor\"?") unless Federails::Configuration.actor_types.key? entity_type
 
-      Federails::Configuration.entity_types[entity_type]
+      Federails::Configuration.actor_types[entity_type]
     end
 
     class << self
@@ -102,7 +102,7 @@ module Federails
 
         if Fediverse::Webfinger.local_user? parts
           actor = nil
-          Federails::Configuration.entity_types.each_value do |entity|
+          Federails::Configuration.actor_types.each_value do |entity|
             actor ||= entity[:class].find_by(entity[:username_field] => parts[:username])&.federails_actor
           end
           raise ActiveRecord::RecordNotFound if actor.nil?
