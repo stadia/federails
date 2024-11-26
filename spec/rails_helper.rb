@@ -37,10 +37,8 @@ ActiveRecord::Migrator.migrations_paths = [
 ]
 # Check for migration status
 begin
-  if ActiveRecord::Base.connection.migration_context.needs_migration?
-    # Try to migrate
-    ActiveRecord::Base.connection.migration_context.migrate
-  end
+  migration_context = ActiveRecord::MigrationContext.new ActiveRecord::Migrator.migrations_paths
+  migration_context.migrate if migration_context.needs_migration?
 rescue ActiveRecord::PendingMigrationError => e
   abort e.to_s.strip
 end
