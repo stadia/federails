@@ -15,11 +15,12 @@ module Fediverse
         handlers.each_pair do |klass, method|
           klass.send method, payload
         end
-        return unless handlers.empty?
+        return true unless handlers.empty?
 
         # FIXME: Fails silently
         # raise NotImplementedError
         Rails.logger.debug { "Unhandled activity type: #{payload['type']}" }
+        false
       end
 
       private
