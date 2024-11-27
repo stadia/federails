@@ -27,7 +27,13 @@
   <% end %>
   <% @actors.each do |actor| %>
     <tr>
-      <td><%= actor.name %></td>
+      <td>
+        <% if actor.tombstoned? %>
+          <del><%= actor.name %></del>
+        <% else %>
+          <%= actor.name %>
+        <% end %>
+      </td>
       <td><%= actor.username %></td>
       <td><%= actor.at_address %></td>
       <td><%= actor.local? %></td>
