@@ -34,6 +34,8 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 - `sleeping_king_studios-yard` repository has been renamed to `sleeping_king_studios-docs`. A gem 
   [is planned](https://github.com/sleepingkingstudios/sleeping_king_studios-docs/issues/53)
+- [#25](https://gitlab.com/experimentslabs/federails/-/issues/25) - `Actor#local?` now resolves with a new `local` flag 
+  on `Actor`, so it is now reliable.
 
 ### Maintenance
 

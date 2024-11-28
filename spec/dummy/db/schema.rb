@@ -57,6 +57,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_03_01_082500) do
     t.text "public_key"
     t.text "private_key"
     t.json "extensions"
+    t.boolean "local", default: false, null: false
     t.index ["entity_type", "entity_id"], name: "index_federails_actors_on_entity", unique: true
     t.index ["federated_url"], name: "index_federails_actors_on_federated_url", unique: true
     t.index ["uuid"], name: "index_federails_actors_on_uuid", unique: true

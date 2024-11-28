@@ -9,5 +9,6 @@ FactoryBot.define do
     followers_url { "#{federated_url}/followers" }
     followings_url { "#{federated_url}/followings" }
     profile_url { "https://example.com/users/#{federated_url.split('/').last}" }
+    local { false }
   end
 end

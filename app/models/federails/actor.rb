@@ -19,7 +19,7 @@ module Federails
     validates :followers_url, presence: { unless: :entity }
     validates :followings_url, presence: { unless: :entity }
     validates :profile_url, presence: { unless: :entity }
-    validates :entity_id, uniqueness: { scope: :entity_type }, if: :local?
+    validates :entity_id, uniqueness: { scope: :entity_type }, if: :entity_type
 
     belongs_to :entity, polymorphic: true, optional: true
     # FIXME: Handle this with something like undelete
@@ -30,11 +30,14 @@ module Federails
     has_many :followers, source: :actor, through: :following_followers
     has_many :follows, source: :target_actor, through: :following_follows
 
-    scope :local, -> { where(federated_url: nil) }
-    scope :distant, -> { where.not(federated_url: nil) }
+    scope :local, -> { where(local: true) }
+    scope :distant, -> { where(local: false) }
+
+    before_create :set_local
 
     def local?
-      attributes['federated_url'].nil?
+      # New actors may not have "local" set to true yet
+      local || entity_type.present?
     end
 
     def federated_url
@@ -197,6 +200,10 @@ module Federails
                      end,
         public_key:  rsa_key.public_key.to_pem,
       }
+    end
+
+    def set_local
+      self.local = entity_id.present?
     end
   end
 end
