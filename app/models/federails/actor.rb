@@ -9,6 +9,8 @@ module Federails
   # See also:
   #  - https://www.w3.org/TR/activitypub/#actor-objects
   class Actor < ApplicationRecord # rubocop:disable Metrics/ClassLength
+    class TombstonedError < StandardError; end
+
     include Federails::HasUuid
 
     validates :federated_url, presence: { unless: :entity }, uniqueness: { unless: :local? }
@@ -34,53 +36,55 @@ module Federails
 
     scope :local, -> { where(local: true) }
     scope :distant, -> { where(local: false) }
+    scope :tombstoned, -> { where.not(tombstoned_at: nil) }
+    scope :not_tombstoned, -> { where(tombstoned_at: nil) }
 
     def distant?
       !local?
     end
 
     def federated_url
-      local? ? Federails::Engine.routes.url_helpers.server_actor_url(self) : attributes['federated_url'].presence
+      use_entity_attributes? ? Federails::Engine.routes.url_helpers.server_actor_url(self) : attributes['federated_url'].presence
     end
 
     def username
-      return attributes['username'] unless local?
+      return attributes['username'] unless use_entity_attributes?
 
       entity.send(entity_configuration[:username_field]).to_s
     end
 
     def name
-      value = (entity.send(entity_configuration[:name_field]).to_s if local?)
+      value = (entity.send(entity_configuration[:name_field]).to_s if use_entity_attributes?)
 
       value || attributes['name'] || username
     end
 
     def server
-      local? ? Utils::Host.localhost : attributes['server']
+      use_entity_attributes? ? Utils::Host.localhost : attributes['server']
     end
 
     def actor_type
-      local? ? entity_configuration[:actor_type] : attributes['actor_type']
+      use_entity_attributes? ? entity_configuration[:actor_type] : attributes['actor_type']
     end
 
     def inbox_url
-      local? ? Federails::Engine.routes.url_helpers.server_actor_inbox_url(self) : attributes['inbox_url']
+      use_entity_attributes? ? Federails::Engine.routes.url_helpers.server_actor_inbox_url(self) : attributes['inbox_url']
     end
 
     def outbox_url
-      local? ? Federails::Engine.routes.url_helpers.server_actor_outbox_url(self) : attributes['outbox_url']
+      use_entity_attributes? ? Federails::Engine.routes.url_helpers.server_actor_outbox_url(self) : attributes['outbox_url']
     end
 
     def followers_url
-      local? ? Federails::Engine.routes.url_helpers.followers_server_actor_url(self) : attributes['followers_url']
+      use_entity_attributes? ? Federails::Engine.routes.url_helpers.followers_server_actor_url(self) : attributes['followers_url']
     end
 
     def followings_url
-      local? ? Federails::Engine.routes.url_helpers.following_server_actor_url(self) : attributes['followings_url']
+      use_entity_attributes? ? Federails::Engine.routes.url_helpers.following_server_actor_url(self) : attributes['followings_url']
     end
 
     def profile_url
-      return attributes['profile_url'].presence unless local?
+      return attributes['profile_url'].presence unless use_entity_attributes?
 
       method = entity_configuration[:profile_url_method]
       return Federails::Engine.routes.url_helpers.server_actor_url self unless method
@@ -93,7 +97,7 @@ module Federails
     end
 
     def short_at_address
-      local? ? "@#{username}" : at_address
+      use_entity_attributes? ? "@#{username}" : at_address
     end
 
     def acct_uri
@@ -111,6 +115,10 @@ module Federails
       raise("Entity not configured for #{entity_type}. Did you use \"acts_as_federails_actor\"?") unless Federails.actor_entity? entity_type
 
       Federails.actor_entity entity_type
+    end
+
+    def tombstoned?
+      tombstoned_at.present?
     end
 
     class << self
@@ -225,6 +233,10 @@ module Federails
                      end,
         public_key:  rsa_key.public_key.to_pem,
       }
+    end
+
+    def use_entity_attributes?
+      local? && !tombstoned?
     end
   end
 end
