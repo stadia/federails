@@ -80,3 +80,4 @@ With this configuration:
   `federated_url` for local content
 - When creating a new Message, a Fediverse "Create" activity for a Note will be created
 - When receiving a new Note from the Fediverse, a Message will be created (with its parent if it's an answer to another message)
+- When updating an existing Message, a Fediverse "Update" activity for the Note will be created

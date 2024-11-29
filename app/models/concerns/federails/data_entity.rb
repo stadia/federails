@@ -5,6 +5,7 @@ module Federails
   #
   # Once included, an activity will automatically be created upon
   #   - entity creation
+  #   - entity updates
   #
   # Also, when properly configured, a handler is registered to transform incoming objects and create entities accordingly.
   #
@@ -99,6 +100,7 @@ module Federails
 
       before_validation :set_federails_actor
       after_create :create_federails_activity
+      after_update :update_federails_activity
     end
 
     # Computed value for the federated URL
@@ -134,6 +136,13 @@ module Federails
       return unless local_federails_entity?
 
       Activity.create! actor: federails_actor, action: 'Create', entity: self
+    end
+
+    def update_federails_activity
+      ensure_federails_configuration!
+      return unless local_federails_entity?
+
+      Activity.create! actor: federails_actor, action: 'Update', entity: self
     end
 
     def ensure_federails_configuration!
