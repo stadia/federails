@@ -82,6 +82,15 @@ module Federails
 
         expect(Fixtures::Classes::FakeDataModel).to have_received(:handle_incoming_fediverse_data).once
       end
+
+      it 'successfully defines an Inbox hook for incoming Update activities' do
+        allow(Fixtures::Classes::FakeDataModel).to receive(:handle_incoming_fediverse_data)
+
+        Fediverse::Inbox.dispatch_request 'type' => 'Update', 'object' => { 'type' => 'TestThing' }
+        Fediverse::Inbox.dispatch_request 'type' => 'Update', 'object' => { 'type' => 'OtherThing' }
+
+        expect(Fixtures::Classes::FakeDataModel).to have_received(:handle_incoming_fediverse_data).once
+      end
     end
   end
 end

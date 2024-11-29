@@ -7,7 +7,8 @@ module Federails
   #   - entity creation
   #   - entity updates
   #
-  # Also, when properly configured, a handler is registered to transform incoming objects and create entities accordingly.
+  # Also, when properly configured, a handler is registered to transform incoming objects and create/update entities
+  # accordingly.
   #
   # ## Pre-requisites
   #
@@ -59,6 +60,7 @@ module Federails
                                                     with:                with
 
         Fediverse::Inbox.register_handler 'Create', handles, self, with
+        Fediverse::Inbox.register_handler 'Update', handles, self, with
       end
 
       # Instantiates a new instance from an ActivityPub object
