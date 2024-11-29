@@ -38,6 +38,7 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
   from local content, and database entries from Fediverse content. When configured:
   - "Create" activities will be created on data creation 
   - Incoming "Create" activities will be dispatched on supported models to create data locally 
+  - "Update" activities will be created on data update 
 - Data transformer for Notes: `Federails::DataTransformer::Note`, to ease transforming local data to Fediverse Notes
 - Server: new "published" controller to render published `Federails::DataEntity` as federated object. This controller 
   will answer to the `federated_url` generated for local content.
