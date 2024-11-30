@@ -22,7 +22,9 @@ module Fediverse
       #
       # @param payload [Hash] Dereferenced activity
       def dispatch_request(payload)
-        handlers = get_handlers(payload['type'], payload['object'].is_a?(Hash) ? payload.dig('object', 'type') : nil)
+        payload['object'] = Fediverse::Request.dereference(payload['object']) if payload.key? 'object'
+
+        handlers = get_handlers(payload['type'], payload.dig('object', 'type'))
         handlers.each_pair do |klass, method|
           klass.send method, payload
         end
@@ -51,7 +53,7 @@ module Fediverse
       end
 
       def handle_accept_request(activity)
-        original_activity = Request.get(activity['object'])
+        original_activity = Request.dereference(activity['object'])
 
         actor        = Federails::Actor.find_or_create_by_object original_activity['actor']
         target_actor = Federails::Actor.find_or_create_by_object original_activity['object']

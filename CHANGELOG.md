@@ -33,6 +33,7 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 ### Added
 
 - `Federails::Actor`: Add `.distant` scope to select distant actors
+- `Federails::Request`: Add `.dereference` method to... dereference an object
 
 ## [0.4.0] 2024-12-02
 

@@ -22,6 +22,20 @@ module Fediverse
       def get(id)
         new(id).get
       end
+
+      # Dereferences a value
+      # @param value [String, Hash]
+      # @return [Hash]
+      def dereference(value)
+        case value
+        when String
+          get(value)
+        when Hash
+          value
+        else
+          raise "Unhandled object type #{value.class}"
+        end
+      end
     end
 
     private

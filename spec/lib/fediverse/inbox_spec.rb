@@ -39,7 +39,7 @@ module Fediverse
       end
 
       it 'accepts the following request' do
-        allow(Fediverse::Request).to receive(:get).and_return following
+        allow(Fediverse::Request).to receive(:dereference).and_return following
         described_class.send(:handle_accept_request, payload)
 
         local_following.reload
