@@ -135,6 +135,27 @@ actor.following
 #...
 ```
 
+## Data models
+
+To ease the work of publishing data to the Fediverse and saving content from it, Federails provides a concern to include
+in the data models:
+
+
+```rb
+class Note < ApplicationRecord
+  include Federails::DataEntity
+  
+  acts_as_federails_data
+end
+```
+
+For options, pre-requisites, etc..., refer to the documentation of `Federails::DataEntity.acts_as_federails_data`.
+
+You can check the "Examples" for implementation samples 
+
+You also can check the `Post` and `Comment` models from the `dummy` app (in source code: `spec/dummy`): they are both 
+configured to handle Note and transform them as Post/Comment. 
+
 ## Using the Federails client
 
 Federails comes with a client, enabled by default, that provides basic views to display and interact with Federails data,

@@ -77,6 +77,14 @@ module Federails
     def self.register_actor_class(klass, config = {})
       @@actor_types[klass.name] = config.merge(class: klass)
     end
+
+    # List of data types (classes using Federails::DataEntity)
+    mattr_reader :data_types
+    @@data_types = {}
+
+    def self.register_data_type(klass, config = {})
+      @@data_types[klass.name] = config.merge(class: klass)
+    end
   end
   # rubocop:enable Style/ClassVars
 end

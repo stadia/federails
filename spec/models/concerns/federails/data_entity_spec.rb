@@ -1,0 +1,54 @@
+require 'rails_helper'
+
+module Federails
+  RSpec.describe DataEntity do
+    let(:user) { FactoryBot.create :user }
+
+    describe '#federated_url' do
+      let(:instance) { Fixtures::Classes::FakeDataModel.create! federails_actor: user.federails_actor, title: 'abc', content: 'def' }
+
+      context 'when present' do
+        before do
+          instance.update! federated_url: 'http://example.com/notes/123'
+        end
+
+        it 'returns the record value' do
+          expect(instance.federated_url).to eq 'http://example.com/notes/123'
+        end
+      end
+
+      context 'when absent' do
+        it 'generates a value from the configured route' do
+          expect(instance.federated_url).to eq 'not_yet_implemented'
+        end
+      end
+    end
+
+    describe '#acts_as_federails_data' do
+      it 'sets the class configuration in the Federails configuration' do
+        expect(Federails::Configuration.data_types).to have_key 'Fixtures::Classes::FakeDataModel'
+      end
+    end
+
+    describe 'scopes' do
+      before do
+        2.times do
+          Fixtures::Classes::FakeArticleDataModel.create! title: 'title', content: 'content', user: user
+        end
+        Fixtures::Classes::FakeArticleDataModel.create! federails_actor: FactoryBot.create(:distant_actor), federated_url: 'https://somewhere/the_note', title: 'title', content: 'content'
+      end
+
+      describe '.local_federails_entities' do
+        it 'returns only local entities' do
+          expect(Fixtures::Classes::FakeArticleDataModel.local_federails_entities.count).to eq 2
+        end
+      end
+
+      describe '.distant_federails_entities' do
+        it 'returns only distant entities' do
+          expect(Fixtures::Classes::FakeArticleDataModel.distant_federails_entities.count).to eq 1
+        end
+      end
+    end
+  end
+end

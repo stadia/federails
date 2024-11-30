@@ -34,6 +34,8 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 - `Federails::Actor`: Add `.distant` scope to select distant actors
 - `Federails::Request`: Add `.dereference` method to... dereference an object
+- New feature: Federated entities. This allows model configuration to ease the process of creating Fediverse entities 
+  from local content, and database entries from Fediverse content 
 
 ## [0.4.0] 2024-12-02
 
