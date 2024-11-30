@@ -45,5 +45,9 @@ Federails::Engine.routes.draw do
       resources :activities, only: [:show]
       resources :followings, only: [:show]
     end
+
+    scope :published do
+      get ':publishable_type/:id', to: 'published#show', as: :published
+    end
   end
 end

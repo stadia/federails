@@ -44,5 +44,18 @@ class Message < ApplicationRecord
   belongs_to :user, optional: true # Change here 
   belongs_to :parent, optional: true, class_name: 'Comment', inverse_of: :answers
   has_many :answers, class_name: 'Comment', foreign_key: :parent_id  
+   
+  # Transforms the instance to a valid ActivityPub object   
+  # @return [Hash]
+  def to_activitypub_object
+    Federails::DataTransformer::Note.to_federation self,
+                                                   content:   content,
+                                                   inReplyTo: parent?.federated_url
+  end
 end
 ```
+
+With this configuration:
+- GET requests to  `/federation/published/messages/:id` will return the Message as a Note. This URL will also be used as
+  `federated_url` for local content
+- When creating a new Message, a Fediverse "Create" activity for a Note will be created

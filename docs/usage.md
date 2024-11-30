@@ -68,6 +68,7 @@ With `routes_path = 'federation'`, routes will be:
 /federation/actors/:actor_id/followings/:id(.:format)
 /federation/actors/:actor_id/notes/:id(.:format)
 /federation/actors/:id(.:format)
+/federation/published/:publishable_type/:id(.:format)
 ...
 ```
 

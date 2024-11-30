@@ -19,7 +19,7 @@ module Federails
 
       context 'when absent' do
         it 'generates a value from the configured route' do
-          expect(instance.federated_url).to eq 'not_yet_implemented'
+          expect(instance.federated_url).to eq Federails::Engine.routes.url_helpers.server_published_url(publishable_type: 'fake_data', id: instance.id)
         end
       end
     end
@@ -47,6 +47,18 @@ module Federails
       describe '.distant_federails_entities' do
         it 'returns only distant entities' do
           expect(Fixtures::Classes::FakeArticleDataModel.distant_federails_entities.count).to eq 1
+        end
+      end
+    end
+
+    describe 'hooks' do
+      describe 'after_create: create_federails_activity' do
+        context 'with default values' do
+          let(:instance) { Fixtures::Classes::FakeDataModel.new FactoryBot.attributes_for(:post, user_id: user.id) }
+
+          it 'creates an activity' do
+            expect { instance.save! }.to change(Federails::Activity.where(action: 'Create'), :count).by 1
+          end
         end
       end
     end
