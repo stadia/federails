@@ -10,14 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_11_29_062133) do
+ActiveRecord::Schema[7.1].define(version: 2024_11_29_104734) do
   create_table "comments", force: :cascade do |t|
     t.text "content", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.integer "post_id"
     t.integer "parent_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "federated_url"
+    t.integer "federails_actor_id"
+    t.index ["federails_actor_id"], name: "index_comments_on_federails_actor_id"
     t.index ["parent_id"], name: "index_comments_on_parent_id"
     t.index ["post_id"], name: "index_comments_on_post_id"
     t.index ["user_id"], name: "index_comments_on_user_id"
@@ -75,9 +78,12 @@ ActiveRecord::Schema[7.1].define(version: 2024_11_29_062133) do
   create_table "posts", force: :cascade do |t|
     t.string "title", null: false
     t.text "content", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "federated_url"
+    t.integer "federails_actor_id"
+    t.index ["federails_actor_id"], name: "index_posts_on_federails_actor_id"
     t.index ["user_id"], name: "index_posts_on_user_id"
   end
 
@@ -94,10 +100,12 @@ ActiveRecord::Schema[7.1].define(version: 2024_11_29_062133) do
   end
 
   add_foreign_key "comments", "comments", column: "parent_id"
+  add_foreign_key "comments", "federails_actors"
   add_foreign_key "comments", "posts"
   add_foreign_key "comments", "users"
   add_foreign_key "federails_activities", "federails_actors", column: "actor_id"
   add_foreign_key "federails_followings", "federails_actors", column: "actor_id"
   add_foreign_key "federails_followings", "federails_actors", column: "target_actor_id"
+  add_foreign_key "posts", "federails_actors"
   add_foreign_key "posts", "users"
 end
