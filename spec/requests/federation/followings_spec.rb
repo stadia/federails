@@ -13,16 +13,6 @@ require 'rails_helper'
 # sticking to rails and rspec-rails APIs to keep things simple and stable.
 
 RSpec.describe '/federation/followings', type: :request do
-  # Federation::Following. As you add validations to Federation::Following, be sure to
-  # adjust the attributes here as well.
-  let(:valid_attributes) do
-    skip('Add a hash of attributes valid for your model')
-  end
-
-  let(:invalid_attributes) do
-    skip('Add a hash of attributes invalid for your model')
-  end
-
   describe 'GET /show' do
     let(:actor) { FactoryBot.create(:user).federails_actor }
     let(:target_actor) { FactoryBot.create(:user).federails_actor }
