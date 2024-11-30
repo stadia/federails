@@ -14,8 +14,17 @@ RSpec.describe Federails::Server::PublishedController, type: :acceptance do
 
   entity :publishable_entity,
          '@context': { type: :string, description: 'JSON-LD contexts' },
-         id:         { type: :string, description: 'Federated ID of the DataEntity' },
-         actor:      { type: :string, description: 'Federated ID of the creator' }
+         id:           { type: :string, description: 'Federated ID of the DataEntity' },
+         actor:        { type: :string, description: 'Federated ID of the creator' },
+         type:         { type: :string, description: 'Activity type' },
+         to:           { type: :array, description: 'List of targeted actors', of: :string },
+         cc:           { type: :array, description: 'Complementary list', of: :string },
+         # Note specific data
+         name:         { type: :string, description: 'Note name/title' },
+         content:      { type: :string, description: 'Note content' },
+         attributedTo: { type: :string, description: 'Attribution ID' },
+         published:    { type: :datetime, description: 'Creation date' },
+         updated:      { type: :datetime, description: 'Update date' }
 
   parameters :publishable_path_params,
              publishable_type: { type: :string, description: 'DataEntity type, same as configured with `:route_path_segment`' },
