@@ -1,3 +1,5 @@
+require 'federails/data_transformer/note'
+
 module Fixtures
   module Classes
     class FakeDataModel < ApplicationRecord
