@@ -37,7 +37,8 @@ end
 
 class Message < ApplicationRecord
   include Federails::DataEntity
-  acts_as_federails_data actor_entity_method: :user
+  acts_as_federails_data handles: 'Note',
+                         actor_entity_method: :user
 
   validates :content, presence: true, allow_blank: false
 
@@ -52,6 +53,25 @@ class Message < ApplicationRecord
                                                    content:   content,
                                                    inReplyTo: parent?.federated_url
   end
+
+  # Takes a Note hash and returns the attributes for a valid Message
+  #
+  # @param hash [Hash] 
+  #
+  # @return [Hash] Valid Hash 
+  def self.from_activitypub_object(hash)
+    # Gets the timestamps values with a helper
+    attrs = Federails::Utils::Object.timestamp_attributes(hash)
+                                    # Complete attributes
+                                    .merge federated_url: hash['id'],
+                                           content:       hash['content']
+
+    # Find the parent if message is an answer
+    parent = Federails::Utils::Object.find_or_create! hash['inReplyTo'] if hash['inReplyTo'].present? 
+    attrs[:parent] = parent if parent
+
+    attrs
+  end
 end
 ```
 
@@ -59,3 +79,4 @@ With this configuration:
 - GET requests to  `/federation/published/messages/:id` will return the Message as a Note. This URL will also be used as
   `federated_url` for local content
 - When creating a new Message, a Fediverse "Create" activity for a Note will be created
+- When receiving a new Note from the Fediverse, a Message will be created (with its parent if it's an answer to another message)

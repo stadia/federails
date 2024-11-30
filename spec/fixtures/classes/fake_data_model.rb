@@ -4,7 +4,8 @@ module Fixtures
       self.table_name = 'posts'
       include Federails::DataEntity
 
-      acts_as_federails_data actor_entity_method: :user,
+      acts_as_federails_data handles:             'TestThing',
+                             actor_entity_method: :user,
                              route_path_segment:  :fake_data
 
       belongs_to :user, optional: true

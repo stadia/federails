@@ -1,8 +1,12 @@
+require 'fediverse/inbox'
+
 module Federails
   # Model concern to include in models for which data is pushed to the Fediverse and comes from the Fediverse.
   #
   # Once included, an activity will automatically be created upon
   #   - entity creation
+  #
+  # Also, when properly configured, a handler is registered to transform incoming objects and create entities accordingly.
   #
   # ## Pre-requisites
   #
@@ -34,10 +38,14 @@ module Federails
       # @param actor_entity_method [Symbol] Method returning an object responding to 'federails_actor', for local content
       # @param route_path_segment [Symbol] Segment used in Federails routes to display the ActivityPub representation.
       #   Defaults to the pluralized, underscored class name
+      # @param handles [String] Type of ActivityPub object handled by this entity type
+      # @param with [Symbol] Self class method that will handle incoming objects. Defaults to +:handle_incoming_fediverse_data+
       #
       # @example
-      #   acts_as_federails_data actor_entity_method: :user, route_path_segment: :articles
+      #   acts_as_federails_data handles: 'Note', with: :note_handler, route_path_segment: :articles, actor_entity_method: :user
       def acts_as_federails_data(
+        handles:,
+        with: :handle_incoming_fediverse_data,
         route_path_segment: nil,
         actor_entity_method: nil
       )
@@ -45,7 +53,41 @@ module Federails
 
         Federails::Configuration.register_data_type self,
                                                     route_path_segment:  route_path_segment,
-                                                    actor_entity_method: actor_entity_method
+                                                    actor_entity_method: actor_entity_method,
+                                                    handles:             handles,
+                                                    with:                with
+
+        Fediverse::Inbox.register_handler 'Create', handles, self, with
+      end
+
+      # Instantiates a new instance from an ActivityPub object
+      #
+      # @param activitypub_object [Hash]
+      #
+      # @return [self]
+      def new_from_activitypub_object(activitypub_object)
+        new from_activitypub_object(activitypub_object)
+      end
+
+      # Creates or updates entity based on the ActivityPub activity
+      #
+      # @param activity_hash_or_id [Hash, String] Dereferenced activity hash or ID
+      #
+      # @return [self]
+      def handle_incoming_fediverse_data(activity_hash_or_id)
+        activity = Fediverse::Request.dereference(activity_hash_or_id)
+        object = Fediverse::Request.dereference(activity['object'])
+
+        entity = Federails::Utils::Object.find_or_create!(object)
+
+        if activity['type'] == 'Update'
+          entity.assign_attributes from_activitypub_object(object)
+
+          # Use timestamps from attributes
+          entity.save! touch: false
+        end
+
+        entity
       end
     end
 
