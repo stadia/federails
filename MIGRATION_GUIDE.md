@@ -2,6 +2,8 @@
 
 ## Next
 
+## From 0.3.0 to 0.4.0
+
 - Relation to Federails actor has changed in related entities, from `actor` to `federails_actor`. Update your usages accordingly.
 - Method `create_actor`, included on related entities has been renamed to `create_federails_actor`. Update your usages accordingly.
 - Rename `Federails::Entity` to `Federails::ActorEntity`.
