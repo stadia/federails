@@ -42,6 +42,9 @@ module Federails
       #   Defaults to the pluralized, underscored class name
       # @param handles [String] Type of ActivityPub object handled by this entity type
       # @param with [Symbol] Self class method that will handle incoming objects. Defaults to +:handle_incoming_fediverse_data+
+      # @param filter_method [Symbol] Self class method that determines if an incoming object should be handled. Note
+      #   that the first model for which this method returns true will be used. If left empty, the model CAN be selected,
+      #   so define them if many models handle the same data type.
       #
       # @example
       #   acts_as_federails_data handles: 'Note', with: :note_handler, route_path_segment: :articles, actor_entity_method: :user
@@ -49,7 +52,8 @@ module Federails
         handles:,
         with: :handle_incoming_fediverse_data,
         route_path_segment: nil,
-        actor_entity_method: nil
+        actor_entity_method: nil,
+        filter_method: nil
       )
         route_path_segment ||= name.pluralize.underscore
 
@@ -57,7 +61,8 @@ module Federails
                                                     route_path_segment:  route_path_segment,
                                                     actor_entity_method: actor_entity_method,
                                                     handles:             handles,
-                                                    with:                with
+                                                    with:                with,
+                                                    filter_method:       filter_method
 
         Fediverse::Inbox.register_handler 'Create', handles, self, with
         Fediverse::Inbox.register_handler 'Update', handles, self, with

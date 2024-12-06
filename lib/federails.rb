@@ -56,6 +56,29 @@ module Federails
       Configuration.data_types.key? class_or_instance_name(class_or_instance)
     end
 
+    # Finds configured data types from ActivityPub type
+    #
+    # @param type [String] ActivityPub object type, as configured with `:handles`
+    # @return [Array] List of data entity configurations
+    #
+    # @example
+    #   data_entity_handlers_for 'Note'
+    def data_entity_handlers_for(type)
+      Federails::Configuration.data_types.select { |_, v| v[:handles] == type }.map(&:last)
+    end
+
+    # Finds configured data type from route path segment
+    #
+    # @param route_path_segment [Symbol, String] Route path segment, as configured with `:route_path_segment`
+    # @return [Hash, nil] Entity configuration
+    #
+    # @example
+    #   data_entity_handled_on :articles
+    def data_entity_handled_on(route_path_segment)
+      route_path_segment = route_path_segment.to_sym
+      Federails::Configuration.data_types.find { |_, v| v[:route_path_segment] == route_path_segment }&.last
+    end
+
     # @return [Hash] The configuration for the given data entity
     def data_entity_configuration(class_or_instance)
       klass = class_or_instance_name(class_or_instance)

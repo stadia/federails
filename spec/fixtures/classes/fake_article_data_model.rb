@@ -7,7 +7,8 @@ module Fixtures
 
       acts_as_federails_data handles:             'CustomNote',
                              actor_entity_method: :user,
-                             route_path_segment:  :articles
+                             route_path_segment:  :articles,
+                             filter_method:       :handle_incoming_note?
 
       belongs_to :user, optional: true
 
@@ -23,6 +24,12 @@ module Fixtures
           content:         hash['content'],
           federails_actor: Federails::Actor.find_by_federation_url(hash['actor']),
         }
+      end
+
+      def self.handle_incoming_note?(_activitypub_hash)
+        # Perform checks on incoming hash to determine if it needs to be handled by this class
+        # and return a boolean.
+        true
       end
     end
   end
