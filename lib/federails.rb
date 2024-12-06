@@ -1,11 +1,14 @@
 require 'federails/version'
 require 'federails/engine'
 require 'federails/configuration'
+require 'federails/utils/object'
 
 # rubocop:disable Style/ClassVars
 
 # This module includes classes and methods related to Ruby on Rails: engine configuration, models, controllers, etc.
 module Federails
+  DEFAULT_DATA_FILTER_METHOD = :handle_federated_object?
+
   mattr_reader :configuration
   @@configuration = Configuration
 
@@ -65,6 +68,19 @@ module Federails
     #   data_entity_handlers_for 'Note'
     def data_entity_handlers_for(type)
       Federails::Configuration.data_types.select { |_, v| v[:handles] == type }.map(&:last)
+    end
+
+    # Finds the configured handler for a given ActivityPub object
+    #
+    # @param hash [Hash] ActivityPub object hash
+    #
+    # @return [Hash, nil] Data entity configuration
+    def data_entity_handler_for(hash)
+      data_entity_handlers_for(hash['type']).find do |handler|
+        return true if !handler[:filter_method] && !handler[:class].respond_to?(DEFAULT_DATA_FILTER_METHOD)
+
+        handler[:class].send(handler[:filter_method] || DEFAULT_DATA_FILTER_METHOD, hash)
+      end
     end
 
     # Finds configured data type from route path segment
