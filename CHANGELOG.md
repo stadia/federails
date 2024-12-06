@@ -45,6 +45,11 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 - Data transformer for Notes: `Federails::DataTransformer::Note`, to ease transforming local data to Fediverse Notes
 - Server: new "published" controller to render published `Federails::DataEntity` as federated object. This controller 
   will answer to the `federated_url` generated for local content.
+- New helper module with methods to find local data from an ActivityPub object: `Federails::Utils::Object`:
+  - `find_or_initialize(object_or_id)` returns nil when object is not found remotely
+  - `find_or_initialize!(object_or_id)` raises an error when object is not found remotely
+  - `find_or_create!(object_or_id)` raises an error when object is not found remotely
+  - `timestamp_attributes(hash)` returns hash with `created_at`/`updated_at` attributes from the ActivityPub object
 
 ## [0.4.0] 2024-12-02
 
