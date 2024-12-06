@@ -24,17 +24,15 @@ module Fediverse
       end
 
       # Dereferences a value
+      #
       # @param value [String, Hash]
-      # @return [Hash]
+      #
+      # @return [Hash, nil]
       def dereference(value)
-        case value
-        when String
-          get(value)
-        when Hash
-          value
-        else
-          raise "Unhandled object type #{value.class}"
-        end
+        return value if value.is_a? Hash
+        return get(value) if value.is_a? String
+
+        raise "Unhandled object type #{value.class}"
       end
     end
 
