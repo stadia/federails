@@ -1,0 +1,55 @@
+---
+title: Federails
+#email: your-email@example.com
+description: >-
+  Federails is an engine that brings ActivityPub to Ruby on Rails application.
+baseurl: "/federails" # the subpath of your site, e.g. /blog
+url: "https://experimentslabs.gitlab.io/"
+
+# Build settings
+theme: just-the-docs
+
+defaults:
+  -
+    scope:
+      path: "" # an empty string here means all files in the project
+    values:
+      layout: page
+
+# Exclude from processing.
+# The following items will not be processed, by default.
+# Any item listed under the `exclude:` key here will be automatically added to
+# the internal "default list".
+#
+# Excluded items can be processed by explicitly listing the directories or
+# their entries' file path in the `include:` list.
+#
+# exclude:
+#   - .sass-cache/
+#   - .jekyll-cache/
+#   - gemfiles/
+#   - Gemfile
+#   - Gemfile.lock
+#   - node_modules/
+#   - vendor/bundle/
+#   - vendor/cache/
+#   - vendor/gems/
+#   - vendor/ruby/
+
+# Collections configuration
+collections:
+  classes:    # code reference
+    output: false
+  constants:  # code reference
+    output: false
+  methods:    # code reference
+    output: false
+  modules:    # code reference
+    output: false
+  namespaces: # code reference
+    output: false
+
+just_the_docs:
+  collections:
+    code_reference:
+      name: Code reference

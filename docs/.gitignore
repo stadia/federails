@@ -1,0 +1,15 @@
+.jekyll-cache
+
+# Generated site
+/_site/
+
+# Files generated with "bundle exec thor docs:generate"
+# or                   "bundle exec thor docs:update"
+/_classes/
+/_constants/
+/_methods/
+/_modules/
+/_namespaces/
+
+/reference/**/*
+!/reference/index.md
