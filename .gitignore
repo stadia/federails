@@ -13,3 +13,6 @@
 rspec_examples.txt
 
 /coverage
+
+# Generated documentation site
+/public

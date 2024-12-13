@@ -1,0 +1,6 @@
+#!/bin/bash
+
+set -xe
+
+bundle exec thor docs:generate
+bundle exec jekyll build --source docs --destination public

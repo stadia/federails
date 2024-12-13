@@ -13,3 +13,9 @@
 
 /reference/**/*
 !/reference/index.md
+
+# Federails files
+/CHANGELOG.md
+/index.md
+/LICENSE.md
+/MIGRATION_GUIDE.md

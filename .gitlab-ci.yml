@@ -4,6 +4,7 @@ image: ruby:3.1
 stages:
   - prepare
   - test
+  - deploy
 
 cache: &dependencies
   untracked: true
@@ -19,6 +20,7 @@ before_script:
   - bundle --version
   - bundle config set --local deployment 'true'
   - bundle config set --local jobs $(nproc)
+  - bundle config set --local without ':doc'
   - bundle install --quiet
 
 # Bundle stage
@@ -58,3 +60,22 @@ rspec:
     - bundle exec rspec
   dependencies:
     - bundle
+
+# Gitlab pages
+# ======================================
+pages:
+  stage: deploy
+  rules:
+    - if: $CI_COMMIT_TAG
+  script:
+    # This step should be removed for Ruby > 3.1
+    # See: https://github.com/jekyll/jekyll/issues/9563
+    - gem update --system
+    - bundle config unset --local without
+    - bundle install --quiet
+    - .gitlab/scripts/copy_documentation_files
+    - .gitlab/scripts/build_documentation
+  artifacts:
+    paths:
+      - public
+
