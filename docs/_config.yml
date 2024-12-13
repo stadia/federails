@@ -53,3 +53,12 @@ just_the_docs:
   collections:
     code_reference:
       name: Code reference
+
+# Aux links for the upper right navigation
+aux_links:
+  Community chat:
+    - https://matrix.to/#/#federails:matrix.org
+  Code repository/issues:
+    - https://gitlab.com/experimentslabs/federails
+# Makes Aux links open in a new tab. Default is false
+aux_links_new_tab: true
