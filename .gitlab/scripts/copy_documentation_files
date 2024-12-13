@@ -2,14 +2,30 @@
 
 set -xe
 
+set_title_and_order() {
+  if [[ -n $3 ]];then
+    sed -i "1s/^/---\ntitle: $2\nnav_order: $3\n---\n\n/" "$1"
+  else
+    sed -i "1s/^/---\ntitle: $2\n---\n\n/" "$1"
+  fi
+}
+
+replace_md_links(){
+  sed -i 's/.md)/)/' "$1"
+}
+
 cp README.md docs/index.md
 sed -i '1s/^/---\n---\n\n/' docs/index.md
+replace_md_links docs/index.md
 
 cp CHANGELOG.md docs/
-sed -i '1s/^/---\ntitle: Changelog\nnav_order: 98\n---\n\n/' docs/CHANGELOG.md
+set_title_and_order docs/CHANGELOG.md Changelog 98
+replace_md_links docs/CHANGELOG.md
 
 cp MIGRATION_GUIDE.md docs/
-sed -i '1s/^/---\ntitle: Migration guide\nnav_order: 99\n---\n\n/' docs/MIGRATION_GUIDE.md
+set_title_and_order docs/MIGRATION_GUIDE.md "Migration guide" 99
+replace_md_links docs/MIGRATION_GUIDE.md
 
 cp LICENSE docs/LICENSE.md
-sed -i '1s/^/---\ntitle: License\nnav_order: 100\n---\n\n/' docs/LICENSE.md
+set_title_and_order docs/LICENSE.md License 100
+replace_md_links docs/LICENSE.md
