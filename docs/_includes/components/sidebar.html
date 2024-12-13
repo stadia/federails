@@ -12,6 +12,7 @@
 <div class="side-bar">
   <div class="site-header" role="banner">
     <a href="{{ '/' | relative_url }}" class="site-title lh-tight">{% include title.html %}</a>
+    <small class="label label-green fw-700">v{{ site.data['current_version'] }}</small>
     <button id="menu-button" class="site-button btn-reset" aria-label="Toggle menu" aria-pressed="false">
       <svg viewBox="0 0 24 24" class="icon" aria-hidden="true"><use xlink:href="#svg-menu"></use></svg>
     </button>
