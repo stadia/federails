@@ -11,6 +11,10 @@ module Jekyll
 
       "#{namespace}#{name}"
     end
+
+    def kept_reference_path?(path)
+      !CodeReferenceMetas.ignore_path?(path)
+    end
   end
 end
 

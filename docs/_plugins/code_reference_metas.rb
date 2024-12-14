@@ -16,6 +16,7 @@ module Jekyll
 
       site.pages.each do |page|
         next unless reference_page? page
+        next if CodeReferenceMetas.ignore_path? page.path
 
         add_metas(page)
 
@@ -28,6 +29,14 @@ module Jekyll
 
       # Add the virtual collection
       site.collections[COLLECTION_NAME] = collection
+    end
+
+    def self.ignore_path?(path)
+      return false unless path
+
+      path.match?(%r{federails/(client|server|application-).*(controller|policy|policy/scope|job|mailer|record)(.md)?$}) ||
+        path.match?(%r{federails/[^/]+(generator|policy|job)(.md)?$}) ||
+        path.match?(%r{federails/(engine|server|client)(.md)?$})
     end
 
     private
