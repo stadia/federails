@@ -7,6 +7,4 @@
 {% endfor %}
 ## Constructor
 {% include reference/method.md name="initialize" inherited=inherited path=path type="instance" %}
-
-[Back To Top](#)
 {% endif %}

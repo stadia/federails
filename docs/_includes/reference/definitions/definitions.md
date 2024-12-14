@@ -18,6 +18,4 @@ Modules
   {% unless forloop.last %}, {% endunless %}
   {%- endfor %}
 {% endif %}
-
-[Back To Top](#)
 {% endif %}
