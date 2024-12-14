@@ -1,0 +1,15 @@
+// Custom classes for reference page
+.reference{
+  // Methods names used as section title
+  &__method-title {
+    code {
+      display: block;
+      padding-top: .3rem;
+      padding-bottom: .3rem;
+
+      &:not(:first-child) {
+        margin-top: 0.2rem;
+      }
+    }
+  }
+}

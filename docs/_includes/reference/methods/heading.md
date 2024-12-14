@@ -2,10 +2,10 @@
 {% capture abstract %}{% if include.method.metadata.abstract %} <small>(abstract)</small>{% endif %}{% endcapture %}
 {% capture deprecated %}{% if include.method.metadata.deprecated %} <small>(deprecated)</small>{% endif %}{% endcapture %}
 
-<h3>
+<h3 class="reference__method-title">
   {% if include.method.overloads.size > 0 %}
   {% for overload in method.overloads %}
-  <code>{{ char }}{{ overload.signature }} => {% include reference/methods/return_types.md method=overload -%}{{ abstract }}{{ deprecated }}</code>{% unless forloop.last %}<br />{% endunless %}
+  <code>{{ char }}{{ overload.signature }} => {% include reference/methods/return_types.md method=overload -%}{{ abstract }}{{ deprecated }}</code>{% unless forloop.last %}{% endunless %}
   {%- endfor -%}
   {%- else -%}
   <code>{{ char }}{{ include.method.signature }} => {% include reference/methods/return_types.md method=include.method -%}{{ abstract }}{{ deprecated }}</code>
