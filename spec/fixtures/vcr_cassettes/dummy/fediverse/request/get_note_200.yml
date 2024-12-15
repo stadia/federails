@@ -1,0 +1,84 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://mamot.fr/users/mtancoigne/statuses/113741447018463971
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v2.9.0
+      Content-Type:
+      - application/json
+      Accept:
+      - application/json
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      date:
+      - Mon, 30 Dec 2024 13:41:35 GMT
+      content-type:
+      - application/activity+json; charset=utf-8
+      content-length:
+      - '2655'
+      connection:
+      - keep-alive
+      server:
+      - Mastodon
+      x-frame-options:
+      - DENY
+      x-content-type-options:
+      - nosniff
+      x-xss-protection:
+      - '0'
+      referrer-policy:
+      - same-origin
+      vary:
+      - Accept, Accept-Language, Cookie
+      link:
+      - <https://mamot.fr/users/mtancoigne/statuses/113741447018463971>; rel="alternate";
+        type="application/activity+json"
+      cache-control:
+      - max-age=180, public
+      etag:
+      - W/"99847142c0a9ac35f130bf03b92bfc2f"
+      content-security-policy:
+      - 'base-uri ''none''; default-src ''none''; frame-ancestors ''none''; font-src
+        ''self'' https://mamot.fr; img-src ''self'' data: blob: https://mamot.fr https://static.mamot.fr;
+        style-src ''self'' https://mamot.fr ''nonce-LKPT+7JWegjQd7fgbm3vGw==''; media-src
+        ''self'' data: https://mamot.fr https://static.mamot.fr; manifest-src ''self''
+        https://mamot.fr; form-action ''none''; child-src ''self'' blob: https://mamot.fr;
+        worker-src ''self'' blob: https://mamot.fr; connect-src ''self'' data: blob:
+        https://mamot.fr https://static.mamot.fr wss://mamot.fr; script-src ''self''
+        https://mamot.fr ''wasm-unsafe-eval''; frame-src ''self'' https:'
+      x-request-id:
+      - 19a25ccb-4fb4-4a43-bd43-294a83456b57
+      x-runtime:
+      - '0.017405'
+      strict-transport-security:
+      - max-age=63072000; includeSubDomains, max-age=15552000; preload
+      x-cached:
+      - HIT
+      alt-svc:
+      - h2="mamoteqvcadrmfs6ryykna4wpxhtsuzbpt4z7lxnqvx3qtse5xmk2fqd.onion:443"; ma=86400;
+        persist=1
+    body:
+      encoding: UTF-8
+      string: '{"@context":["https://www.w3.org/ns/activitystreams",{"ostatus":"http://ostatus.org#","atomUri":"ostatus:atomUri","inReplyToAtomUri":"ostatus:inReplyToAtomUri","conversation":"ostatus:conversation","sensitive":"as:sensitive","toot":"http://joinmastodon.org/ns#","votersCount":"toot:votersCount"}],"id":"https://mamot.fr/users/mtancoigne/statuses/113741447018463971","type":"Note","summary":null,"inReplyTo":null,"published":"2024-12-30T11:05:47Z","url":"https://mamot.fr/@mtancoigne/113741447018463971","attributedTo":"https://mamot.fr/users/mtancoigne","to":["https://www.w3.org/ns/activitystreams#Public"],"cc":["https://mamot.fr/users/mtancoigne/followers","https://mastodon.me.uk/users/Floppy"],"sensitive":false,"atomUri":"https://mamot.fr/users/mtancoigne/statuses/113741447018463971","inReplyToAtomUri":null,"conversation":"tag:mamot.fr,2024-12-30:objectId=192141654:objectType=Conversation","content":"\u003cp\u003eHello
+        \u003cspan class=\"h-card\" translate=\"no\"\u003e\u003ca href=\"https://mastodon.me.uk/@Floppy\"
+        class=\"u-url mention\"\u003e@\u003cspan\u003eFloppy\u003c/span\u003e\u003c/a\u003e\u003c/span\u003e
+        !\u003c/p\u003e\u003cp\u003eI\u0026#39;m writing a test for Federails and
+        I need a federated Note with a reply, and a reply from me to the first reply...
+        \u003c/p\u003e\u003cp\u003eAre you OK to reply to this and have the Note and
+        replies versioned in the VCR cassettes?\u003c/p\u003e","contentMap":{"en":"\u003cp\u003eHello
+        \u003cspan class=\"h-card\" translate=\"no\"\u003e\u003ca href=\"https://mastodon.me.uk/@Floppy\"
+        class=\"u-url mention\"\u003e@\u003cspan\u003eFloppy\u003c/span\u003e\u003c/a\u003e\u003c/span\u003e
+        !\u003c/p\u003e\u003cp\u003eI\u0026#39;m writing a test for Federails and
+        I need a federated Note with a reply, and a reply from me to the first reply...
+        \u003c/p\u003e\u003cp\u003eAre you OK to reply to this and have the Note and
+        replies versioned in the VCR cassettes?\u003c/p\u003e"},"attachment":[],"tag":[{"type":"Mention","href":"https://mastodon.me.uk/users/Floppy","name":"@Floppy@mastodon.me.uk"}],"replies":{"id":"https://mamot.fr/users/mtancoigne/statuses/113741447018463971/replies","type":"Collection","first":{"type":"CollectionPage","next":"https://mamot.fr/users/mtancoigne/statuses/113741447018463971/replies?only_other_accounts=true\u0026page=true","partOf":"https://mamot.fr/users/mtancoigne/statuses/113741447018463971/replies","items":[]}},"likes":{"id":"https://mamot.fr/users/mtancoigne/statuses/113741447018463971/likes","type":"Collection","totalItems":0},"shares":{"id":"https://mamot.fr/users/mtancoigne/statuses/113741447018463971/shares","type":"Collection","totalItems":0}}'
+  recorded_at: Mon, 30 Dec 2024 13:41:35 GMT
+recorded_with: VCR 6.2.0
