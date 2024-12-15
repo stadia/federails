@@ -46,3 +46,31 @@ A rake task checks the replayability of the factories and traits:
 ```sh
 bundle exec app:factory_bot:lint
 ```
+
+## Documentation
+
+Documentation is generated with Jekyll from the `docs/` directory, in the Gitlab's CI.
+
+The README and other files are _copied_ to the `docs/` directory and some replacements are automatically
+made in them. Run this everytime you want to preview changes made to Markdown files from the _root_ of the repository:
+
+```sh
+.gitlab/scripts/copy_documentation_files
+```
+
+Yard documentation is generated with a script too, so to preview your changes in the code documentation, run:
+
+```sh
+bundle exec thor docs:generate
+
+# If you already generated files once, you can use one of these to update the files:
+bundle exec thor docs:generate --force
+bundle exec thor docs:update
+```
+
+Finally, start the Jekyll server:
+
+```sh
+cd docs
+bundle exec jekyll serve # --port=12345 
+```
