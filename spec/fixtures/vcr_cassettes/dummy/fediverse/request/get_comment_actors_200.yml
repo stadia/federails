@@ -1,0 +1,180 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://mamot.fr/users/mtancoigne
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - application/json
+      User-Agent:
+      - Faraday v2.9.0
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      date:
+      - Mon, 30 Dec 2024 13:51:09 GMT
+      content-type:
+      - application/activity+json; charset=utf-8
+      content-length:
+      - '2682'
+      connection:
+      - keep-alive
+      server:
+      - Mastodon
+      x-frame-options:
+      - DENY
+      x-content-type-options:
+      - nosniff
+      x-xss-protection:
+      - '0'
+      referrer-policy:
+      - same-origin
+      cache-control:
+      - max-age=180, public
+      etag:
+      - W/"89e8d0e8024a3ea10a0ff4af7e624788"
+      content-security-policy:
+      - 'base-uri ''none''; default-src ''none''; frame-ancestors ''none''; font-src
+        ''self'' https://mamot.fr; img-src ''self'' data: blob: https://mamot.fr https://static.mamot.fr;
+        style-src ''self'' https://mamot.fr ''nonce-dTf2y2DmRzjPgT1bBly/ag==''; media-src
+        ''self'' data: https://mamot.fr https://static.mamot.fr; manifest-src ''self''
+        https://mamot.fr; form-action ''none''; child-src ''self'' blob: https://mamot.fr;
+        worker-src ''self'' blob: https://mamot.fr; connect-src ''self'' data: blob:
+        https://mamot.fr https://static.mamot.fr wss://mamot.fr; script-src ''self''
+        https://mamot.fr ''wasm-unsafe-eval''; frame-src ''self'' https:'
+      x-request-id:
+      - 6cf6f606-79e5-42d4-be8c-0ca6a1ae362e
+      x-runtime:
+      - '0.008429'
+      strict-transport-security:
+      - max-age=63072000; includeSubDomains, max-age=15552000; preload
+      vary:
+      - Accept, Accept-Language, Cookie, Origin
+      x-cached:
+      - HIT
+      alt-svc:
+      - h2="mamoteqvcadrmfs6ryykna4wpxhtsuzbpt4z7lxnqvx3qtse5xmk2fqd.onion:443"; ma=86400;
+        persist=1
+    body:
+      encoding: UTF-8
+      string: '{"@context":["https://www.w3.org/ns/activitystreams","https://w3id.org/security/v1",{"manuallyApprovesFollowers":"as:manuallyApprovesFollowers","toot":"http://joinmastodon.org/ns#","featured":{"@id":"toot:featured","@type":"@id"},"featuredTags":{"@id":"toot:featuredTags","@type":"@id"},"alsoKnownAs":{"@id":"as:alsoKnownAs","@type":"@id"},"movedTo":{"@id":"as:movedTo","@type":"@id"},"schema":"http://schema.org#","PropertyValue":"schema:PropertyValue","value":"schema:value","discoverable":"toot:discoverable","suspended":"toot:suspended","memorial":"toot:memorial","indexable":"toot:indexable","attributionDomains":{"@id":"toot:attributionDomains","@type":"@id"},"focalPoint":{"@container":"@list","@id":"toot:focalPoint"}}],"id":"https://mamot.fr/users/mtancoigne","type":"Person","following":"https://mamot.fr/users/mtancoigne/following","followers":"https://mamot.fr/users/mtancoigne/followers","inbox":"https://mamot.fr/users/mtancoigne/inbox","outbox":"https://mamot.fr/users/mtancoigne/outbox","featured":"https://mamot.fr/users/mtancoigne/collections/featured","featuredTags":"https://mamot.fr/users/mtancoigne/collections/tags","preferredUsername":"mtancoigne","name":"Manuel
+        Tancoigne","summary":"","url":"https://mamot.fr/@mtancoigne","manuallyApprovesFollowers":false,"discoverable":false,"indexable":false,"published":"2020-02-13T00:00:00Z","memorial":false,"publicKey":{"id":"https://mamot.fr/users/mtancoigne#main-key","owner":"https://mamot.fr/users/mtancoigne","publicKeyPem":"-----BEGIN
+        PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvp/A1RqJN5g6834otu28\nk5M2wI7BAoZEGgl36EbUj3aWdzFDWaCJi2D4ZYdSFRSjAfHwoUGvGPP4nvYoQ1bt\n6Zgy7olRAFacq8GIK1qiT6kmWwowgI6TF2WDcqtXb002itZtIjWiSXupI5smY8C2\nL+1KGbocs8l34B2cmQUFenXfIhBmGFTIGw8vSKR8T3pUGyH/nxk5IVriewx27k8M\nVaglIXxKqb7KJ4XnGPQViRIL7RCdrfgc/rwPRwteztMTKA+XrF4tSyRe1zu9hm+9\nTXq49Ev2jrO8KV6wLj9K+IYnnk7SzVNKZN1iY5i10VVW+tHhpQfbNiIxZtLOwqB5\newIDAQAB\n-----END
+        PUBLIC KEY-----\n"},"tag":[],"attachment":[{"type":"PropertyValue","name":"site","value":"\u003ca
+        href=\"https://experimentslabs.com\" target=\"_blank\" rel=\"nofollow noopener
+        noreferrer me\" translate=\"no\"\u003e\u003cspan class=\"invisible\"\u003ehttps://\u003c/span\u003e\u003cspan
+        class=\"\"\u003eexperimentslabs.com\u003c/span\u003e\u003cspan class=\"invisible\"\u003e\u003c/span\u003e\u003c/a\u003e"}],"endpoints":{"sharedInbox":"https://mamot.fr/inbox"},"icon":{"type":"Image","mediaType":"image/png","url":"https://static.mamot.fr/accounts/avatars/000/289/545/original/18c5be972969f5a7.png"},"image":{"type":"Image","mediaType":"image/jpeg","url":"https://static.mamot.fr/accounts/headers/000/289/545/original/ef77868c082f11d7.jpg"}}'
+  recorded_at: Mon, 30 Dec 2024 13:51:09 GMT
+- request:
+    method: get
+    uri: https://mastodon.me.uk/users/Floppy
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - application/json
+      User-Agent:
+      - Faraday v2.9.0
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      date:
+      - Mon, 30 Dec 2024 13:51:09 GMT
+      content-type:
+      - application/activity+json; charset=utf-8
+      content-length:
+      - '6933'
+      connection:
+      - keep-alive
+      server:
+      - Mastodon
+      x-frame-options:
+      - DENY
+      x-content-type-options:
+      - nosniff
+      x-xss-protection:
+      - '0'
+      referrer-policy:
+      - same-origin
+      cache-control:
+      - max-age=180, public
+      etag:
+      - W/"f8d80eede511c9a2616fe9f49d3ef80e"
+      content-security-policy:
+      - 'base-uri ''none''; default-src ''none''; frame-ancestors ''none''; font-src
+        ''self'' https://mastodon.me.uk; img-src ''self'' data: blob: https://mastodon.me.uk;
+        style-src ''self'' https://mastodon.me.uk ''nonce-zdcFLVFn1CO+GVdZn6/hbA=='';
+        media-src ''self'' data: https://mastodon.me.uk; manifest-src ''self'' https://mastodon.me.uk;
+        form-action ''none''; child-src ''self'' blob: https://mastodon.me.uk; worker-src
+        ''self'' blob: https://mastodon.me.uk; connect-src ''self'' data: blob: https://mastodon.me.uk
+        wss://mastodon.me.uk; script-src ''self'' https://mastodon.me.uk ''wasm-unsafe-eval'';
+        frame-src ''self'' https:'
+      x-request-id:
+      - 809b0fa8-6e66-4f75-848d-e752ea1084e0
+      x-runtime:
+      - '0.043039'
+      strict-transport-security:
+      - max-age=63072000; includeSubDomains
+      vary:
+      - Accept, Accept-Language, Cookie, Origin
+      x-cached:
+      - HIT
+    body:
+      encoding: UTF-8
+      string: "{\"@context\":[\"https://www.w3.org/ns/activitystreams\",\"https://w3id.org/security/v1\",{\"manuallyApprovesFollowers\":\"as:manuallyApprovesFollowers\",\"toot\":\"http://joinmastodon.org/ns#\",\"featured\":{\"@id\":\"toot:featured\",\"@type\":\"@id\"},\"featuredTags\":{\"@id\":\"toot:featuredTags\",\"@type\":\"@id\"},\"alsoKnownAs\":{\"@id\":\"as:alsoKnownAs\",\"@type\":\"@id\"},\"movedTo\":{\"@id\":\"as:movedTo\",\"@type\":\"@id\"},\"schema\":\"http://schema.org#\",\"PropertyValue\":\"schema:PropertyValue\",\"value\":\"schema:value\",\"discoverable\":\"toot:discoverable\",\"suspended\":\"toot:suspended\",\"memorial\":\"toot:memorial\",\"indexable\":\"toot:indexable\",\"attributionDomains\":{\"@id\":\"toot:attributionDomains\",\"@type\":\"@id\"},\"Hashtag\":\"as:Hashtag\",\"focalPoint\":{\"@container\":\"@list\",\"@id\":\"toot:focalPoint\"}}],\"id\":\"https://mastodon.me.uk/users/Floppy\",\"type\":\"Person\",\"following\":\"https://mastodon.me.uk/users/Floppy/following\",\"followers\":\"https://mastodon.me.uk/users/Floppy/followers\",\"inbox\":\"https://mastodon.me.uk/users/Floppy/inbox\",\"outbox\":\"https://mastodon.me.uk/users/Floppy/outbox\",\"featured\":\"https://mastodon.me.uk/users/Floppy/collections/featured\",\"featuredTags\":\"https://mastodon.me.uk/users/Floppy/collections/tags\",\"preferredUsername\":\"Floppy\",\"name\":\"James
+        Smith \U0001F4BE\",\"summary\":\"\\u003cp\\u003eGeneric humanoid carbon unit.
+        ❤️ tech, democracy, environment, society.\\u003c/p\\u003e\\u003cp\\u003eCurrently
+        building \\u003cspan class=\\\"h-card\\\" translate=\\\"no\\\"\\u003e\\u003ca
+        href=\\\"https://3dp.chat/@manyfold\\\" class=\\\"u-url mention\\\"\\u003e@\\u003cspan\\u003emanyfold\\u003c/span\\u003e\\u003c/a\\u003e\\u003c/span\\u003e
+        and site admin @ \\u003ca href=\\\"https://mastodon.me.uk\\\" target=\\\"_blank\\\"
+        rel=\\\"nofollow noopener noreferrer\\\" translate=\\\"no\\\"\\u003e\\u003cspan
+        class=\\\"invisible\\\"\\u003ehttps://\\u003c/span\\u003e\\u003cspan class=\\\"\\\"\\u003emastodon.me.uk\\u003c/span\\u003e\\u003cspan
+        class=\\\"invisible\\\"\\u003e\\u003c/span\\u003e\\u003c/a\\u003e\\u003c/p\\u003e\\u003cp\\u003ePreviously:
+        \\u003ca href=\\\"https://dxw.com\\\" target=\\\"_blank\\\" rel=\\\"nofollow
+        noopener noreferrer\\\" translate=\\\"no\\\"\\u003e\\u003cspan class=\\\"invisible\\\"\\u003ehttps://\\u003c/span\\u003e\\u003cspan
+        class=\\\"\\\"\\u003edxw.com\\u003c/span\\u003e\\u003cspan class=\\\"invisible\\\"\\u003e\\u003c/span\\u003e\\u003c/a\\u003e,
+        \\u003ca href=\\\"https://somethingnew.org.uk\\\" target=\\\"_blank\\\" rel=\\\"nofollow
+        noopener noreferrer\\\" translate=\\\"no\\\"\\u003e\\u003cspan class=\\\"invisible\\\"\\u003ehttps://\\u003c/span\\u003e\\u003cspan
+        class=\\\"\\\"\\u003esomethingnew.org.uk\\u003c/span\\u003e\\u003cspan class=\\\"invisible\\\"\\u003e\\u003c/span\\u003e\\u003c/a\\u003e,
+        \\u003ca href=\\\"https://openpolitics.org.uk\\\" target=\\\"_blank\\\" rel=\\\"nofollow
+        noopener noreferrer\\\" translate=\\\"no\\\"\\u003e\\u003cspan class=\\\"invisible\\\"\\u003ehttps://\\u003c/span\\u003e\\u003cspan
+        class=\\\"\\\"\\u003eopenpolitics.org.uk\\u003c/span\\u003e\\u003cspan class=\\\"invisible\\\"\\u003e\\u003c/span\\u003e\\u003c/a\\u003e,
+        \\u003ca href=\\\"https://apolitical.co\\\" target=\\\"_blank\\\" rel=\\\"nofollow
+        noopener noreferrer\\\" translate=\\\"no\\\"\\u003e\\u003cspan class=\\\"invisible\\\"\\u003ehttps://\\u003c/span\\u003e\\u003cspan
+        class=\\\"\\\"\\u003eapolitical.co\\u003c/span\\u003e\\u003cspan class=\\\"invisible\\\"\\u003e\\u003c/span\\u003e\\u003c/a\\u003e,
+        \\u003ca href=\\\"https://theodi.org\\\" target=\\\"_blank\\\" rel=\\\"nofollow
+        noopener noreferrer\\\" translate=\\\"no\\\"\\u003e\\u003cspan class=\\\"invisible\\\"\\u003ehttps://\\u003c/span\\u003e\\u003cspan
+        class=\\\"\\\"\\u003etheodi.org\\u003c/span\\u003e\\u003cspan class=\\\"invisible\\\"\\u003e\\u003c/span\\u003e\\u003c/a\\u003e,
+        \\u003ca href=\\\"https://www.amee.com\\\" target=\\\"_blank\\\" rel=\\\"nofollow
+        noopener noreferrer\\\" translate=\\\"no\\\"\\u003e\\u003cspan class=\\\"invisible\\\"\\u003ehttps://www.\\u003c/span\\u003e\\u003cspan
+        class=\\\"\\\"\\u003eamee.com\\u003c/span\\u003e\\u003cspan class=\\\"invisible\\\"\\u003e\\u003c/span\\u003e\\u003c/a\\u003e
+        and more.\\u003c/p\\u003e\\u003cp\\u003eAlignment: Chaotic Whimsy.\\u003c/p\\u003e\\u003cp\\u003e\\u003ca
+        href=\\\"https://mastodon.me.uk/tags/OpenSource\\\" class=\\\"mention hashtag\\\"
+        rel=\\\"tag\\\"\\u003e#\\u003cspan\\u003eOpenSource\\u003c/span\\u003e\\u003c/a\\u003e
+        \\u003ca href=\\\"https://mastodon.me.uk/tags/Ruby\\\" class=\\\"mention hashtag\\\"
+        rel=\\\"tag\\\"\\u003e#\\u003cspan\\u003eRuby\\u003c/span\\u003e\\u003c/a\\u003e
+        \\u003ca href=\\\"https://mastodon.me.uk/tags/Rails\\\" class=\\\"mention
+        hashtag\\\" rel=\\\"tag\\\"\\u003e#\\u003cspan\\u003eRails\\u003c/span\\u003e\\u003c/a\\u003e
+        \\u003ca href=\\\"https://mastodon.me.uk/tags/Python\\\" class=\\\"mention
+        hashtag\\\" rel=\\\"tag\\\"\\u003e#\\u003cspan\\u003ePython\\u003c/span\\u003e\\u003c/a\\u003e\\u003c/p\\u003e\",\"url\":\"https://mastodon.me.uk/@Floppy\",\"manuallyApprovesFollowers\":false,\"discoverable\":true,\"indexable\":true,\"published\":\"2017-04-05T00:00:00Z\",\"memorial\":false,\"alsoKnownAs\":[\"https://mastodon.social/users/Floppy\"],\"publicKey\":{\"id\":\"https://mastodon.me.uk/users/Floppy#main-key\",\"owner\":\"https://mastodon.me.uk/users/Floppy\",\"publicKeyPem\":\"-----BEGIN
+        PUBLIC KEY-----\\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4suDJx+tDvv+NwXX9Ux4\\nNMLW33IcEGpN3i3ZAl1jOsWHFGAaEenC5bNkm6nry8GWu4sHnpjF7KHuK3vADlam\\n+hxZSxRjK5wxLyz7oZSgTPv9vRSo+IlGyFDwSQ7u9jTzWWt7csuoiO6LAcBQf31T\\nKLe+Asj371KXRkVzZlBMnRH6e3JjPyySmvtzrxH8KRtcNCWCp4pnL+goST+6XjUn\\nFBy4QGgmI+uE08N7+ZlpW5i0mStOn4wecdZwT1fq/9gcblMFouZGv4LT3zx3xhbS\\nUWf1PpXZJgCWrIpghvaUxxl7f8fAicPEi4gICwT1iGcXfhl5QGJQl1qfSVLPkCPX\\nnQIDAQAB\\n-----END
+        PUBLIC KEY-----\\n\"},\"tag\":[{\"type\":\"Hashtag\",\"href\":\"https://mastodon.me.uk/tags/opensource\",\"name\":\"#opensource\"},{\"type\":\"Hashtag\",\"href\":\"https://mastodon.me.uk/tags/ruby\",\"name\":\"#ruby\"},{\"type\":\"Hashtag\",\"href\":\"https://mastodon.me.uk/tags/rails\",\"name\":\"#rails\"},{\"type\":\"Hashtag\",\"href\":\"https://mastodon.me.uk/tags/python\",\"name\":\"#python\"}],\"attachment\":[{\"type\":\"PropertyValue\",\"name\":\"Web\",\"value\":\"\\u003ca
+        href=\\\"https://floppy.org.uk\\\" target=\\\"_blank\\\" rel=\\\"nofollow
+        noopener noreferrer me\\\" translate=\\\"no\\\"\\u003e\\u003cspan class=\\\"invisible\\\"\\u003ehttps://\\u003c/span\\u003e\\u003cspan
+        class=\\\"\\\"\\u003efloppy.org.uk\\u003c/span\\u003e\\u003cspan class=\\\"invisible\\\"\\u003e\\u003c/span\\u003e\\u003c/a\\u003e\"},{\"type\":\"PropertyValue\",\"name\":\"PGP\",\"value\":\"\\u003ca
+        href=\\\"https://keyoxide.org/BB87E90E3A03BA98FD1E7C43BF20545FD5122D5D\\\"
+        target=\\\"_blank\\\" rel=\\\"nofollow noopener noreferrer me\\\" translate=\\\"no\\\"\\u003e\\u003cspan
+        class=\\\"invisible\\\"\\u003ehttps://\\u003c/span\\u003e\\u003cspan class=\\\"ellipsis\\\"\\u003ekeyoxide.org/BB87E90E3A03BA98F\\u003c/span\\u003e\\u003cspan
+        class=\\\"invisible\\\"\\u003eD1E7C43BF20545FD5122D5D\\u003c/span\\u003e\\u003c/a\\u003e\"},{\"type\":\"PropertyValue\",\"name\":\"Pronoun\",\"value\":\"he/him\"},{\"type\":\"PropertyValue\",\"name\":\"Matrix\",\"value\":\"\\u003cspan
+        class=\\\"h-card\\\" translate=\\\"no\\\"\\u003e\\u003ca href=\\\"https://mastodon.me.uk/@Floppy\\\"
+        class=\\\"u-url mention\\\"\\u003e@\\u003cspan\\u003eFloppy\\u003c/span\\u003e\\u003c/a\\u003e\\u003c/span\\u003e:one.ems.host\"}],\"endpoints\":{\"sharedInbox\":\"https://mastodon.me.uk/inbox\"},\"icon\":{\"type\":\"Image\",\"mediaType\":\"image/jpeg\",\"url\":\"https://mastodon.me.uk/system/accounts/avatars/000/000/001/original/60c83c3fc4c026e6.jpeg\"}}"
+  recorded_at: Mon, 30 Dec 2024 13:51:09 GMT
+recorded_with: VCR 6.2.0
