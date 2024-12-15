@@ -48,9 +48,13 @@ collections:
     output: false
   namespaces: # code reference
     output: false
+  examples:
+    output: true
 
 just_the_docs:
   collections:
+    examples:
+      name: Examples
     code_reference:
       name: Code reference
 

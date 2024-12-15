@@ -1,4 +1,6 @@
-# Actors creation: opt-in
+---
+title: 'Actors creation: opt-in'
+---
 
 Goal: only create actors based on a condition on the model (e.g.: opt-in flag, reputation, role, etc...):
 maybe you want to create actors, but not for every one of the associated entities.
