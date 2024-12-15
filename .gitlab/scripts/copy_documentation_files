@@ -16,6 +16,7 @@ replace_md_links(){
 
 cp README.md docs/index.md
 sed -i '1s/^/---\n---\n\n/' docs/index.md
+sed -i -r 's/\(docs\/(.*)\.md\)/(.\/\1)/' docs/index.md
 replace_md_links docs/index.md
 
 cp CHANGELOG.md docs/
