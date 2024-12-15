@@ -40,7 +40,8 @@ Federails.configure do |config|
 end
 ```
 
-For now, refer to [the source code](lib/federails/configuration.rb) for the full list of options.
+For now, refer to [the source code](https://gitlab.com/experimentslabs/federails/-/blob/main/lib/federails/configuration.rb) 
+for the full list of options.
 
 ### Routes
 
