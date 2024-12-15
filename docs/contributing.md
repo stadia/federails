@@ -3,7 +3,7 @@ title: Contributing
 nav_order: 40
 ---
 
-## Contributing
+# Contributing
 
 Contributions are welcome, may it be issues, ideas, code or whatever you want to share. Please note:
 
@@ -20,9 +20,9 @@ To contribute:
 3. Ideally create small pull requests. Don't hesitate to open them early so we all can follow how it's going
 4. Get congratulated
 
-### Tooling
+## Tooling
 
-#### RSpec
+### RSpec
 
 RSpec is the test suite. Start it with
 
@@ -30,7 +30,7 @@ RSpec is the test suite. Start it with
 bundle exec rspec
 ```
 
-#### Rubocop
+### Rubocop
 
 Rubocop is a linter. Start it with
 
@@ -38,7 +38,7 @@ Rubocop is a linter. Start it with
 bundle exec rubocop
 ```
 
-#### FactoryBot
+### FactoryBot
 
 FactoryBot is a factory generator used in tests and development.
 A rake task checks the replayability of the factories and traits:

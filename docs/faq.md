@@ -3,7 +3,7 @@ title: Common questions
 nav_order: 30
 ---
 
-## Common questions
+# Common questions
 
 - **I override the base controller and the links breaks in my layout**
 

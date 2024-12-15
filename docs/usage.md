@@ -3,7 +3,7 @@ title: Usage
 nav_order: 10
 ---
 
-## Installation
+# Installation
 
 Add this line to your application's Gemfile:
 
@@ -17,7 +17,7 @@ And then execute:
 $ bundle
 ```
 
-### Configuration
+## Configuration
 
 Generate configuration files:
 
@@ -43,7 +43,7 @@ end
 For now, refer to [the source code](https://gitlab.com/experimentslabs/federails/-/blob/main/lib/federails/configuration.rb) 
 for the full list of options.
 
-### Routes
+## Routes
 
 Mount the engine on `/`: routes to `/.well-known/*` and `/nodeinfo/*` must be at the root of the site.
 Federails routes are then available under the configured path (`routes_path`):
@@ -83,7 +83,7 @@ Federails.configure do |config|
 end
 ```
 
-#### Remote following
+### Remote following
 
 By default, remote follow requests (where you press a follow button on another server and get redirected home to complete the follow)
 will use the built-in client paths. If you're not using the client, or want to provide your own user interface, you can set the path like this, assuming that `new_follow_url` is a valid route in your app. A `uri` query parameter template will be automatically appended, you don't need to specify that.
@@ -94,7 +94,7 @@ Federails.configure do |config|
 end
 ```
 
-### Migrations
+## Migrations
 
 Copy the migrations:
 
@@ -102,7 +102,7 @@ Copy the migrations:
 bundle exec rails federails:install:migrations
 ```
 
-### User model
+## User model
 
 In the ActivityPub world, we refer to _actors_ to represent the thing that publishes or subscribe to _other actors_.
 
@@ -135,7 +135,7 @@ actor.following
 #...
 ```
 
-### Using the Federails client
+## Using the Federails client
 
 Federails comes with a client, enabled by default, that provides basic views to display and interact with Federails data,
 accessible on `/app` by default (changeable with the configuration option `client_routes_path`)
