@@ -47,24 +47,6 @@ module Fediverse
       end
     end
 
-    describe '#handle_create_note' do
-      let(:distant_note) do
-        {
-          'id'           => 'http://example.com/fake_note',
-          'attributedTo' => distant_actor.federated_url,
-          'content'      => 'Some content',
-        }
-      end
-
-      it 'creates a new note' do
-        skip 'Note are not implemented yet'
-
-        expect do
-          described_class.send(:handle_create_note, distant_note)
-        end.to change(Note, :count).by 1
-      end
-    end
-
     describe '#handle_undo_request' do
       let(:payload) do
         {

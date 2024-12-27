@@ -30,8 +30,6 @@ module Fediverse
         end
         return true unless handlers.empty?
 
-        # FIXME: Fails silently
-        # raise NotImplementedError
         Rails.logger.debug { "Unhandled activity type: #{payload['type']}" }
         false
       end
