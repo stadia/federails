@@ -8,7 +8,7 @@ http_interactions:
       string: ''
     headers:
       User-Agent:
-      - Faraday v1.10.3
+      - Faraday v2.9.0
       Content-Type:
       - application/json
       Accept:
@@ -19,11 +19,11 @@ http_interactions:
       message: OK
     headers:
       date:
-      - Sun, 12 Feb 2023 15:14:23 GMT
+      - Fri, 27 Dec 2024 13:32:40 GMT
       content-type:
       - application/activity+json; charset=utf-8
-      transfer-encoding:
-      - chunked
+      content-length:
+      - '2682'
       connection:
       - keep-alive
       server:
@@ -34,40 +34,205 @@ http_interactions:
       - nosniff
       x-xss-protection:
       - '0'
-      permissions-policy:
-      - interest-cohort=()
       referrer-policy:
-      - origin
-      vary:
-      - Accept, Origin
+      - same-origin
       cache-control:
       - max-age=180, public
       etag:
-      - W/"4053fc0c9bff9105caa70287f6bf47db"
+      - W/"89e8d0e8024a3ea10a0ff4af7e624788"
       content-security-policy:
       - 'base-uri ''none''; default-src ''none''; frame-ancestors ''none''; font-src
-        ''self'' https://mamot.fr; img-src ''self'' https: data: blob: https://mamot.fr;
-        style-src ''self'' https://mamot.fr ''nonce-XpmnMcFkbAyLPcxAEqgOyQ==''; media-src
-        ''self'' https: data: https://mamot.fr; frame-src ''self'' https:; manifest-src
-        ''self'' https://mamot.fr; connect-src ''self'' data: blob: https://mamot.fr
-        https://mamot.fr wss://mamot.fr; script-src ''self'' https://mamot.fr ''wasm-unsafe-eval'';
-        child-src ''self'' blob: https://mamot.fr; worker-src ''self'' blob: https://mamot.fr'
+        ''self'' https://mamot.fr; img-src ''self'' data: blob: https://mamot.fr https://static.mamot.fr;
+        style-src ''self'' https://mamot.fr ''nonce-CvYu7IoMY54A4XHmCQVK+A==''; media-src
+        ''self'' data: https://mamot.fr https://static.mamot.fr; manifest-src ''self''
+        https://mamot.fr; form-action ''none''; child-src ''self'' blob: https://mamot.fr;
+        worker-src ''self'' blob: https://mamot.fr; connect-src ''self'' data: blob:
+        https://mamot.fr https://static.mamot.fr wss://mamot.fr; script-src ''self''
+        https://mamot.fr ''wasm-unsafe-eval''; frame-src ''self'' https:'
       x-request-id:
-      - a35f274e-2fc6-4d97-8bc3-72e689d8b784
+      - 7dcaa543-62da-4207-9d3c-2168031af279
       x-runtime:
-      - '0.023027'
+      - '0.009139'
       strict-transport-security:
-      - max-age=63072000; includeSubDomains
+      - max-age=63072000; includeSubDomains, max-age=15552000; preload
+      vary:
+      - Accept, Accept-Language, Cookie, Origin
       x-cached:
-      - HIT
+      - EXPIRED
+      alt-svc:
+      - h2="mamoteqvcadrmfs6ryykna4wpxhtsuzbpt4z7lxnqvx3qtse5xmk2fqd.onion:443"; ma=86400;
+        persist=1
     body:
       encoding: UTF-8
-      string: '{"@context":["https://www.w3.org/ns/activitystreams","https://w3id.org/security/v1",{"manuallyApprovesFollowers":"as:manuallyApprovesFollowers","toot":"http://joinmastodon.org/ns#","featured":{"@id":"toot:featured","@type":"@id"},"featuredTags":{"@id":"toot:featuredTags","@type":"@id"},"alsoKnownAs":{"@id":"as:alsoKnownAs","@type":"@id"},"movedTo":{"@id":"as:movedTo","@type":"@id"},"schema":"http://schema.org#","PropertyValue":"schema:PropertyValue","value":"schema:value","discoverable":"toot:discoverable","Device":"toot:Device","Ed25519Signature":"toot:Ed25519Signature","Ed25519Key":"toot:Ed25519Key","Curve25519Key":"toot:Curve25519Key","EncryptedMessage":"toot:EncryptedMessage","publicKeyBase64":"toot:publicKeyBase64","deviceId":"toot:deviceId","claim":{"@type":"@id","@id":"toot:claim"},"fingerprintKey":{"@type":"@id","@id":"toot:fingerprintKey"},"identityKey":{"@type":"@id","@id":"toot:identityKey"},"devices":{"@type":"@id","@id":"toot:devices"},"messageFranking":"toot:messageFranking","messageType":"toot:messageType","cipherText":"toot:cipherText","suspended":"toot:suspended","focalPoint":{"@container":"@list","@id":"toot:focalPoint"}}],"id":"https://mamot.fr/users/mtancoigne","type":"Person","following":"https://mamot.fr/users/mtancoigne/following","followers":"https://mamot.fr/users/mtancoigne/followers","inbox":"https://mamot.fr/users/mtancoigne/inbox","outbox":"https://mamot.fr/users/mtancoigne/outbox","featured":"https://mamot.fr/users/mtancoigne/collections/featured","featuredTags":"https://mamot.fr/users/mtancoigne/collections/tags","preferredUsername":"mtancoigne","name":"Manuel
-        Tancoigne","summary":"","url":"https://mamot.fr/@mtancoigne","manuallyApprovesFollowers":false,"discoverable":false,"published":"2020-02-13T00:00:00Z","devices":"https://mamot.fr/users/mtancoigne/collections/devices","publicKey":{"id":"https://mamot.fr/users/mtancoigne#main-key","owner":"https://mamot.fr/users/mtancoigne","publicKeyPem":"-----BEGIN
+      string: '{"@context":["https://www.w3.org/ns/activitystreams","https://w3id.org/security/v1",{"manuallyApprovesFollowers":"as:manuallyApprovesFollowers","toot":"http://joinmastodon.org/ns#","featured":{"@id":"toot:featured","@type":"@id"},"featuredTags":{"@id":"toot:featuredTags","@type":"@id"},"alsoKnownAs":{"@id":"as:alsoKnownAs","@type":"@id"},"movedTo":{"@id":"as:movedTo","@type":"@id"},"schema":"http://schema.org#","PropertyValue":"schema:PropertyValue","value":"schema:value","discoverable":"toot:discoverable","suspended":"toot:suspended","memorial":"toot:memorial","indexable":"toot:indexable","attributionDomains":{"@id":"toot:attributionDomains","@type":"@id"},"focalPoint":{"@container":"@list","@id":"toot:focalPoint"}}],"id":"https://mamot.fr/users/mtancoigne","type":"Person","following":"https://mamot.fr/users/mtancoigne/following","followers":"https://mamot.fr/users/mtancoigne/followers","inbox":"https://mamot.fr/users/mtancoigne/inbox","outbox":"https://mamot.fr/users/mtancoigne/outbox","featured":"https://mamot.fr/users/mtancoigne/collections/featured","featuredTags":"https://mamot.fr/users/mtancoigne/collections/tags","preferredUsername":"mtancoigne","name":"Manuel
+        Tancoigne","summary":"","url":"https://mamot.fr/@mtancoigne","manuallyApprovesFollowers":false,"discoverable":false,"indexable":false,"published":"2020-02-13T00:00:00Z","memorial":false,"publicKey":{"id":"https://mamot.fr/users/mtancoigne#main-key","owner":"https://mamot.fr/users/mtancoigne","publicKeyPem":"-----BEGIN
         PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvp/A1RqJN5g6834otu28\nk5M2wI7BAoZEGgl36EbUj3aWdzFDWaCJi2D4ZYdSFRSjAfHwoUGvGPP4nvYoQ1bt\n6Zgy7olRAFacq8GIK1qiT6kmWwowgI6TF2WDcqtXb002itZtIjWiSXupI5smY8C2\nL+1KGbocs8l34B2cmQUFenXfIhBmGFTIGw8vSKR8T3pUGyH/nxk5IVriewx27k8M\nVaglIXxKqb7KJ4XnGPQViRIL7RCdrfgc/rwPRwteztMTKA+XrF4tSyRe1zu9hm+9\nTXq49Ev2jrO8KV6wLj9K+IYnnk7SzVNKZN1iY5i10VVW+tHhpQfbNiIxZtLOwqB5\newIDAQAB\n-----END
         PUBLIC KEY-----\n"},"tag":[],"attachment":[{"type":"PropertyValue","name":"site","value":"\u003ca
         href=\"https://experimentslabs.com\" target=\"_blank\" rel=\"nofollow noopener
-        noreferrer me\"\u003e\u003cspan class=\"invisible\"\u003ehttps://\u003c/span\u003e\u003cspan
-        class=\"\"\u003eexperimentslabs.com\u003c/span\u003e\u003cspan class=\"invisible\"\u003e\u003c/span\u003e\u003c/a\u003e"}],"endpoints":{"sharedInbox":"https://mamot.fr/inbox"},"icon":{"type":"Image","mediaType":"image/png","url":"https://mamot.fr/system/accounts/avatars/000/289/545/original/18c5be972969f5a7.png"},"image":{"type":"Image","mediaType":"image/jpeg","url":"https://mamot.fr/system/accounts/headers/000/289/545/original/ef77868c082f11d7.jpg"}}'
-  recorded_at: Sun, 12 Feb 2023 15:14:23 GMT
-recorded_with: VCR 6.1.0
+        noreferrer me\" translate=\"no\"\u003e\u003cspan class=\"invisible\"\u003ehttps://\u003c/span\u003e\u003cspan
+        class=\"\"\u003eexperimentslabs.com\u003c/span\u003e\u003cspan class=\"invisible\"\u003e\u003c/span\u003e\u003c/a\u003e"}],"endpoints":{"sharedInbox":"https://mamot.fr/inbox"},"icon":{"type":"Image","mediaType":"image/png","url":"https://static.mamot.fr/accounts/avatars/000/289/545/original/18c5be972969f5a7.png"},"image":{"type":"Image","mediaType":"image/jpeg","url":"https://static.mamot.fr/accounts/headers/000/289/545/original/ef77868c082f11d7.jpg"}}'
+  recorded_at: Fri, 27 Dec 2024 13:32:40 GMT
+- request:
+    method: get
+    uri: https://w3id.org/security/v1
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - application/ld+json;profile=http://www.w3.org/ns/json-ld#context, application/ld+json;q=0.9,
+        text/html;q=0.8, application/xhtml+xml;q=0.8, application/json;q=0.5
+      User-Agent:
+      - Ruby RDF.rb/3.3.1
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+  response:
+    status:
+      code: 302
+      message: Found
+    headers:
+      Date:
+      - Fri, 27 Dec 2024 13:32:40 GMT
+      Server:
+      - Apache/2.4.29 (Ubuntu)
+      Access-Control-Allow-Origin:
+      - "*"
+      Location:
+      - https://w3c-ccg.github.io/security-vocab/contexts/security-v1.jsonld
+      Content-Length:
+      - '327'
+      Content-Type:
+      - text/html; charset=iso-8859-1
+    body:
+      encoding: UTF-8
+      string: |
+        <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+        <html><head>
+        <title>302 Found</title>
+        </head><body>
+        <h1>Found</h1>
+        <p>The document has moved <a href="https://w3c-ccg.github.io/security-vocab/contexts/security-v1.jsonld">here</a>.</p>
+        <hr>
+        <address>Apache/2.4.29 (Ubuntu) Server at w3id.org Port 443</address>
+        </body></html>
+  recorded_at: Fri, 27 Dec 2024 13:32:40 GMT
+- request:
+    method: get
+    uri: https://w3c-ccg.github.io/security-vocab/contexts/security-v1.jsonld
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - application/ld+json;profile=http://www.w3.org/ns/json-ld#context, application/ld+json;q=0.9,
+        text/html;q=0.8, application/xhtml+xml;q=0.8, application/json;q=0.5
+      User-Agent:
+      - Ruby RDF.rb/3.3.1
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2059'
+      Server:
+      - GitHub.com
+      Content-Type:
+      - application/ld+json
+      Permissions-Policy:
+      - interest-cohort=()
+      Last-Modified:
+      - Fri, 15 Jul 2022 12:57:18 GMT
+      Access-Control-Allow-Origin:
+      - "*"
+      Strict-Transport-Security:
+      - max-age=31556952
+      Etag:
+      - W/"62d1642e-80b"
+      Expires:
+      - Fri, 27 Dec 2024 11:19:43 GMT
+      Cache-Control:
+      - max-age=600
+      X-Proxy-Cache:
+      - MISS
+      X-Github-Request-Id:
+      - 87FA:4DD5A:5FB89EF:606861B:676E8AF7
+      Accept-Ranges:
+      - bytes
+      Age:
+      - '0'
+      Date:
+      - Fri, 27 Dec 2024 13:32:40 GMT
+      Via:
+      - 1.1 varnish
+      X-Served-By:
+      - cache-cdg-lfpb1150026-CDG
+      X-Cache:
+      - HIT
+      X-Cache-Hits:
+      - '0'
+      X-Timer:
+      - S1735306361.663411,VS0,VE118
+      Vary:
+      - Accept-Encoding
+      X-Fastly-Request-Id:
+      - a2bfe24f617f083903900a8524feb42e476db4bf
+    body:
+      encoding: ASCII-8BIT
+      string: |
+        {
+          "@context": {
+            "id": "@id",
+            "type": "@type",
+
+            "dc": "http://purl.org/dc/terms/",
+            "sec": "https://w3id.org/security#",
+            "xsd": "http://www.w3.org/2001/XMLSchema#",
+
+            "EcdsaKoblitzSignature2016": "sec:EcdsaKoblitzSignature2016",
+            "Ed25519Signature2018": "sec:Ed25519Signature2018",
+            "EncryptedMessage": "sec:EncryptedMessage",
+            "GraphSignature2012": "sec:GraphSignature2012",
+            "LinkedDataSignature2015": "sec:LinkedDataSignature2015",
+            "LinkedDataSignature2016": "sec:LinkedDataSignature2016",
+            "CryptographicKey": "sec:Key",
+
+            "authenticationTag": "sec:authenticationTag",
+            "canonicalizationAlgorithm": "sec:canonicalizationAlgorithm",
+            "cipherAlgorithm": "sec:cipherAlgorithm",
+            "cipherData": "sec:cipherData",
+            "cipherKey": "sec:cipherKey",
+            "created": {"@id": "dc:created", "@type": "xsd:dateTime"},
+            "creator": {"@id": "dc:creator", "@type": "@id"},
+            "digestAlgorithm": "sec:digestAlgorithm",
+            "digestValue": "sec:digestValue",
+            "domain": "sec:domain",
+            "encryptionKey": "sec:encryptionKey",
+            "expiration": {"@id": "sec:expiration", "@type": "xsd:dateTime"},
+            "expires": {"@id": "sec:expiration", "@type": "xsd:dateTime"},
+            "initializationVector": "sec:initializationVector",
+            "iterationCount": "sec:iterationCount",
+            "nonce": "sec:nonce",
+            "normalizationAlgorithm": "sec:normalizationAlgorithm",
+            "owner": {"@id": "sec:owner", "@type": "@id"},
+            "password": "sec:password",
+            "privateKey": {"@id": "sec:privateKey", "@type": "@id"},
+            "privateKeyPem": "sec:privateKeyPem",
+            "publicKey": {"@id": "sec:publicKey", "@type": "@id"},
+            "publicKeyBase58": "sec:publicKeyBase58",
+            "publicKeyPem": "sec:publicKeyPem",
+            "publicKeyWif": "sec:publicKeyWif",
+            "publicKeyService": {"@id": "sec:publicKeyService", "@type": "@id"},
+            "revoked": {"@id": "sec:revoked", "@type": "xsd:dateTime"},
+            "salt": "sec:salt",
+            "signature": "sec:signature",
+            "signatureAlgorithm": "sec:signingAlgorithm",
+            "signatureValue": "sec:signatureValue"
+          }
+        }
+  recorded_at: Fri, 27 Dec 2024 13:32:40 GMT
+recorded_with: VCR 6.2.0
