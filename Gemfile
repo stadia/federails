@@ -27,6 +27,7 @@ gem 'rspec-rails-api', '~> 0.8'
 gem 'rspec-rfc-helper'
 gem 'simplecov'
 gem 'vcr'
+gem 'webmock'
 
 # Start debugger with binding.b [https://github.com/ruby/debug]
 gem 'debug', '>= 1.0.0'

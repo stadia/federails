@@ -110,6 +110,9 @@ GEM
     colorator (1.1.0)
     concurrent-ruby (1.2.3)
     connection_pool (2.4.1)
+    crack (1.0.0)
+      bigdecimal
+      rexml
     crass (1.0.6)
     cuprum (1.2.0)
       sleeping_king_studios-tools (~> 1.0)
@@ -162,6 +165,7 @@ GEM
     google-protobuf (4.29.1-x86_64-linux)
       bigdecimal
       rake (>= 13)
+    hashdiff (1.1.2)
     htmlentities (4.3.4)
     http_parser.rb (0.8.0)
     i18n (1.14.1)
@@ -432,6 +436,10 @@ GEM
     vcr (6.2.0)
     warden (1.2.9)
       rack (>= 2.0.9)
+    webmock (3.24.0)
+      addressable (>= 2.8.0)
+      crack (>= 0.3.2)
+      hashdiff (>= 0.4.0, < 2.0.0)
     webrick (1.8.1)
     websocket-driver (0.7.6)
       websocket-extensions (>= 0.1.0)
@@ -468,6 +476,7 @@ DEPENDENCIES
   sprockets-rails
   sqlite3
   vcr
+  webmock
   webrick (~> 1.8)
   yard (~> 0.9)
 
