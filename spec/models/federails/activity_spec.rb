@@ -27,16 +27,6 @@ module Federails
           expect(distant_following.activities.last.recipients).to eq [distant_actor]
         end
       end
-
-      context 'when creating a Note' do
-        it 'notifies the followers' do
-          skip 'Note are not implemented yet'
-
-          distant_following.accept!
-          note = FactoryBot.create :note, actor: actor
-          expect(note.activities.last.recipients).to eq [distant_actor]
-        end
-      end
     end
   end
 end
