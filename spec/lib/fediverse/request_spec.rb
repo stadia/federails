@@ -6,7 +6,7 @@ module Fediverse
     describe '#get' do
       context 'when request fails' do
         it 'returns nil' do
-          VCR.use_cassette 'fediverse/request/get_get_404' do
+          VCR.use_cassette 'fediverse/request/get_404' do
             expect(described_class.get('http://example.com/something.json')).to be_nil
           end
         end
@@ -14,7 +14,7 @@ module Fediverse
 
       context 'when request is successful' do
         it 'returns a hash' do
-          VCR.use_cassette 'fediverse/request/get_get_200' do
+          VCR.use_cassette 'fediverse/request/get_actor_200' do
             expect(described_class.get('https://mamot.fr/users/mtancoigne')).to be_a Hash
           end
         end
@@ -30,7 +30,7 @@ module Fediverse
 
       context 'when value is a string' do
         it 'returns a Hash' do
-          VCR.use_cassette 'fediverse/request/get_get_200' do
+          VCR.use_cassette 'fediverse/request/get_actor_200' do
             expect(described_class.dereference('https://mamot.fr/users/mtancoigne')).to be_a Hash
           end
         end
