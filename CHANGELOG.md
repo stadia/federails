@@ -30,6 +30,10 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ## [Unreleased]
 
+### Added
+
+- `Federails::Actor`: Add `.distant` scope to select distant actors
+
 ## [0.4.0] 2024-12-02
 
 As we're still in a kind of early development, some changes to Federails internals are listed.
