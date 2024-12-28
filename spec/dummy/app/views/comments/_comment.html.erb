@@ -1,22 +1,21 @@
 <div id="<%= dom_id comment %>">
-  <p>
-    <strong>Content:</strong>
-    <%= comment.content %>
-  </p>
+  <div>
+    <small>By #<%= comment.user.id %></small>
+    <% if comment.user_id == current_user.id %>
+      <%= link_to "Edit this comment", edit_comment_url(comment) %>
+    <% end %>
+  </div>
 
-  <p>
-    <strong>User:</strong>
-    <%= comment.user_id %>
-  </p>
+  <div><%= comment.content %></div>
 
-  <p>
-    <strong>Post:</strong>
-    <%= comment.post_id %>
-  </p>
-
-  <p>
-    <strong>Parent:</strong>
-    <%= comment.parent_id %>
-  </p>
-
+  <details style="margin-left:10px;">
+    <summary>Responses</summary>
+    <% if comment.answers.size.zero? %>
+      <em>No response to this comment. Be the first to add one!</em>
+    <% end %>
+    <% comment.answers.each do |child| %>
+      <%= render 'comments/comment', comment: child %>
+    <% end %>
+    <%= render 'comments/form', comment: Comment.new(parent: comment, post_id: comment.post_id) %>
+  </details>
 </div>

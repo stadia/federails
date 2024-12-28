@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :post do
-    title { Faker::Lorem.string }
+    title { Faker::Quote.fortune_cookie }
     content { Faker::Lorem.paragraph }
 
     user

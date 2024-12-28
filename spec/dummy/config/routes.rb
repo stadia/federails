@@ -1,7 +1,8 @@
 Rails.application.routes.draw do
-  resources :posts
-  resources :comments
   devise_for :users
+
+  resources :posts
+  resources :comments, except: [:index, :show, :new]
 
   mount Federails::Engine => '/'
 

@@ -1,17 +1,6 @@
 <div id="<%= dom_id post %>">
-  <p>
-    <strong>Title:</strong>
-    <%= post.title %>
-  </p>
+  <h1><%= post.title %></h1>
+  <div><small>By <%= post.user.id %>, on <%= post.created_at %></small></div>
 
-  <p>
-    <strong>Content:</strong>
-    <%= post.content %>
-  </p>
-
-  <p>
-    <strong>User:</strong>
-    <%= post.user_id %>
-  </p>
-
+  <article><%= post.content %></article>
 </div>
