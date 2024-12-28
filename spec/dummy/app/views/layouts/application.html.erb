@@ -16,6 +16,7 @@
         <%= link_to 'Register', main_app.new_user_registration_url %>
       <% else %>
         <%= current_user.email %>
+        <%= link_to 'New article', main_app.new_post_url %>
         <%= button_to 'Logout', main_app.destroy_user_session_url, method: :delete, form: { style: 'display: inline-block;' } %>
       <% end %>
     </nav>
