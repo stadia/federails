@@ -11,6 +11,7 @@ module Fediverse
       @id = id
     end
 
+    # FIXME: Replace by `Webfinger.get_json` (move other method here as class method)
     def get
       Rails.logger.debug { "GET #{@id}" }
       @response = Faraday.get(@id, nil, BASE_HEADERS)

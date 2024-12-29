@@ -4,12 +4,23 @@ module Fediverse
   class Inbox
     @@handlers = {} # rubocop:todo Style/ClassVars
     class << self
+      # Registers a handler for incoming data
+      #
+      # @param activity_type [String] Target activity type ('Create', 'Follow', 'Like', ...)
+      #   See https://www.w3.org/TR/activitystreams-vocabulary/#activity-types for a list of common ones
+      # @param object_type [String] Type of the related object ('Article', 'Note', ...)
+      #   See https://www.w3.org/TR/activitystreams-vocabulary/#object-types for a list of common object types
+      # @param klass [String] Class handling the incoming object
+      # @param method [Symbol] Method in the class that will handle the object
       def register_handler(activity_type, object_type, klass, method)
         @@handlers[activity_type] ||= {}
         @@handlers[activity_type][object_type] ||= {}
         @@handlers[activity_type][object_type][klass] = method
       end
 
+      # Executes the registered handler for an incoming object
+      #
+      # @param payload [Hash] Dereferenced activity
       def dispatch_request(payload)
         handlers = get_handlers(payload['type'], payload['object'].is_a?(Hash) ? payload.dig('object', 'type') : nil)
         handlers.each_pair do |klass, method|

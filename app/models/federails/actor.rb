@@ -2,6 +2,12 @@ require 'federails/utils/host'
 require 'fediverse/webfinger'
 
 module Federails
+  # Model storing _distant_ actors and links to local ones.
+  #
+  # To make a model act as an actor, use the `Federails::ActorEntity` concern
+  #
+  # See also:
+  #  - https://www.w3.org/TR/activitypub/#actor-objects
   class Actor < ApplicationRecord # rubocop:disable Metrics/ClassLength
     include Federails::HasUuid
 

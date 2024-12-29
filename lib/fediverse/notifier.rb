@@ -3,6 +3,9 @@ require 'fediverse/signature'
 module Fediverse
   class Notifier
     class << self
+      # Posts an activity to its recipients
+      #
+      # @param activity [Federails::Activity]
       def post_to_inboxes(activity)
         actors = activity.recipients
         Rails.logger.debug('Nobody to notice') && return if actors.count.zero?

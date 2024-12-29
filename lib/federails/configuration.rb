@@ -1,5 +1,7 @@
 module Federails
   # rubocop:disable Style/ClassVars
+
+  # Stores the Federails configuration in a _singleton_.
   module Configuration
     # Application name, used in well-known and nodeinfo endpoints
     mattr_accessor :app_name
@@ -45,7 +47,16 @@ module Federails
     mattr_accessor :base_client_controller
     @@base_client_controller = 'ActionController::Base'
 
+    # @!method self.remote_follow_url_method
+    #
     # Route method for remote-following requests
+
+    # @!method self.remote_follow_url_method=(value)
+    #
+    # Sets the route method for remote-following requests
+    # @param value [String] Route method name as used in links
+    # @example
+    #   remote_follow_url_method 'main_app.my_custom_route_helper'
     mattr_accessor :remote_follow_url_method
     @@remote_follow_url_method = 'federails.new_client_following_url'
 

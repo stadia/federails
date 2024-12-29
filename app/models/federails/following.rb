@@ -1,4 +1,5 @@
 module Federails
+  # Stores following data between actors
   class Following < ApplicationRecord
     include Federails::HasUuid
 

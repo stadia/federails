@@ -3,6 +3,8 @@ require 'federails/engine'
 require 'federails/configuration'
 
 # rubocop:disable Style/ClassVars
+
+# This module includes classes and methods related to Ruby on Rails: engine configuration, models, controllers, etc.
 module Federails
   mattr_reader :configuration
   @@configuration = Configuration
