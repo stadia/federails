@@ -29,6 +29,8 @@ FactoryBot.use_parent_strategy = false
 
 Dir[Federails::Engine.root.join('spec', 'support', '**', '*.rb')].each { |f| require f }
 Dir[Federails::Engine.root.join('spec', 'fixtures', 'classes', '*.rb')].each { |f| require f }
+# Load all models so they are properly registered as Federails data entities
+Dir[Federails::Engine.root.join('spec', 'dummy', 'app', 'models', '*.rb')].each { |f| require f }
 
 # Checks for pending migrations and applies them before tests are run.
 # Specify all migration paths
