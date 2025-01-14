@@ -78,7 +78,7 @@ module Federails
           config = Federails.data_entity_handled_on route[:publishable_type]
           return unless config
 
-          config[:class]&.find(route[:id])
+          config[:class]&.find_by(config[:url_param] => route[:id])
         rescue ActiveRecord::RecordNotFound
           nil
         end

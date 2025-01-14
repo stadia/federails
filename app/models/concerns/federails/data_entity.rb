@@ -38,6 +38,7 @@ module Federails
       # - `to_activitypub_object`, returning a valid ActivityPub object
       #
       # @param actor_entity_method [Symbol] Method returning an object responding to 'federails_actor', for local content
+      # @param url_param [Symbol] Column name of the object ID that should be used in URLs. Defaults to +:id+
       # @param route_path_segment [Symbol] Segment used in Federails routes to display the ActivityPub representation.
       #   Defaults to the pluralized, underscored class name
       # @param handles [String] Type of ActivityPub object handled by this entity type
@@ -48,11 +49,13 @@ module Federails
       #
       # @example
       #   acts_as_federails_data handles: 'Note', with: :note_handler, route_path_segment: :articles, actor_entity_method: :user
+      # rubocop:disable Metrics/ParameterLists
       def acts_as_federails_data(
         handles:,
         with: :handle_incoming_fediverse_data,
         route_path_segment: nil,
         actor_entity_method: nil,
+        url_param: :id,
         filter_method: nil
       )
         route_path_segment ||= name.pluralize.underscore
@@ -60,6 +63,7 @@ module Federails
         Federails::Configuration.register_data_type self,
                                                     route_path_segment:  route_path_segment,
                                                     actor_entity_method: actor_entity_method,
+                                                    url_param:           url_param,
                                                     handles:             handles,
                                                     with:                with,
                                                     filter_method:       filter_method
@@ -67,6 +71,7 @@ module Federails
         Fediverse::Inbox.register_handler 'Create', handles, self, with
         Fediverse::Inbox.register_handler 'Update', handles, self, with
       end
+      # rubocop:enable Metrics/ParameterLists
 
       # Instantiates a new instance from an ActivityPub object
       #
@@ -117,7 +122,8 @@ module Federails
       return attributes['federated_url'] if attributes['federated_url'].present?
 
       path_segment = Federails.data_entity_configuration(self)[:route_path_segment]
-      Federails::Engine.routes.url_helpers.server_published_url(publishable_type: path_segment, id: id)
+      url_param = Federails.data_entity_configuration(self)[:url_param]
+      Federails::Engine.routes.url_helpers.server_published_url(publishable_type: path_segment, id: send(url_param))
     end
 
     # Check whether the entity was created locally or comes from the Fediverse
