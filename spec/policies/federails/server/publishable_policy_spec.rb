@@ -15,5 +15,15 @@ RSpec.describe Federails::Server::PublishablePolicy, type: :policy do
     let(:policy_subject) { published }
 
     it_behaves_like 'an action for everyone'
+
+    context 'when entity should not be published' do
+      before do
+        published.update! title: "Draft: #{published.title}"
+      end
+
+      it 'denies access' do
+        expect(described_class).not_to permit(nil, policy_subject)
+      end
+    end
   end
 end

@@ -18,6 +18,11 @@ module Fixtures
                                                        name:    title
       end
 
+      # Prevent posts starting with 'Draft:" to be published
+      def default_should_federate?
+        !title.start_with?('Draft:')
+      end
+
       def self.from_activitypub_object(hash)
         {
           title:           hash['name'] || 'A post',

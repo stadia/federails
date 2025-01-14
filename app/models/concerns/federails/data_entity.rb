@@ -46,6 +46,9 @@ module Federails
       # @param filter_method [Symbol] Self class method that determines if an incoming object should be handled. Note
       #   that the first model for which this method returns true will be used. If left empty, the model CAN be selected,
       #   so define them if many models handle the same data type.
+      # @param should_federate_method [Symbol] method to determine if an object should be federated. If the method returns false,
+      #   no create/update activities will happen, and object will not be accessible at federated_url. Defaults to a method
+      #   that always returns true.
       #
       # @example
       #   acts_as_federails_data handles: 'Note', with: :note_handler, route_path_segment: :articles, actor_entity_method: :user
@@ -56,17 +59,19 @@ module Federails
         route_path_segment: nil,
         actor_entity_method: nil,
         url_param: :id,
-        filter_method: nil
+        filter_method: nil,
+        should_federate_method: :default_should_federate?
       )
         route_path_segment ||= name.pluralize.underscore
 
         Federails::Configuration.register_data_type self,
-                                                    route_path_segment:  route_path_segment,
-                                                    actor_entity_method: actor_entity_method,
-                                                    url_param:           url_param,
-                                                    handles:             handles,
-                                                    with:                with,
-                                                    filter_method:       filter_method
+                                                    route_path_segment:     route_path_segment,
+                                                    actor_entity_method:    actor_entity_method,
+                                                    url_param:              url_param,
+                                                    handles:                handles,
+                                                    with:                   with,
+                                                    filter_method:          filter_method,
+                                                    should_federate_method: should_federate_method
 
         Fediverse::Inbox.register_handler 'Create', handles, self, with
         Fediverse::Inbox.register_handler 'Update', handles, self, with
@@ -119,6 +124,7 @@ module Federails
     #
     # @return [String]
     def federated_url
+      return nil unless send(federails_data_configuration[:should_federate_method])
       return attributes['federated_url'] if attributes['federated_url'].present?
 
       path_segment = Federails.data_entity_configuration(self)[:route_path_segment]
@@ -133,33 +139,40 @@ module Federails
       attributes['federated_url'].blank?
     end
 
+    def federails_data_configuration
+      Federails.data_entity_configuration(self)
+    end
+
     private
 
     def set_federails_actor
       return federails_actor if federails_actor.present?
 
-      configuration = Federails.data_entity_configuration(self)
-      self.federails_actor = send(configuration[:actor_entity_method])&.federails_actor if configuration[:actor_entity_method]
+      self.federails_actor = send(federails_data_configuration[:actor_entity_method])&.federails_actor if federails_data_configuration[:actor_entity_method]
 
       raise 'Cannot determine actor from configuration' unless federails_actor
     end
 
     def create_federails_activity
       ensure_federails_configuration!
-      return unless local_federails_entity?
+      return unless local_federails_entity? && send(federails_data_configuration[:should_federate_method])
 
       Activity.create! actor: federails_actor, action: 'Create', entity: self
     end
 
     def update_federails_activity
       ensure_federails_configuration!
-      return unless local_federails_entity?
+      return unless local_federails_entity? && send(federails_data_configuration[:should_federate_method])
 
       Activity.create! actor: federails_actor, action: 'Update', entity: self
     end
 
     def ensure_federails_configuration!
       raise("Entity not configured for #{self.class.name}. Did you use \"acts_as_federails_data\"?") unless Federails.data_entity? self
+    end
+
+    def default_should_federate?
+      true
     end
   end
 end
