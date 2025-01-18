@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe Federails::Server::ActorPolicy, type: :policy do
   let(:signed_in_user) { FactoryBot.create :user }
-  let(:scope) { Federails::Server::ActivityPolicy::Scope.new(nil, Federails::Actor).resolve }
+  let(:scope) { Federails::Server::ActorPolicy::Scope.new(nil, Federails::Actor).resolve }
 
   permissions '.scope' do
     it 'returns all the users' do
