@@ -13,7 +13,7 @@ GIT
 PATH
   remote: .
   specs:
-    federails (0.4.0)
+    federails (0.5.0)
       faraday
       faraday-follow_redirects
       json-ld (>= 3.2.0)
