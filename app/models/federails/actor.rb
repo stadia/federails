@@ -30,11 +30,11 @@ module Federails
     has_many :followers, source: :actor, through: :following_followers
     has_many :follows, source: :target_actor, through: :following_follows
 
-    scope :local, -> { where.not(entity: nil) }
+    scope :local, -> { where(federated_url: nil) }
     scope :distant, -> { where.not(federated_url: nil) }
 
     def local?
-      entity.present?
+      attributes['federated_url'].nil?
     end
 
     def federated_url
