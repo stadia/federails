@@ -2,7 +2,15 @@
 
 ## Next
 
+## From 0.4.0 to 0.5.0
+
+First of all, read the [CHANGELOG](./CHANGELOG.md)
+
+This release contains only new features and should be safe to apply.
+
 ## From 0.3.0 to 0.4.0
+
+First of all, read the [CHANGELOG](./CHANGELOG.md)
 
 - Relation to Federails actor has changed in related entities, from `actor` to `federails_actor`. Update your usages accordingly.
 - Method `create_actor`, included on related entities has been renamed to `create_federails_actor`. Update your usages accordingly.
