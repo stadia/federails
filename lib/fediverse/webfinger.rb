@@ -110,17 +110,20 @@ module Fediverse
       # Builds a +Federails::Actor+ from a Webfinger response
       # @param data [Hash] Webfinger response
       # @return [Federails::Actor]
-      def webfinger_to_actor(data)
-        Federails::Actor.new federated_url:  data['id'],
-                             username:       data['preferredUsername'],
-                             name:           data['name'],
-                             server:         server_and_port(data['id']),
-                             inbox_url:      data['inbox'],
-                             outbox_url:     data['outbox'],
-                             followers_url:  data['followers'],
-                             followings_url: data['following'],
-                             profile_url:    data['url'],
-                             public_key:     data.dig('publicKey', 'publicKeyPem')
+      def webfinger_to_actor(data) # rubocop:disable Metrics/MethodLength
+        data = data.clone
+        id = data.delete('id')
+        Federails::Actor.new federated_url:  id,
+                             username:       data.delete('preferredUsername'),
+                             name:           data.delete('name'),
+                             server:         server_and_port(id),
+                             inbox_url:      data.delete('inbox'),
+                             outbox_url:     data.delete('outbox'),
+                             followers_url:  data.delete('followers'),
+                             followings_url: data.delete('following'),
+                             profile_url:    data.delete('url'),
+                             public_key:     data.delete('publicKey')&.dig('publicKeyPem'),
+                             extensions:     data.except('@context')
       end
 
       # Makes a simple GET request and returns a +Hash+ from the parsed body

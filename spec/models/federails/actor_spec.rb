@@ -80,6 +80,13 @@ module Federails
         end
       end
 
+      it 'stores extra data for distant actors' do
+        VCR.use_cassette 'actor/find_by_account_get' do
+          result = described_class.find_by_account(distant_account)
+          expect(result.extensions['manuallyApprovesFollowers']).to be false
+        end
+      end
+
       it 'returns distant actors without making a call' do
         # This should not create new cassettes; if this one is created there is an issue
         VCR.use_cassette 'this_should_not_be_here' do
