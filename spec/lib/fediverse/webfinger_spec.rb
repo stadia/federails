@@ -13,8 +13,31 @@ module Fediverse
         end
       end
 
+      context 'with only a username with leading @' do
+        let(:account) { '@user' }
+
+        it 'extracts username' do
+          results = described_class.split_account(account)
+          expect(results[:username]).to eq 'user'
+        end
+      end
+
       context 'with a complete account string' do
         let(:account) { 'user@domain.tld' }
+
+        it 'extracts username' do
+          results = described_class.split_account(account)
+          expect(results[:username]).to eq 'user'
+        end
+
+        it 'extracts domain' do
+          results = described_class.split_account(account)
+          expect(results[:domain]).to eq 'domain.tld'
+        end
+      end
+
+      context 'with a complete account string with leading @' do
+        let(:account) { '@user@domain.tld' }
 
         it 'extracts username' do
           results = described_class.split_account(account)

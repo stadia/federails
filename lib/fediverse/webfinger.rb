@@ -24,7 +24,7 @@ module Fediverse
       #
       # @return [MatchData, nil] Matches with +:username+ and +:domain+ or +nil+
       def split_account(account)
-        /\A#{ACCOUNT_REGEX}\z/io.match account
+        /\A@?#{ACCOUNT_REGEX}\z/io.match account
       end
 
       # Determines if a given account string should be a local account (same host as configured one)
