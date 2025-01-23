@@ -124,7 +124,7 @@ module Federails
     private
 
     def create_federails_actor
-      Federails::Actor.create! entity: self
+      Federails::Actor.find_or_create_by! entity: self
     end
   end
 end

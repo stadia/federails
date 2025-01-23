@@ -28,6 +28,20 @@ module Federails
           end
         end
 
+        context 'with a supplied actor' do
+          let!(:actor) { FactoryBot.create :distant_actor }
+          let(:instance) { Fixtures::Classes::FakeUserModelWithoutAutoCreation.new email: Faker::Internet.unique.email, federails_actor: actor }
+
+          it 'does not create an actor' do
+            expect { instance.save! }.not_to change(Federails::Actor, :count)
+          end
+
+          it 'associates existing actor' do
+            instance.save!
+            expect(instance.federails_actor).to eq actor
+          end
+        end
+
         context 'without actor auto-creation' do
           let(:instance) { Fixtures::Classes::FakeUserModelWithoutAutoCreation.new email: Faker::Internet.unique.email }
 
