@@ -5,6 +5,7 @@ require:
   - rubocop-rails
   - rubocop-rake
   - rubocop-rspec
+  - rubocop-rspec_rails
   - rubocop-factory_bot
 
 AllCops:
@@ -139,7 +140,7 @@ RSpec/MultipleMemoizedHelpers:
 RSpec/NestedGroups:
   Max: 4
 
-RSpec/Rails/InferredSpecType:
+RSpecRails/InferredSpecType:
   Enabled: false
 
 RSpec/RepeatedDescription:
