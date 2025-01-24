@@ -11,13 +11,14 @@ gem 'sprockets-rails'
 gem 'sqlite3'
 
 # Linters
-gem 'rubocop', '1.60.0'
-gem 'rubocop-factory_bot', '2.25.1'
-gem 'rubocop-faker', '1.1.0'
-gem 'rubocop-performance', '1.20.2'
-gem 'rubocop-rails', '2.23.1'
-gem 'rubocop-rake', '0.6.0'
-gem 'rubocop-rspec', '2.26.1'
+gem 'rubocop'
+gem 'rubocop-factory_bot'
+gem 'rubocop-faker'
+gem 'rubocop-performance'
+gem 'rubocop-rails'
+gem 'rubocop-rake'
+gem 'rubocop-rspec'
+gem 'rubocop-rspec_rails'
 
 # Testing
 gem 'database_cleaner'
