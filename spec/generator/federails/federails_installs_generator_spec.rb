@@ -3,9 +3,9 @@ require 'rails_helper'
 RSpec.describe 'Federails::Install', type: :generator do
   it 'copies all the client views' do # rubocop:disable RSpec/ExampleLength
     output = `bundle exec rails generate federails:install --pretend --skip`
-             &.split("\n")
-             &.map(&:strip)
-             &.join("\n")
+             .split("\n")
+             .map(&:strip)
+             .join("\n")
 
     expect(output).to eq <<~TXT.strip
       skip  spec/dummy/config/federails.yml
