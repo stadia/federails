@@ -34,11 +34,18 @@ module Federails
       when 'Federails::Following'
         [(action == 'Accept' ? entity.actor : entity.target_actor)]
       else
-        actor.followers
+        default_recipient_list
       end
     end
 
     private
+
+    def default_recipient_list
+      list = actor.followers
+      # If local actor is the subject, notify that actor's followers as well
+      list += entity.followers if entity.is_a?(Federails::Actor) && entity.local?
+      list.uniq
+    end
 
     def post_to_inboxes
       NotifyInboxJob.perform_later(self)
