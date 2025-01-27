@@ -63,7 +63,7 @@ module Fediverse
       # @return [String, nil] Federation URL if found
       def webfinger(username, domain)
         json = webfinger_response(username, domain)
-        link = json['links'].find { |l| l['type'] == 'application/activity+json' }
+        link = json['links'].find { |l| Mime::Type.lookup(l['type']).to_sym == :activitypub }
 
         link['href'] if link
       end
