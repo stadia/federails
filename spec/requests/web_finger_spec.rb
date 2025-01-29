@@ -9,6 +9,18 @@ RSpec.describe '/well-known', type: :request do
       expect(response).to be_successful
     end
 
+    it 'renders a not found response given an @ address' do
+      expect do
+        get federails.webfinger_url, params: { resource: "@#{user.id}@localhost" }
+      end.to raise_error ActiveRecord::RecordNotFound
+    end
+
+    it 'renders a not found response given a bare address' do
+      expect do
+        get federails.webfinger_url, params: { resource: "#{user.id}@localhost" }
+      end.to raise_error ActiveRecord::RecordNotFound
+    end
+
     it 'renders a successful response given HTTP URI' do
       get federails.webfinger_url, params: { resource: user.federails_actor.federated_url }
       expect(response).to be_successful
