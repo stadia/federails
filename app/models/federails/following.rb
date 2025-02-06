@@ -14,6 +14,7 @@ module Federails
 
     after_create :after_follow
     after_create :create_activity
+    after_update :after_follow_accepted
     after_destroy :destroy_activity
 
     scope :with_actor, ->(actor) { where(actor_id: actor.id).or(where(target_actor_id: actor.id)) }
@@ -38,6 +39,14 @@ module Federails
 
     def after_follow
       target_actor&.entity&.run_callbacks :followed, :after do
+        self
+      end
+    end
+
+    def after_follow_accepted
+      return unless status_previously_changed? && status == 'accepted'
+
+      actor&.entity&.run_callbacks :accepted, :after do
         self
       end
     end

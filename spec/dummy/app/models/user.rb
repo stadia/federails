@@ -16,6 +16,9 @@ class User < ApplicationRecord
   after_followed :accept_follow
   def accept_follow; end
 
+  after_follow_accepted :follow_accepted
+  def follow_accepted; end
+
   def self.user_count(range)
     if range.nil?
       # No range, return total user count

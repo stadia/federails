@@ -69,6 +69,16 @@ module Federails
         set_callback :followed, :after, method_name
       end
 
+      # Define a method that will be called after a follow request made by the entity is accepted
+      #
+      # @param method_name [Symbol] The name of the method to call, or a block that will be called directly
+      #
+      # @example
+      #   after_follow_accepted :follow_accepted
+      def after_follow_accepted(method_name)
+        set_callback :accepted, :after, method_name
+      end
+
       # Define a method that will be called after an activity has been received
       #
       # @param activity_type [String] The activity action to handle, e.g. 'Create'. If you specify '*', the handler will be called for any activity type.
@@ -85,7 +95,7 @@ module Federails
     included do
       include ActiveSupport::Callbacks
 
-      define_callbacks :followed
+      define_callbacks :followed, :accepted
 
       has_one :federails_actor, class_name: 'Federails::Actor', as: :entity, dependent: :destroy
 
