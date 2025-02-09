@@ -38,17 +38,16 @@ module Federails
     private
 
     def after_follow
-      target_actor&.entity&.run_callbacks :followed, :after do
-        self
-      end
+      return unless target_actor&.entity
+
+      target_actor.entity.class.send(:dispatch_callback, :after_followed, target_actor.entity, self)
     end
 
     def after_follow_accepted
       return unless status_previously_changed? && status == 'accepted'
+      return unless actor&.entity
 
-      actor&.entity&.run_callbacks :accepted, :after do
-        self
-      end
+      actor.entity.class.send(:dispatch_callback, :after_follow_accepted, actor.entity, self)
     end
 
     def create_activity

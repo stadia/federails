@@ -59,24 +59,26 @@ module Federails
       end
       # rubocop:enable Metrics/ParameterLists
 
-      # Define a method that will be called after the entity receives a follow request
+      # Define a method that will be called after the entity receives a follow request.
+      # The follow request will be passed as an argument to the method.
       #
       # @param method_name [Symbol] The name of the method to call, or a block that will be called directly
       #
       # @example
       #   after_followed :accept_follow
       def after_followed(method_name)
-        set_callback :followed, :after, method_name
+        @after_followed = method_name
       end
 
       # Define a method that will be called after a follow request made by the entity is accepted
+      # The accepted follow request will be passed as an argument to the method.
       #
       # @param method_name [Symbol] The name of the method to call, or a block that will be called directly
       #
       # @example
       #   after_follow_accepted :follow_accepted
       def after_follow_accepted(method_name)
-        set_callback :accepted, :after, method_name
+        @after_follow_accepted = method_name
       end
 
       # Define a method that will be called after an activity has been received
@@ -90,13 +92,20 @@ module Federails
       def after_activity_received(activity_type, object_type, method_name)
         Fediverse::Inbox.register_handler(activity_type, object_type, self, method_name)
       end
+
+      private
+
+      def dispatch_callback(name, instance, *args)
+        case name
+        when :after_followed
+          instance.send(@after_followed, *args) if @after_followed
+        when :after_follow_accepted
+          instance.send(@after_follow_accepted, *args) if @after_follow_accepted
+        end
+      end
     end
 
     included do
-      include ActiveSupport::Callbacks
-
-      define_callbacks :followed, :accepted
-
       has_one :federails_actor, class_name: 'Federails::Actor', as: :entity, dependent: :destroy
 
       after_create :create_federails_actor, if: lambda {
