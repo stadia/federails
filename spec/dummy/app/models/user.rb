@@ -14,10 +14,10 @@ class User < ApplicationRecord
   has_many :comments
 
   after_followed :accept_follow
-  def accept_follow; end
+  def accept_follow(follow); end
 
   after_follow_accepted :follow_accepted
-  def follow_accepted; end
+  def follow_accepted(follow); end
 
   def self.user_count(range)
     if range.nil?
