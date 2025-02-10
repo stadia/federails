@@ -9,22 +9,14 @@ module Fediverse
     class << self
       ACCOUNT_REGEX = /(?<username>[a-z0-9\-_.]+)(?:@(?<domain>.*))?/
 
-      # Extracts username and domain from a "acct:username@domain" string
-      #
-      # @param account [String] Account string
-      #
-      # @return [MatchData, nil] Matches with +:username+ and +:domain+ or +nil+
-      def split_resource_account(account)
-        /\Aacct:#{ACCOUNT_REGEX}\z/io.match account
-      end
-
-      # Extracts username and domain from a "username@domain" string
+      # Extracts username and domain from an account string.
+      # Accepts forms "user@domain", "@user@domain", and "acct:user@domain"
       #
       # @param account [String] Account string
       #
       # @return [MatchData, nil] Matches with +:username+ and +:domain+ or +nil+
       def split_account(account)
-        /\A@?#{ACCOUNT_REGEX}\z/io.match account
+        /\A(acct:|@)?#{ACCOUNT_REGEX}\z/io.match account
       end
 
       # Determines if a given account string should be a local account (same host as configured one)

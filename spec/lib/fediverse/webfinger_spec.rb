@@ -49,19 +49,19 @@ module Fediverse
           expect(results[:domain]).to eq 'domain.tld'
         end
       end
-    end
 
-    describe '#split_resource_account' do
-      let(:resource_string) { 'acct:user@domain.tld' }
+      context 'with a full acct: URI' do
+        let(:resource_string) { 'acct:user@domain.tld' }
 
-      it 'extracts username from the resource string' do
-        results = described_class.split_resource_account(resource_string)
-        expect(results[:username]).to eq 'user'
-      end
+        it 'extracts username from the resource string' do
+          results = described_class.split_account(resource_string)
+          expect(results[:username]).to eq 'user'
+        end
 
-      it 'extracts domain from the resource string' do
-        results = described_class.split_resource_account(resource_string)
-        expect(results[:domain]).to eq 'domain.tld'
+        it 'extracts domain from the resource string' do
+          results = described_class.split_account(resource_string)
+          expect(results[:domain]).to eq 'domain.tld'
+        end
       end
     end
 

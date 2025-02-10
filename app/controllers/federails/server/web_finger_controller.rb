@@ -31,7 +31,7 @@ module Federails
       private
 
       def username
-        account = Fediverse::Webfinger.split_resource_account params.require(:resource)
+        account = Fediverse::Webfinger.split_account params.require(:resource)
         # Fail early if user don't _seems_ local
         raise ActiveRecord::RecordNotFound unless account && Fediverse::Webfinger.local_user?(account)
 
