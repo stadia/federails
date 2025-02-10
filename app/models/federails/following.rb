@@ -51,7 +51,7 @@ module Federails
     end
 
     def create_activity
-      Activity.create! actor: actor, action: 'Create', entity: self
+      Activity.create! actor: actor, action: 'Follow', entity: target_actor
     end
 
     def destroy_activity
