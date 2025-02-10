@@ -28,6 +28,10 @@ module Federails
       Activity.create! actor: target_actor, action: 'Accept', entity: self
     end
 
+    def follow_activity
+      Activity.find_by actor: actor, action: 'Follow', entity: target_actor
+    end
+
     class << self
       def new_from_account(account, actor:)
         target_actor = Actor.find_or_create_by_account account

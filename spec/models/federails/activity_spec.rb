@@ -17,7 +17,7 @@ module Federails
 
       context 'when creating a Following' do
         it 'notifies the target actor' do
-          expect(following.activities.last.recipients).to eq [distant_actor]
+          expect(following.follow_activity.recipients).to eq [distant_actor]
         end
       end
 

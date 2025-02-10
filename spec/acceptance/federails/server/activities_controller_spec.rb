@@ -5,7 +5,7 @@ RSpec.describe Federails::Server::ActivitiesController, type: :acceptance do
   let(:headers) { { accept: 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"' } }
   let(:actor) { FactoryBot.create(:user).federails_actor }
   let(:following) { FactoryBot.create :following, actor: actor }
-  let(:following_activity) { following.activities.last }
+  let(:following_activity) { following.follow_activity }
 
   before do
     RSpec::Rails::Api::Metadata.default_expected_content_type =
@@ -86,7 +86,7 @@ RSpec.describe Federails::Server::ActivitiesController, type: :acceptance do
     let(:inbox_payload) do
       {
         '@context' => 'https://www.w3.org/ns/activitystreams',
-        'id'       => federails.server_actor_activity_url(actor, following.activities.last),
+        'id'       => federails.server_actor_activity_url(actor, following.follow_activity),
         'type'     => 'Create',
         'actor'    => distant_actor.federated_url,
         'object'   => federails.server_actor_following_url(actor, following),
