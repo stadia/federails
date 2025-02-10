@@ -83,11 +83,15 @@ module Federails
     end
 
     def at_address
-      "#{username}@#{server}"
+      "@#{username}@#{server}"
     end
 
     def short_at_address
       local? ? "@#{username}" : at_address
+    end
+
+    def acct_uri
+      "acct:#{username}@#{server}"
     end
 
     def follows?(actor)
