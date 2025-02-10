@@ -30,9 +30,13 @@ module Federails
     def recipients
       return [] unless actor.local?
 
-      case entity_type
-      when 'Federails::Following'
-        [(action == 'Accept' ? entity.actor : entity.target_actor)]
+      case action
+      when 'Follow'
+        [entity]
+      when 'Undo'
+        [entity.target_actor]
+      when 'Accept'
+        [entity.actor]
       else
         default_recipient_list
       end
