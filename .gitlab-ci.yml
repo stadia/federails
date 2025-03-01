@@ -20,6 +20,7 @@ before_script:
   - bundle --version
   - bundle config set --local jobs $(nproc)
   - bundle config set --local without ':doc'
+  - bundle config set --local path vendor
   - bundle install --quiet
 
 # Bundle stage
