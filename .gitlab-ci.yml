@@ -6,7 +6,7 @@ stages:
   - test
   - deploy
 
-cache: &dependencies
+.cache: &cache_definition
   untracked: true
   key:
     files:
@@ -30,7 +30,7 @@ bundle:
   script:
     - echo "This job only fills the cache"
   cache:
-    <<: *dependencies
+    <<: *cache_definition
     policy: push
 
 # Code lint
