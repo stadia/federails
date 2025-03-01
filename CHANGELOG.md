@@ -30,6 +30,11 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ## [Unreleased]
 
+### Fixed
+
+- `sleeping_king_studios-yard` repository has been renamed to `sleeping_king_studios-docs`. A gem 
+  [is planned](https://github.com/sleepingkingstudios/sleeping_king_studios-docs/issues/53) 
+
 ## [0.5.0] 2025-01-22
 
 ### Added

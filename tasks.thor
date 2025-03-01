@@ -1,1 +1,1 @@
-load 'sleeping_king_studios/yard/tasks.rb'
+load 'sleeping_king_studios/docs/tasks.rb'
