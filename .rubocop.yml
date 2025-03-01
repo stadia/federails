@@ -1,10 +1,11 @@
 ---
-require:
+plugins:
   - rubocop-faker
   - rubocop-performance
   - rubocop-rails
   - rubocop-rake
   - rubocop-rspec
+require:
   - rubocop-rspec_rails
   - rubocop-factory_bot
 
