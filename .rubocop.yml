@@ -103,6 +103,13 @@ Rails/I18nLocaleTexts:
   Exclude:
     - spec/dummy/**/*
 
+# Unsafe rule for Rails 8
+# Re-enable when we don't support Rails 7 anymore and when the behavior stabilized
+# Also, see
+#  - https://github.com/rubocop/rubocop-rails/issues/1418 for an issue with Rubocop autocorrect on this rule
+Rails/StrongParametersExpect:
+  Enabled: false
+
 RSpec/DescribeClass:
   Exclude:
     # Tasks
