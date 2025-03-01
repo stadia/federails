@@ -23,6 +23,17 @@ The general direction is to be able to:
 - implement some or all the parts of the RFC labelled with **SHOULD** and **SHOULD NOT**
 - maybe implement the parts of the RFC labelled with **MAY**
 
+## Supported Ruby on Rails versions
+
+This gem is tested against non end-of-life versions of Ruby and Rails:
+
+- Ruby versions 3.1 to 3.4
+- Rails 7.1 to 8.0.x.
+
+Feel free to open an issue if we missed something
+
+It _may_ work on other versions, but we won't provide support.
+
 ## Documentation
 
 - [Usage](docs/usage.md)
