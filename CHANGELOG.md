@@ -38,6 +38,7 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 ### Maintenance
 
 - CI now runs against multiple Ruby versions
+- CI now runs against multiple Rails versions
 
 ## [0.5.0] 2025-01-22
 
