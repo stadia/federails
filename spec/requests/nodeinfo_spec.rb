@@ -50,11 +50,21 @@ RSpec.describe '/nodeinfo', type: :request do
       expect(JSON.parse(response.body)['openRegistrations']).to be false # rubocop:disable Rails/ResponseParsedBody
     end
 
-    it 'shows open registrations if set' do
+    it 'shows open registrations if set' do # rubocop:todo RSpec/ExampleLength
       prev = Federails::Configuration.open_registrations
       Federails::Configuration.open_registrations = true
       get federails.show_node_info_url
       expect(JSON.parse(response.body)['openRegistrations']).to be true # rubocop:disable Rails/ResponseParsedBody
+    ensure
+      Federails::Configuration.open_registrations = prev
+    end
+
+    it 'gets open registrations from a proc' do # rubocop:todo RSpec/ExampleLength
+      prev = Federails::Configuration.open_registrations
+      Federails::Configuration.open_registrations = -> { true }
+      get federails.show_node_info_url
+      expect(JSON.parse(response.body)['openRegistrations']).to be true # rubocop:disable Rails/ResponseParsedBody
+    ensure
       Federails::Configuration.open_registrations = prev
     end
   end

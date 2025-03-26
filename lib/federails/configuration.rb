@@ -28,8 +28,12 @@ module Federails
     @@enable_discovery = true
 
     # Does the site allow open registrations? (only used for nodeinfo reporting)
-    mattr_accessor :open_registrations
+    # Can either be a static boolean, or a Proc which will be called to get the state.
+    mattr_writer :open_registrations
     @@open_registrations = false
+    def self.open_registrations
+      @@open_registrations.is_a?(Proc) ? @@open_registrations.call : @@open_registrations
+    end
 
     # Application layout
     mattr_accessor :app_layout
