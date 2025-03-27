@@ -11,15 +11,16 @@ module Federails
   class Actor < ApplicationRecord # rubocop:disable Metrics/ClassLength
     include Federails::HasUuid
 
-    validates :federated_url, presence: { unless: :entity }, uniqueness: { unless: :entity }
-    validates :username, presence: { unless: :entity }
-    validates :server, presence: { unless: :entity }
-    validates :inbox_url, presence: { unless: :entity }
-    validates :outbox_url, presence: { unless: :entity }
-    validates :followers_url, presence: { unless: :entity }
-    validates :followings_url, presence: { unless: :entity }
-    validates :profile_url, presence: { unless: :entity }
+    validates :federated_url, presence: { unless: :entity }, uniqueness: { unless: :local? }
+    validates :username, presence: { unless: :local? }
+    validates :server, presence: { unless: :local? }
+    validates :inbox_url, presence: { unless: :local? }
+    validates :outbox_url, presence: { unless: :local? }
+    validates :followers_url, presence: { unless: :local? }
+    validates :followings_url, presence: { unless: :local? }
+    validates :profile_url, presence: { unless: :local? }
     validates :entity_id, uniqueness: { scope: :entity_type }, if: :entity_type
+    validates :entity, presence: true, if: -> { local? }
 
     belongs_to :entity, polymorphic: true, optional: true
     # FIXME: Handle this with something like undelete
@@ -33,11 +34,8 @@ module Federails
     scope :local, -> { where(local: true) }
     scope :distant, -> { where(local: false) }
 
-    before_create :set_local
-
-    def local?
-      # New actors may not have "local" set to true yet
-      local || entity_type.present?
+    def distant?
+      !local?
     end
 
     def federated_url
@@ -200,10 +198,6 @@ module Federails
                      end,
         public_key:  rsa_key.public_key.to_pem,
       }
-    end
-
-    def set_local
-      self.local = entity_id.present?
     end
   end
 end

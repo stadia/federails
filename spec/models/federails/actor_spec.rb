@@ -37,6 +37,11 @@ module Federails
         duplicate.validate
         expect(duplicate.errors.details[:federated_url][0][:error]).to eq :taken
       end
+
+      it 'does not set the "local" flag' do
+        actor = described_class.create! distant_actor_attributes
+        expect(actor).not_to be_local
+      end
     end
 
     context 'when creating local actors' do
@@ -45,6 +50,11 @@ module Federails
         duplicate = described_class.new(entity: user)
         duplicate.validate
         expect(duplicate.errors.details[:entity_id][0][:error]).to eq :taken
+      end
+
+      it 'sets the "local" flag' do
+        user = FactoryBot.create :user
+        expect(user.federails_actor).to be_local
       end
 
       it 'creates a new RSA keypair with public key' do
@@ -187,6 +197,29 @@ module Federails
           described_class.find_or_create_by_object hash
           expect(described_class).to have_received(:find_or_create_by_federation_url).with(distant_url)
         end
+      end
+    end
+
+    describe 'local actor' do
+      it 'must have a related entity' do
+        entity = described_class.new local: true
+        entity.validate
+        expect(entity.errors[:entity]).to include "can't be blank"
+      end
+    end
+
+    describe 'distant actor' do
+      it 'can be without a related entity' do
+        entity = described_class.new local: false
+        entity.validate
+        expect(entity.errors[:entity]).to be_empty
+      end
+
+      it 'can have a related entity' do
+        post = FactoryBot.create :post # This makes no sense beside validating the example
+        entity = described_class.new local: false, entity: post
+        entity.validate
+        expect(entity.errors[:entity]).to be_empty
       end
     end
   end

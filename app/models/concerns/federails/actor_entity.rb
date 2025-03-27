@@ -142,8 +142,15 @@ module Federails
 
     private
 
+    # Result is used to determine if an actor related to this entity should be created as local actor or not
+    #
+    # Override it in your models if you need distant actors to be related to another entity.
+    def create_federails_actor_as_local?
+      true
+    end
+
     def create_federails_actor
-      Federails::Actor.find_or_create_by! entity: self
+      Federails::Actor.find_or_create_by! entity: self, local: create_federails_actor_as_local?
     end
   end
 end
