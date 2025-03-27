@@ -58,6 +58,23 @@ just_the_docs:
     code_reference:
       name: Code reference
 
+callouts_level: quiet # or loud
+callouts:
+  highlight:
+    color: yellow
+  important:
+    title: Important
+    color: blue
+  new:
+    title: New
+    color: green
+  note:
+    title: Note
+    color: purple
+  warning:
+    title: Warning
+    color: red
+
 # Aux links for the upper right navigation
 aux_links:
   Community chat:
