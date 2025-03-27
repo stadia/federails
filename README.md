@@ -48,3 +48,12 @@ The gem is available as open source under the terms of the [MIT License](https:/
 
 See [CONTRIBUTING](CONTRIBUTING.md) to have an overview of the process and the tools we use.
 
+### Contributors
+
+- [echarp](https://gitlab.com/echarp)
+- [James Smith](https://gitlab.com/floppy.uk)
+- [Manuel Tancoigne](https://gitlab.com/mtancoigne)
+
+### Indirect contributions
+
+- Gitlab runners are graciously provided by [Coopaname](https://coopaname.coop), a French cooperative.
