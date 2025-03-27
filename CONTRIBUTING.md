@@ -13,7 +13,22 @@ To contribute:
 1. Fork this repository
 2. Create small commits
 3. Ideally create small pull requests. Don't hesitate to open them early so we all can follow how it's going
-4. Get congratulated
+4. Add yourself to the contributors list in the README (list is sorted alphabetically).
+5. Get congratulated
+
+{: .note-title }
+> About commits
+> 
+> Unless it's only part of a feature, a commit should contain:
+> - The changelog entry corresponding to your change
+> - An entry in the migration guide for breaking changes or if the change will require a specific action from
+>   integrators when updating
+> - Changes the documentation: update impacted examples and descriptions, or write new ones
+>
+> If you develop a whole feature with multiple commits, update changelog, migration guide and documentation last, with
+> three separate commits.
+>
+> We require _you_ to update the docs as _you_ are the best to document your code.
 
 ## Tooling
 
