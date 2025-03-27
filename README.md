@@ -38,8 +38,13 @@ It _may_ work on other versions, but we won't provide support.
 
 - [Usage](docs/usage.md)
 - [Common questions](docs/faq.md)
-- [Contributing](docs/contributing.md)
+- [Contributing](CONTRIBUTING.md)
 
 ## License
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+
+## Contributing
+
+See [CONTRIBUTING](CONTRIBUTING.md) to have an overview of the process and the tools we use.
+

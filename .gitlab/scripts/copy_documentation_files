@@ -19,6 +19,10 @@ sed -i '1s/^/---\n---\n\n/' docs/index.md
 sed -i -r 's/\(docs\/(.*)\.md\)/(.\/\1)/' docs/index.md
 replace_md_links docs/index.md
 
+cp CONTRIBUTING.md docs/
+set_title_and_order docs/CONTRIBUTING.md Contributing 40
+replace_md_links docs/CONTRIBUTING.md
+
 cp CHANGELOG.md docs/
 set_title_and_order docs/CHANGELOG.md Changelog 98
 replace_md_links docs/CHANGELOG.md

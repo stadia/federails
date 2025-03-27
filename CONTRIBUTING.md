@@ -1,8 +1,3 @@
----
-title: Contributing
-nav_order: 40
----
-
 # Contributing
 
 Contributions are welcome, may it be issues, ideas, code or whatever you want to share. Please note:
