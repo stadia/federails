@@ -2,8 +2,8 @@
 
 Contributions are welcome, may it be issues, ideas, code or whatever you want to share. Please note:
 
-- This project is _fast forward_ only: we don't do merge commits
-- We adhere to [semantic versioning](). Please update the changelog in your commits
+- This project is _fast-forward_ only: we don't do merge commits
+- We adhere to [semantic versioning](https://semver.org/).
 - We try to adhere to [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) principles
 - We _may_ rename your commits before merging them
 - We _may_ split your commits before merging them
@@ -36,7 +36,7 @@ bundle exec rubocop
 ### FactoryBot
 
 FactoryBot is a factory generator used in tests and development.
-A rake task checks the replayability of the factories and traits:
+A rake task checks the re-playability of the factories and traits:
 
 ```sh
 bundle exec app:factory_bot:lint
