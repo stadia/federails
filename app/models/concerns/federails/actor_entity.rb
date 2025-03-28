@@ -150,7 +150,7 @@ module Federails
     end
 
     def create_federails_actor
-      Federails::Actor.find_or_create_by! entity: self, local: create_federails_actor_as_local?
+      Federails::Actor.create_with(local: create_federails_actor_as_local?).find_or_create_by!(entity: self)
     end
   end
 end
