@@ -50,6 +50,16 @@ module Federails
           end
         end
       end
+
+      describe '.before_destroy' do
+        let(:instance) { Fixtures::Classes::FakeUserModel.create! email: Faker::Internet.unique.email }
+
+        it 'marks the actor as tombstoned' do
+          actor = instance.federails_actor
+          instance.destroy!
+          expect(actor.reload).to be_tombstoned
+        end
+      end
     end
   end
 end

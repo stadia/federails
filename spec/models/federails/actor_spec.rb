@@ -226,6 +226,48 @@ module Federails
       end
     end
 
+    describe '#tombstone!' do
+      context 'with a distant actor' do
+        let(:entity) { described_class.create! distant_actor_attributes }
+
+        it 'does not create an activity' do
+          expect { entity.tombstone! }.not_to change(Federails::Activity, :count)
+        end
+
+        it 'makes the actor tombstoned' do
+          entity.tombstone!
+
+          expect(entity.tombstoned_at).not_to be_nil
+        end
+
+        it 'saves the entity' do
+          entity.tombstone!
+
+          expect(entity).not_to be_changed
+        end
+      end
+
+      context 'with a local actor' do
+        let(:entity) { FactoryBot.create(:user).federails_actor }
+
+        it 'creates an activity' do
+          expect { entity.tombstone! }.to change(Federails::Activity, :count).by 1
+        end
+
+        it 'makes the actor tombstoned' do
+          entity.tombstone!
+
+          expect(entity.tombstoned_at).not_to be_nil
+        end
+
+        it 'saves the entity' do
+          entity.tombstone!
+
+          expect(entity).not_to be_changed
+        end
+      end
+    end
+
     describe 'local actor' do
       it 'must have a related entity' do
         entity = described_class.new local: true

@@ -106,13 +106,15 @@ module Federails
     end
 
     included do
-      has_one :federails_actor, class_name: 'Federails::Actor', as: :entity, dependent: :destroy
+      # No "dependent: :xyz" as the "before_destroy" hook should have nullified the actor
+      has_one :federails_actor, class_name: 'Federails::Actor', as: :entity # rubocop:disable Rails/HasManyOrHasOneDependent
 
       after_create :create_federails_actor, if: lambda {
         raise("Entity not configured for #{self.class.name}. Did you use \"acts_as_federails_actor\"?") unless Federails.actor_entity? self
 
         Federails.actor_entity(self)[:auto_create_actors]
       }
+      before_destroy :tombstone_federails_actor!
     end
 
     # Add custom data to actor responses.
@@ -151,6 +153,10 @@ module Federails
 
     def create_federails_actor
       Federails::Actor.create_with(local: create_federails_actor_as_local?).find_or_create_by!(entity: self)
+    end
+
+    def tombstone_federails_actor!
+      federails_actor.tombstone!
     end
   end
 end

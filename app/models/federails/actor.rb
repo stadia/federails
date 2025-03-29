@@ -1,4 +1,5 @@
 require 'federails/utils/host'
+require 'federails/utils/actor'
 require 'fediverse/webfinger'
 
 module Federails
@@ -23,7 +24,7 @@ module Federails
     validates :profile_url, presence: { unless: :local? }
     validates :actor_type, presence: { unless: :local? }
     validates :entity_id, uniqueness: { scope: :entity_type }, if: :entity_type
-    validates :entity, presence: true, if: -> { local? }
+    validates :entity, presence: true, if: -> { local? && !tombstoned? }
 
     belongs_to :entity, polymorphic: true, optional: true
     # FIXME: Handle this with something like undelete
@@ -119,6 +120,10 @@ module Federails
 
     def tombstoned?
       tombstoned_at.present?
+    end
+
+    def tombstone!
+      Federails::Utils::Actor.tombstone! self
     end
 
     class << self
