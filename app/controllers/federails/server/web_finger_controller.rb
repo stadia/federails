@@ -9,7 +9,7 @@ module Federails
         resource = params.require(:resource)
         case resource
         when %r{^https?://.+}
-          @user = Federails::Actor.find_by_federation_url(resource)&.entity
+          @user = Federails::Actor.find_by_federation_url!(resource).entity # rubocop:disable Rails/DynamicFindBy
         when /^acct:.+/
           actor = Federails::Actor.find_local_by_username(username)
           @user = actor&.entity

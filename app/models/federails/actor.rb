@@ -136,6 +136,12 @@ module Federails
         Fediverse::Webfinger.fetch_actor_url(federated_url)
       end
 
+      def find_by_federation_url!(federated_url)
+        find_by_federation_url(federated_url).tap do |actor|
+          raise ActiveRecord::RecordNotFound if actor.nil?
+        end
+      end
+
       def find_or_create_by_account(account)
         actor = find_by_account account
         # Create/update distant actors
