@@ -33,6 +33,27 @@ RSpec.describe '/federation/actors', type: :request do
         expect(response.content_type).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"; charset=utf-8'
       end
     end
+
+    context 'when the actor is tombstoned' do
+      before do
+        user.federails_actor.tombstone!
+      end
+
+      it 'responds with a 410' do
+        get federails.server_actor_url(user.federails_actor), headers: { accept: Mime[:activitypub] }
+        expect(response).to have_http_status :gone
+      end
+
+      it 'responds with the Tombstone object' do
+        get federails.server_actor_url(user.federails_actor), headers: { accept: Mime[:activitypub] }
+
+        hash = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+
+        aggregate_failures do
+          expect(hash.keys).to include '@context', 'type', 'id', 'deleted', 'formerType'
+        end
+      end
+    end
   end
 
   describe 'GET /followers' do

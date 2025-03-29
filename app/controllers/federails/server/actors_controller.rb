@@ -5,7 +5,10 @@ module Federails
 
       # GET /federation/actors/1
       # GET /federation/actors/1.json
-      def show; end
+      def show
+        status = @actor.tombstoned? ? :gone : :ok
+        render :show, status: status
+      end
 
       # GET /federation/actors/:id/followers
       # GET /federation/actors/:id/followers.json
