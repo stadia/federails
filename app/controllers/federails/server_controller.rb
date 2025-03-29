@@ -8,6 +8,7 @@ module Federails
     helper Federails::ServerHelper
 
     rescue_from ActiveRecord::RecordNotFound, with: :error_not_found
+    rescue_from Federails::Actor::TombstonedError, with: :error_gone
 
     private
 
@@ -25,6 +26,10 @@ module Federails
 
     def error_not_found(exception = nil)
       error_fallback(exception, 'Resource not found', :not_found)
+    end
+
+    def error_gone(exception = nil)
+      error_fallback(exception, 'Resource is gone', :gone)
     end
   end
 end
