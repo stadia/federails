@@ -109,6 +109,10 @@ module Federails
     end
 
     class << self
+      # Searches for an actor from account URI
+      #
+      # @param account [String] Account URI (username@host)
+      # @return [Federails::Actor, nil]
       def find_by_account(account) # rubocop:todo Metrics/AbcSize
         parts = Fediverse::Webfinger.split_account account
 

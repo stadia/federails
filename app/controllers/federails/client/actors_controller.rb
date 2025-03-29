@@ -16,8 +16,8 @@ module Federails
       # GET /app/actors/1.json
       def show; end
 
-      # GET /app/explorer/lookup
-      # GET /app/explorer/lookup.json
+      # GET /app/actors/lookup
+      # GET /app/actors/lookup.json
       def lookup
         @actor = Federails::Actor.find_by_account account_param
         authorize @actor, policy_class: Federails::Client::ActorPolicy

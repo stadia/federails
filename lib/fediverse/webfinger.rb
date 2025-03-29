@@ -10,7 +10,7 @@ module Fediverse
       ACCOUNT_REGEX = /(?<username>[a-z0-9\-_.]+)(?:@(?<domain>.*))?/
 
       # Extracts username and domain from an account string.
-      # Accepts forms "user@domain", "@user@domain", and "acct:user@domain"
+      # Accepts forms "user@domain", "@user@domain" and "acct:user@domain"
       #
       # @param account [String] Account string
       #

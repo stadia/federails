@@ -3,7 +3,7 @@ module Federails
     module Note
       # Renders a Note. The entity is used to determine actor and generic fields data
       #
-      # @param entity [#federail_actor] A model instance
+      # @param entity [#federail_actor, #federated_url, #created_at, #updated_at] A model instance
       # @param content [String] Note content
       # @param name [String, nil] Optional name/title
       # @param custom [Hash] Optional additional keys (e.g.: attachment, icon, ...). Defaults will override these.
