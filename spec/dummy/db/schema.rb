@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_03_01_082500) do
+ActiveRecord::Schema[7.2].define(version: 2025_03_29_123939) do
   create_table "comments", force: :cascade do |t|
     t.text "content", null: false
     t.integer "user_id"
@@ -58,6 +58,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_03_01_082500) do
     t.text "private_key"
     t.json "extensions"
     t.boolean "local", default: false, null: false
+    t.string "actor_type"
     t.index ["entity_type", "entity_id"], name: "index_federails_actors_on_entity", unique: true
     t.index ["federated_url"], name: "index_federails_actors_on_federated_url", unique: true
     t.index ["uuid"], name: "index_federails_actors_on_uuid", unique: true

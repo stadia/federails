@@ -9,7 +9,7 @@ json.set! '@context', ([
 
 json.id actor.federated_url
 json.name actor.name
-json.type actor.entity_configuration[:actor_type]
+json.type actor.actor_type
 json.preferredUsername actor.username
 json.inbox actor.inbox_url
 json.outbox actor.outbox_url

@@ -19,6 +19,7 @@ module Federails
     validates :followers_url, presence: { unless: :local? }
     validates :followings_url, presence: { unless: :local? }
     validates :profile_url, presence: { unless: :local? }
+    validates :actor_type, presence: { unless: :local? }
     validates :entity_id, uniqueness: { scope: :entity_type }, if: :entity_type
     validates :entity, presence: true, if: -> { local? }
 
@@ -56,6 +57,10 @@ module Federails
 
     def server
       local? ? Utils::Host.localhost : attributes['server']
+    end
+
+    def actor_type
+      local? ? entity_configuration[:actor_type] : attributes['actor_type']
     end
 
     def inbox_url

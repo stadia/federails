@@ -107,6 +107,7 @@ module Fediverse
         id = data.delete('id')
         Federails::Actor.new federated_url:  id,
                              username:       data.delete('preferredUsername'),
+                             actor_type:     data.delete('type'),
                              name:           data.delete('name'),
                              server:         server_and_port(id),
                              inbox_url:      data.delete('inbox'),
