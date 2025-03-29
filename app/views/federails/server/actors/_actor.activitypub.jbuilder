@@ -1,4 +1,4 @@
-actor_data = actor.entity.to_activitypub_object
+actor_data = actor.entity&.to_activitypub_object || {}
 
 json.set! '@context', ([
   'https://www.w3.org/ns/activitystreams',
