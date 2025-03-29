@@ -151,6 +151,7 @@ module Federails
 
       def find_by_federation_url!(federated_url)
         find_by_federation_url(federated_url).tap do |actor|
+          raise Federails::Actor::TombstonedError if actor.tombstoned?
           raise ActiveRecord::RecordNotFound if actor.nil?
         end
       end
@@ -190,7 +191,10 @@ module Federails
 
           actor = entity[:class].find_by(entity[:username_field] => username)&.federails_actor
         end
-        actor
+        return actor if actor
+
+        # Last hope: Search for tombstoned actors
+        Federails::Actor.local.tombstoned.find_by username: username
       end
 
       def find_local_by_username!(username)
