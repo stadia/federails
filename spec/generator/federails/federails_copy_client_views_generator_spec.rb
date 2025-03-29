@@ -18,6 +18,7 @@ RSpec.describe 'Federails::CopyClientViews', type: :generator do
       create  spec/dummy/app/views/federails/client/activities/index.json.jbuilder
       create  spec/dummy/app/views/federails/client/actors/_actor.json.jbuilder
       create  spec/dummy/app/views/federails/client/actors/_lookup_form.html.erb
+      create  spec/dummy/app/views/federails/client/actors/gone.html.erb
       create  spec/dummy/app/views/federails/client/actors/index.html.erb
       create  spec/dummy/app/views/federails/client/actors/index.json.jbuilder
       create  spec/dummy/app/views/federails/client/actors/show.html.erb

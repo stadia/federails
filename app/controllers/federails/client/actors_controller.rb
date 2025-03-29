@@ -14,14 +14,16 @@ module Federails
 
       # GET /app/actors/1
       # GET /app/actors/1.json
-      def show; end
+      def show
+        render_show
+      end
 
       # GET /app/actors/lookup
       # GET /app/actors/lookup.json
       def lookup
         @actor = Federails::Actor.find_by_account account_param
         authorize @actor, policy_class: Federails::Client::ActorPolicy
-        render :show
+        render_show
       end
 
       private
@@ -34,6 +36,18 @@ module Federails
 
       def account_param
         params.require('account')
+      end
+
+      def render_show
+        respond_to do |format|
+          if @actor.tombstoned?
+            format.html { render :gone, status: :gone }
+            format.json { render json: { error: I18n.t('controller.actors.gone') }, status: :gone }
+          else
+            format.html { render :show }
+            format.json { render :show }
+          end
+        end
       end
     end
   end

@@ -12,5 +12,6 @@ json.extract! actor,
               :local,
               :entity_id,
               :entity_type,
+              :tombstoned_at,
               :created_at,
               :updated_at

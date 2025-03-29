@@ -48,6 +48,16 @@ RSpec.describe '/actors', type: :request do
       end
     end
 
+    context 'with a tombstoned actor' do
+      let(:actor) { FactoryBot.create(:local_actor).tap(&:tombstone!) }
+
+      it 'renders an error page' do
+        get federails.client_actor_url(actor)
+
+        expect(response).to have_http_status :gone
+      end
+    end
+
     context 'without a valid actor' do
       it 'renders an error page' do
         expect do
@@ -58,10 +68,29 @@ RSpec.describe '/actors', type: :request do
   end
 
   describe 'GET /lookup' do
+    let(:user) { FactoryBot.create :user }
+
     it 'renders a successful response' do
-      user = FactoryBot.create :user
       get federails.lookup_client_actors_url account: user.id
       expect(response).to be_successful
+    end
+
+    context 'with a tombstoned actor' do
+      let(:actor) { FactoryBot.create(:local_actor).tap(&:tombstone!) }
+
+      it 'renders an error page' do
+        get federails.lookup_client_actors_url account: actor.username
+
+        expect(response).to have_http_status :gone
+      end
+    end
+
+    context 'without a valid actor' do
+      it 'renders an error page' do
+        expect do
+          get federails.lookup_client_actors_url account: 'invalid'
+        end.to raise_error ActiveRecord::RecordNotFound
+      end
     end
   end
 end
