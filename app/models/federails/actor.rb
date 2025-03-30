@@ -113,15 +113,11 @@ module Federails
       #
       # @param account [String] Account URI (username@host)
       # @return [Federails::Actor, nil]
-      def find_by_account(account) # rubocop:todo Metrics/AbcSize
+      def find_by_account(account)
         parts = Fediverse::Webfinger.split_account account
 
         if Fediverse::Webfinger.local_user? parts
-          actor = nil
-          Federails::Configuration.actor_types.each_value do |entity|
-            actor ||= entity[:class].find_by(entity[:username_field] => parts[:username])&.federails_actor
-          end
-          raise ActiveRecord::RecordNotFound if actor.nil?
+          actor = find_local_by_username! parts[:username]
         else
           actor = find_by username: parts[:username], server: parts[:domain]
           actor ||= Fediverse::Webfinger.fetch_actor(parts[:username], parts[:domain])
@@ -165,6 +161,22 @@ module Federails
           find_or_create_by_federation_url object['id']
         else
           raise "Unsupported object type for actor (#{object.class})"
+        end
+      end
+
+      def find_local_by_username(username)
+        actor = nil
+        Federails::Configuration.actor_types.each_value do |entity|
+          break if actor.present?
+
+          actor = entity[:class].find_by(entity[:username_field] => username)&.federails_actor
+        end
+        actor
+      end
+
+      def find_local_by_username!(username)
+        find_local_by_username(username).tap do |actor|
+          raise ActiveRecord::RecordNotFound if actor.nil?
         end
       end
     end

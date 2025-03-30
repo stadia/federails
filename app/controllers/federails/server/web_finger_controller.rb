@@ -11,9 +11,8 @@ module Federails
         when %r{^https?://.+}
           @user = Federails::Actor.find_by_federation_url(resource)&.entity
         when /^acct:.+/
-          Federails::Configuration.actor_types.each_value do |entity|
-            @user ||= entity[:class].find_by(entity[:username_field] => username)
-          end
+          actor = Federails::Actor.find_local_by_username(username)
+          @user = actor&.entity
         end
         raise ActiveRecord::RecordNotFound if @user.nil?
 

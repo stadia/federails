@@ -200,6 +200,32 @@ module Federails
       end
     end
 
+    describe '#find_local_by_username' do
+      let(:user) { FactoryBot.create :user }
+
+      it 'returns the local actor' do
+        # ID is used as username in dummy
+        expect(described_class.find_local_by_username(user.id)).to eq user.federails_actor
+      end
+
+      it 'returns nil when not found' do
+        expect(described_class.find_local_by_username('invalid_username')).to be_nil
+      end
+    end
+
+    describe '#find_local_by_username!' do
+      let(:user) { FactoryBot.create :user }
+
+      it 'returns the local actor' do
+        # ID is used as username in dummy
+        expect(described_class.find_local_by_username!(user.id)).to eq user.federails_actor
+      end
+
+      it 'raises an error' do
+        expect { described_class.find_local_by_username! 'invalid_username' }.to raise_error ActiveRecord::RecordNotFound
+      end
+    end
+
     describe 'local actor' do
       it 'must have a related entity' do
         entity = described_class.new local: true
