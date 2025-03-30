@@ -12,6 +12,8 @@ module Federails
           @user = Federails::Actor.find_by_federation_url!(resource).entity # rubocop:disable Rails/DynamicFindBy
         when /^acct:.+/
           actor = Federails::Actor.find_local_by_username(username)
+          raise Federails::Actor::TombstonedError if actor&.tombstoned?
+
           @user = actor&.entity
         end
         raise ActiveRecord::RecordNotFound if @user.nil?

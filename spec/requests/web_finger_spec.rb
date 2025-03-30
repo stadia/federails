@@ -38,6 +38,22 @@ RSpec.describe '/well-known', type: :request do
       end
     end
 
+    context 'with a tombstoned actor' do
+      let(:actor) { user.federails_actor.tombstone! }
+
+      ['application/jrd+json', 'application/json'].each do |accept|
+        it "returns an error page to a #{accept} request with an URL resource" do
+          get federails.webfinger_url, params: { resource: actor.federated_url }, headers: { accept: accept }
+          expect(response).to have_http_status :gone
+        end
+
+        it "returns an error page to a #{accept} request with an 'acct:' resource" do
+          get federails.webfinger_url, params: { resource: actor.acct_uri }, headers: { accept: accept }
+          expect(response).to have_http_status :gone
+        end
+      end
+    end
+
     context 'when checking content' do
       let(:result) do
         get federails.webfinger_url, params: { resource: "acct:#{user.id}@localhost" }, headers: { accept: accept }

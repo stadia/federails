@@ -19,16 +19,21 @@ RSpec.describe Federails::Server::WebFingerController, type: :acceptance do
 
   on_get '/.well-known/webfinger', 'Find actor' do
     path_params fields: { resource: { type: :string, description: 'actor address, e.g.: "acct:user@server.tld"' } }
+    let(:user) { FactoryBot.create :user }
 
     # Test that JRD is delivered in response to application/jrd+json
     for_code 200, expect_one: :webfinger do |url|
-      user = FactoryBot.create :user
       # Use the user's id as username in dummy app, as there is no username field on the user's table
       test_response_of url, path_params: { resource: "acct:#{user.id}@localhost" }, headers: headers
     end
 
     for_code 404, with_content_type: Mime[:jrd] do |url|
       test_response_of url, path_params: { resource: 'acct:john@doe-service.org' }, headers: headers
+    end
+
+    for_code 410, with_content_type: Mime[:jrd] do |url|
+      user.federails_actor.tombstone!
+      test_response_of url, path_params: { resource: "acct:#{user.id}@localhost" }, headers: headers
     end
   end
 end
