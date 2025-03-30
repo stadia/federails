@@ -31,11 +31,13 @@ module Federails
       private
 
       def username
+        return @username if instance_variable_defined? :@username
+
         account = Fediverse::Webfinger.split_account params.require(:resource)
         # Fail early if user don't _seems_ local
         raise ActiveRecord::RecordNotFound unless account && Fediverse::Webfinger.local_user?(account)
 
-        account[:username]
+        @username = account[:username]
       end
     end
   end
