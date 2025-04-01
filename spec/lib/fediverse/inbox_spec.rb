@@ -4,14 +4,14 @@ require 'fediverse/request'
 
 module Fediverse
   RSpec.describe Inbox do
-    let(:actor) { FactoryBot.create(:user).federails_actor }
+    let(:local_actor) { FactoryBot.create(:user).federails_actor }
     let(:distant_actor) { FactoryBot.create :distant_actor }
 
     describe '#handle_create_follow_request' do
       let(:distant_following) do
         {
           'id'     => 'http://example.com/fake_following_request',
-          'actor'  => actor.federated_url,
+          'actor'  => local_actor.federated_url,
           'object' => distant_actor.federated_url,
         }
       end
@@ -24,7 +24,7 @@ module Fediverse
     end
 
     describe '#handle_accept_follow_request' do
-      let(:local_following) { Federails::Following.create actor: actor, target_actor: distant_actor }
+      let(:local_following) { Federails::Following.create actor: local_actor, target_actor: distant_actor }
       let(:payload) do
         {
           'actor' => distant_actor.federated_url,
@@ -66,7 +66,7 @@ module Fediverse
       end
 
       context 'with a pending following' do
-        let(:local_following) { Federails::Following.create actor: actor, target_actor: distant_actor }
+        let(:local_following) { Federails::Following.create actor: local_actor, target_actor: distant_actor }
 
         it 'destroys the target Following' do
           expect do
@@ -76,7 +76,7 @@ module Fediverse
       end
 
       context 'with an accepted following' do
-        let(:local_following) { Federails::Following.create actor: actor, target_actor: distant_actor, status: :accepted }
+        let(:local_following) { Federails::Following.create actor: local_actor, target_actor: distant_actor, status: :accepted }
 
         it 'destroys the target Following' do
           expect do
