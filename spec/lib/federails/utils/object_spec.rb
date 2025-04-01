@@ -114,6 +114,33 @@ module Federails
           end
         end
       end
+
+      describe '.find_distant_object_in_all' do
+        let(:entities) do
+          # Noise
+          FactoryBot.create(:distant_actor).tap do |actor|
+            Fixtures::Classes::FakeArticleDataModel.create(title: 'Not the right one', content: 'Hello world', federated_url: 'https://some_example.com/posts/1', federails_actor: actor)
+          end
+
+          [
+            FactoryBot.create(:distant_actor),
+            Fixtures::Classes::FakeArticleDataModel.create!(
+              title:           'The right one',
+              content:         'Hello world',
+              federated_url:   'https://some_example.com/posts/10',
+              federails_actor: FactoryBot.create(:distant_actor)
+            ),
+          ]
+        end
+
+        it 'returns the right object' do
+          aggregate_failures do
+            entities.each do |entity|
+              expect(described_class.find_distant_object_in_all(entity.federated_url)).to eq entity
+            end
+          end
+        end
+      end
     end
   end
 end

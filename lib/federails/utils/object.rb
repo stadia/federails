@@ -20,6 +20,31 @@ module Federails
           from_distant_server(object_or_id)
         end
 
+        # Search for a distant object in actors and configured data entities.
+        #
+        # This is useful to find something when the type is unknown, as an object from a Delete activity.
+        #
+        # @param federated_url [String] Object identifier
+        # @return [Federails::Actor, Federails::DataEntity, Federails::Following, nil]
+        def find_distant_object_in_all(federated_url)
+          # Search in actors
+          object = Federails::Actor.find_by federated_url: federated_url
+          return object if object.present?
+
+          # Search in followings
+          object = Federails::Following.find_by federated_url: federated_url
+          return object if object.present?
+
+          # Search in data entities
+          Federails.configuration.data_types.keys.sort.each do |klass|
+            object = klass.constantize.find_by federated_url: federated_url
+
+            break if object.present?
+          end
+
+          object
+        end
+
         # Finds or initializes an entity from an ActivityPub object or id
         #
         # @see .find_or_initialize
