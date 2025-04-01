@@ -3,6 +3,17 @@ require 'fediverse/notifier'
 
 module Federails
   RSpec.describe Following, type: :model do
+    describe 'hooks' do
+      describe 'on_federails_delete_requested' do
+        it 'tombstones the actor' do
+          following = FactoryBot.create :following, :incoming
+          following.run_callbacks :on_federails_delete_requested
+
+          expect { following.reload }.to raise_error ActiveRecord::RecordNotFound
+        end
+      end
+    end
+
     context 'with a follow relationship in place' do
       let(:follower) { FactoryBot.create :local_actor }
       let(:target) { FactoryBot.create :local_actor }

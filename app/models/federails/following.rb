@@ -16,6 +16,10 @@ module Federails
     after_update :after_follow_accepted
     after_destroy :destroy_activity, if: :locally_instigated?
 
+    define_callbacks :on_federails_delete_requested
+
+    set_callback :on_federails_delete_requested, -> { destroy! unless locally_instigated? }
+
     scope :with_actor, ->(actor) { where(actor_id: actor.id).or(where(target_actor_id: actor.id)) }
 
     def federated_url
