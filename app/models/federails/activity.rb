@@ -34,7 +34,7 @@ module Federails
       when 'Follow'
         [entity]
       when 'Undo'
-        [entity.target_actor]
+        [entity.entity]
       when 'Accept'
         [entity.actor]
       else

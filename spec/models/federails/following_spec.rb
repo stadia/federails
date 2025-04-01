@@ -33,5 +33,46 @@ module Federails
         expect(user).to have_received(:follow_accepted).with(f).once
       end
     end
+
+    context 'when following a remote actor' do
+      let(:local_user) { FactoryBot.create :user }
+      let(:remote_actor) { FactoryBot.create :distant_actor }
+
+      it 'creates Follow activity' do # rubocop:disable RSpec/ExampleLength
+        allow(Activity).to receive(:create!)
+        described_class.create actor: local_user.federails_actor, target_actor: remote_actor
+        expect(Activity).to have_received(:create!).with(
+          action: 'Follow',
+          actor:  local_user.federails_actor,
+          entity: remote_actor
+        )
+      end
+
+      it 'queues NotifyInboxJob' do
+        expect do
+          described_class.create actor: local_user.federails_actor, target_actor: remote_actor
+        end.to have_enqueued_job(NotifyInboxJob).once
+      end
+    end
+
+    context 'when unfollowing a distant actor' do
+      let(:local_user) { FactoryBot.create :user }
+      let(:distant_actor) { FactoryBot.create :distant_actor }
+      let!(:follow) { described_class.create actor: local_user.federails_actor, target_actor: distant_actor }
+
+      it 'creates Undo activity when Following is destroyed' do # rubocop:disable RSpec/ExampleLength
+        allow(Activity).to receive(:create!)
+        follow.destroy
+        expect(Activity).to have_received(:create!).with(
+          action: 'Undo',
+          actor:  local_user.federails_actor,
+          entity: Activity.find_by(action: 'Follow', actor: local_user.federails_actor, entity: distant_actor)
+        )
+      end
+
+      it 'queues NotifyInboxJob' do
+        expect { follow.destroy }.to have_enqueued_job(NotifyInboxJob).once
+      end
+    end
   end
 end

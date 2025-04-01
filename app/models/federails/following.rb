@@ -59,7 +59,7 @@ module Federails
     end
 
     def destroy_activity
-      Activity.create! actor: actor, action: 'Undo', entity: self
+      Activity.create! actor: actor, action: 'Undo', entity: follow_activity
     end
   end
 end
