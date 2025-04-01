@@ -25,10 +25,15 @@ module Federails
   # class Post < ApplicationRecord
   #   include Federails::DataEntity
   #   acts_as_federails_data options
+  #
+  #   # This will be called when a Delete activity comes for the entry. As we don't know how you want to handle it,
+  #   # you'll have to implement the behavior yourself.
+  #   on_federails_delete_requested :do_something
   # end
   # ```
   module DataEntity
     extend ActiveSupport::Concern
+    include Federails::HandlesDeleteRequests
 
     # Class methods automatically included in the concern.
     module ClassMethods
@@ -73,6 +78,7 @@ module Federails
                                                     filter_method:          filter_method,
                                                     should_federate_method: should_federate_method
 
+        # NOTE: Delete activities cannot be handled like this as we can't be sure to have the object's type
         Fediverse::Inbox.register_handler 'Create', handles, self, with
         Fediverse::Inbox.register_handler 'Update', handles, self, with
       end
