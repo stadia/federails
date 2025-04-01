@@ -23,7 +23,7 @@ module Fediverse
       end
     end
 
-    describe '#handle_accept_request' do
+    describe '#handle_accept_follow_request' do
       let(:local_following) { Federails::Following.create actor: actor, target_actor: distant_actor }
       let(:payload) do
         {
@@ -40,14 +40,14 @@ module Fediverse
 
       it 'accepts the following request' do
         allow(Fediverse::Request).to receive(:dereference).and_return following
-        described_class.send(:handle_accept_request, payload)
+        described_class.send(:handle_accept_follow_request, payload)
 
         local_following.reload
         expect(local_following).to be_accepted
       end
     end
 
-    describe '#handle_undo_request' do
+    describe '#handle_undo_follow_request' do
       let(:payload) do
         {
           'object' => following,
@@ -70,7 +70,7 @@ module Fediverse
 
         it 'destroys the target Following' do
           expect do
-            described_class.send(:handle_undo_request, payload)
+            described_class.send(:handle_undo_follow_request, payload)
           end.to change(Federails::Following, :count).by(-1)
         end
       end
@@ -80,7 +80,7 @@ module Fediverse
 
         it 'destroys the target Following' do
           expect do
-            described_class.send(:handle_undo_request, payload)
+            described_class.send(:handle_undo_follow_request, payload)
           end.to change(Federails::Following, :count).by(-1)
         end
       end

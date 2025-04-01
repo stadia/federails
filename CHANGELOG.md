@@ -34,6 +34,11 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 - `Federails::Configuration#open_registrations` now supports a proc in addition to booleans.
 
+### Changed
+
+- Renamed `Fediverse::Inbox#handle_accept_request` private method to `handle_accept_follow_request`
+- Renamed `Fediverse::Inbox#handle_undo_request` private method to `handle_undo_follow_request`
+
 ### Fixed
 
 - `sleeping_king_studios-yard` repository has been renamed to `sleeping_king_studios-docs`. A gem 

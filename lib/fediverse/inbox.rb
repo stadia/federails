@@ -50,7 +50,7 @@ module Fediverse
         Federails::Following.create! actor: actor, target_actor: target_actor, federated_url: activity['id']
       end
 
-      def handle_accept_request(activity)
+      def handle_accept_follow_request(activity)
         original_activity = Request.dereference(activity['object'])
 
         actor        = Federails::Actor.find_or_create_by_object original_activity['actor']
@@ -61,7 +61,7 @@ module Fediverse
         follow.accept!
       end
 
-      def handle_undo_request(activity)
+      def handle_undo_follow_request(activity)
         original_activity = activity['object']
 
         actor        = Federails::Actor.find_or_create_by_object original_activity['actor']
@@ -73,7 +73,7 @@ module Fediverse
     end
 
     register_handler 'Follow', '*', self, :handle_create_follow_request
-    register_handler 'Accept', 'Follow', self, :handle_accept_request
-    register_handler 'Undo', 'Follow', self, :handle_undo_request
+    register_handler 'Accept', 'Follow', self, :handle_accept_follow_request
+    register_handler 'Undo', 'Follow', self, :handle_undo_follow_request
   end
 end
