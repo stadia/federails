@@ -15,7 +15,7 @@ require 'rails_helper'
 RSpec.describe '/federation/activities', type: :request do
   let(:local_actor) { FactoryBot.create :local_actor }
   let(:distant_actor) { FactoryBot.create :distant_actor }
-  let(:activity) { FactoryBot.create :following, actor: distant_actor, target_actor: local_actor }
+  let(:activity) { FactoryBot.create :following, :outgoing, actor: local_actor, target_actor: distant_actor }
 
   describe 'GET /outbox' do
     before do
@@ -37,7 +37,7 @@ RSpec.describe '/federation/activities', type: :request do
 
   describe 'GET /show' do
     before do
-      FactoryBot.create :following
+      FactoryBot.create :following, :outgoing
     end
 
     let(:activity) { Federails::Activity.last }

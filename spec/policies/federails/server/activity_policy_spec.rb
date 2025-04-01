@@ -7,7 +7,7 @@ RSpec.describe Federails::Server::ActivityPolicy, type: :policy do
   permissions '.scope' do
     it 'returns all the activities' do
       # This will create two activities
-      FactoryBot.create_list :following, 2, target_actor: signed_in_user.federails_actor
+      FactoryBot.create_list :following, 2, :outgoing, actor: signed_in_user.federails_actor
 
       expect(scope.count).to eq 2
     end

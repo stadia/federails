@@ -9,13 +9,12 @@ module Federails
 
     belongs_to :actor
     belongs_to :target_actor, class_name: 'Federails::Actor'
-    # FIXME: Handle this with something like undelete
     has_many :activities, as: :entity, dependent: :destroy
 
     after_create :after_follow
-    after_create :create_activity
+    after_create :create_activity, if: :locally_instigated?
     after_update :after_follow_accepted
-    after_destroy :destroy_activity
+    after_destroy :destroy_activity, if: :locally_instigated?
 
     scope :with_actor, ->(actor) { where(actor_id: actor.id).or(where(target_actor_id: actor.id)) }
 
@@ -40,6 +39,10 @@ module Federails
     end
 
     private
+
+    def locally_instigated?
+      actor.local?
+    end
 
     def after_follow
       return unless target_actor&.entity

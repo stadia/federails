@@ -38,6 +38,7 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
   on `Actor`, so it is now reliable.
 - Distant actors can now have local entities. Override `create_federails_actor_as_local?` in your models to determine
   if associated actor is local or not (defaults to `true`)
+- Stop creating Activities when receiving distant following requests
 
 ### Maintenance
 

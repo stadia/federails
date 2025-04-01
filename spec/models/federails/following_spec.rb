@@ -1,4 +1,5 @@
 require 'rails_helper'
+require 'fediverse/notifier'
 
 module Federails
   RSpec.describe Following, type: :model do
@@ -72,6 +73,37 @@ module Federails
 
       it 'queues NotifyInboxJob' do
         expect { follow.destroy }.to have_enqueued_job(NotifyInboxJob).once
+      end
+    end
+
+    context 'when a remote actor follows a local user' do
+      let(:local_user) { FactoryBot.create :user }
+      let(:remote_actor) { FactoryBot.create :distant_actor }
+
+      it 'does not create Follow activity' do
+        expect do
+          described_class.create actor: remote_actor, target_actor: local_user.federails_actor
+        end.not_to change(Activity, :count)
+      end
+
+      it 'does not queue NotifyInboxJob' do
+        expect do
+          described_class.create actor: remote_actor, target_actor: local_user.federails_actor
+        end.not_to have_enqueued_job(NotifyInboxJob)
+      end
+    end
+
+    context 'when a remote actor unfollows a local user' do
+      let(:local_user) { FactoryBot.create :user }
+      let(:remote_actor) { FactoryBot.create :distant_actor }
+      let!(:follow) { described_class.create actor: remote_actor, target_actor: local_user.federails_actor }
+
+      it 'does not create Follow activity' do
+        expect { follow.destroy }.not_to change(Activity, :count)
+      end
+
+      it 'does not queue NotifyInboxJob' do
+        expect { follow.destroy }.not_to have_enqueued_job(NotifyInboxJob)
       end
     end
   end
