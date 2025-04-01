@@ -6,6 +6,9 @@ module Fediverse
     class << self
       # Registers a handler for incoming data
       #
+      # Unless a specific type is not implemented in Federails, you should leave the 'Delete' activity to Federails:
+      # it will dispatch a `on_federails_delete_requested` event on the right objects.
+      #
       # @param activity_type [String] Target activity type ('Create', 'Follow', 'Like', ...)
       #   See https://www.w3.org/TR/activitystreams-vocabulary/#activity-types for a list of common ones
       # @param object_type [String] Type of the related object ('Article', 'Note', ...)
@@ -22,6 +25,8 @@ module Fediverse
       #
       # @param payload [Hash] Dereferenced activity
       def dispatch_request(payload)
+        return dispatch_delete_request(payload) if payload['type'] == 'Delete'
+
         payload['object'] = Fediverse::Request.dereference(payload['object']) if payload.key? 'object'
 
         handlers = get_handlers(payload['type'], payload.dig('object', 'type'))
@@ -35,6 +40,14 @@ module Fediverse
       end
 
       private
+
+      def dispatch_delete_request(payload)
+        payload['object'] = payload['object']['id'] unless payload['object'].is_a? String
+        object = Federails::Utils::Object.find_distant_object_in_all payload['object']
+        return if object.blank?
+
+        object.run_callbacks :on_federails_delete_requested
+      end
 
       def get_handlers(activity_type, object_type)
         {}.merge(@@handlers.dig(activity_type, object_type) || {})
