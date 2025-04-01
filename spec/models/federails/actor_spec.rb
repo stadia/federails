@@ -68,6 +68,17 @@ module Federails
       end
     end
 
+    describe 'hooks' do
+      describe 'on_federails_delete_requested' do
+        it 'tombstones the actor' do
+          actor = FactoryBot.create :distant_actor
+          actor.run_callbacks :on_federails_delete_requested
+
+          expect(actor).to be_tombstoned
+        end
+      end
+    end
+
     describe '#find_by_account' do
       it 'returns local actors' do
         user = FactoryBot.create :user

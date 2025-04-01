@@ -13,6 +13,7 @@ module Federails
     class TombstonedError < StandardError; end
 
     include Federails::HasUuid
+    include Federails::HandlesDeleteRequests
 
     validates :federated_url, presence: { unless: :entity }, uniqueness: { unless: :local? }
     validates :username, presence: { unless: :local? }
@@ -39,6 +40,8 @@ module Federails
     scope :distant, -> { where(local: false) }
     scope :tombstoned, -> { where.not(tombstoned_at: nil) }
     scope :not_tombstoned, -> { where(tombstoned_at: nil) }
+
+    on_federails_delete_requested -> { tombstone! }
 
     def distant?
       !local?
