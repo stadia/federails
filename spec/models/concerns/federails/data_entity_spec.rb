@@ -71,6 +71,16 @@ module Federails
           end
         end
       end
+
+      describe 'after_delete: create_federails_activity' do
+        context 'with default values' do
+          let(:instance) { Fixtures::Classes::FakeDataModel.create! FactoryBot.attributes_for(:post, user_id: user.id) }
+
+          it 'creates an activity' do
+            expect { instance.destroy! }.to change(Federails::Activity.where(action: 'Delete'), :count).by 1
+          end
+        end
+      end
     end
 
     describe 'Inbox hook' do

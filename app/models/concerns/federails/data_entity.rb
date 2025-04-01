@@ -124,6 +124,7 @@ module Federails
       before_validation :set_federails_actor
       after_create -> { create_federails_activity 'Create' }
       after_update -> { create_federails_activity 'Update' }
+      after_destroy -> { create_federails_activity 'Delete' }
     end
 
     # Computed value for the federated URL
