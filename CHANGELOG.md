@@ -30,6 +30,10 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ## [Unreleased]
 
+### Added
+
+- `Federails::Configuration#open_registrations` now supports a proc in addition to booleans.
+
 ### Fixed
 
 - `sleeping_king_studios-yard` repository has been renamed to `sleeping_king_studios-docs`. A gem 
