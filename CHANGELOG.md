@@ -34,6 +34,7 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 - `Federails::Configuration#open_registrations` now supports a proc in addition to booleans.
 - `Federails::Actor` now stores the actor's type (`actor_type`)
+- `Federails::Maintenance::ActorsUpdater` was added to update distant actors
 
 ### Changed
 
