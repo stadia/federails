@@ -37,7 +37,7 @@ gem 'debug', '>= 1.0.0'
 group :doc do
   gem 'jekyll'
   gem 'just-the-docs'
-  gem 'sleeping_king_studios-docs', git: 'https://github.com/sleepingkingstudios/sleeping_king_studios-docs.git', branch: 'main'
+  gem 'sleeping_king_studios-docs'
   gem 'webrick', '~> 1.8' # Use Webrick as local content server.
   gem 'yard', '~> 0.9', require: false
 
