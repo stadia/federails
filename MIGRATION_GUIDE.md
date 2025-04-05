@@ -2,6 +2,18 @@
 
 ## Next
 
+First of all, read the [CHANGELOG](./CHANGELOG.md)
+
+- `actor_type` was added to `Federails::Actor`. Once the migration is applied, update all actors:
+  ```sh
+  rake federails:sync_actors
+  ```
+  or in one of your migrations:
+  ```rb
+  Federails::Maintenance::ActorsUpdater.run
+  ```
+
+
 ## From 0.4.0 to 0.5.0
 
 First of all, read the [CHANGELOG](./CHANGELOG.md)

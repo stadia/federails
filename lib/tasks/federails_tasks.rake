@@ -1,4 +1,8 @@
-# desc "Explaining what the task does"
-# task :federails do
-#   # Task goes here
-# end
+namespace :federails do
+  desc 'Re-fetches every remote actors to update database'
+  task sync_actors: :environment do
+    Federails::Maintenance::ActorUpdater.run do |actor, status|
+      puts "#{actor.federated_url}: #{status}"
+    end
+  end
+end
