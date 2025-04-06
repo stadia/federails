@@ -8,7 +8,9 @@ module Federails
     helper Federails::ServerHelper
 
     rescue_from ActiveRecord::RecordNotFound, with: :error_not_found
-    rescue_from Federails::Actor::TombstonedError, with: :error_gone
+    rescue_from Federails::Actor::TombstonedError,
+                Federails::DataEntity::TombstonedError,
+                with: :error_gone
 
     private
 
