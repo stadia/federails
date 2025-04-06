@@ -7,6 +7,22 @@ module Fediverse
     let(:local_actor) { FactoryBot.create(:user).federails_actor }
     let(:distant_actor) { FactoryBot.create :distant_actor }
 
+    describe 'registered handlers' do
+      let(:handlers) { described_class.class_variable_get :@@handlers }
+
+      it 'registered a handler for all "Follow" activities' do
+        expect(handlers['Follow']['*'].keys).to include described_class
+      end
+
+      it 'registered a handler for "Accept" activities on "Follow" object' do
+        expect(handlers['Accept']['Follow'].keys).to include described_class
+      end
+
+      it 'registered a handler for "Undo" activities on "Follow" object' do
+        expect(handlers['Undo']['Follow'].keys).to include described_class
+      end
+    end
+
     describe '#handle_create_follow_request' do
       let(:distant_following) do
         {
