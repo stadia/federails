@@ -6,14 +6,20 @@ module Fixtures
       include Federails::DataEntity
       include Federails::HandlesDeleteRequests
 
-      acts_as_federails_data handles:             'CustomNote',
-                             actor_entity_method: :user,
-                             route_path_segment:  :articles,
-                             filter_method:       :handle_incoming_note?
+      acts_as_federails_data handles:                 'CustomNote',
+                             actor_entity_method:     :user,
+                             route_path_segment:      :articles,
+                             filter_method:           :handle_incoming_note?,
+                             soft_deleted_method:     :deleted?,
+                             soft_delete_date_method: :deleted_at
 
       belongs_to :user, optional: true
 
       on_federails_delete_requested -> { raise 'on_federails_delete_requested called' }
+
+      def deleted?
+        !!deleted_at
+      end
 
       def to_activitypub_object
         Federails::DataTransformer::Note.to_federation self,

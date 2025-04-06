@@ -3,7 +3,7 @@ module Federails
     # Controller to render ActivityPub representation of entities configured with Federails::DataEntity
     class PublishedController < Federails::ServerController
       def show
-        @publishable = type_scope.find_by!(url_param => params[:id])
+        @publishable = type_scope.find_untombstoned_by!(url_param => params[:id])
         authorize @publishable, policy_class: Federails::Server::PublishablePolicy
       end
 
