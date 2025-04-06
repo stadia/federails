@@ -30,6 +30,34 @@ module Federails
       end
     end
 
+    describe '.find_untombstoned_by!' do
+      let(:actor) { FactoryBot.create :local_actor }
+
+      context 'when soft deleted and :soft_deleted_method set' do
+        let!(:entity) { Fixtures::Classes::FakeArticleDataModel.create! federails_actor: actor, title: 'abc', content: 'def' }
+
+        it 'raises an error' do
+          entity.update! deleted_at: Time.current
+
+          expect { Fixtures::Classes::FakeArticleDataModel.find_untombstoned_by! id: entity.id }.to raise_error Federails::DataEntity::TombstonedError
+        end
+      end
+
+      context 'without soft delete support' do # Well, record _was_ destroyed
+        it 'raises an error' do
+          expect { Fixtures::Classes::FakeDataModel.find_untombstoned_by! id: 0 }.to raise_error ActiveRecord::RecordNotFound
+        end
+      end
+
+      context 'when the object exists' do
+        let!(:entity) { Fixtures::Classes::FakeDataModel.create! federails_actor: actor, title: 'abc', content: 'def' }
+
+        it 'returns the object' do
+          expect(Fixtures::Classes::FakeDataModel.find_untombstoned_by!(id: entity.id)).not_to be_nil
+        end
+      end
+    end
+
     describe 'scopes' do
       before do
         2.times do

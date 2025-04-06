@@ -32,6 +32,8 @@ module Federails
   # end
   # ```
   module DataEntity
+    class TombstonedError < StandardError; end
+
     extend ActiveSupport::Concern
     include Federails::HandlesDeleteRequests
 
@@ -118,6 +120,15 @@ module Federails
           # Use timestamps from attributes
           entity.save! touch: false
         end
+
+        entity
+      end
+
+      def find_untombstoned_by!(**params)
+        configuration = Federails.data_entity_configuration(self)
+        entity = find_by!(**params)
+
+        raise Federails::DataEntity::TombstonedError if configuration[:soft_deleted_method] && entity.send(configuration[:soft_deleted_method])
 
         entity
       end
