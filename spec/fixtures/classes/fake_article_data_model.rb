@@ -4,6 +4,7 @@ module Fixtures
     class FakeArticleDataModel < ApplicationRecord
       self.table_name = 'posts'
       include Federails::DataEntity
+      include Federails::HandlesDeleteRequests
 
       acts_as_federails_data handles:             'CustomNote',
                              actor_entity_method: :user,
@@ -11,6 +12,8 @@ module Fixtures
                              filter_method:       :handle_incoming_note?
 
       belongs_to :user, optional: true
+
+      on_federails_delete_requested -> { raise 'on_federails_delete_requested called' }
 
       def to_activitypub_object
         Federails::DataTransformer::Note.to_federation self,

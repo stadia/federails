@@ -21,6 +21,10 @@ module Fediverse
       it 'registered a handler for "Undo" activities on "Follow" object' do
         expect(handlers['Undo']['Follow'].keys).to include described_class
       end
+
+      it 'registered a handler for "Delete" activities on all activities' do
+        expect(handlers['Delete']['*'].keys).to include described_class
+      end
     end
 
     describe '#handle_create_follow_request' do
@@ -99,6 +103,22 @@ module Fediverse
             described_class.send(:handle_undo_follow_request, payload)
           end.to change(Federails::Following, :count).by(-1)
         end
+      end
+    end
+
+    describe '#handle_delete_request' do
+      let(:payload) do
+        {
+          'type'   => 'Delete',
+          'actor'  => entity.federails_actor.federated_url,
+          'object' => entity.federated_url,
+          'delete' => Time.current,
+        }
+      end
+      let!(:entity) { Fixtures::Classes::FakeArticleDataModel.create! federails_actor_id: distant_actor.id, federated_url: 'https://example.com/data/1', title: 'A title', content: 'the content' }
+
+      it 'triggers the "on_federails_delete_requested" callback' do
+        expect { described_class.send(:handle_delete_request, payload) }.to raise_error 'on_federails_delete_requested called'
       end
     end
   end

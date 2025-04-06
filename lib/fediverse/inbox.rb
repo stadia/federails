@@ -70,10 +70,18 @@ module Fediverse
         follow = Federails::Following.find_by actor: actor, target_actor: target_actor
         follow&.destroy
       end
+
+      def handle_delete_request(activity)
+        object = Federails::Utils::Object.find_distant_object_in_all(activity['object'])
+        return if object.blank?
+
+        object.run_callbacks :on_federails_delete_requested
+      end
     end
 
     register_handler 'Follow', '*', self, :handle_create_follow_request
     register_handler 'Accept', 'Follow', self, :handle_accept_follow_request
     register_handler 'Undo', 'Follow', self, :handle_undo_follow_request
+    register_handler 'Delete', '*', self, :handle_delete_request
   end
 end
