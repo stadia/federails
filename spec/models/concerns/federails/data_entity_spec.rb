@@ -62,12 +62,12 @@ module Federails
         end
       end
 
-      describe 'after_update: update_federails_activity' do
+      describe 'after_update: create_federails_activity' do
         context 'with default values' do
           let(:instance) { Fixtures::Classes::FakeDataModel.create! FactoryBot.attributes_for(:post, user_id: user.id) }
 
           it 'creates an activity' do
-            expect { instance.update! title: 'Nnew title' }.to change(Federails::Activity.where(action: 'Update'), :count).by 1
+            expect { instance.update! title: 'New title' }.to change(Federails::Activity.where(action: 'Update'), :count).by 1
           end
         end
       end

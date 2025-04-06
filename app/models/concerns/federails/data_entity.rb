@@ -116,8 +116,8 @@ module Federails
       scope :distant_federails_entities, -> { where.not(federated_url: nil) }
 
       before_validation :set_federails_actor
-      after_create :create_federails_activity
-      after_update :update_federails_activity
+      after_create -> { create_federails_activity 'Create' }
+      after_update -> { create_federails_activity 'Update' }
     end
 
     # Computed value for the federated URL
@@ -153,18 +153,11 @@ module Federails
       raise 'Cannot determine actor from configuration' unless federails_actor
     end
 
-    def create_federails_activity
+    def create_federails_activity(action)
       ensure_federails_configuration!
       return unless local_federails_entity? && send(federails_data_configuration[:should_federate_method])
 
-      Activity.create! actor: federails_actor, action: 'Create', entity: self
-    end
-
-    def update_federails_activity
-      ensure_federails_configuration!
-      return unless local_federails_entity? && send(federails_data_configuration[:should_federate_method])
-
-      Activity.create! actor: federails_actor, action: 'Update', entity: self
+      Activity.create! actor: federails_actor, action: action, entity: self
     end
 
     def ensure_federails_configuration!
