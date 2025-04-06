@@ -54,10 +54,14 @@ module Federails
       # @param should_federate_method [Symbol] method to determine if an object should be federated. If the method returns false,
       #   no create/update activities will happen, and object will not be accessible at federated_url. Defaults to a method
       #   that always returns true.
+      # @param soft_deleted_method [Symbol, nil] Method to soft-delete the object when receiving a Delete request. This
+      #   is not required by the spec but greatly encouraged as the app will return a 410 response with a Tombstone object
+      #   instead of an 404 error.
+      # @param soft_delete_date_method [Symbol, nil] Method to get the date of the soft-deletion
       #
       # @example
       #   acts_as_federails_data handles: 'Note', with: :note_handler, route_path_segment: :articles, actor_entity_method: :user
-      # rubocop:disable Metrics/ParameterLists
+      # rubocop:disable Metrics/ParameterLists, Metrics/MethodLength
       def acts_as_federails_data(
         handles:,
         with: :handle_incoming_fediverse_data,
@@ -65,24 +69,28 @@ module Federails
         actor_entity_method: nil,
         url_param: :id,
         filter_method: nil,
-        should_federate_method: :default_should_federate?
+        should_federate_method: :default_should_federate?,
+        soft_deleted_method: nil,
+        soft_delete_date_method: nil
       )
         route_path_segment ||= name.pluralize.underscore
 
         Federails::Configuration.register_data_type self,
-                                                    route_path_segment:     route_path_segment,
-                                                    actor_entity_method:    actor_entity_method,
-                                                    url_param:              url_param,
-                                                    handles:                handles,
-                                                    with:                   with,
-                                                    filter_method:          filter_method,
-                                                    should_federate_method: should_federate_method
+                                                    route_path_segment:      route_path_segment,
+                                                    actor_entity_method:     actor_entity_method,
+                                                    url_param:               url_param,
+                                                    handles:                 handles,
+                                                    with:                    with,
+                                                    filter_method:           filter_method,
+                                                    should_federate_method:  should_federate_method,
+                                                    soft_deleted_method:     soft_deleted_method,
+                                                    soft_delete_date_method: soft_delete_date_method
 
         # NOTE: Delete activities cannot be handled like this as we can't be sure to have the object's type
         Fediverse::Inbox.register_handler 'Create', handles, self, with
         Fediverse::Inbox.register_handler 'Update', handles, self, with
       end
-      # rubocop:enable Metrics/ParameterLists
+      # rubocop:enable Metrics/ParameterLists, Metrics/MethodLength
 
       # Instantiates a new instance from an ActivityPub object
       #
@@ -123,7 +131,7 @@ module Federails
 
       before_validation :set_federails_actor
       after_create -> { create_federails_activity 'Create' }
-      after_update -> { create_federails_activity 'Update' }
+      after_update -> { create_federails_activity 'Update' }, :federails_tombstoned?
       after_destroy -> { create_federails_activity 'Delete' }
     end
 
@@ -144,6 +152,14 @@ module Federails
     # @return [Boolean]
     def local_federails_entity?
       attributes['federated_url'].blank?
+    end
+
+    def federails_tombstoned?
+      federails_data_configuration[:soft_deleted_method] ? send(federails_data_configuration[:soft_deleted_method]) : false
+    end
+
+    def federails_tombstoned_at
+      federails_data_configuration[:soft_delete_date_method] ? send(federails_data_configuration[:soft_delete_date_method]) : nil
     end
 
     def federails_data_configuration
