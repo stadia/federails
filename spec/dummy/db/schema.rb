@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_03_29_123940) do
+ActiveRecord::Schema[7.2].define(version: 2025_04_06_213935) do
   create_table "comments", force: :cascade do |t|
     t.text "content", null: false
     t.integer "user_id"
@@ -20,6 +20,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_03_29_123940) do
     t.datetime "updated_at", null: false
     t.string "federated_url"
     t.integer "federails_actor_id"
+    t.datetime "deleted_at"
     t.index ["federails_actor_id"], name: "index_comments_on_federails_actor_id"
     t.index ["parent_id"], name: "index_comments_on_parent_id"
     t.index ["post_id"], name: "index_comments_on_post_id"
@@ -87,6 +88,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_03_29_123940) do
     t.datetime "updated_at", null: false
     t.string "federated_url"
     t.integer "federails_actor_id"
+    t.datetime "deleted_at"
     t.index ["federails_actor_id"], name: "index_posts_on_federails_actor_id"
     t.index ["user_id"], name: "index_posts_on_user_id"
   end
