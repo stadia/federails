@@ -147,6 +147,8 @@ class Note < ApplicationRecord
   include Federails::DataEntity
   
   acts_as_federails_data
+
+  on_federails_delete_requested -> { Rails.logger.info { 'Deletion requested' } }
 end
 ```
 
@@ -155,7 +157,47 @@ For options, pre-requisites, etc..., refer to the documentation of `Federails::D
 You can check the "Examples" for implementation samples 
 
 You also can check the `Post` and `Comment` models from the `dummy` app (in source code: `spec/dummy`): they are both 
-configured to handle Note and transform them as Post/Comment. 
+configured to handle Note and transform them as Post/Comment.
+
+### Destroying entities
+
+`DataEntity` concern uses the `after_destroy` hook to send `Delete` activities to the Fediverse. 
+
+Incoming `Delete` activities will trigger the custom `on_federails_delete_requested` hook, and **you'll need to implement
+the behavior yourself**.
+
+### Support for soft-delete
+
+If your model supports soft-delete, you can pass the `soft_deleted_method` and `soft_delete_date_method` parameters to
+`acts_as_federails_data`. If you do so, requests made to fetch a soft-deleted entity will result into a nice `Tombstone`
+ActivityPub object and a 410 _gone_ status, instead of a 404 error.
+
+You also will need to call `create_federails_activity 'Delete'` in your soft-deletion process.
+
+```rb
+# Assume soft-deletion is made by filling `deleted_at` attribute
+class Note < ApplicationRecord
+  include Federails::DataEntity
+
+  acts_as_federails_data handles: 'Note',
+                         #...
+                         soft_deleted_method: :deleted?,
+                         soft_delete_date_method: :deleted_at
+
+  on_federails_delete_requested :soft_delete!
+  
+  def deleted?
+    deleted_at.present?
+  end
+
+  def soft_delete!
+    update! deleted_at: Time.current
+    
+    # Manually create the delete activity for locally-created entities only
+    create_federails_activity 'Delete' if local_federails_entity?
+  end
+end
+```
 
 ## Using the Federails client
 
