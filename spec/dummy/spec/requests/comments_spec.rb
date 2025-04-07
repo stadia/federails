@@ -82,12 +82,12 @@ RSpec.describe '/comments', type: :request do
     it 'destroys the requested comment' do
       expect do
         delete comment_url(comment)
-      end.to change(Comment, :count).by(-1)
+      end.to change { Comment.deleted.count }.by(1)
     end
 
-    it 'redirects to the comments list' do
+    it 'redirects to the post' do
       delete comment_url(comment)
-      expect(response).to redirect_to(comments_url)
+      expect(response).to redirect_to(post_url(comment.post))
     end
   end
 end

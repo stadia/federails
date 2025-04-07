@@ -1,21 +1,29 @@
-<div id="<%= dom_id comment %>">
+<% if comment.soft_deleted? %>
   <div>
-    <small>By #<%= comment.user.id %></small>
-    <% if comment.user_id == current_user.id %>
-      <%= link_to "Edit this comment", edit_comment_url(comment) %>
-    <% end %>
+    <em>This comment was deleted by its author</em>
   </div>
+<% else %>
+  <div id="<%= dom_id comment %>">
+    <div>
+      <small>By #<%= comment.user.id %></small>
+      <% if comment.user_id == current_user.id %>
+        <%= link_to "Edit this comment", edit_comment_url(comment) %>
+        <%= button_to "Delete this comment", comment, method: :delete %>
+      <% end %>
+    </div>
 
-  <div><%= comment.content %></div>
+    <div><%= comment.content %></div>
 
-  <details style="margin-left:10px;">
-    <summary>Responses</summary>
-    <% if comment.answers.size.zero? %>
-      <em>No response to this comment. Be the first to add one!</em>
-    <% end %>
-    <% comment.answers.each do |child| %>
-      <%= render 'comments/comment', comment: child %>
-    <% end %>
-    <%= render 'comments/form', comment: Comment.new(parent: comment, post_id: comment.post_id) %>
-  </details>
-</div>
+    <details style="margin-left:10px;">
+      <summary>Responses</summary>
+      <% if comment.answers.size.zero? %>
+        <em>No response to this comment. Be the first to add one!</em>
+      <% end %>
+      <% comment.answers.each do |child| %>
+        <%= render 'comments/comment', comment: child %>
+      <% end %>
+      <%= render 'comments/form', comment: Comment.new(parent: comment, post_id: comment.post_id) %>
+    </details>
+  </div>
+<% end %>
+
