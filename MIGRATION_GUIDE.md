@@ -1,8 +1,24 @@
 # Migration guide
 
+## General steps
+
+After reading the [CHANGELOG](./CHANGELOG.md) and migration guide for changes from the currently used version and the
+desired one, do these steps (in the order you see fit)
+
+- Update the gem to the desired version.
+- Copy and apply new migrations 
+  ```sh
+  bundle exec rails federails:install:migrations
+  ```
+- Re-copy client views if you use them, and adapt them.
+  ```sh
+  rails generate federails:copy_client_views
+  ```
+- Follow directions of the migration guide, for every version intermediate version 
+
 ## Next
 
-First of all, read the [CHANGELOG](./CHANGELOG.md)
+First of all, read the **[general upgrade steps](#general-steps)**
 
 - `actor_type` was added to `Federails::Actor`. Once the migration is applied, update all actors:
   ```sh
@@ -16,13 +32,13 @@ First of all, read the [CHANGELOG](./CHANGELOG.md)
 
 ## From 0.4.0 to 0.5.0
 
-First of all, read the [CHANGELOG](./CHANGELOG.md)
+First of all, read the **[general upgrade steps](#general-steps)**
 
 This release contains only new features and should be safe to apply.
 
 ## From 0.3.0 to 0.4.0
 
-First of all, read the [CHANGELOG](./CHANGELOG.md)
+First of all, read the **[general upgrade steps](#general-steps)**
 
 - Relation to Federails actor has changed in related entities, from `actor` to `federails_actor`. Update your usages accordingly.
 - Method `create_actor`, included on related entities has been renamed to `create_federails_actor`. Update your usages accordingly.
@@ -33,7 +49,7 @@ First of all, read the [CHANGELOG](./CHANGELOG.md)
 
 ## From 0.2.0 to 0.3.0
 
-First of all, read the [CHANGELOG](./CHANGELOG.md)
+First of all, read the **[general upgrade steps](#general-steps)**
 
 - Deprecated configuration options were removed; leading to a change in migrations. You will _need_ to update existing
   migrations to hardcode the `Federails.configuration.user_table` to what you previously used, in:
