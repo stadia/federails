@@ -30,6 +30,8 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ## [Unreleased]
 
+## [0.6.0] 2025-04-07
+
 ### Added
 
 - `Federails::Configuration#open_registrations` now supports a proc in addition to booleans.
@@ -48,8 +50,7 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ### Fixed
 
-- `sleeping_king_studios-yard` repository has been renamed to `sleeping_king_studios-docs`. A gem 
-  [is planned](https://github.com/sleepingkingstudios/sleeping_king_studios-docs/issues/53)
+- `sleeping_king_studios-yard` repository has been renamed to `sleeping_king_studios-docs`. A gem has been released 
 - [#25](https://gitlab.com/experimentslabs/federails/-/issues/25) - `Actor#local?` now resolves with a new `local` flag 
   on `Actor`, so it is now reliable.
 - Distant actors can now have local entities. Override `create_federails_actor_as_local?` in your models to determine
