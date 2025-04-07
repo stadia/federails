@@ -19,7 +19,7 @@ $ bundle
 
 ## Configuration
 
-Generate configuration files:
+### Generate configuration files
 
 ```sh
 bundle exec rails generate federails:install
@@ -42,6 +42,14 @@ end
 
 For now, refer to [the source code](https://gitlab.com/experimentslabs/federails/-/blob/main/lib/federails/configuration.rb) 
 for the full list of options.
+
+### Copy the migrations
+
+```sh
+bundle exec rails federails:install:migrations
+```
+
+Review the changes and apply them.
 
 ## Routes
 
