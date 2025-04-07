@@ -1,22 +1,25 @@
-<div>
-  <%= link_to "Back to posts", posts_path %>
+<% if @post.soft_deleted? %>
+  <%= render 'posts/soft_deleted' %>
+<% else %>
+  <div>
+    <%= link_to "Back to posts", posts_path %>
 
-  <% if @post.user_id == current_user&.id %>
-    <%= link_to "Edit this post", edit_post_path(@post) %> |
+    <% if @post.user_id == current_user&.id %>
+      <%= link_to "Edit this post", edit_post_path(@post) %> |
 
-    <%= button_to "Destroy this post", @post, method: :delete %>
-  <%end %>
-</div>
+      <%= button_to "Destroy this post", @post, method: :delete %>
+    <%end %>
+  </div>
 
-<%= render @post %>
+  <%= render @post %>
 
-<h2>Comments</h2>
+  <h2>Comments</h2>
 
-<% if @post.comments.parents.size.zero? %>No comment yet<% end %>
-<% @post.comments.parents.each do |comment| %>
-  <%= render 'comments/comment', comment: comment %>
+  <% if @post.comments.parents.size.zero? %>No comment yet<% end %>
+  <% @post.comments.parents.each do |comment| %>
+    <%= render 'comments/comment', comment: comment %>
+  <% end %>
+
+  <h3>New comment</h3>
+  <%= render 'comments/form', comment: Comment.new(post_id: @post.id) %>
 <% end %>
-
-<h3>New comment</h3>
-<%= render 'comments/form', comment: Comment.new(post_id: @post.id) %>
-

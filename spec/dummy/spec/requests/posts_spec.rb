@@ -101,7 +101,7 @@ RSpec.describe '/posts', type: :request do
     it 'destroys the requested post' do
       expect do
         delete post_url(article)
-      end.to change(Post, :count).by(-1)
+      end.to change { Post.deleted.count }.by(1)
     end
 
     it 'redirects to the posts list' do

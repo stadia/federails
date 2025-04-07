@@ -1,6 +1,10 @@
-<div id="<%= dom_id post %>">
-  <h1><%= post.title %></h1>
-  <div><small>By <%= post.user.id %>, on <%= post.created_at %></small></div>
+<% if post.soft_deleted? %>
+  <%= render 'posts/soft_deleted' %>
+<% else %>
+  <div id="<%= dom_id post %>">
+    <h1><%= post.title %></h1>
+    <div><small>By <%= post.user.id %>, on <%= post.created_at %></small></div>
 
-  <article><%= post.content %></article>
-</div>
+    <article><%= post.content %></article>
+  </div>
+<% end %>
