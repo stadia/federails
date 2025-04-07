@@ -36,6 +36,10 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 - `Federails::Actor` now stores the actor's type (`actor_type`)
 - `Federails::Maintenance::ActorsUpdater` was added to update distant actors
 - Rake task `federails:sync_actors` was added to update distant actors from CLI
+- Added support for `Delete` activities on:
+  - `Actor`: soft-deletes the actor; returns 410 _gone_ responses on webfinger and Actor's `show` view
+  - `Following`: destroys the following
+  - `DataEntity`: triggers a hook so implementers can do what they want. Soft-deletions are also supported.
 
 ### Changed
 
