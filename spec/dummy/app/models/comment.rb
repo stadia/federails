@@ -1,9 +1,12 @@
 class Comment < ApplicationRecord
   include Federails::DataEntity
+  include FederatedAndSoftDeletable
 
-  acts_as_federails_data handles:                'Note',
-                         actor_entity_method:    :user,
-                         should_federate_method: :federate?
+  acts_as_federails_data handles:                 'Note',
+                         actor_entity_method:     :user,
+                         should_federate_method:  :federate?,
+                         soft_deleted_method:     :soft_deleted?,
+                         soft_delete_date_method: :deleted_at?
 
   validates :content, presence: true, allow_blank: false
   validates :post, presence: true, allow_blank: false, unless: :parent_id
