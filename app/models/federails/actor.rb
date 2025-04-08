@@ -248,7 +248,7 @@ module Federails
     end
 
     def use_entity_attributes?
-      local? && !tombstoned?
+      local? && !tombstoned? && entity.present?
     end
   end
 end
