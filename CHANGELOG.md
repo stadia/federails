@@ -30,6 +30,10 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ## [Unreleased]
 
+### Fixed
+
+- Prevent overwriting actor's entity when updating with `ActorUpdater`
+
 ## [0.6.1] 2025-04-09
 
 ### Fixed
@@ -56,8 +60,8 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ### Fixed
 
-- `sleeping_king_studios-yard` repository has been renamed to `sleeping_king_studios-docs`. A gem has been released 
-- [#25](https://gitlab.com/experimentslabs/federails/-/issues/25) - `Actor#local?` now resolves with a new `local` flag 
+- `sleeping_king_studios-yard` repository has been renamed to `sleeping_king_studios-docs`. A gem has been released
+- [#25](https://gitlab.com/experimentslabs/federails/-/issues/25) - `Actor#local?` now resolves with a new `local` flag
   on `Actor`, so it is now reliable.
 - Distant actors can now have local entities. Override `create_federails_actor_as_local?` in your models to determine
   if associated actor is local or not (defaults to `true`)
@@ -74,16 +78,16 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 - `Federails::Actor`: Add `.distant` scope to select distant actors
 - `Federails::Request`: Add `.dereference` method to... dereference an object
-- New feature: Federated entities. This allows model configuration to ease the process of creating Fediverse entities 
+- New feature: Federated entities. This allows model configuration to ease the process of creating Fediverse entities
   from local content, and database entries from Fediverse content. When configured:
-  - "Create" activities will be created on data creation 
-  - Incoming "Create" activities will be dispatched on supported models to create data locally 
-  - "Update" activities will be created on data update 
+  - "Create" activities will be created on data creation
+  - Incoming "Create" activities will be dispatched on supported models to create data locally
+  - "Update" activities will be created on data update
   - Incoming "Update" activities will be dispatched on supported models to update (or create if missing) data locally
-  - Ability to support the same Fediverse type with multiple models (note: only one model finally handles the object, 
+  - Ability to support the same Fediverse type with multiple models (note: only one model finally handles the object,
     check documentation for more)
 - Data transformer for Notes: `Federails::DataTransformer::Note`, to ease transforming local data to Fediverse Notes
-- Server: new "published" controller to render published `Federails::DataEntity` as federated object. This controller 
+- Server: new "published" controller to render published `Federails::DataEntity` as federated object. This controller
   will answer to the `federated_url` generated for local content.
 - New helper module with methods to find local data from an ActivityPub object: `Federails::Utils::Object`:
   - `find_or_initialize(object_or_id)` returns nil when object is not found remotely
@@ -110,7 +114,7 @@ As we're still in a kind of early development, some changes to Federails interna
 
 ### Added
 
-- Base controller for client controllers can be specified to something different from `ActionController::Base` with the 
+- Base controller for client controllers can be specified to something different from `ActionController::Base` with the
   `base_client_controller` option
 - New generator: `federails:copy_client_views`, that copies all the client views in `app/views/federails/client` for override
 - Added `auto_create_actors` option for `acts_as_federails_actor` method to disable automatic actor creation.
@@ -130,7 +134,7 @@ As we're still in a kind of early development, some changes to Federails interna
 
 ### Removed
 
-- As actors' subject is a polymorphic relation, these Federails configuration options were removed: `user_class`, 
+- As actors' subject is a polymorphic relation, these Federails configuration options were removed: `user_class`,
   `user_table`, `user_profile_url_method`, `user_name_field` and `user_username_field`
 - `acts_as_federails_actor` is not automatically called when `Federails::Entity` concern is included in models.
 
