@@ -55,7 +55,7 @@ module Federails
           return :ignored_local if actor.local?
 
           response = Fediverse::Webfinger.fetch_actor_url(actor.federated_url)
-          new_attributes = response.attributes.except 'id', 'uuid', 'created_at', 'updated_at', 'local'
+          new_attributes = response.attributes.except 'id', 'uuid', 'created_at', 'updated_at', 'local', 'entity_id', 'entity_type'
 
           actor.update(new_attributes) ? :updated : :failed
         rescue ActiveRecord::RecordNotFound
