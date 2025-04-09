@@ -30,6 +30,12 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ## [Unreleased]
 
+## [0.6.1] 2025-04-09
+
+### Fixed
+
+- Actors: don't use entity attributes if there isn't one available
+
 ## [0.6.0] 2025-04-07
 
 ### Added
