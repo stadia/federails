@@ -1,4 +1,6 @@
 require 'jbuilder'
+require 'kaminari'
+require 'pundit'
 
 require 'federails/version'
 require 'federails/engine'
