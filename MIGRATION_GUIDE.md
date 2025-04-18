@@ -18,6 +18,10 @@ desired one, do these steps (in the order you see fit)
 
 ## Next
 
+## From 0.6.1 to 0.6.2
+
+Update the gem (no migration, no changes on views, ect...).
+
 ## From 0.6.0 to 0.6.1
 
 Update the gem (no migration, no changes on views, ect...).

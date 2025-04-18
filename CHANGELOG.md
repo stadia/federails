@@ -30,6 +30,8 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ## [Unreleased]
 
+## [0.6.2] 2025-04-18
+
 ### Fixed
 
 - Prevent overwriting actor's entity when updating with `ActorUpdater`
