@@ -52,12 +52,27 @@ module Federails
       end
 
       describe '.before_destroy' do
-        let(:instance) { Fixtures::Classes::FakeUserModel.create! email: Faker::Internet.unique.email }
+        context 'when ActorEntity has an associated actor' do
+          let(:instance) { Fixtures::Classes::FakeUserModel.create! email: Faker::Internet.unique.email }
 
-        it 'marks the actor as tombstoned' do
-          actor = instance.federails_actor
-          instance.destroy!
-          expect(actor.reload).to be_tombstoned
+          it 'marks the actor as tombstoned' do
+            actor = instance.federails_actor
+            instance.destroy!
+            expect(actor.reload).to be_tombstoned
+          end
+        end
+
+        context 'when ActorEntity does not have an associated actor' do
+          let(:instance) { Fixtures::Classes::FakeUserModel.create! email: Faker::Internet.unique.email }
+
+          before do
+            instance.federails_actor.destroy!
+            instance.reload
+          end
+
+          it 'only deletes the ActorEntity' do
+            expect { instance.destroy! }.to change(Fixtures::Classes::FakeUserModel, :count).by(-1)
+          end
         end
       end
     end

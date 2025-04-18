@@ -156,7 +156,7 @@ module Federails
     end
 
     def tombstone_federails_actor!
-      federails_actor.tombstone!
+      federails_actor.tombstone! if federails_actor.present?
     end
   end
 end

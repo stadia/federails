@@ -33,6 +33,7 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 ### Fixed
 
 - Prevent overwriting actor's entity when updating with `ActorUpdater`
+- ActorEntity: Don't try to tombstone nonexistent actors
 
 ## [0.6.1] 2025-04-09
 
