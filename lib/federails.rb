@@ -1,3 +1,5 @@
+require 'jbuilder'
+
 require 'federails/version'
 require 'federails/engine'
 require 'federails/configuration'
