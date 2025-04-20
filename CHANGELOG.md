@@ -34,6 +34,8 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 - Actors:
   - added `sync!` method to update distant actors: `Actor.find(1).sync!`
+- DataEntity:
+  - added `federails_sync!` method to update distant content: `Articles.find(1).federails_sync!`
 
 ### Changed
 

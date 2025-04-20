@@ -58,6 +58,34 @@ module Federails
       end
     end
 
+    describe '#federails_sync!' do
+      context 'with a local entity' do
+        let(:actor) { FactoryBot.create :local_actor }
+        let!(:entity) { Fixtures::Classes::FakeArticleDataModel.create! federails_actor: actor, title: 'abc', content: 'def' }
+
+        it 'returns false' do
+          expect(entity.federails_sync!).to be false
+        end
+      end
+
+      context 'with a distant entity' do
+        let(:actor) { FactoryBot.create :distant_actor, federated_url: 'https://mamot.fr/users/mtancoigne', username: 'mtancoigne', server: 'mamot.fr' }
+        let!(:entity) { Fixtures::Classes::FakeArticleDataModel.create! federails_actor: actor, federated_url: 'https://mamot.fr/users/mtancoigne/statuses/113741447018463971', title: 'abc', content: 'def' }
+
+        it 'updates the entity' do
+          VCR.use_cassette 'dummy/fediverse/request/get_note_200' do
+            expect { entity.federails_sync! }.to change { entity.reload.title }.from('abc').to('A post')
+          end
+        end
+
+        it 'returns true' do
+          VCR.use_cassette 'dummy/fediverse/request/get_note_200' do
+            expect(entity.federails_sync!).to be true
+          end
+        end
+      end
+    end
+
     describe 'scopes' do
       before do
         2.times do

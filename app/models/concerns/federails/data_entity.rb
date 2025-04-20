@@ -217,6 +217,17 @@ module Federails
       Federails.data_entity_configuration(self)
     end
 
+    def federails_sync!
+      if local_federails_entity?
+        Rails.logger.info { "Ignored attempt to sync a local #{self.class.name}" }
+        return false
+      end
+
+      object = Fediverse::Request.dereference(federated_url)
+
+      update! self.class.from_activitypub_object(object)
+    end
+
     private
 
     def set_federails_actor
