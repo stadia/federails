@@ -33,7 +33,7 @@ module Federails
           Federails::Actor.transaction do
             hash = {
               tombstoned_at: Time.current,
-              entity:        nil,
+              entity:        actor.entity || nil,
             }
             # Hardcode attributes depending on the actor's entity
             COMPUTED_ATTRIBUTES.each { |attribute| hash[attribute] = actor.send(attribute) }

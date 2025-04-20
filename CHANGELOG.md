@@ -30,6 +30,11 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ## [Unreleased]
 
+### Changed
+
+- Actors:
+  - `entity` relation is now kept when actor is tombstoned with an existing entity
+
 ### Fixed
 
 - Do not create actor when fetching new remote objects

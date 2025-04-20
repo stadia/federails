@@ -13,9 +13,9 @@ RSpec.describe Federails::Utils::Actor do
         expect { described_class.tombstone!(actor) }.to change { actor.attributes.slice(*Federails::Utils::Actor::COMPUTED_ATTRIBUTES.map(&:to_s)) }.from(nils).to computed
       end
 
-      it 'nullifies the entity' do
+      it 'does not nullify the entity if still existing' do
         described_class.tombstone!(actor)
-        expect(actor.entity).to be_nil
+        expect(actor.entity).not_to be_nil
       end
 
       it 'marks the actor as tombstoned' do
