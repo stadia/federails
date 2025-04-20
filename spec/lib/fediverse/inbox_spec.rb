@@ -107,18 +107,39 @@ module Fediverse
     end
 
     describe '#handle_delete_request' do
-      let(:payload) do
-        {
-          'type'   => 'Delete',
-          'actor'  => entity.federails_actor.federated_url,
-          'object' => entity.federated_url,
-          'delete' => Time.current,
-        }
-      end
-      let!(:entity) { Fixtures::Classes::FakeArticleDataModel.create! federails_actor_id: distant_actor.id, federated_url: 'https://example.com/data/1', title: 'A title', content: 'the content' }
+      context 'with a DataEntity' do
+        let(:payload) do
+          {
+            'type'   => 'Delete',
+            'actor'  => entity.federails_actor.federated_url,
+            'object' => entity.federated_url,
+            'delete' => Time.current,
+          }
+        end
+        let!(:entity) { Fixtures::Classes::FakeArticleDataModel.create! federails_actor_id: distant_actor.id, federated_url: 'https://example.com/data/1', title: 'A title', content: 'the content' }
 
-      it 'triggers the "on_federails_delete_requested" callback' do
-        expect { described_class.send(:handle_delete_request, payload) }.to raise_error 'on_federails_delete_requested called'
+        it 'triggers the "on_federails_delete_requested"' do
+          expect { described_class.send(:handle_delete_request, payload) }.to raise_error 'on_federails_delete_requested called'
+        end
+      end
+
+      context 'with an Actor' do
+        let!(:entity) { FactoryBot.create :distant_actor }
+        let(:payload) do
+          {
+            'type'   => 'Delete',
+            'actor'  => entity.federated_url,
+            'object' => entity.federated_url,
+            'delete' => Time.current,
+          }
+        end
+
+        it 'triggers the "on_federails_delete_requested"' do
+          allow(Federails::Utils::Actor).to receive(:tombstone!)
+
+          described_class.send(:handle_delete_request, payload)
+          expect(Federails::Utils::Actor).to have_received(:tombstone!).once
+        end
       end
     end
   end
