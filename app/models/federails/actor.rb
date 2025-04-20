@@ -42,6 +42,7 @@ module Federails
     scope :not_tombstoned, -> { where(tombstoned_at: nil) }
 
     on_federails_delete_requested -> { tombstone! }
+    on_federails_undelete_requested -> { untombstone! }
 
     def distant?
       !local?

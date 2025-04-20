@@ -34,8 +34,11 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 - Actors:
   - added `sync!` method to update distant actors: `Actor.find(1).sync!`
+  - added `on_federails_undelete_requested` callback
+  - restore actor when `on_federails_undelete_requested` is triggered 
 - DataEntity:
   - added `federails_sync!` method to update distant content: `Articles.find(1).federails_sync!`
+  - added `on_federails_undelete_requested` callback
 
 ### Changed
 

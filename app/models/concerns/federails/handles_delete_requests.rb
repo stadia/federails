@@ -22,10 +22,15 @@ module Federails
       def on_federails_delete_requested(*args)
         set_callback :on_federails_delete_requested, *args
       end
+
+      def on_federails_undelete_requested(*args)
+        set_callback :on_federails_undelete_requested, *args
+      end
     end
 
     included do
       define_callbacks :on_federails_delete_requested
+      define_callbacks :on_federails_undelete_requested
     end
   end
 end

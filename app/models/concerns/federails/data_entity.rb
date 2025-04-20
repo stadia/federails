@@ -39,6 +39,10 @@ module Federails
   #   # you'll have to implement the behavior yourself.
   #   on_federails_delete_requested :do_something
   #
+  #   # This will be called when a Undo activity comes for the entry. The easiest way to handle this case is to re-fetch
+  #   # the entity
+  #   on_federails_undelete_requested :do_something_else
+  #
   #   def to_activitypub_object
   #     Federails::DataTransformer::Note.to_federation self,
   #                                                    content: content,
@@ -66,12 +70,29 @@ module Federails
   #                        soft_delete_date_method: :deleted_at
   #
   # on_federails_delete_requested :soft_delete!
+  # on_federails_undelete_requested :restore_remote_entity!
   #
   # # Method you use to soft-delete entities
   # def soft_delete!
   #   update deleted_at: time.current
   #
   #   send_federails_activity 'Delete' unless local_federails_entity?
+  # end
+  #
+  # # Method you use to restore soft-deleted entities
+  # def restore!
+  #   update deleted_at: nil
+  #
+  #   if local_federails_entity?
+  #     delete_activity =  Activity.find_by action: 'Delete', entity: self
+  #     send_federails_activity 'Undo', entity: delete_activity, actor: federails_actor if delete_activity.present?
+  #   end
+  # end
+  #
+  # def restore_remote_entity!
+  #   self.deleted_at: nil
+  #   federails_sync!
+  #   save!
   # end
   # ```
   module DataEntity

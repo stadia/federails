@@ -77,6 +77,21 @@ module Federails
           expect(actor).to be_tombstoned
         end
       end
+
+      describe 'on_federails_undelete_requested' do
+        it 'un-tombstones the actor' do # rubocop:disable RSpec/MultipleExpectations, RSpec/ExampleLength
+          actor = FactoryBot.create :distant_actor, tombstoned_at: Time.current
+          allow(actor).to receive(:sync!)
+
+          expect(actor).to be_tombstoned
+
+          actor.run_callbacks :on_federails_undelete_requested
+          aggregate_failures do
+            expect(actor).not_to be_tombstoned
+            expect(actor).to have_received(:sync!).once
+          end
+        end
+      end
     end
 
     describe '#find_by_account' do
