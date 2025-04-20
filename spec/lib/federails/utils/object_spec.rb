@@ -55,7 +55,7 @@ module Federails
           context 'when it does not exist locally' do
             context 'when it exists remotely' do
               before do
-                allow(Fediverse::Request).to receive(:dereference).with(url).and_return({ 'id' => url, 'type' => 'CustomNote', 'actor' => distant_actor.federated_url, 'content' => 'the content' })
+                allow(Fediverse::Request).to receive(:dereference).with(url).and_return({ 'id' => url, 'type' => 'CustomNote', 'attributedTo' => distant_actor.federated_url, 'content' => 'the content' })
                 allow(Federails::Actor).to receive(:find_by_federation_url).with(distant_actor.federated_url).and_return(distant_actor)
               end
 

@@ -30,6 +30,10 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ## [Unreleased]
 
+### Fixed
+
+- Do not create actor when fetching new remote objects
+
 ## [0.6.2] 2025-04-18
 
 ### Fixed

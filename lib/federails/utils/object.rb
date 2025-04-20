@@ -121,7 +121,7 @@ module Federails
           entity = handler[:class].new_from_activitypub_object(hash)
           return unless entity
 
-          entity.federails_actor = Federails::Actor.find_or_create_by_object hash['attributedTo'] if entity && !entity.federails_actor
+          entity.federails_actor = Federails::Actor.find_by_federation_url hash['attributedTo'] if entity && !entity.federails_actor
 
           entity
         end
