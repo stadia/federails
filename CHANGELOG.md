@@ -33,6 +33,7 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 ### Fixed
 
 - Do not create actor when fetching new remote objects
+- Added missing condition on DataEntity's `after_update` hook
 
 ## [0.6.2] 2025-04-18
 
