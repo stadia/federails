@@ -90,11 +90,21 @@ module Fediverse
 
         object.run_callbacks :on_federails_delete_requested
       end
+
+      def handle_undelete_request(activity)
+        # Get to original object
+        delete_activity = Request.dereference(activity['object'])
+        object = Federails::Utils::Object.find_distant_object_in_all(delete_activity['object'])
+        return if object.blank?
+
+        object.run_callbacks :on_federails_undelete_requested
+      end
     end
 
     register_handler 'Follow', '*', self, :handle_create_follow_request
     register_handler 'Accept', 'Follow', self, :handle_accept_follow_request
     register_handler 'Undo', 'Follow', self, :handle_undo_follow_request
     register_handler 'Delete', '*', self, :handle_delete_request
+    register_handler 'Undo', 'Delete', self, :handle_undelete_request
   end
 end

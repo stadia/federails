@@ -25,6 +25,10 @@ module Fediverse
       it 'registered a handler for "Delete" activities on all activities' do
         expect(handlers['Delete']['*'].keys).to include described_class
       end
+
+      it 'registered a handler for "Undo" activities on "Delete" activities' do
+        expect(handlers['Undo']['Delete'].keys).to include described_class
+      end
     end
 
     describe '#handle_create_follow_request' do
@@ -139,6 +143,52 @@ module Fediverse
 
           described_class.send(:handle_delete_request, payload)
           expect(Federails::Utils::Actor).to have_received(:tombstone!).once
+        end
+      end
+    end
+
+    describe '#handle_undelete_request' do
+      context 'with a DataEntity' do
+        let(:entity) do
+          Fixtures::Classes::FakeArticleDataModel.create! federails_actor_id: distant_actor.id,
+                                                          federated_url:      'https://example.com/data/1',
+                                                          title:              'A title',
+                                                          content:            'the content',
+                                                          deleted_at:         Time.current
+        end
+
+        let!(:payload) do
+          {
+            'type'   => 'Undo',
+            'actor'  => entity.federails_actor.federated_url,
+            'object' => 'https://example.com/activities/delete_123',
+          }
+        end
+
+        it 'triggers the "on_federails_undelete_requested" callback' do
+          allow(Fediverse::Request).to receive(:dereference).with(payload['object']).and_return({ 'type' => 'Delete', 'id' => payload['object'], 'object' => entity.federated_url }).once
+
+          expect { described_class.send(:handle_undelete_request, payload) }.to raise_error 'on_federails_undelete_requested called'
+        end
+      end
+
+      context 'with an Actor' do
+        let(:entity) { FactoryBot.create :distant_actor, tombstoned_at: Time.current }
+
+        let!(:payload) do
+          {
+            'type'   => 'Undo',
+            'actor'  => entity.federated_url,
+            'object' => 'https://example.com/activities/delete_123',
+          }
+        end
+
+        it 'triggers the "on_federails_undelete_requested" callback' do
+          allow(Fediverse::Request).to receive(:dereference).with(payload['object']).and_return({ 'type' => 'Delete', 'id' => payload['object'], 'object' => entity.federated_url }).once
+          allow(Federails::Utils::Actor).to receive(:untombstone!)
+
+          described_class.send(:handle_undelete_request, payload)
+          expect(Federails::Utils::Actor).to have_received(:untombstone!).once
         end
       end
     end

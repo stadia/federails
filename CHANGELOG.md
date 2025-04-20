@@ -39,6 +39,8 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 - DataEntity:
   - added `federails_sync!` method to update distant content: `Articles.find(1).federails_sync!`
   - added `on_federails_undelete_requested` callback
+- Inboxes:
+  - dispatch `on_federails_undelete_requested` when receiving an `Undo` activity on a `Delete` one
 
 ### Changed
 

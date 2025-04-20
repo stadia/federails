@@ -16,9 +16,17 @@ module Fixtures
       belongs_to :user, optional: true
 
       on_federails_delete_requested -> { raise 'on_federails_delete_requested called' }
+      on_federails_undelete_requested -> { raise 'on_federails_undelete_requested called' }
 
       def deleted?
         !!deleted_at
+      end
+
+      def soft_delete!
+        return unless local_federails_entity?
+
+        update! deleted_at: Time.current
+        create_federails_activity('Delete')
       end
 
       def to_activitypub_object
