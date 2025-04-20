@@ -34,9 +34,8 @@ module Fixtures
 
       def self.from_activitypub_object(hash)
         {
-          title:           hash['name'] || 'A post',
-          content:         hash['content'],
-          federails_actor: Federails::Actor.find_by_federation_url(hash['actor']),
+          title:   hash['name'] || 'A post',
+          content: hash['content'],
         }
       end
 
