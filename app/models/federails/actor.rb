@@ -121,6 +121,21 @@ module Federails
       Federails.actor_entity entity_type
     end
 
+    # Synchronizes actor with distant data
+    #
+    # @raise [ActiveRecord::RecordNotFound] when distant data was not found
+    def sync!
+      if local?
+        Rails.logger.info 'Ignored attempt to sync a local actor'
+        return false
+      end
+
+      response = Fediverse::Webfinger.fetch_actor_url(federated_url)
+      new_attributes = response.attributes.except 'id', 'uuid', 'created_at', 'updated_at', 'local', 'entity_id', 'entity_type'
+
+      update! new_attributes
+    end
+
     def tombstoned?
       tombstoned_at.present?
     end

@@ -279,6 +279,34 @@ module Federails
       end
     end
 
+    describe '#sync!' do
+      context 'with a local actor' do
+        let(:local_actor) { FactoryBot.create(:user).reload.federails_actor }
+
+        it 'returns false' do
+          expect(local_actor.sync!).to be false
+        end
+      end
+
+      context 'with a distant actor' do
+        before do
+          existing_distant_actor.update! username: 'old_username'
+        end
+
+        it 'updates the actor' do
+          VCR.use_cassette 'actor/find_or_create_by_federation_url_get' do
+            expect { existing_distant_actor.sync! }.to change { existing_distant_actor.reload.username }.from('old_username').to('mtancoigne')
+          end
+        end
+
+        it 'returns true' do
+          VCR.use_cassette 'actor/find_or_create_by_federation_url_get' do
+            expect(existing_distant_actor.sync!).to be true
+          end
+        end
+      end
+    end
+
     describe 'local actor' do
       it 'must have a related entity' do
         entity = described_class.new local: true

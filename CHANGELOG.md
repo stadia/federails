@@ -30,6 +30,11 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ## [Unreleased]
 
+### Added
+
+- Actors:
+  - added `sync!` method to update distant actors: `Actor.find(1).sync!`
+
 ### Changed
 
 - Actors:
