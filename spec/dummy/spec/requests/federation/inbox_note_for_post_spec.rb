@@ -19,7 +19,7 @@ RSpec.describe 'POST federation/actors/:actor_id/inbox with a Note to become a P
       post federails.server_actor_inbox_url(actor_id: local_actor.id), params: fediverse_object, headers: headers
     end
 
-    context 'with a supported Note', :doing do
+    context 'with a supported Note' do
       context 'when actor already exist' do
         before do
           VCR.use_cassette 'fediverse/request/get_actor_200' do

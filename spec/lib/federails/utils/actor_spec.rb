@@ -2,7 +2,7 @@ require 'rails_helper'
 require 'federails/utils/actor'
 
 RSpec.describe Federails::Utils::Actor do
-  describe '.tombstone!', :doing do
+  describe '.tombstone!' do
     context 'with a local actor' do
       let(:actor) { FactoryBot.create :local_actor }
 
