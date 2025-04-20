@@ -144,6 +144,10 @@ module Federails
       Federails::Utils::Actor.tombstone! self
     end
 
+    def untombstone!
+      Federails::Utils::Actor.untombstone! self
+    end
+
     class << self
       # Searches for an actor from account URI
       #

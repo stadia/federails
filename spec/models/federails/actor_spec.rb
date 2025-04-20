@@ -279,6 +279,62 @@ module Federails
       end
     end
 
+    describe '#untombstone!' do
+      context 'with a distant actor' do
+        let(:entity) { described_class.create! distant_actor_attributes.merge(tombstoned_at: Time.current) }
+
+        before do
+          allow(entity).to receive(:sync!).and_return(true)
+        end
+
+        it 'does not create an activity' do
+          expect { entity.untombstone! }.not_to change(Federails::Activity, :count)
+        end
+
+        it 'removes the tombstoned flag' do
+          entity.untombstone!
+
+          expect(entity.tombstoned_at).to be_nil
+        end
+
+        it 'synchronizes the actor' do
+          entity.untombstone!
+
+          expect(entity).to have_received(:sync!).once
+        end
+
+        it 'saves the entity' do
+          entity.untombstone!
+
+          expect(entity).not_to be_changed
+        end
+      end
+
+      context 'with a local actor' do
+        let(:entity) { FactoryBot.create(:user).federails_actor }
+
+        before do
+          entity.tombstone!
+        end
+
+        it 'creates an activity' do
+          expect { entity.untombstone! }.to change(Federails::Activity, :count).by 1
+        end
+
+        it 'removes the tombstoned flag' do
+          entity.untombstone!
+
+          expect(entity.tombstoned_at).to be_nil
+        end
+
+        it 'saves the entity' do
+          entity.untombstone!
+
+          expect(entity).not_to be_changed
+        end
+      end
+    end
+
     describe '#sync!' do
       context 'with a local actor' do
         let(:local_actor) { FactoryBot.create(:user).reload.federails_actor }

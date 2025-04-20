@@ -27,6 +27,14 @@ module Federails
           actor
         end
 
+        def untombstone!(actor)
+          if actor.local?
+            untombstone_local_actor actor
+          else
+            untombstone_distant_actor actor
+          end
+        end
+
         private
 
         def tombstone_local_actor(actor)
@@ -44,8 +52,32 @@ module Federails
           end
         end
 
+        def untombstone_local_actor(actor)
+          return unless actor.tombstoned?
+          raise 'Cannot restore a local actor without an entity' if actor.entity.blank?
+
+          Federails::Actor.transaction do
+            # Reset hardcoded attributes depending on the actor's entity
+            hash = { tombstoned_at: nil }
+            COMPUTED_ATTRIBUTES.each { |attribute| hash[attribute] = nil }
+
+            actor.update! hash
+
+            delete_activity = Activity.find_by actor: actor, action: 'Delete', entity: actor
+            return unless delete_activity
+
+            Activity.create! actor: actor, action: 'Undo', entity: delete_activity
+          end
+        end
+
         def tombstone_distant_actor(actor)
           actor.update! tombstoned_at: Time.current
+        end
+
+        def untombstone_distant_actor(actor)
+          actor.tombstoned_at = nil
+          actor.sync!
+          actor.save
         end
       end
     end
