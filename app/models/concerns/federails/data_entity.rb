@@ -12,9 +12,18 @@ module Federails
   #
   # ## Pre-requisites
   #
-  # Model must have a `federated_url` attribute:
+  # Model should have the following methods:
+  #  - `to_activitypub_object`, returning a valid ActivityPub object
+  #  - `self.from_activitypub_object`, returning a hash of valid attributes from a hash of incoming data
+  #
+  #  Table needs at least:
+  #  - `t.string :federated_url, null: true, default: nil`
+  #  - `t.references :federails_actor, foreign_key: true, null: true, default: nil
+  #
+  # Model must have the following attributes:
   # ```rb
   # add_column :posts, :federated_url, :string, null: true, default: nil
+  # add_reference :posts, :federails_actor, foreign_key: true, null: true, default: nil
   # ```
   #
   # ## Usage
@@ -29,6 +38,40 @@ module Federails
   #   # This will be called when a Delete activity comes for the entry. As we don't know how you want to handle it,
   #   # you'll have to implement the behavior yourself.
   #   on_federails_delete_requested :do_something
+  #
+  #   def to_activitypub_object
+  #     Federails::DataTransformer::Note.to_federation self,
+  #                                                    content: content,
+  #                                                    name:    title
+  #   end
+  #
+  #   # Creates a hash of attributes from incoming Note
+  #   def self.from_activitypub_object(hash)
+  #     {
+  #       title:   hash['name'] || 'A post',
+  #       content: hash['content'],
+  #     }
+  #   end
+  # end
+  # ```
+  #
+  # **If your model has a mechanism for soft deletion:**
+  # - you can specify some methods names to handle it in Federails responses:
+  # - you will need to send the delete activity yourself
+  #
+  # ```rb
+  # acts_as_federails_data handles: 'Note',
+  #                        ...,
+  #                        soft_deleted_method: :deleted?
+  #                        soft_delete_date_method: :deleted_at
+  #
+  # on_federails_delete_requested :soft_delete!
+  #
+  # # Method you use to soft-delete entities
+  # def soft_delete!
+  #   update deleted_at: time.current
+  #
+  #   send_federails_activity 'Delete' unless local_federails_entity?
   # end
   # ```
   module DataEntity
@@ -40,9 +83,6 @@ module Federails
     # Class methods automatically included in the concern.
     module ClassMethods
       # Configures the mapping between entity and Fediverse
-      #
-      # Model should have the following methods:
-      # - `to_activitypub_object`, returning a valid ActivityPub object
       #
       # @param actor_entity_method [Symbol] Method returning an object responding to 'federails_actor', for local content
       # @param url_param [Symbol] Column name of the object ID that should be used in URLs. Defaults to +:id+
@@ -56,9 +96,9 @@ module Federails
       # @param should_federate_method [Symbol] method to determine if an object should be federated. If the method returns false,
       #   no create/update activities will happen, and object will not be accessible at federated_url. Defaults to a method
       #   that always returns true.
-      # @param soft_deleted_method [Symbol, nil] Method to soft-delete the object when receiving a Delete request. This
-      #   is not required by the spec but greatly encouraged as the app will return a 410 response with a Tombstone object
-      #   instead of an 404 error.
+      # @param soft_deleted_method [Symbol, nil] If the model uses a soft-delete mechanism, this is the method to check
+      #   if entity is soft-deleted. This is not required by the spec but greatly encouraged as the app will return a 410
+      #   response with a Tombstone object instead of an 404 error.
       # @param soft_delete_date_method [Symbol, nil] Method to get the date of the soft-deletion
       #
       # @example
