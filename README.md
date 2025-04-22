@@ -40,6 +40,13 @@ It _may_ work on other versions, but we won't provide support.
 - [Common questions](docs/faq.md)
 - [Contributing](CONTRIBUTING.md)
 
+## Extensions
+
+Extensions extends the features of Federails.
+
+- [Federails Moderation](https://github.com/manyfold3d/federails-moderation/)
+  > A gem that provides moderation capabilities for Federails
+
 ## License
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
