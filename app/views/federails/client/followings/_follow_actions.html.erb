@@ -26,6 +26,8 @@
         <%= button_to 'Revoke', federails.client_following_path(followed), method: :delete %>
       <% end %>
     <% end %>
+  <% elsif !user %>
+    Register or login to be able to follow this actor
   <% else %>
     <%= user.class.name %> is not configured to follow/be followed, or has no associated actor.
   <% end %>

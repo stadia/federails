@@ -17,7 +17,9 @@ Federation:
 </ul>
 
 <%# Debug information%>
-<% if !Federails::actor_entity?(user) %>
+<% if !user %>
+  Register or login to view your actor's information
+<% elsif !Federails::actor_entity?(user) %>
   <p><%= user.class.name %> is not configured to have an associated actor; you won't be allowed to follow or be followed</p>
 <% elsif !user.federails_actor.present? %>
   <p>Your account does not have an associated actor; you won't be allowed to follow or be followed</p>
