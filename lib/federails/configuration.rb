@@ -58,6 +58,13 @@ module Federails
     # @!method self.remote_follow_url_method=(value)
     #
     # Sets the route method for remote-following requests
+    #
+    # The route should lead to a page displaying the remote actor and a button to follow it.
+    # Remote actor is specified in the `uri` query parameter.
+    #
+    # Its value defaults to a route of the Federails client, so your application will break
+    # if you don't use the client routes and don't override this value.
+    #
     # @param value [String] Route method name as used in links
     # @example
     #   remote_follow_url_method 'main_app.my_custom_route_helper'
