@@ -53,6 +53,7 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 - Added missing condition on DataEntity's `after_update` hook
 - Client:
   - Don't fail in `follower` partial when user is not signed-in
+  - Require `uri` parameter in new following action 
 
 ## [0.6.2] 2025-04-18
 

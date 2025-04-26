@@ -8,7 +8,7 @@ module Federails
       # GET /app/followings/new?uri={uri}
       def new
         # Find actor (and fetch if necessary)
-        actor = Actor.find_or_create_by_federation_url(params[:uri])
+        actor = Actor.find_or_create_by_federation_url(params.require(:uri))
         # Redirect to local profile page which will have a follow button on it
         redirect_to federails.client_actor_url(actor)
       end
