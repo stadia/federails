@@ -46,6 +46,7 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 - Actors:
   - `entity` relation is now kept when actor is tombstoned with an existing entity
+  - `at_address` now have a `prefix` argument to change the address prefix. Defaults to `@` for compatibility.
 
 ### Fixed
 

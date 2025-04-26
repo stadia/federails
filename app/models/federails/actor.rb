@@ -97,8 +97,8 @@ module Federails
       Rails.application.routes.url_helpers.send method, [entity]
     end
 
-    def at_address
-      "@#{username}@#{server}"
+    def at_address(prefix: '@')
+      "#{prefix}#{username}@#{server}"
     end
 
     def short_at_address
