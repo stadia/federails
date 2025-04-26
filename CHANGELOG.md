@@ -51,6 +51,8 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 - Do not create actor when fetching new remote objects
 - Added missing condition on DataEntity's `after_update` hook
+- Client:
+  - Don't fail in `follower` partial when user is not signed-in
 
 ## [0.6.2] 2025-04-18
 
