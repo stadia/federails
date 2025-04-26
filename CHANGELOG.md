@@ -41,6 +41,8 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
   - added `on_federails_undelete_requested` callback
 - Inboxes:
   - dispatch `on_federails_undelete_requested` when receiving an `Undo` activity on a `Delete` one
+- Client:
+  - Added a field with actor's "at address" to copy in another instance
 
 ### Changed
 

@@ -27,7 +27,9 @@
       <% end %>
     <% end %>
   <% elsif !user %>
-    Register or login to be able to follow this actor
+    Register or login to be able to follow this actor. Alternatively, search for this address on Fediverse server where
+    you already have an account:
+    <input type="text" readonly="readonly" value="<%= actor.at_address(prefix: '') %>">
   <% else %>
     <%= user.class.name %> is not configured to follow/be followed, or has no associated actor.
   <% end %>
