@@ -89,6 +89,12 @@ module Federails
       Federails::Engine.routes.default_url_options[:port] = value
     end
 
+    # Default amount of seconds to consider that a remote entity could be updated
+    #
+    # This setting is used for hosts information only, for now.
+    mattr_accessor :remote_entities_cache_duration
+    @@remote_entities_cache_duration = 1.day
+
     # List of actor types (classes using Federails::ActorEntity)
     mattr_reader :actor_types
     @@actor_types = {}

@@ -36,6 +36,9 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
   a Proc that will return a hash when required.
 - Hosts:
   - Added `Federails::Host` model to store remote hosts information
+- Configuration: 
+  - Added `remote_entities_cache_duration` option to define the cache duration in seconds for a remote entity
+    to be considered outdated. Only used for `Federails::Host` for now
 
 ### Removed
 
