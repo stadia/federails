@@ -5,4 +5,9 @@ namespace :federails do
       puts "#{actor.federated_url}: #{status}"
     end
   end
+
+  desc 'Re-fetches every host and completes missing ones'
+  task sync_hosts: :environment do
+    Federails::Maintenance::HostsUpdater.run
+  end
 end
