@@ -93,6 +93,20 @@ module Federails
           end
         end
       end
+
+      describe 'after_create' do
+        context 'with a local actor' do
+          it 'does not fetch domain information' do
+            expect { FactoryBot.create :local_actor }.not_to have_enqueued_job(Federails::FetchNodeinfoJob)
+          end
+        end
+
+        context 'with a remote actor' do
+          it 'fetches the domain information' do
+            expect { FactoryBot.create :distant_actor }.to have_enqueued_job(Federails::FetchNodeinfoJob)
+          end
+        end
+      end
     end
 
     describe '#find_by_account' do

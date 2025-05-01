@@ -47,6 +47,8 @@ module Federails
     scope :tombstoned, -> { where.not(tombstoned_at: nil) }
     scope :not_tombstoned, -> { where(tombstoned_at: nil) }
 
+    after_create -> { FetchNodeinfoJob.perform_later(server) }, unless: :local?
+
     on_federails_delete_requested -> { tombstone! }
     on_federails_undelete_requested -> { untombstone! }
 
