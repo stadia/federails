@@ -43,12 +43,20 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
   - dispatch `on_federails_undelete_requested` when receiving an `Undo` activity on a `Delete` one
 - Client:
   - Added a field with actor's "at address" to copy in another instance
+- Utils:
+  - Added `Federails::Utils::JsonRequest` module to replace many similar methods in `Fediverse::Webfinger` and 
+    `Fediverse::Request` 
 
 ### Changed
 
 - Actors:
   - `entity` relation is now kept when actor is tombstoned with an existing entity
   - `at_address` now have a `prefix` argument to change the address prefix. Defaults to `@` for compatibility.
+- `Fediverse::Request`: class is not instantiable anymore
+
+### Removed
+
+- `Fediverse::Request.get` has been removed.
 
 ### Fixed
 

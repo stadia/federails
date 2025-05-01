@@ -18,6 +18,8 @@ desired one, do these steps (in the order you see fit)
 
 ## Next
 
+First of all, read the **[general upgrade steps](#general-steps)**
+
 ## From 0.6.1 to 0.6.2
 
 Update the gem (no migration, no changes on views, ect...).
@@ -38,7 +40,6 @@ First of all, read the **[general upgrade steps](#general-steps)**
   ```rb
   Federails::Maintenance::ActorsUpdater.run
   ```
-
 
 ## From 0.4.0 to 0.5.0
 

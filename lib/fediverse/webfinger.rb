@@ -1,7 +1,5 @@
-require 'faraday'
-require 'faraday/follow_redirects'
-
 require 'federails/utils/host'
+require 'federails/utils/json_request'
 
 module Fediverse
   # Methods related to Webfinger: find accounts, fetch actors,...
@@ -122,41 +120,20 @@ module Fediverse
       # Makes a simple GET request and returns a +Hash+ from the parsed body
       # @return [Hash]
       # @raise [ActiveRecord::RecordNotFound] when the response is invalid
-      def get_json(url, payload = {})
-        response = get(url, payload: payload, headers: { accept: 'application/json' })
-
-        if response.status != 200
-          Rails.logger.debug { "Unhandled status code #{response.status} for GET #{url}" }
-          raise ActiveRecord::RecordNotFound
-        end
-
-        JSON.parse(response.body)
-      rescue JSON::ParserError
-        Rails.logger.debug { "Invalid JSON response GET #{url}" }
+      def get_json(url, params = {})
+        Federails::Utils::JsonRequest.get_json(url, params: params, follow_redirects: true, headers: { accept: 'application/json' })
+      rescue Federails::Utils::JsonRequest::UnhandledResponseStatus => e
+        Rails.logger.debug { e.message }
 
         raise ActiveRecord::RecordNotFound
-      end
+      rescue Faraday::ConnectionFailed
+        Rails.logger.debug { "Failed to reach server for GET #{url}" }
 
-      # Only perform a GET request and throws an ActiveRecord::RecordNotFound on error.
-      #
-      # That's "ok-ish"; when an actor is unavailable, whatever the reason is, it's not found...
-      #
-      # @return [Faraday::Response]
-      # @raise [ActiveRecord::RecordNotFound] when the response is invalid
-      def get(url, payload: {}, headers: {})
-        connection = Faraday.new url: url, params: payload, headers: headers do |faraday|
-          faraday.response :follow_redirects # use Faraday::FollowRedirects::Middleware
-          faraday.adapter Faraday.default_adapter
-        end
+        raise ActiveRecord::RecordNotFound
+      rescue JSON::ParserError
+        Rails.logger.debug { "Invalid JSON response for GET #{url}" }
 
-        begin
-          response = connection.get
-        rescue Faraday::ConnectionFailed
-          Rails.logger.debug { "Failed to reach server for GET #{url}" }
-          raise ActiveRecord::RecordNotFound
-        end
-
-        response
+        raise ActiveRecord::RecordNotFound
       end
     end
   end

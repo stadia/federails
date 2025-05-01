@@ -2,27 +2,7 @@ require 'json/ld'
 
 module Fediverse
   class Request
-    BASE_HEADERS = {
-      'Content-Type' => 'application/json',
-      'Accept'       => 'application/json',
-    }.freeze
-
-    def initialize(id)
-      @id = id
-    end
-
-    # FIXME: Replace by `Webfinger.get_json` (move other method here as class method)
-    def get
-      Rails.logger.debug { "GET #{@id}" }
-      @response = Faraday.get(@id, nil, BASE_HEADERS)
-      response_to_json
-    end
-
     class << self
-      def get(id)
-        new(id).get
-      end
-
       # Dereferences a value
       #
       # @param value [String, Hash]
@@ -34,18 +14,16 @@ module Fediverse
 
         raise "Unhandled object type #{value.class}"
       end
-    end
 
-    private
+      private
 
-    def response_to_json
-      begin
-        body = JSON.parse @response.body
+      def get(id)
+        json = Federails::Utils::JsonRequest.get_json(id)
+
+        JSON::LD::API.compact json, json['@context']
       rescue JSON::ParserError
-        return
+        nil
       end
-
-      JSON::LD::API.compact body, body['@context']
     end
   end
 end
