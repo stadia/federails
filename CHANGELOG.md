@@ -45,7 +45,9 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
   - Added a field with actor's "at address" to copy in another instance
 - Utils:
   - Added `Federails::Utils::JsonRequest` module to replace many similar methods in `Fediverse::Webfinger` and 
-    `Fediverse::Request` 
+    `Fediverse::Request`
+- Fediverse:
+  - Added `Fediverse::NodeInfo` to retrieve nodeinfo data
 
 ### Changed
 
