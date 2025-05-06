@@ -378,6 +378,46 @@ module Federails
       end
     end
 
+    describe '#follows?' do
+      let(:actor) { FactoryBot.create :local_actor }
+
+      context 'when current actor follows given actor' do
+        before do
+          Federails::Following.create! actor: actor, target_actor: existing_distant_actor
+        end
+
+        it 'returns the Following' do
+          expect(actor.follows?(existing_distant_actor)).to be_a Federails::Following
+        end
+      end
+
+      context 'when current actor does not follow given actor' do
+        it 'returns false' do
+          expect(actor.follows?(existing_distant_actor)).to be false
+        end
+      end
+    end
+
+    describe '#followed_by?' do
+      let(:actor) { FactoryBot.create :local_actor }
+
+      context 'when given actor follows current actor' do
+        before do
+          Federails::Following.create! actor: existing_distant_actor, target_actor: actor
+        end
+
+        it 'returns the Following' do
+          expect(actor.followed_by?(existing_distant_actor)).to be_a Federails::Following
+        end
+      end
+
+      context 'when given actor does not follow current actor' do
+        it 'returns false' do
+          expect(actor.followed_by?(existing_distant_actor)).to be false
+        end
+      end
+    end
+
     describe 'local actor' do
       it 'must have a related entity' do
         entity = described_class.new local: true

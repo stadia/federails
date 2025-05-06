@@ -33,7 +33,9 @@ module Federails
     has_many :activities_as_entity, class_name: 'Federails::Activity', as: :entity, dependent: :destroy
     has_many :following_followers, class_name: 'Federails::Following', foreign_key: :target_actor_id, dependent: :destroy, inverse_of: :target_actor
     has_many :following_follows, class_name: 'Federails::Following', dependent: :destroy, inverse_of: :actor
+    # Actors following actor
     has_many :followers, source: :actor, through: :following_followers
+    # Actors followed by actor
     has_many :follows, source: :target_actor, through: :following_follows
 
     scope :local, -> { where(local: true) }
@@ -109,8 +111,21 @@ module Federails
       "acct:#{username}@#{server}"
     end
 
+    # Checks if a given actor follows the current actor
+    #
+    # @return [Federails::Following, false]
     def follows?(actor)
       list = following_follows.where target_actor: actor
+      return list.first if list.count == 1
+
+      false
+    end
+
+    # Checks if current actor is followed by the given actor
+    #
+    # @return [Federails::Following, false]
+    def followed_by?(actor)
+      list = following_followers.where actor: actor
       return list.first if list.count == 1
 
       false
