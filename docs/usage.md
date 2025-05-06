@@ -91,17 +91,53 @@ Federails.configure do |config|
   config.client_routes_path = nil
 end
 ```
+## Federails client
 
-### Remote following
+To get started, you can use the Federails client: routes and views to list actors, follow them, list activities, etc...
 
-By default, remote follow requests (where you press a follow button on another server and get redirected home to complete the follow)
-will use the built-in client paths. If you're not using the client, or want to provide your own user interface, you can set the path like this, assuming that `new_follow_url` is a valid route in your app. A `uri` query parameter template will be automatically appended, you don't need to specify that.
+To enable the routes, set the `config.client_routes_path` to something so they can be mounted in your application.
+
+Doing so may break some links in your layout when rendering the client views: you will need to prefix all calls to
+your app's url helpers with `main_app`:
+
+```html.erb
+<%= link_to 'Users', main_app.users_url %>
+```
+
+You can override the views like with any other engine. We provide a rake task to copy them all so you can easily
+override what you want:
+
+```sh
+rails generate federails:copy_client_views
+```
+
+### Disabling/not using the client
+
+To disable the client, set `client_routes_path` to `nil`.
+
+Disabling the client will break some of the Federails features, as Federails _needs_ some of the client routes to
+generate URLS. You will need provide the routes yourself:
+
+#### Remote following
+
+By default, remote follow requests (where you press a follow button on another server and get redirected home to
+complete the follow) will use the built-in client paths. If you're not using the client, or want to provide your own
+user interface, you can set the path like this, assuming that `new_follow_url` is a valid route in your app. A `uri`
+query parameter template will be automatically appended, you don't need to specify that.
 
 ```rb
 Federails.configure do |config|
   config.remote_follow_url_method = :new_follow_url
 end
 ```
+
+This _GET_ route _should_ render a page allowing to follow the actor passed as `uri` parameter.
+
+In the client (`app/controllers/federails/client/followings_controller.rb#new`), we use a page that allows signed-in
+actor to find another actor and follow it. In the Federails client implementation, we fetch the actor, save it locally
+and redirect to a page that displays it, with the "Follow" button, but you can do whatever you want, as long as the user
+has ability to follow the actor in the end.
+
 
 ## Migrations
 
