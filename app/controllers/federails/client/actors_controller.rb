@@ -35,7 +35,7 @@ module Federails
       end
 
       def account_param
-        params.require('account')
+        params.require('account').strip
       end
 
       def render_show
