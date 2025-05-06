@@ -55,6 +55,7 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
   - Don't fail in `follower` partial when user is not signed-in
   - Require `uri` parameter in new following action 
   - Strip parameter value when searching for actors
+  - Improve some strings in views
 - Server:
   - Fix nodeinfo scheme in schema URL
 

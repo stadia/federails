@@ -10,7 +10,7 @@
     <% if actor.entity == user %>
       <button type="button" role="button" disabled="disabled">That's you</button>
     <% elsif follow %>
-      Already following (<%= follow.status %>)
+      You are already following (<%= follow.status %>)
       <%= button_to 'Cancel', federails.client_following_path(follow), method: :delete %>
     <% else %>
       <%= button_to "Follow #{actor.username}", federails.follow_client_followings_path, params: { account: actor.at_address }, method: :post %>
