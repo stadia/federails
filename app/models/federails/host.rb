@@ -10,6 +10,17 @@ module Federails
     # No "dependent" option here as this is not a hard reference, and we want to keep the actors if the host gets deleted
     has_many :actors, class_name: 'Federails::Actor', primary_key: :domain, foreign_key: :server, inverse_of: :host # rubocop:disable Rails/HasManyOrHasOneDependent
 
+    scope :same_app, -> { where software_name: Configuration.app_name }
+    scope :same_app_and_version, -> { same_app.where app_version: Configuration.app_version }
+
+    def same_app?
+      software_name == Configuration.app_name
+    end
+
+    def same_app_and_version?
+      software_name == Configuration.app_name && app_version == Configuration.app_version
+    end
+
     # Update from remote data
     def sync!
       update! Fediverse::NodeInfo.fetch(domain)
