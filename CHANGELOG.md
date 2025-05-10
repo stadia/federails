@@ -30,6 +30,10 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ## [Unreleased]
 
+### Removed
+
+- Dropped support for end of life Ruby on Rails 7.1. It _may_ still work, we don't test it anymore
+
 ## [0.7.0] 2025-05-10
 
 ### Added
