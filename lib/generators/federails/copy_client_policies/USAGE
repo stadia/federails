@@ -1,0 +1,8 @@
+Description:
+    Copies the Pundit client policies to be overridden in main application.
+
+Example:
+    bin/rails generate copy_client_policies
+
+    This will create:
+        app/policies/federails/client/*

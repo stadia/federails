@@ -34,6 +34,7 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 - Generators:
   - `rails generate federails:copy_factories` copies FactoryBot factories in 'spec/factories', with `federails_` prefix
+  - `rails generate federails:copy_client_policies` copies Pundit policies in 'app/policies/federails'
 - Actors:
   - added `sync!` method to update distant actors: `Actor.find(1).sync!`
   - added `on_federails_undelete_requested` callback
