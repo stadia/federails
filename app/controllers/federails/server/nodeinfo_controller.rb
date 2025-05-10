@@ -18,8 +18,8 @@ module Federails
           @has_user_counts = true
           model = config[:class]
           @total += model.send(method, nil)
-          @active_month += model.send(method, ((30.days.ago)...Time.current))
-          @active_halfyear += model.send(method, ((180.days.ago)...Time.current))
+          @active_month += model.send(method, (30.days.ago)...Time.current)
+          @active_halfyear += model.send(method, (180.days.ago)...Time.current)
         end
         render formats: [:nodeinfo]
       end
