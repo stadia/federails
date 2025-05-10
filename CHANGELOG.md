@@ -30,6 +30,8 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ## [Unreleased]
 
+## [0.7.0] 2025-05-10
+
 ### Added
 
 - Generators:

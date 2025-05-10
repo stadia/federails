@@ -20,6 +20,12 @@ desired one, do these steps (in the order you see fit)
 
 First of all, read the **[general upgrade steps](#general-steps)**
 
+## From 0.6.2 to 0.7.0
+
+First of all, read the **[general upgrade steps](#general-steps)**
+
+Some client views have some fixes; update yours if you override them in your app.
+
 ## From 0.6.1 to 0.6.2
 
 Update the gem (no migration, no changes on views, ect...).
