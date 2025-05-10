@@ -34,6 +34,8 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 - Set custom metadata for nodeinfo response using `Federails::Configuration.nodeinfo_metadata`, providing a hash or
   a Proc that will return a hash when required.
+- Hosts:
+  - Added `Federails::Host` model to store remote hosts information
 
 ### Removed
 

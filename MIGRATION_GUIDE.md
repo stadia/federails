@@ -20,6 +20,8 @@ desired one, do these steps (in the order you see fit)
 
 First of all, read the **[general upgrade steps](#general-steps)**
 
+- There are new migrations, so don't forget to _install_ them
+
 ## From 0.6.2 to 0.7.0
 
 First of all, read the **[general upgrade steps](#general-steps)**

@@ -37,6 +37,7 @@ module Federails
     has_many :followers, source: :actor, through: :following_followers
     # Actors followed by actor
     has_many :follows, source: :target_actor, through: :following_follows
+    belongs_to :host, class_name: 'Federails::Host', foreign_key: :server, primary_key: :domain, inverse_of: :actors, optional: true
 
     # Explicitly explain serialization for MariaDB
     attribute :extensions, :json
