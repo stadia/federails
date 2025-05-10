@@ -1,0 +1,8 @@
+Description:
+    Copies FactoryBot factories in the "spec" directory
+
+Example:
+    bin/rails generate copy_factories
+
+    This will create:
+        spec/factories/*
