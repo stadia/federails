@@ -14,7 +14,7 @@ class Comment < ApplicationRecord
   belongs_to :user, optional: true
   belongs_to :post, optional: true
   belongs_to :parent, optional: true, class_name: 'Comment', inverse_of: :answers
-  has_many :answers, class_name: 'Comment', foreign_key: :parent_id
+  has_many :answers, class_name: 'Comment', foreign_key: :parent_id, inverse_of: :parent, dependent: :destroy
 
   scope :parents, -> { where parent_id: nil }
 

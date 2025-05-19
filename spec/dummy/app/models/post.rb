@@ -11,7 +11,7 @@ class Post < ApplicationRecord
   validates :content, presence: true, allow_blank: false
 
   belongs_to :user, optional: true
-  has_many :comments
+  has_many :comments, dependent: :destroy
 
   def to_activitypub_object
     Federails::DataTransformer::Note.to_federation self,
