@@ -1,6 +1,11 @@
 FactoryBot.define do
   factory :local_actor, class: 'Federails::Actor' do
-    # Local actors needs an user, and gets created with one, so we create an user and return its actor
-    initialize_with { create(:user).federails_actor }
+    initialize_with do
+      # Create an "actor entity" and pick the actor from here
+      #
+      # If the actor creation is conditional, make sure to adapt the actor entity creation accordingly
+      create(:user) # <- Adapt the "actor entity" for your app
+        .federails_actor
+    end
   end
 end
