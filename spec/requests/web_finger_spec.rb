@@ -81,7 +81,7 @@ RSpec.describe '/well-known', type: :request do
       it 'includes ostatus subscribe template for remote following' do # rubocop:disable RSpec/MultipleExpectations
         remote_follow = result['links'].find { |x| x['rel'] == 'http://ostatus.org/schema/1.0/subscribe' }
         expect(remote_follow).to be_present
-        expect(remote_follow['template']).to eq 'http://www.example.com/app/followings/new?uri={uri}'
+        expect(remote_follow['template']).to eq 'http://localhost:3000/app/followings/new?uri={uri}'
       end
     end
   end
