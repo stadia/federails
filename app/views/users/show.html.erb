@@ -1,0 +1,4 @@
+This page renders a users profile; its route (<code>user_url</code>) is used as <code>:profile_url_method</code>
+in Federails integration (<code>acts_as_actor_entity</code> in <code>User</code> model).
+
+<pre><%= JSON.pretty_generate @user.as_json %></pre>
