@@ -1,0 +1,172 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://mamot.fr/.well-known/nodeinfo
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Content-Type:
+      - application/json
+      Accept:
+      - application/json
+      User-Agent:
+      - Faraday v2.13.1
+  response:
+    status:
+      code: 301
+      message: Moved Permanently
+    headers:
+      server:
+      - nginx/1.18.0
+      date:
+      - Mon, 19 May 2025 09:18:38 GMT
+      content-type:
+      - text/html
+      content-length:
+      - '169'
+      connection:
+      - keep-alive
+      location:
+      - https://mamot.fr/.well-known/nodeinfo
+    body:
+      encoding: UTF-8
+      string: "<html>\r\n<head><title>301 Moved Permanently</title></head>\r\n<body>\r\n<center><h1>301
+        Moved Permanently</h1></center>\r\n<hr><center>nginx/1.18.0</center>\r\n</body>\r\n</html>\r\n"
+  recorded_at: Mon, 19 May 2025 09:18:38 GMT
+- request:
+    method: get
+    uri: https://mamot.fr/.well-known/nodeinfo
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Content-Type:
+      - application/json
+      Accept:
+      - application/json
+      User-Agent:
+      - Faraday v2.13.1
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      date:
+      - Mon, 19 May 2025 09:18:38 GMT
+      content-type:
+      - application/json; charset=utf-8
+      content-length:
+      - '108'
+      connection:
+      - keep-alive
+      server:
+      - Mastodon
+      x-frame-options:
+      - DENY
+      x-content-type-options:
+      - nosniff
+      x-xss-protection:
+      - '0'
+      referrer-policy:
+      - same-origin
+      cache-control:
+      - max-age=259200, public
+      etag:
+      - W/"0ba46d0c7029b95c0679e749c481dbe2"
+      content-security-policy:
+      - 'base-uri ''none''; default-src ''none''; frame-ancestors ''none''; font-src
+        ''self'' https://mamot.fr; img-src ''self'' data: blob: https://mamot.fr https://static.mamot.fr;
+        style-src ''self'' https://mamot.fr ''nonce-5LoNLhIaxCQP1Aoh8t1aKg==''; media-src
+        ''self'' data: https://mamot.fr https://static.mamot.fr; manifest-src ''self''
+        https://mamot.fr; form-action ''self''; child-src ''self'' blob: https://mamot.fr;
+        worker-src ''self'' blob: https://mamot.fr; connect-src ''self'' data: blob:
+        https://mamot.fr https://static.mamot.fr wss://mamot.fr; script-src ''self''
+        https://mamot.fr ''wasm-unsafe-eval''; frame-src ''self'' https:'
+      x-request-id:
+      - 3a1d1e9d-9b87-4224-a3b8-bb31a1422c48
+      x-runtime:
+      - '0.003979'
+      strict-transport-security:
+      - max-age=63072000; includeSubDomains, max-age=15552000; preload
+      vary:
+      - Origin
+      x-cached:
+      - HIT
+      alt-svc:
+      - h2="mamoteqvcadrmfs6ryykna4wpxhtsuzbpt4z7lxnqvx3qtse5xmk2fqd.onion:443"; ma=86400;
+        persist=1
+    body:
+      encoding: UTF-8
+      string: '{"links":[{"rel":"http://nodeinfo.diaspora.software/ns/schema/2.0","href":"https://mamot.fr/nodeinfo/2.0"}]}'
+  recorded_at: Mon, 19 May 2025 09:18:38 GMT
+- request:
+    method: get
+    uri: https://mamot.fr/nodeinfo/2.0
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Content-Type:
+      - application/json
+      Accept:
+      - application/json
+      User-Agent:
+      - Faraday v2.13.1
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      date:
+      - Mon, 19 May 2025 09:18:38 GMT
+      content-type:
+      - application/json; charset=utf-8
+      content-length:
+      - '425'
+      connection:
+      - keep-alive
+      server:
+      - Mastodon
+      x-frame-options:
+      - DENY
+      x-content-type-options:
+      - nosniff
+      x-xss-protection:
+      - '0'
+      referrer-policy:
+      - same-origin
+      cache-control:
+      - max-age=1800, public
+      etag:
+      - W/"c01c90ce8443cfa3a146c4c20473e61f"
+      content-security-policy:
+      - 'base-uri ''none''; default-src ''none''; frame-ancestors ''none''; font-src
+        ''self'' https://mamot.fr; img-src ''self'' data: blob: https://mamot.fr https://static.mamot.fr;
+        style-src ''self'' https://mamot.fr ''nonce-lwjRmgtTgnMRGSWwUUFoAA==''; media-src
+        ''self'' data: https://mamot.fr https://static.mamot.fr; manifest-src ''self''
+        https://mamot.fr; form-action ''self''; child-src ''self'' blob: https://mamot.fr;
+        worker-src ''self'' blob: https://mamot.fr; connect-src ''self'' data: blob:
+        https://mamot.fr https://static.mamot.fr wss://mamot.fr; script-src ''self''
+        https://mamot.fr ''wasm-unsafe-eval''; frame-src ''self'' https:'
+      x-request-id:
+      - 7e956cc6-4e8b-4552-9f23-59298da2a31f
+      x-runtime:
+      - '0.002379'
+      strict-transport-security:
+      - max-age=63072000; includeSubDomains, max-age=15552000; preload
+      vary:
+      - Origin
+      x-cached:
+      - HIT
+      alt-svc:
+      - h2="mamoteqvcadrmfs6ryykna4wpxhtsuzbpt4z7lxnqvx3qtse5xmk2fqd.onion:443"; ma=86400;
+        persist=1
+    body:
+      encoding: UTF-8
+      string: '{"version":"2.0","software":{"name":"mastodon","version":"4.3.4"},"protocols":["activitypub"],"services":{"outbound":[],"inbound":[]},"usage":{"users":{"total":40022,"activeMonth":3278,"activeHalfyear":5536},"localPosts":7131666},"openRegistrations":true,"metadata":{"nodeName":"Mamot
+        - Le Mastodon de La Quadrature du Net ","nodeDescription":"Mamot.fr est un
+        serveur Mastodon francophone, géré par La Quadrature du Net."}}'
+  recorded_at: Mon, 19 May 2025 09:18:38 GMT
+recorded_with: VCR 6.3.1
