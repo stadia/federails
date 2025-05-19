@@ -7,6 +7,7 @@ module Federails
     let(:distant_url) { 'https://mamot.fr/users/mtancoigne' }
     let(:distant_account) { 'mtancoigne@mamot.fr' }
     let(:existing_distant_actor) { FactoryBot.create :distant_actor, federated_url: distant_url, username: 'mtancoigne', server: 'mamot.fr' }
+    let(:existing_local_actor) { FactoryBot.create(:user).reload.federails_actor }
     # Cassette which should not be created by any example. Used to test the absence
     # of outgoing requests
     let(:error_cassette) { 'this_should_not_be_here' }
@@ -252,7 +253,51 @@ module Federails
       end
     end
 
-    describe '#tombstone!' do
+    describe '.profile_url' do
+      context 'with a local entity' do
+        context 'without a profile_url_method defined' do
+          around do |example|
+            old_url_method = Federails.actor_entity(User)[:profile_url_method]
+            Federails.actor_entity(User)[:profile_url_method] = nil
+
+            example.run
+
+            Federails.actor_entity(User)[:profile_url_method] = old_url_method
+          end
+
+          it "returns the actor's url" do
+            expected_url = Federails::Engine.routes.url_helpers.server_actor_url(existing_local_actor)
+            expect(existing_local_actor.profile_url).to eq expected_url
+          end
+        end
+
+        context 'with a profile_url_method defined' do
+          it 'returns the value from the defined route helper' do
+            expected_url = Rails.application.routes.url_helpers.user_url(existing_local_actor.entity)
+            expect(existing_local_actor.profile_url).to eq expected_url
+          end
+        end
+
+        context 'when entity is tombstoned' do
+          before do
+            existing_local_actor.tombstone!
+            existing_local_actor.update! profile_url: 'https://example.com/the_profile'
+          end
+
+          it 'returns the actors profile URL' do
+            expect(existing_local_actor.profile_url).to eq 'https://example.com/the_profile'
+          end
+        end
+      end
+
+      context 'with a distant entity' do
+        it 'returns the actors profile URL' do
+          expect(existing_distant_actor.profile_url).to eq existing_distant_actor.attributes['profile_url']
+        end
+      end
+    end
+
+    describe '.tombstone!' do
       context 'with a distant actor' do
         let(:entity) { described_class.create! distant_actor_attributes }
 
@@ -294,7 +339,7 @@ module Federails
       end
     end
 
-    describe '#untombstone!' do
+    describe '.untombstone!' do
       context 'with a distant actor' do
         let(:entity) { described_class.create! distant_actor_attributes.merge(tombstoned_at: Time.current) }
 
@@ -350,7 +395,7 @@ module Federails
       end
     end
 
-    describe '#sync!' do
+    describe '.sync!' do
       context 'with a local actor' do
         let(:local_actor) { FactoryBot.create(:user).reload.federails_actor }
 
@@ -378,7 +423,7 @@ module Federails
       end
     end
 
-    describe '#follows?' do
+    describe '.follows?' do
       let(:actor) { FactoryBot.create :local_actor }
 
       context 'when current actor follows given actor' do
@@ -398,7 +443,7 @@ module Federails
       end
     end
 
-    describe '#followed_by?' do
+    describe '.followed_by?' do
       let(:actor) { FactoryBot.create :local_actor }
 
       context 'when given actor follows current actor' do
