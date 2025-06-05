@@ -20,7 +20,15 @@ class Comment < ApplicationRecord
 
   def to_activitypub_object
     Federails::DataTransformer::Note.to_federation self,
-                                                   content: content
+                                                   content: content,
+                                                   custom:  {
+                                                     '@context' => [
+                                                       'https://purl.archive.org/miscellany',
+                                                       {
+                                                         Hashtag: 'as:Hashtag',
+                                                       },
+                                                     ],
+                                                   }
   end
 
   def self.handle_federated_object?(hash)

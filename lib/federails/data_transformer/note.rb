@@ -1,3 +1,5 @@
+require 'federails/utils/context'
+
 module Federails
   module DataTransformer
     module Note
@@ -17,7 +19,10 @@ module Federails
       #   - https://www.w3.org/TR/activitystreams-vocabulary/#dfn-object
       #   - https://www.w3.org/TR/activitystreams-vocabulary/#dfn-note
       def self.to_federation(entity, content:, name: nil, custom: {})
-        custom.merge '@context'     => 'https://www.w3.org/ns/activitystreams',
+        # Merge default and custom contexts
+        context = Utils::Context.generate(additional: custom.delete('@context'))
+        # Merge in standard Note fields
+        custom.merge '@context'     => context,
                      'id'           => entity.federated_url,
                      'type'         => 'Note',
                      'name'         => name,
