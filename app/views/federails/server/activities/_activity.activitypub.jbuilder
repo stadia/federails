@@ -1,6 +1,6 @@
 context = true unless context == false
 addressing = true unless addressing == false
-json.set! '@context', 'https://www.w3.org/ns/activitystreams' if context
+set_json_ld_context(json) if context
 
 json.id Federails::Engine.routes.url_helpers.server_actor_activity_url activity.actor, activity
 json.type activity.action

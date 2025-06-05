@@ -1,5 +1,5 @@
 context = true unless context == false
-json.set! '@context', 'https://www.w3.org/ns/activitystreams' if context
+set_json_ld_context(json) if context
 
 publishable.to_activitypub_object.each_pair do |key, value|
   json.set! key, value

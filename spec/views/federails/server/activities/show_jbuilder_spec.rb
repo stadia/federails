@@ -4,6 +4,9 @@ RSpec.describe 'federails/server/activities/show', type: :view do
   let(:local_actor) { FactoryBot.create :local_actor }
   let(:distant_actor) { FactoryBot.create :distant_actor }
 
+  # enable ServerHelper methods for tests
+  helper Federails::ServerHelper
+
   context 'when rendering a Follow activity' do
     let(:follow) { FactoryBot.create :following, actor: local_actor, target_actor: distant_actor }
     let(:json_result) do

@@ -1,4 +1,4 @@
-json.set!('@context', 'https://www.w3.org/ns/activitystreams')
+set_json_ld_context(json)
 collection_id = @actor.followings_url
 json.id collection_id
 json.type 'OrderedCollectionPage'

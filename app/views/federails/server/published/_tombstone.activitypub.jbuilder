@@ -1,7 +1,4 @@
-json.set! '@context', [
-  'https://www.w3.org/ns/activitystreams',
-  'https://w3id.org/security/v1',
-]
+set_json_ld_context(json)
 
 json.id publishable.federated_url
 json.type 'Tombstone'
