@@ -27,6 +27,32 @@ RSpec.describe '/federation/actors', type: :request do
       expect(response).to be_successful
     end
 
+    it 'includes standard activitypub context' do
+      get federails.server_actor_url(user.federails_actor), headers: { accept: Mime[:activitypub] }
+      json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+      expect(json['@context']).to include('https://www.w3.org/ns/activitystreams')
+    end
+
+    it 'includes w3c security context' do
+      get federails.server_actor_url(user.federails_actor), headers: { accept: Mime[:activitypub] }
+      json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+      expect(json['@context']).to include('https://w3id.org/security/v1')
+    end
+
+    it 'includes additional context from actor' do # rubocop:todo RSpec/ExampleLength
+      get federails.server_actor_url(user.federails_actor), headers: { accept: Mime[:activitypub] }
+      json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+      expect(json['@context']).to include(
+        {
+          'attributionDomains' => {
+            '@id'   => 'toot:attributionDomains',
+            '@type' => '@id',
+          },
+          'toot'               => 'http://joinmastodon.org/ns#',
+        }
+      )
+    end
+
     ACTIVITYPUB_CONTENT_TYPES.each do |accept|
       it "responds with LD in response to a #{accept} request" do
         get federails.server_actor_url(user.federails_actor), headers: { accept: accept }
