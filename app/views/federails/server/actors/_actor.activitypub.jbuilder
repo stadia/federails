@@ -1,11 +1,12 @@
 actor_data = actor.entity&.to_activitypub_object || {}
 
-json.set! '@context', ([
-  'https://www.w3.org/ns/activitystreams',
-  'https://w3id.org/security/v1',
-] + [
-  actor_data&.delete(:@context),
-].flatten).compact
+set_json_ld_context(
+  json,
+  additional: [
+    'https://w3id.org/security/v1',
+    actor_data.delete(:@context),
+  ]
+)
 
 json.id actor.federated_url
 json.name actor.name

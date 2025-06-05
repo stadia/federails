@@ -8,5 +8,11 @@ module Federails
         Rails.application.routes.url_helpers.send(method_name)
       end
     end
+
+    def set_json_ld_context(json, additional: nil)
+      activity_streams = 'https://www.w3.org/ns/activitystreams'
+      context = additional.nil? ? activity_streams : [activity_streams, additional].flatten.compact
+      json.set! '@context', context
+    end
   end
 end
