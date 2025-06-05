@@ -36,6 +36,8 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ### Fixed
 
+- Server:
+  - Notes now support extra JSON-LD @context provided in `custom`.
 - Tasks:
   - Replace factory names in `federails:copy_factories`
 
@@ -49,7 +51,7 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 - Actors:
   - added `sync!` method to update distant actors: `Actor.find(1).sync!`
   - added `on_federails_undelete_requested` callback
-  - restore actor when `on_federails_undelete_requested` is triggered 
+  - restore actor when `on_federails_undelete_requested` is triggered
 - DataEntity:
   - added `federails_sync!` method to update distant content: `Articles.find(1).federails_sync!`
   - added `on_federails_undelete_requested` callback
@@ -58,7 +60,7 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 - Client:
   - Added a field with actor's "at address" to copy in another instance
 - Utils:
-  - Added `Federails::Utils::JsonRequest` module to replace many similar methods in `Fediverse::Webfinger` and 
+  - Added `Federails::Utils::JsonRequest` module to replace many similar methods in `Fediverse::Webfinger` and
     `Fediverse::Request`
 - Fediverse:
   - Added `Fediverse::NodeInfo` to retrieve nodeinfo data
@@ -80,7 +82,7 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 - Added missing condition on DataEntity's `after_update` hook
 - Client:
   - Don't fail in `follower` partial when user is not signed-in
-  - Require `uri` parameter in new following action 
+  - Require `uri` parameter in new following action
   - Strip parameter value when searching for actors
   - Improve some strings in views
 - Server:
