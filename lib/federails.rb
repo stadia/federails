@@ -35,6 +35,7 @@ module Federails
         :site_port,
         :enable_discovery,
         :open_registrations,
+        :nodeinfo_metadata,
         :app_layout,
         :server_routes_path,
         :client_routes_path,

@@ -17,4 +17,4 @@ if @has_user_counts
     activeHalfyear: @active_halfyear,
   }
 end
-json.metadata({})
+json.metadata(Federails::Configuration.nodeinfo_metadata || {})

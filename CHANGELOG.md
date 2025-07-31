@@ -30,6 +30,11 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ## [Unreleased]
 
+### Added
+
+- Set custom metadata for nodeinfo response using `Federails::Configuration.nodeinfo_metadata`, providing a hash or
+  a Proc that will return a hash when required.
+
 ### Removed
 
 - Dropped support for end of life Ruby on Rails 7.1. It _may_ still work, we don't test it anymore

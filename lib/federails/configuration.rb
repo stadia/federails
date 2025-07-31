@@ -35,6 +35,14 @@ module Federails
       @@open_registrations.is_a?(Proc) ? @@open_registrations.call : @@open_registrations
     end
 
+    # Custom metadata for nodeinfo
+    # Can either be a static hash, or a Proc which will be called to get the state.
+    mattr_writer :nodeinfo_metadata
+    @@nodeinfo_metadata = {}
+    def self.nodeinfo_metadata
+      @@nodeinfo_metadata.is_a?(Proc) ? @@nodeinfo_metadata.call : @@nodeinfo_metadata
+    end
+
     # Application layout
     mattr_accessor :app_layout
     @@app_layout = nil
