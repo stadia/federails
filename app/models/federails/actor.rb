@@ -116,7 +116,7 @@ module Federails
     # @return [Federails::Following, false]
     def follows?(actor)
       list = following_follows.where target_actor: actor
-      return list.first if list.count == 1
+      return list.first if list.one?
 
       false
     end
@@ -126,7 +126,7 @@ module Federails
     # @return [Federails::Following, false]
     def followed_by?(actor)
       list = following_followers.where actor: actor
-      return list.first if list.count == 1
+      return list.first if list.one?
 
       false
     end

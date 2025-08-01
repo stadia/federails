@@ -8,7 +8,7 @@ module Fediverse
       # @param activity [Federails::Activity]
       def post_to_inboxes(activity)
         actors = activity.recipients
-        Rails.logger.debug('Nobody to notice') && return if actors.count.zero?
+        Rails.logger.debug('Nobody to notice') && return if actors.none?
 
         message = payload(activity)
         actors.each do |recipient|
