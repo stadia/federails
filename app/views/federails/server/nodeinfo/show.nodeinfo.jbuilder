@@ -1,6 +1,5 @@
 json.version '2.0'
-# FIXME: Use configuration values when created
-json.software name:    Federails::Configuration.app_name,
+json.software name:    Federails::Configuration.app_name&.parameterize,
               version: Federails::Configuration.app_version
 json.protocols [
   'activitypub',

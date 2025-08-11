@@ -14,6 +14,16 @@ RSpec.describe '/nodeinfo', type: :request do
       expect(response).to be_successful
     end
 
+    it 'include software name' do
+      get federails.show_node_info_url
+      expect(JSON.parse(response.body)['software']['name']).to eq 'the-dummy-app' # rubocop:disable Rails/ResponseParsedBody
+    end
+
+    it 'transforms software name to match spec regex' do
+      get federails.show_node_info_url
+      expect(JSON.parse(response.body)['software']['name']).to match(/^[a-z0-9-]+$/) # rubocop:disable Rails/ResponseParsedBody
+    end
+
     it 'does not include user data if no method is set' do
       prev = Federails::Configuration.actor_types.dig('User', :user_count_method)
       Federails::Configuration.actor_types['User'][:user_count_method] = nil
