@@ -38,6 +38,9 @@ module Federails
     # Actors followed by actor
     has_many :follows, source: :target_actor, through: :following_follows
 
+    # Explicitly explain serialization for MariaDB
+    attribute :extensions, :json
+
     scope :local, -> { where(local: true) }
     scope :distant, -> { where(local: false) }
     scope :tombstoned, -> { where.not(tombstoned_at: nil) }
