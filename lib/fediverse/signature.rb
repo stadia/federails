@@ -20,7 +20,7 @@ module Fediverse
         raise 'Unsigned headers' unless request.headers['Signature']
 
         signature_header = request.headers['Signature'].split(',').to_h do |pair|
-          /\A(?<key>[\w]+)="(?<value>.*)"\z/ =~ pair
+          /\A(?<key>\w+)="(?<value>.*)"\z/ =~ pair
           [key, value]
         end
 
