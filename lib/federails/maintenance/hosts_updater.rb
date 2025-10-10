@@ -10,7 +10,7 @@ module Federails
           domains.uniq!
 
           domains.each do |domain|
-            Federails::Host.create_or_update! domain, cache_interval
+            Federails::Host.create_or_update domain, min_update_interval: cache_interval
           end
         end
       end
