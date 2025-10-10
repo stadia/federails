@@ -40,6 +40,8 @@ module Federails
         entry
       rescue Fediverse::NodeInfo::NoActivityPubError
         Rails.logger.info { "#{domain} does not provide ActivityPub service" }
+      rescue Federails::Utils::JsonRequest::UnhandledResponseStatus, Faraday::SSLError => e
+        Rails.logger.info { "Error connecting to #{domain}: '#{e.message}'" }
       end
     end
   end
