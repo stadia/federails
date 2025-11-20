@@ -7,5 +7,5 @@ end
 
 json.id publishable.federated_url
 json.actor publishable.federails_actor.federated_url
-json.to ['https://www.w3.org/ns/activitystreams#Public']
+json.to [Fediverse::Collections::PUBLIC]
 json.cc [publishable.federails_actor.followers_url]

@@ -8,6 +8,8 @@ require 'federails/configuration'
 require 'federails/utils/object'
 require 'federails/utils/json_request'
 
+require 'fediverse'
+
 # rubocop:disable Style/ClassVars
 
 # This module includes classes and methods related to Ruby on Rails: engine configuration, models, controllers, etc.

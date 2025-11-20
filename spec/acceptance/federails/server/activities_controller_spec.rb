@@ -90,7 +90,7 @@ RSpec.describe Federails::Server::ActivitiesController, type: :acceptance do
         'type'     => 'Create',
         'actor'    => distant_actor.federated_url,
         'object'   => federails.server_actor_following_url(actor, following),
-        'to'       => ['https://www.w3.org/ns/activitystreams#Public'],
+        'to'       => [Fediverse::Collections::PUBLIC],
         'cc'       => [actor.followers_url],
       }
     end
