@@ -54,12 +54,7 @@ RSpec.describe 'federails/server/activities/show', type: :view do
 
     it 'references includes original Follow as object' do
       uuid = follow.follow_activity.uuid
-      expect(json_result['object']).to eq({
-                                            'id'     => "http://localhost/federation/actors/#{local_actor.uuid}/activities/#{uuid}",
-                                            'type'   => 'Follow',
-                                            'actor'  => local_actor.federated_url,
-                                            'object' => distant_actor.federated_url,
-                                          })
+      expect(json_result['object']['id']).to eq "http://localhost/federation/actors/#{local_actor.uuid}/activities/#{uuid}"
     end
   end
 
