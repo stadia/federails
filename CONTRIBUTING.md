@@ -18,7 +18,7 @@ To contribute:
 
 {: .note-title }
 > About commits
-> 
+>
 > Unless it's only part of a feature, a commit should contain:
 > - The changelog entry corresponding to your change
 > - An entry in the migration guide for breaking changes or if the change will require a specific action from
@@ -38,6 +38,12 @@ RSpec is the test suite. Start it with
 
 ```sh
 bundle exec rspec
+```
+
+You can also run the tests continuously as you code, using guard:
+
+```sh
+bundle exec guard
 ```
 
 ### Rubocop
@@ -82,5 +88,5 @@ Finally, start the Jekyll server:
 
 ```sh
 cd docs
-bundle exec jekyll serve # --port=12345 
+bundle exec jekyll serve # --port=12345
 ```

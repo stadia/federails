@@ -43,6 +43,8 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
   - Create/update host when created
 - Rake tasks:
   - Added `federails:sync_hosts` to update/complete the list of known hosts
+- Testing:
+  - Added `guard` for continuous testing in development
 
 ### Removed
 
