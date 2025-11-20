@@ -42,6 +42,41 @@ module Federails
       end
     end
 
+    # Generates URLs for the `to` field of the Activity
+    # Mirrors `recipients` for Follow/Undo/Accept activities, and makes everything else public.
+    #
+    # @return [String]
+    def to
+      case action
+      when 'Follow'
+        [entity.federated_url]
+      when 'Undo'
+        [entity.entity.federated_url]
+      when 'Accept'
+        [entity.actor.federated_url]
+      else
+        # Everything is public for now
+        [Fediverse::Collections::PUBLIC]
+      end
+    end
+
+    # Generates URLs for the `cc` field of the Activity
+    # Mirrors `recipients` for non-Follow/Undo/Accept activities
+    #
+    # @return [String]
+    def cc
+      case action
+      when 'Follow', 'Undo', 'Accept'
+        nil
+      else
+        # This mirrors default_recipient_list
+        [
+          actor.followers_url,
+          (entity.try(:followers_url) if entity&.local?),
+        ].compact.uniq
+      end
+    end
+
     private
 
     def default_recipient_list

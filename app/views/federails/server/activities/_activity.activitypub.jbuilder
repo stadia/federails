@@ -6,8 +6,12 @@ json.id Federails::Engine.routes.url_helpers.server_actor_activity_url activity.
 json.type activity.action
 json.actor activity.actor.federated_url
 if addressing
-  json.to [Fediverse::Collection::PUBLIC]
-  json.cc [activity.actor.followers_url]
+  json.merge!(
+    {
+      to: activity.to,
+      cc: activity.cc,
+    }.compact
+  )
 end
 
 if activity.entity.is_a? Federails::Activity

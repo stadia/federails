@@ -30,6 +30,14 @@ RSpec.describe 'federails/server/activities/show', type: :view do
     it 'references target actor by URL' do
       expect(json_result['object']).to eq distant_actor.federated_url
     end
+
+    it 'is addressed only to the target actor' do
+      expect(json_result['to']).to eq [distant_actor.federated_url]
+    end
+
+    it 'is not cced to anyone else' do
+      expect(json_result).not_to have_key 'cc'
+    end
   end
 
   context 'when rendering an Undo activity' do
@@ -56,6 +64,14 @@ RSpec.describe 'federails/server/activities/show', type: :view do
       uuid = follow.follow_activity.uuid
       expect(json_result['object']['id']).to eq "http://localhost/federation/actors/#{local_actor.uuid}/activities/#{uuid}"
     end
+
+    it 'is addressed only to the followed actor' do
+      expect(json_result['to']).to eq [distant_actor.federated_url]
+    end
+
+    it 'is not cced to anyone else' do
+      expect(json_result).not_to have_key 'cc'
+    end
   end
 
   context 'when rendering an Accept activity' do
@@ -81,10 +97,18 @@ RSpec.describe 'federails/server/activities/show', type: :view do
     it 'references includes original Follow as object' do
       expect(json_result['object']).to eq "#{local_actor.federated_url}/followings/#{follow.uuid}"
     end
+
+    it 'is addressed only to the original actor' do
+      expect(json_result['to']).to eq [local_actor.federated_url]
+    end
+
+    it 'is not cced to anyone else' do
+      expect(json_result).not_to have_key 'cc'
+    end
   end
 
   context 'when rendering a public Create activity' do
-    let!(:activity) { FactoryBot.create :activity, :create, :actor, :public }
+    let!(:activity) { FactoryBot.create :activity, :create, entity: local_actor }
     let(:json_result) do
       assign(:activity, activity)
       render
@@ -101,6 +125,10 @@ RSpec.describe 'federails/server/activities/show', type: :view do
 
     it 'is cced to the actor\'s followers' do
       expect(json_result['cc']).to include "http://localhost/federation/actors/#{activity.actor.uuid}/followers"
+    end
+
+    it 'is cced to the entity\'s followers if local' do
+      expect(json_result['cc']).to include "http://localhost/federation/actors/#{local_actor.uuid}/followers"
     end
   end
 end
