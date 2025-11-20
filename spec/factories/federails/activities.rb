@@ -7,9 +7,5 @@ FactoryBot.define do
     trait :create do
       action { 'Create' }
     end
-
-    trait :actor do
-      entity factory: [:local_actor]
-    end
   end
 end
