@@ -156,11 +156,11 @@ module Federails
     end
 
     def tombstone_federails_actor!
-      federails_actor.tombstone! if federails_actor.present?
+      federails_actor.presence&.tombstone!
     end
 
     def untombstone_federails_actor!
-      federails_actor.untombstone! if federails_actor.present?
+      federails_actor.presence&.untombstone!
     end
   end
 end
