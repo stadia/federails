@@ -101,7 +101,7 @@ RSpec.describe 'federails/server/activities/show', type: :view do
     end
 
     it 'is addressed to the public collection' do
-      expect(json_result['to']).to include 'https://www.w3.org/ns/activitystreams#Public'
+      expect(json_result['to']).to include Fediverse::Collection::PUBLIC
     end
 
     it 'is cced to the actor\'s followers' do
