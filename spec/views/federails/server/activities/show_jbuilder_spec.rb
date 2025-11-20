@@ -63,6 +63,31 @@ RSpec.describe 'federails/server/activities/show', type: :view do
     end
   end
 
+  context 'when rendering an Accept activity' do
+    let(:follow) { FactoryBot.create :following, actor: local_actor, target_actor: distant_actor }
+    let(:accept) do
+      follow.accept!
+      Federails::Activity.find_by action: 'Accept'
+    end
+    let(:json_result) do
+      assign(:activity, accept)
+      render
+      JSON.parse(rendered)
+    end
+
+    it 'has Accept type' do
+      expect(json_result['type']).to eq('Accept').and(eq(accept.action))
+    end
+
+    it 'is performed by the target actor' do
+      expect(json_result['actor']).to eq follow.target_actor.federated_url
+    end
+
+    it 'references includes original Follow as object' do
+      expect(json_result['object']).to eq "#{local_actor.federated_url}/followings/#{follow.uuid}"
+    end
+  end
+
   context 'when rendering a public Create activity' do
     let!(:activity) { FactoryBot.create :activity, :create, :actor, :public }
     let(:json_result) do
