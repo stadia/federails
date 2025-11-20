@@ -3,7 +3,7 @@ require 'fediverse/notifier'
 
 module Fediverse
   FakeEntity = Struct.new :federated_url
-  FakeActivity = Struct.new :id, :actor, :recipients, :action, :entity, keyword_init: true
+  FakeActivity = Struct.new :id, :actor, :recipients, :action, :entity, :to, :cc, keyword_init: true
 
   RSpec.describe Notifier do
     let(:local_actor) { FactoryBot.create(:user).federails_actor }
