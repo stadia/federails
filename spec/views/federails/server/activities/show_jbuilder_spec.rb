@@ -62,4 +62,25 @@ RSpec.describe 'federails/server/activities/show', type: :view do
                                           })
     end
   end
+
+  context 'when rendering a Create activity' do
+    let!(:activity) { FactoryBot.create :activity, :create, :actor }
+    let(:json_result) do
+      assign(:activity, activity)
+      render
+      JSON.parse(rendered)
+    end
+
+    it 'has an id' do
+      expect(json_result['id']).to eq "http://localhost/federation/actors/#{activity.actor.uuid}/activities/#{activity.uuid}"
+    end
+
+    it 'has the public collection in to field' do
+      expect(json_result['to']).to include 'https://www.w3.org/ns/activitystreams#Public'
+    end
+
+    it 'has the actor\'s follower collection in cc field' do
+      expect(json_result['cc']).to include "http://localhost/federation/actors/#{activity.actor.uuid}/followers"
+    end
+  end
 end
