@@ -17,8 +17,8 @@ RSpec.describe Federails::Server::ActivitiesController, type: :acceptance do
     type:   { type: :string, description: 'Activity type' },
     actor:  { type: :string, description: 'Federated actor identifier' },
     object: { type: :string, description: 'Federated target object identifier' },
-    to:     { type: :array, description: 'List of targeted actors', of: :string },
-    cc:     { type: :array, description: 'Complementary list', of: :string },
+    to:     { type: :array, description: 'List of targeted actors', of: :string, required: false },
+    cc:     { type: :array, description: 'Complementary list', of: :string, required: false },
   }
 
   entity :activity, activity_base
