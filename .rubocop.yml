@@ -98,6 +98,13 @@ Rails/DynamicFindBy:
 Rails/FilePath:
   EnforcedStyle: arguments
 
+# :unprocessable_content was added in Rack 3.1, so until we require that, disable this check
+RSpecRails/HttpStatusNameConsistency:
+  Enabled: false
+
+Rails/HttpStatusNameConsistency:
+  Enabled: false
+
 Rails/I18nLocaleTexts:
   Exclude:
     - spec/dummy/**/*
