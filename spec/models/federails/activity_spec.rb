@@ -22,6 +22,17 @@ module Federails
       end
     end
 
+    [:to, :cc].each do |attr|
+      describe "serializing #{attr} field" do
+        let(:addresses) { ['https://example.com/@abc123', 'https://example.social/@def456'] }
+        let(:activity) { described_class.create!(:actor => alice, :entity => bob, :action => 'Create', attr => addresses) }
+
+        it 'serializes and deserializes multiple addresses correctly' do
+          a = described_class.find(activity.id)
+          expect(a.send(attr)).to eq addresses
+        end
+      end
+    end
 
     describe 'delivery' do
       context 'when activity creator is distant' do
