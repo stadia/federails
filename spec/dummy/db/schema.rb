@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_04_26_061729) do
+ActiveRecord::Schema[7.2].define(version: 2025_11_21_160720) do
   create_table "comments", force: :cascade do |t|
     t.text "content", null: false
     t.integer "user_id"
@@ -35,6 +35,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_04_26_061729) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "uuid"
+    t.string "to"
+    t.string "cc"
     t.index ["actor_id"], name: "index_federails_activities_on_actor_id"
     t.index ["entity_type", "entity_id"], name: "index_federails_activities_on_entity"
     t.index ["uuid"], name: "index_federails_activities_on_uuid", unique: true

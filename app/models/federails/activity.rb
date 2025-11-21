@@ -24,6 +24,9 @@ module Federails
 
     after_create_commit :post_to_inboxes
 
+    serialize :cc, coder: YAML
+    serialize :to, coder: YAML
+
     # Determines the list of actors targeted by the activity
     #
     # @return [Array<Federails::Actor>]
