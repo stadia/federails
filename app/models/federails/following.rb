@@ -28,7 +28,7 @@ module Federails
 
     def accept!
       update! status: :accepted
-      Activity.create! actor: target_actor, action: 'Accept', entity: self
+      Activity.create! actor: target_actor, action: 'Accept', entity: self, to: [actor.federated_url]
     end
 
     def follow_activity
@@ -62,11 +62,11 @@ module Federails
     end
 
     def create_activity
-      Activity.create! actor: actor, action: 'Follow', entity: target_actor
+      Activity.create! actor: actor, action: 'Follow', entity: target_actor, to: [target_actor.federated_url]
     end
 
     def destroy_activity
-      Activity.create! actor: actor, action: 'Undo', entity: follow_activity
+      Activity.create! actor: actor, action: 'Undo', entity: follow_activity, to: [target_actor.federated_url]
     end
   end
 end

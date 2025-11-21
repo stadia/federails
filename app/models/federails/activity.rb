@@ -24,6 +24,8 @@ module Federails
 
     after_create_commit :post_to_inboxes
 
+    before_validation :set_default_addressing, on: :create
+
     serialize :cc, coder: YAML
     serialize :to, coder: YAML
 
@@ -45,42 +47,20 @@ module Federails
       end
     end
 
-    # Generates URLs for the `to` field of the Activity
-    # Mirrors `recipients` for Follow/Undo/Accept activities, and makes everything else public.
-    #
-    # @return [String]
-    def to
-      case action
-      when 'Follow'
-        [entity.federated_url]
-      when 'Undo'
-        [entity.entity.federated_url]
-      when 'Accept'
-        [entity.actor.federated_url]
-      else
-        # Everything is public for now
-        [Fediverse::Collections::PUBLIC]
-      end
-    end
-
-    # Generates URLs for the `cc` field of the Activity
-    # Mirrors `recipients` for non-Follow/Undo/Accept activities
-    #
-    # @return [String]
-    def cc
-      case action
-      when 'Follow', 'Undo', 'Accept'
-        nil
-      else
-        # This mirrors default_recipient_list
-        [
-          actor.followers_url,
-          (entity.try(:followers_url) if entity&.local?),
-        ].compact.uniq
-      end
-    end
-
     private
+
+    # Sets up default public-and-followers addressing unless to and cc are already set
+    #
+    # This retains compatibility with previous behaviour
+    def set_default_addressing
+      return if to.present? || cc.present?
+
+      self.to = [Fediverse::Collection::PUBLIC]
+      self.cc = [
+        actor.followers_url,
+        (entity.try(:followers_url) if entity.try(:local?)),
+      ].compact.uniq
+    end
 
     def default_recipient_list
       list = actor.followers
