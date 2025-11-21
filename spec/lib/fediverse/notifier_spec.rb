@@ -25,7 +25,7 @@ module Fediverse
     describe '#signed_request' do
       let(:request) do
         described_class.send :signed_request,
-                             to:      distant_target_actor,
+                             url:     distant_target_actor.inbox_url,
                              from:    local_actor,
                              message: 'test'
       end

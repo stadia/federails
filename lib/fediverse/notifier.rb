@@ -13,7 +13,7 @@ module Fediverse
         message = payload(activity)
         actors.each do |recipient|
           Rails.logger.debug { "Sending activity ##{activity.id} to #{recipient.inbox_url}" }
-          post_to_inbox(to: recipient, message: message, from: activity.actor)
+          post_to_inbox(inbox_url: recipient.inbox_url, message: message, from: activity.actor)
         end
       end
 
@@ -27,27 +27,27 @@ module Fediverse
         )
       end
 
-      def post_to_inbox(to:, message:, from: nil)
+      def post_to_inbox(inbox_url:, message:, from: nil)
         conn = Faraday.default_connection
         conn.builder.build_response(
           conn,
-          signed_request(to: to, message: message, from: from)
+          signed_request(url: inbox_url, message: message, from: from)
         )
       end
 
-      def signed_request(to:, message:, from:)
-        req = request(to: to, message: message)
+      def signed_request(url:, message:, from:)
+        req = request(url: url, message: message)
         req.headers['Signature'] = Fediverse::Signature.sign(sender: from, request: req) if from
         req
       end
 
-      def request(to:, message:) # rubocop:todo Metrics/AbcSize
+      def request(url:, message:) # rubocop:todo Metrics/AbcSize
         Faraday.default_connection.build_request(:post) do |req|
-          req.url to.inbox_url
+          req.url url
           req.body = message
           req.headers['Content-Type'] = Mime[:activitypub].to_s
           req.headers['Accept'] = Mime[:activitypub].to_s
-          req.headers['Host'] = URI.parse(to.inbox_url).host
+          req.headers['Host'] = URI.parse(url).host
           req.headers['Date'] = Time.now.utc.httpdate
           req.headers['Digest'] = digest(message)
         end
