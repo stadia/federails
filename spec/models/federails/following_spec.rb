@@ -54,63 +54,83 @@ module Federails
     context 'when following a remote actor' do
       let(:follower) { FactoryBot.create :local_actor }
       let(:target) { FactoryBot.create :distant_actor }
-      let(:following) { described_class.build actor: follower, target_actor: target }
+      let(:following) { described_class.create actor: follower, target_actor: target }
+      let!(:activity) { following.follow_activity }
 
-      it 'creates Follow activity' do # rubocop:disable RSpec/ExampleLength
-        allow(Activity).to receive(:create!)
-        following.save!
-        expect(Activity).to have_received(:create!).with(
-          action: 'Follow',
-          actor:  follower,
-          entity: target
-        )
+      it 'creates activity with Follow action' do
+        expect(activity.action).to eq 'Follow'
+      end
+
+      it 'creates Follow activity with the follower as the actor' do
+        expect(activity.actor).to eq follower
+      end
+
+      it 'creates Follow activity with the target as the entity' do
+        expect(activity.entity).to eq target
+      end
+
+      it 'is addressed to the target actor' do
+        expect(activity.to).to eq [target.federated_url]
+      end
+
+      it 'does not cc anyone' do
+        expect(activity.cc).to be_nil
       end
 
       it 'queues NotifyInboxJob' do
-        expect do
-          following.save!
-        end.to have_enqueued_job(NotifyInboxJob).once
+        expect(NotifyInboxJob).to have_been_enqueued.with(activity)
       end
     end
 
     context 'when unfollowing a local actor' do
       let(:follower) { FactoryBot.create :local_actor }
       let(:target) { FactoryBot.create :local_actor }
-      let!(:following) { described_class.create! actor: follower, target_actor: target }
-
-      it 'creates Undo activity when Following is destroyed' do # rubocop:disable RSpec/ExampleLength
-        allow(Activity).to receive(:create!)
+      let(:following) { described_class.create! actor: follower, target_actor: target }
+      let!(:activity) do
         following.destroy!
-        expect(Activity).to have_received(:create!).with(
-          action: 'Undo',
-          actor:  follower,
-          entity: Activity.find_by(action: 'Follow', actor: follower, entity: target)
-        )
+        Activity.find_by(action: 'Undo')
+      end
+
+      it 'creates activity with Undo action' do
+        expect(activity.action).to eq 'Undo'
+      end
+
+      it 'creates Undo activity with the follower as the actor' do
+        expect(activity.actor).to eq follower
+      end
+
+      it 'creates Undo activity with the original follow as the entity' do
+        expect(activity.entity).to eq following.follow_activity
+      end
+
+      it 'is addressed to the target actor' do
+        expect(activity.to).to eq [target.federated_url]
+      end
+
+      it 'does not cc anyone' do
+        expect(activity.cc).to be_nil
       end
 
       it 'queues NotifyInboxJob' do
-        expect { following.destroy! }.to have_enqueued_job(NotifyInboxJob).once
+        expect(NotifyInboxJob).to have_been_enqueued.with(activity)
       end
     end
 
     context 'when unfollowing a distant actor' do
       let(:follower) { FactoryBot.create :local_actor }
       let(:target) { FactoryBot.create :distant_actor }
-
-      let!(:following) { described_class.create! actor: follower, target_actor: target }
-
-      it 'creates Undo activity when Following is destroyed' do # rubocop:disable RSpec/ExampleLength
-        allow(Activity).to receive(:create!)
+      let(:following) { described_class.create! actor: follower, target_actor: target }
+      let!(:activity) do
         following.destroy!
-        expect(Activity).to have_received(:create!).with(
-          action: 'Undo',
-          actor:  follower,
-          entity: Activity.find_by(action: 'Follow', actor: follower, entity: target)
-        )
+        Activity.find_by(action: 'Undo')
+      end
+
+      it 'creates Undo activity when Following is destroyed' do
+        expect(activity.action).to eq 'Undo'
       end
 
       it 'queues NotifyInboxJob' do
-        expect { following.destroy! }.to have_enqueued_job(NotifyInboxJob).once
+        expect(NotifyInboxJob).to have_been_enqueued.with(activity)
       end
     end
 
@@ -144,6 +164,40 @@ module Federails
 
       it 'does not queue NotifyInboxJob' do
         expect { following.destroy! }.not_to have_enqueued_job(NotifyInboxJob)
+      end
+    end
+
+    context 'when a follow request is accepted' do
+      let(:follower) { FactoryBot.create :distant_actor }
+      let(:target) { FactoryBot.create :local_actor }
+      let(:following) { described_class.create! actor: follower, target_actor: target }
+      let!(:activity) do
+        following.accept!
+        Activity.find_by(action: 'Accept')
+      end
+
+      it 'creates activity with Accept action' do
+        expect(activity.action).to eq 'Accept'
+      end
+
+      it 'creates Accept activity with the target as the actor' do
+        expect(activity.actor).to eq target
+      end
+
+      it 'creates Accept activity with the original follow as the entity' do
+        expect(activity.entity).to eq following
+      end
+
+      it 'is addressed to the follower' do
+        expect(activity.to).to eq [follower.federated_url]
+      end
+
+      it 'does not cc anyone' do
+        expect(activity.cc).to be_nil
+      end
+
+      it 'queues NotifyInboxJob' do
+        expect(NotifyInboxJob).to have_been_enqueued.with(activity)
       end
     end
   end
