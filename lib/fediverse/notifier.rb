@@ -28,12 +28,22 @@ module Fediverse
         return [] unless activity.actor.local?
 
         [activity.to, activity.cc].flatten.compact.reject { |x| x == Fediverse::Collection::PUBLIC }.map do |url|
-          if (actor = Federails::Actor.find_by_federation_url(url))
-            [actor.inbox_url]
-          else
-            [] # Collection
-          end
-        end.flatten
+          actor = Federails::Actor.find_or_create_by_federation_url(url)
+          [actor.inbox_url]
+        rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid
+          collection_to_actors(url).map(&:inbox_url)
+        end.flatten.compact
+      end
+
+      def collection_to_actors(url)
+        collection = Collection.fetch(url)
+        collection.filter_map do |actor_url|
+          Federails::Actor.find_or_create_by_federation_url(actor_url)
+        rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid
+          nil
+        end
+      rescue Errors::NotACollection
+        []
       end
 
       def payload(activity)

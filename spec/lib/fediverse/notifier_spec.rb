@@ -32,6 +32,23 @@ module Fediverse
         end
       end
 
+      context 'when notifying a follower collection' do
+        let(:fake_entity) { FakeEntity.new('some_url') }
+        let(:fake_activity) { FakeActivity.new(id: 1, actor: local_actor, to: [Fediverse::Collection::PUBLIC], cc: ['https://activitypub.academy/users/begusla_laddaciul/followers'], action: 'Create', entity: fake_entity) }
+
+        before do
+          FactoryBot.create :following, actor: distant_target_actor, target_actor: local_actor
+        end
+
+        it 'calls post_to_inbox for each recipient' do
+          VCR.use_cassette('fediverse/notifier/get_collection_200') do
+            allow(described_class).to receive(:post_to_inbox)
+            described_class.post_to_inboxes(fake_activity)
+            expect(described_class).to have_received(:post_to_inbox).with(hash_including(inbox_url: 'https://3dp.chat/users/manyfold/inbox')).once
+          end
+        end
+      end
+
       context 'when posting publicly but with no cc' do
         let(:fake_entity) { FakeEntity.new('some_url') }
         let(:fake_activity) { FakeActivity.new(id: 1, actor: local_actor, to: [Fediverse::Collection::PUBLIC], action: 'Create', entity: fake_entity) }

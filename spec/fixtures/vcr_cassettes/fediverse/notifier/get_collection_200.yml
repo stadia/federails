@@ -1,0 +1,272 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://activitypub.academy/users/begusla_laddaciul/followers
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Content-Type:
+      - application/json
+      Accept:
+      - application/json
+      User-Agent:
+      - Faraday v2.14.0
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      server:
+      - nginx/1.18.0 (Ubuntu)
+      date:
+      - Mon, 24 Nov 2025 14:46:23 GMT
+      content-type:
+      - application/activity+json; charset=utf-8
+      connection:
+      - close
+      x-frame-options:
+      - DENY
+      x-content-type-options:
+      - nosniff
+      x-xss-protection:
+      - '0'
+      permissions-policy:
+      - interest-cohort=()
+      referrer-policy:
+      - same-origin
+      vary:
+      - Accept
+      cache-control:
+      - max-age=180, public
+      etag:
+      - W/"bfe1633ff5d6dc8a072d39ab84e4ad31"
+      content-security-policy:
+      - 'base-uri ''none''; default-src ''none''; frame-ancestors ''none''; font-src
+        ''self'' https://activitypub.academy; img-src ''self'' https: data: blob:
+        https://activitypub.academy; style-src ''self'' https://activitypub.academy
+        ''nonce-QunXOahF6su94e/VuhnhMg==''; media-src ''self'' https: data: https://activitypub.academy;
+        frame-src ''self'' https:; manifest-src ''self'' https://activitypub.academy;
+        form-action ''self''; connect-src ''self'' data: blob: https://activitypub.academy
+        https://activitypub.academy wss://activitypub.academy; script-src ''self''
+        https://activitypub.academy ''wasm-unsafe-eval''; child-src ''self'' blob:
+        https://activitypub.academy; worker-src ''self'' blob: https://activitypub.academy'
+      x-request-id:
+      - bafb4735-8055-46f5-bea8-f8da64dbf3c0
+      x-runtime:
+      - '0.037019'
+      strict-transport-security:
+      - max-age=63072000; includeSubDomains
+    body:
+      encoding: UTF-8
+      string: '{"@context":"https://www.w3.org/ns/activitystreams","id":"https://activitypub.academy/users/begusla_laddaciul/followers","type":"OrderedCollection","totalItems":1,"first":"https://activitypub.academy/users/begusla_laddaciul/followers?page=1"}'
+  recorded_at: Mon, 24 Nov 2025 14:46:23 GMT
+- request:
+    method: get
+    uri: https://activitypub.academy/users/begusla_laddaciul/followers
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Content-Type:
+      - application/json
+      Accept:
+      - application/json
+      User-Agent:
+      - Faraday v2.14.0
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      server:
+      - nginx/1.18.0 (Ubuntu)
+      date:
+      - Mon, 24 Nov 2025 14:46:24 GMT
+      content-type:
+      - application/activity+json; charset=utf-8
+      connection:
+      - close
+      x-frame-options:
+      - DENY
+      x-content-type-options:
+      - nosniff
+      x-xss-protection:
+      - '0'
+      permissions-policy:
+      - interest-cohort=()
+      referrer-policy:
+      - same-origin
+      vary:
+      - Accept
+      cache-control:
+      - max-age=180, public
+      etag:
+      - W/"bfe1633ff5d6dc8a072d39ab84e4ad31"
+      content-security-policy:
+      - 'base-uri ''none''; default-src ''none''; frame-ancestors ''none''; font-src
+        ''self'' https://activitypub.academy; img-src ''self'' https: data: blob:
+        https://activitypub.academy; style-src ''self'' https://activitypub.academy
+        ''nonce-1CdlHCTbrozd9BrSWIjNfA==''; media-src ''self'' https: data: https://activitypub.academy;
+        frame-src ''self'' https:; manifest-src ''self'' https://activitypub.academy;
+        form-action ''self''; connect-src ''self'' data: blob: https://activitypub.academy
+        https://activitypub.academy wss://activitypub.academy; script-src ''self''
+        https://activitypub.academy ''wasm-unsafe-eval''; child-src ''self'' blob:
+        https://activitypub.academy; worker-src ''self'' blob: https://activitypub.academy'
+      x-request-id:
+      - 1f2e59d1-167c-46d3-b3c6-4721d7123320
+      x-runtime:
+      - '0.014110'
+      strict-transport-security:
+      - max-age=63072000; includeSubDomains
+    body:
+      encoding: UTF-8
+      string: '{"@context":"https://www.w3.org/ns/activitystreams","id":"https://activitypub.academy/users/begusla_laddaciul/followers","type":"OrderedCollection","totalItems":1,"first":"https://activitypub.academy/users/begusla_laddaciul/followers?page=1"}'
+  recorded_at: Mon, 24 Nov 2025 14:46:24 GMT
+- request:
+    method: get
+    uri: https://activitypub.academy/users/begusla_laddaciul/followers?page=1
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Content-Type:
+      - application/json
+      Accept:
+      - application/json
+      User-Agent:
+      - Faraday v2.14.0
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      server:
+      - nginx/1.18.0 (Ubuntu)
+      date:
+      - Mon, 24 Nov 2025 14:46:24 GMT
+      content-type:
+      - application/activity+json; charset=utf-8
+      connection:
+      - close
+      x-frame-options:
+      - DENY
+      x-content-type-options:
+      - nosniff
+      x-xss-protection:
+      - '0'
+      permissions-policy:
+      - interest-cohort=()
+      referrer-policy:
+      - same-origin
+      vary:
+      - Accept
+      cache-control:
+      - max-age=0, public
+      etag:
+      - W/"28f533aac907a6fd13beb0a38c77704a"
+      content-security-policy:
+      - 'base-uri ''none''; default-src ''none''; frame-ancestors ''none''; font-src
+        ''self'' https://activitypub.academy; img-src ''self'' https: data: blob:
+        https://activitypub.academy; style-src ''self'' https://activitypub.academy
+        ''nonce-I30lnE6vMi0HinPBFbCHGg==''; media-src ''self'' https: data: https://activitypub.academy;
+        frame-src ''self'' https:; manifest-src ''self'' https://activitypub.academy;
+        form-action ''self''; connect-src ''self'' data: blob: https://activitypub.academy
+        https://activitypub.academy wss://activitypub.academy; script-src ''self''
+        https://activitypub.academy ''wasm-unsafe-eval''; child-src ''self'' blob:
+        https://activitypub.academy; worker-src ''self'' blob: https://activitypub.academy'
+      x-request-id:
+      - 35ea9fb7-ecb5-4c8d-b014-e0c0a5dbedb2
+      x-runtime:
+      - '0.025596'
+      strict-transport-security:
+      - max-age=63072000; includeSubDomains
+    body:
+      encoding: UTF-8
+      string: '{"@context":"https://www.w3.org/ns/activitystreams","id":"https://activitypub.academy/users/begusla_laddaciul/followers?page=1","type":"OrderedCollectionPage","totalItems":1,"partOf":"https://activitypub.academy/users/begusla_laddaciul/followers","orderedItems":["https://3dp.chat/users/manyfold"]}'
+  recorded_at: Mon, 24 Nov 2025 14:46:24 GMT
+- request:
+    method: get
+    uri: https://3dp.chat/users/manyfold
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Content-Type:
+      - application/json
+      Accept:
+      - application/json
+      User-Agent:
+      - Faraday v2.14.0
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      date:
+      - Mon, 24 Nov 2025 14:35:35 GMT
+      content-type:
+      - application/activity+json; charset=utf-8
+      content-length:
+      - '4426'
+      connection:
+      - keep-alive
+      server:
+      - Mastodon
+      x-frame-options:
+      - DENY
+      x-content-type-options:
+      - nosniff
+      x-xss-protection:
+      - '0'
+      referrer-policy:
+      - same-origin
+      vary:
+      - Accept, Accept-Language, Cookie, Origin
+      cache-control:
+      - max-age=180, public
+      etag:
+      - W/"d7456ed937da5e699434cdc582708d3d"
+      content-security-policy:
+      - 'base-uri ''none''; default-src ''none''; frame-ancestors ''none''; font-src
+        ''self'' https://3dp.chat; img-src ''self'' data: blob: https://3dp.chat https://cdn.masto.host;
+        media-src ''self'' data: https://3dp.chat https://cdn.masto.host; manifest-src
+        ''self'' https://3dp.chat; form-action ''none''; child-src ''self'' blob:
+        https://3dp.chat; worker-src ''self'' blob: https://3dp.chat; connect-src
+        ''self'' data: blob: https://3dp.chat https://cdn.masto.host wss://3dp.chat;
+        script-src ''self'' https://3dp.chat ''wasm-unsafe-eval''; frame-src ''self''
+        https:; style-src ''self'' https://3dp.chat ''nonce-3x2mNPUtPtuqbgqjj2lJLw=='''
+      x-request-id:
+      - 051b40d3-d357-4032-832b-50615baee6a6
+      x-runtime:
+      - '0.005701'
+      strict-transport-security:
+      - max-age=63072000; includeSubDomains, max-age=31536000
+    body:
+      encoding: UTF-8
+      string: '{"@context":["https://www.w3.org/ns/activitystreams","https://w3id.org/security/v1",{"manuallyApprovesFollowers":"as:manuallyApprovesFollowers","toot":"http://joinmastodon.org/ns#","featured":{"@id":"toot:featured","@type":"@id"},"featuredTags":{"@id":"toot:featuredTags","@type":"@id"},"alsoKnownAs":{"@id":"as:alsoKnownAs","@type":"@id"},"movedTo":{"@id":"as:movedTo","@type":"@id"},"schema":"http://schema.org#","PropertyValue":"schema:PropertyValue","value":"schema:value","discoverable":"toot:discoverable","suspended":"toot:suspended","memorial":"toot:memorial","indexable":"toot:indexable","attributionDomains":{"@id":"toot:attributionDomains","@type":"@id"},"focalPoint":{"@container":"@list","@id":"toot:focalPoint"}}],"id":"https://3dp.chat/users/manyfold","type":"Person","following":"https://3dp.chat/users/manyfold/following","followers":"https://3dp.chat/users/manyfold/followers","inbox":"https://3dp.chat/users/manyfold/inbox","outbox":"https://3dp.chat/users/manyfold/outbox","featured":"https://3dp.chat/users/manyfold/collections/featured","featuredTags":"https://3dp.chat/users/manyfold/collections/tags","preferredUsername":"manyfold","name":"Manyfold","summary":"\u003cp\u003eAn
+        open source, self-hosted 3D file asset manager. Follow for announcements and
+        tips! \u003c/p\u003e\u003cp\u003eFinancially supported by \u003cspan class=\"h-card\"
+        translate=\"no\"\u003e\u003ca href=\"https://social.nlnet.nl/@nlnet\" class=\"u-url
+        mention\"\u003e@\u003cspan\u003enlnet\u003c/span\u003e\u003c/a\u003e\u003c/span\u003e,
+        \u003cspan class=\"h-card\" translate=\"no\"\u003e\u003ca href=\"https://mastodon.xyz/@NGIZero\"
+        class=\"u-url mention\"\u003e@\u003cspan\u003eNGIZero\u003c/span\u003e\u003c/a\u003e\u003c/span\u003e,
+        and you!\u003c/p\u003e","url":"https://3dp.chat/@manyfold","manuallyApprovesFollowers":false,"discoverable":true,"indexable":true,"published":"2023-12-06T00:00:00Z","memorial":false,"alsoKnownAs":["https://3dp.chat/users/vandam"],"attributionDomains":["manyfold.app"],"publicKey":{"id":"https://3dp.chat/users/manyfold#main-key","owner":"https://3dp.chat/users/manyfold","publicKeyPem":"-----BEGIN
+        PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmprx/BlZpwzucm6ye0Sn\nIbwvd6XlXADVDVWXz1Lzs4DZ/fntfcYRhAWCpMMQHpPluE2oMDqZ73Kis3yVavkT\nryz4Dtbn124AG1W5rYgvs5IYYZJ4jpFhWbhEdbMXTCP8OjTB5ftS7cU6zLgQ2/ns\ntBdcce0oNI8Jm4lWlXEEmX8j0Go0xLi/5zFWVtIaM7byMpRuHjbG03iJG4YHbIPo\n0+qV8mhK7/g/vdFayhV74jHhodyAPHVBZjSIxkaxilaS2Qcami5kXGa1fheKEHUM\nHYhvz8ltWbiyyc/lWC/L4Vyne5hyc9CLk/fd0VHjDv9HoFYUzCCldG7gUVqBn3sF\nhwIDAQAB\n-----END
+        PUBLIC KEY-----\n"},"tag":[],"attachment":[{"type":"PropertyValue","name":"Website","value":"\u003ca
+        href=\"https://manyfold.app\" target=\"_blank\" rel=\"nofollow noopener me\"
+        translate=\"no\"\u003e\u003cspan class=\"invisible\"\u003ehttps://\u003c/span\u003e\u003cspan
+        class=\"\"\u003emanyfold.app\u003c/span\u003e\u003cspan class=\"invisible\"\u003e\u003c/span\u003e\u003c/a\u003e"},{"type":"PropertyValue","name":"Demo","value":"\u003ca
+        href=\"https://try.manyfold.app\" target=\"_blank\" rel=\"nofollow noopener
+        me\" translate=\"no\"\u003e\u003cspan class=\"invisible\"\u003ehttps://\u003c/span\u003e\u003cspan
+        class=\"\"\u003etry.manyfold.app\u003c/span\u003e\u003cspan class=\"invisible\"\u003e\u003c/span\u003e\u003c/a\u003e"},{"type":"PropertyValue","name":"Source
+        Code","value":"\u003ca href=\"https://github.com/manyfold3d/manyfold\" target=\"_blank\"
+        rel=\"nofollow noopener me\" translate=\"no\"\u003e\u003cspan class=\"invisible\"\u003ehttps://\u003c/span\u003e\u003cspan
+        class=\"\"\u003egithub.com/manyfold3d/manyfold\u003c/span\u003e\u003cspan
+        class=\"invisible\"\u003e\u003c/span\u003e\u003c/a\u003e"},{"type":"PropertyValue","name":"Creator","value":"\u003ca
+        href=\"https://mastodon.me.uk/@Floppy\" target=\"_blank\" rel=\"nofollow noopener
+        me\" translate=\"no\"\u003e\u003cspan class=\"invisible\"\u003ehttps://\u003c/span\u003e\u003cspan
+        class=\"\"\u003emastodon.me.uk/@Floppy\u003c/span\u003e\u003cspan class=\"invisible\"\u003e\u003c/span\u003e\u003c/a\u003e"}],"endpoints":{"sharedInbox":"https://3dp.chat/inbox"},"icon":{"type":"Image","mediaType":"image/png","url":"https://cdn.masto.host/num3dpchat/accounts/avatars/111/532/928/908/963/968/original/aaa8eb8e50c3df9f.png"},"image":{"type":"Image","mediaType":"image/png","url":"https://cdn.masto.host/num3dpchat/accounts/headers/111/532/928/908/963/968/original/5d62fdc4cab92853.png"}}'
+  recorded_at: Mon, 24 Nov 2025 14:46:24 GMT
+recorded_with: VCR 6.3.1
