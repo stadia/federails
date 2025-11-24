@@ -6,7 +6,7 @@ json.id Federails::Engine.routes.url_helpers.server_actor_activity_url activity.
 json.type activity.action
 json.actor activity.actor.federated_url
 if addressing
-  json.to [Fediverse::Collections::PUBLIC]
+  json.to [Fediverse::Collection::PUBLIC]
   json.cc [activity.actor.followers_url]
 end
 
