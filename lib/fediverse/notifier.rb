@@ -27,7 +27,7 @@ module Fediverse
       def inboxes_for(activity)
         return [] unless activity.actor.local?
 
-        [activity.to, activity.cc].flatten.compact.map do |url|
+        [activity.to, activity.cc].flatten.compact.reject { |x| x == Fediverse::Collection::PUBLIC }.map do |url|
           if (actor = Federails::Actor.find_by_federation_url(url))
             [actor.inbox_url]
           else

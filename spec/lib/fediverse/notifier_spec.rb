@@ -31,6 +31,17 @@ module Fediverse
           expect(described_class).to have_received(:post_to_inbox).with(hash_including(inbox_url: distant_target_actor.inbox_url)).once
         end
       end
+
+      context 'when posting publicly but with no cc' do
+        let(:fake_entity) { FakeEntity.new('some_url') }
+        let(:fake_activity) { FakeActivity.new(id: 1, actor: local_actor, to: [Fediverse::Collection::PUBLIC], action: 'Create', entity: fake_entity) }
+
+        it 'does not post to any specific inboxes' do
+          allow(described_class).to receive(:post_to_inbox)
+          described_class.post_to_inboxes(fake_activity)
+          expect(described_class).not_to have_received(:post_to_inbox)
+        end
+      end
     end
 
     describe '#signed_request' do
