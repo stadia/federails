@@ -42,7 +42,17 @@ module Fediverse
       end
     end
 
-    context 'when fetching a bad remote collection' do
+    context 'when fetching something that is not a collection' do
+      let(:url) { 'https://mamot.fr/users/mtancoigne' }
+
+      it 'raises unhandled response error' do
+        VCR.use_cassette 'fediverse/request/get_actor_200' do
+          expect { described_class.fetch(url) }.to raise_error(Errors::NotACollection)
+        end
+      end
+    end
+
+    context 'when fetching a missing remote collection' do
       let(:url) { 'https://example.com/following' }
 
       it 'raises unhandled response error' do

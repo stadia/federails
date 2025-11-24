@@ -13,6 +13,8 @@ module Fediverse
       @total_items = json['totalItems']
       @id = json['id']
       @type = json['type']
+      raise Errors::NotACollection unless %w[OrderedCollection Collection].include?(@type)
+
       next_url = json['first']
       while next_url
         page = Fediverse::Request.dereference(next_url)
@@ -21,5 +23,9 @@ module Fediverse
       end
       self
     end
+  end
+
+  module Errors
+    class NotACollection < StandardError; end
   end
 end
