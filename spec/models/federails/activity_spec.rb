@@ -33,16 +33,5 @@ module Federails
         end
       end
     end
-
-    describe 'delivery' do
-      context 'when activity creator is distant' do
-        let(:distant_actor) { FactoryBot.create :distant_actor }
-
-        it 'does not notify actor' do
-          activity = described_class.new actor: distant_actor
-          expect(activity.recipients).to eq []
-        end
-      end
-    end
   end
 end

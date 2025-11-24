@@ -29,24 +29,6 @@ module Federails
     serialize :cc, coder: YAML
     serialize :to, coder: YAML
 
-    # Determines the list of actors targeted by the activity
-    #
-    # @return [Array<Federails::Actor>]
-    def recipients
-      return [] unless actor.local?
-
-      case action
-      when 'Follow'
-        [entity]
-      when 'Undo'
-        [entity.entity]
-      when 'Accept'
-        [entity.actor]
-      else
-        default_recipient_list
-      end
-    end
-
     private
 
     # Sets up default public-and-followers addressing unless to and cc are already set
@@ -60,13 +42,6 @@ module Federails
         actor.followers_url,
         (entity.try(:followers_url) if entity.try(:local?)),
       ].compact.uniq
-    end
-
-    def default_recipient_list
-      list = actor.followers
-      # If local actor is the subject, notify that actor's followers as well
-      list += entity.followers if entity.is_a?(Federails::Actor) && entity.local?
-      list.uniq
     end
 
     def post_to_inboxes

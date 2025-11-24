@@ -7,9 +7,11 @@ module Fediverse
       #
       # @param activity [Federails::Activity]
       def post_to_inboxes(activity)
-        actors = activity.recipients
+        # Get the list of actors we need to send the activity to
+        actors = recipients(activity)
         Rails.logger.debug('Nobody to notice') && return if actors.none?
 
+        # Deliver to each inbox
         message = payload(activity)
         actors.each do |recipient|
           Rails.logger.debug { "Sending activity ##{activity.id} to #{recipient.inbox_url}" }
@@ -18,6 +20,31 @@ module Fediverse
       end
 
       private
+
+      # Determines the list of inboxes that the activity should be delivered to
+      #
+      # @return [Array<Federails::Actor>]
+      def recipients(activity)
+        return [] unless activity.actor.local?
+
+        case activity.action
+        when 'Follow'
+          [activity.entity]
+        when 'Undo'
+          [activity.entity.entity]
+        when 'Accept'
+          [activity.entity.actor]
+        else
+          default_recipient_list activity
+        end
+      end
+
+      def default_recipient_list(activity)
+        list = activity.actor.followers
+        # If local actor is the subject, notify that actor's followers as well
+        list += activity.entity.followers if activity.entity.is_a?(Federails::Actor) && activity.entity.local?
+        list.uniq
+      end
 
       def payload(activity)
         Federails::ServerController.renderer.new.render(

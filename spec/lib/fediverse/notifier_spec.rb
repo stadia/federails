@@ -9,13 +9,25 @@ module Fediverse
     let(:local_actor) { FactoryBot.create(:user).federails_actor }
     let(:distant_target_actor) { FactoryBot.create :distant_actor }
 
+    describe 'delivery' do
+      context 'when activity creator is distant' do
+        let(:distant_actor) { FactoryBot.create :distant_actor }
+        let(:activity) { FactoryBot.create :activity, actor: distant_actor }
+
+        it 'does not notify actor' do
+          expect(described_class.send(:recipients, activity)).to eq []
+        end
+      end
+    end
+
     describe '#post_to_inboxes' do
       context 'when notifying distant actor' do
         let(:fake_entity) { FakeEntity.new('some_url') }
-        let(:fake_activity) { FakeActivity.new(id: 1, actor: local_actor, recipients: [distant_target_actor], action: 'Create', entity: fake_entity) }
+        let(:fake_activity) { FakeActivity.new(id: 1, actor: local_actor, to: [distant_target_actor.federated_url], action: 'Create', entity: fake_entity) }
 
         it 'calls post_to_inbox for each recipient' do
           allow(described_class).to receive(:post_to_inbox)
+          allow(described_class).to receive(:recipients).and_return([distant_target_actor])
           described_class.post_to_inboxes(fake_activity)
           expect(described_class).to have_received(:post_to_inbox).once
         end
