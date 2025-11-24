@@ -1,0 +1,62 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://mamot.fr/users/mtancoigne/collections/featured
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Content-Type:
+      - application/json
+      Accept:
+      - application/json
+      User-Agent:
+      - Faraday v2.14.0
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      date:
+      - Mon, 24 Nov 2025 13:35:29 GMT
+      content-type:
+      - application/activity+json; charset=utf-8
+      content-length:
+      - '174'
+      connection:
+      - keep-alive
+      server:
+      - Mastodon
+      x-frame-options:
+      - DENY
+      x-content-type-options:
+      - nosniff
+      x-xss-protection:
+      - '0'
+      referrer-policy:
+      - same-origin
+      vary:
+      - Accept
+      cache-control:
+      - max-age=180, public
+      etag:
+      - W/"0bc545b0181979285d41c67dbd8cf6eb"
+      content-security-policy:
+      - default-src 'none'; frame-ancestors 'none'; form-action 'none'
+      x-request-id:
+      - c10f0b68-5a43-4b9a-b98b-b02e5d8cbc7d
+      x-runtime:
+      - '0.015290'
+      strict-transport-security:
+      - max-age=63072000; includeSubDomains, max-age=15552000; preload
+      x-cached:
+      - MISS
+      alt-svc:
+      - h2="mamoteqvcadrmfs6ryykna4wpxhtsuzbpt4z7lxnqvx3qtse5xmk2fqd.onion:443"; ma=86400;
+        persist=1
+    body:
+      encoding: UTF-8
+      string: '{"@context":"https://www.w3.org/ns/activitystreams","id":"https://mamot.fr/users/mtancoigne/collections/featured","type":"OrderedCollection","totalItems":0,"orderedItems":[]}'
+  recorded_at: Mon, 24 Nov 2025 13:35:29 GMT
+recorded_with: VCR 6.3.1

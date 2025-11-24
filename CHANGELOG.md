@@ -41,6 +41,9 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
     to be considered outdated. Only used for `Federails::Host` for now
 - Actors:
   - Create/update host when created
+- Collections:
+  - Add `Fediverse::Collection::PUBLIC` constant to refer to the activitystreams public collection URI
+  - Fetch collections and load contents
 - Rake tasks:
   - Added `federails:sync_hosts` to update/complete the list of known hosts
 - Testing:
