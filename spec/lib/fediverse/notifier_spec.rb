@@ -14,8 +14,8 @@ module Fediverse
         let(:distant_actor) { FactoryBot.create :distant_actor }
         let(:activity) { FactoryBot.create :activity, actor: distant_actor }
 
-        it 'does not notify actor' do
-          expect(described_class.send(:recipients, activity)).to eq []
+        it 'does not notify anyone, the remote server will have done it already' do
+          expect(described_class.send(:inboxes_for, activity)).to eq []
         end
       end
     end
@@ -27,9 +27,9 @@ module Fediverse
 
         it 'calls post_to_inbox for each recipient' do
           allow(described_class).to receive(:post_to_inbox)
-          allow(described_class).to receive(:recipients).and_return([distant_target_actor])
+          allow(described_class).to receive(:inboxes_for).and_return([distant_target_actor.inbox_url])
           described_class.post_to_inboxes(fake_activity)
-          expect(described_class).to have_received(:post_to_inbox).once
+          expect(described_class).to have_received(:post_to_inbox).with(hash_including(inbox_url: distant_target_actor.inbox_url)).once
         end
       end
     end

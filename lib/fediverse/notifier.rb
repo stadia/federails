@@ -8,14 +8,14 @@ module Fediverse
       # @param activity [Federails::Activity]
       def post_to_inboxes(activity)
         # Get the list of actors we need to send the activity to
-        actors = recipients(activity)
-        Rails.logger.debug('Nobody to notice') && return if actors.none?
+        inboxes = inboxes_for(activity)
+        Rails.logger.debug('Nobody to notice') && return if inboxes.none?
 
         # Deliver to each inbox
         message = payload(activity)
-        actors.each do |recipient|
-          Rails.logger.debug { "Sending activity ##{activity.id} to #{recipient.inbox_url}" }
-          post_to_inbox(inbox_url: recipient.inbox_url, message: message, from: activity.actor)
+        inboxes.each do |url|
+          Rails.logger.debug { "Sending activity ##{activity.id} to inbox at #{url}" }
+          post_to_inbox(inbox_url: url, message: message, from: activity.actor)
         end
       end
 
@@ -24,16 +24,16 @@ module Fediverse
       # Determines the list of inboxes that the activity should be delivered to
       #
       # @return [Array<Federails::Actor>]
-      def recipients(activity)
+      def inboxes_for(activity)
         return [] unless activity.actor.local?
 
         case activity.action
         when 'Follow'
-          [activity.entity]
+          [activity.entity.inbox_url]
         when 'Undo'
-          [activity.entity.entity]
+          [activity.entity.entity.inbox_url]
         when 'Accept'
-          [activity.entity.actor]
+          [activity.entity.actor.inbox_url]
         else
           default_recipient_list activity
         end
@@ -43,7 +43,7 @@ module Fediverse
         list = activity.actor.followers
         # If local actor is the subject, notify that actor's followers as well
         list += activity.entity.followers if activity.entity.is_a?(Federails::Actor) && activity.entity.local?
-        list.uniq
+        list.uniq.map(&:inbox_url)
       end
 
       def payload(activity)
