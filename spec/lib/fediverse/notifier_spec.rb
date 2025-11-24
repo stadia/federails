@@ -27,7 +27,6 @@ module Fediverse
 
         it 'calls post_to_inbox for each recipient' do
           allow(described_class).to receive(:post_to_inbox)
-          allow(described_class).to receive(:inboxes_for).and_return([distant_target_actor.inbox_url])
           described_class.post_to_inboxes(fake_activity)
           expect(described_class).to have_received(:post_to_inbox).with(hash_including(inbox_url: distant_target_actor.inbox_url)).once
         end

@@ -27,23 +27,13 @@ module Fediverse
       def inboxes_for(activity)
         return [] unless activity.actor.local?
 
-        case activity.action
-        when 'Follow'
-          [activity.entity.inbox_url]
-        when 'Undo'
-          [activity.entity.entity.inbox_url]
-        when 'Accept'
-          [activity.entity.actor.inbox_url]
-        else
-          default_recipient_list activity
-        end
-      end
-
-      def default_recipient_list(activity)
-        list = activity.actor.followers
-        # If local actor is the subject, notify that actor's followers as well
-        list += activity.entity.followers if activity.entity.is_a?(Federails::Actor) && activity.entity.local?
-        list.uniq.map(&:inbox_url)
+        [activity.to, activity.cc].flatten.compact.map do |url|
+          if (actor = Federails::Actor.find_by_federation_url(url))
+            [actor.inbox_url]
+          else
+            [] # Collection
+          end
+        end.flatten
       end
 
       def payload(activity)
