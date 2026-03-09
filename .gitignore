@@ -17,3 +17,6 @@ rspec_examples.txt
 
 # Generated documentation site
 /public
+
+# Git worktrees
+/.worktrees/
