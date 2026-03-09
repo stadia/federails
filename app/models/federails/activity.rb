@@ -30,6 +30,9 @@ module Federails
 
     serialize :cc, coder: YAML
     serialize :to, coder: YAML
+    serialize :bto, coder: YAML
+    serialize :bcc, coder: YAML
+    serialize :audience, coder: YAML
 
     private
 
@@ -37,7 +40,7 @@ module Federails
     #
     # This retains compatibility with previous behaviour
     def set_default_addressing
-      return if to.present? || cc.present?
+      return if to.present? || cc.present? || bto.present? || bcc.present? || audience.present?
 
       self.to = [Fediverse::Collection::PUBLIC]
       self.cc = [

@@ -10,6 +10,7 @@ if addressing
     {
       to: activity.to,
       cc: activity.cc,
+      audience: activity.try(:audience),
     }.compact
   )
 end

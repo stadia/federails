@@ -131,4 +131,34 @@ RSpec.describe 'federails/server/activities/show', type: :view do
       expect(json_result['cc']).to include "http://localhost/federation/actors/#{local_actor.uuid}/followers"
     end
   end
+
+  context 'when rendering an activity with audience, bto, and bcc' do
+    let!(:activity) do
+      FactoryBot.create(
+        :activity,
+        :create,
+        entity:   local_actor,
+        audience: ['https://example.com/groups/team'],
+        bto:      ['https://example.com/users/private'],
+        bcc:      ['https://example.com/users/hidden']
+      )
+    end
+    let(:json_result) do
+      assign(:activity, activity)
+      render
+      JSON.parse(rendered)
+    end
+
+    it 'includes audience in the serialized activity' do
+      expect(json_result['audience']).to eq(['https://example.com/groups/team'])
+    end
+
+    it 'does not expose bto' do
+      expect(json_result).not_to have_key('bto')
+    end
+
+    it 'does not expose bcc' do
+      expect(json_result).not_to have_key('bcc')
+    end
+  end
 end
