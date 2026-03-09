@@ -37,11 +37,13 @@ module Fediverse
 
         payload['object'] = Fediverse::Request.dereference(payload['object']) if payload.key? 'object'
 
-        if payload['type'] == 'Update' && payload['actor'].present? && payload.dig('object', 'id').present? && !same_origin?(payload['actor'], payload.dig('object', 'id'))
-          Rails.logger.warn do
-            "Rejected Update: actor origin (#{payload['actor']}) does not match object origin (#{payload.dig('object', 'id')})"
+        if payload['type'] == 'Update' && payload['actor'].present?
+          unless payload.dig('object', 'id').present? && same_origin?(payload['actor'], payload.dig('object', 'id'))
+            Rails.logger.warn do
+              "Rejected Update: origin verification failed (actor: #{payload['actor']}, object: #{payload.dig('object', 'id')})"
+            end
+            return false
           end
-          return false
         end
 
         handlers = get_handlers(payload['type'], payload.dig('object', 'type'))
@@ -70,6 +72,9 @@ module Fediverse
 
       private
 
+      # Best-effort recording of processed activity for de-duplication.
+      # Uses actor as fallback entity when the actual object cannot be resolved.
+      # Failures here must not propagate since the activity was already handled successfully.
       def record_processed_activity(payload, dispatched_at)
         federated_url = payload['id']
         return if federated_url.blank?
@@ -98,6 +103,8 @@ module Fediverse
           bcc:           payload['bcc'],
           audience:      payload['audience']
         )
+      rescue StandardError => e
+        Rails.logger.warn { "Failed to record processed activity #{federated_url}: #{e.message}" }
       end
 
       def dispatch_delete_request(payload)

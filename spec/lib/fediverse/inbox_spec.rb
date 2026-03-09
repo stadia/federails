@@ -199,6 +199,24 @@ module Fediverse
         end
       end
 
+      context 'when receiving an Update with missing object id but actor present' do
+        let(:payload) do
+          {
+            'id'     => 'https://evil.com/activities/2',
+            'type'   => 'Update',
+            'actor'  => 'https://evil.com/users/attacker',
+            'object' => {
+              'type'    => 'Note',
+              'content' => 'hacked content',
+            },
+          }
+        end
+
+        it 'rejects the update' do
+          expect(described_class.dispatch_request(payload)).to eq(false)
+        end
+      end
+
       context 'when receiving an Update with matching origin but no handler' do
         let(:payload) do
           {
@@ -383,6 +401,30 @@ module Fediverse
           described_class.maybe_forward(payload)
 
           expect(Fediverse::Notifier).to have_received(:forward_activity).once
+        end
+      end
+
+      context 'when activity references a local collection but no local object' do
+        let(:payload) do
+          {
+            'id'     => 'https://remote.example/activities/no-local-object',
+            'type'   => 'Create',
+            'actor'  => distant_actor.federated_url,
+            'cc'     => [local_actor.followers_url],
+            'object' => {
+              'id'        => 'https://remote.example/notes/1',
+              'type'      => 'Note',
+              'inReplyTo' => 'https://remote.example/notes/0',
+            },
+          }
+        end
+
+        it 'does not forward the activity' do
+          allow(Fediverse::Notifier).to receive(:forward_activity)
+
+          described_class.maybe_forward(payload)
+
+          expect(Fediverse::Notifier).not_to have_received(:forward_activity)
         end
       end
 
