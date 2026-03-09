@@ -10,17 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_11_21_160720) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_09_022939) do
   create_table "comments", force: :cascade do |t|
     t.text "content", null: false
-    t.integer "user_id"
-    t.integer "post_id"
-    t.integer "parent_id"
     t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "federated_url"
-    t.integer "federails_actor_id"
     t.datetime "deleted_at"
+    t.integer "federails_actor_id"
+    t.string "federated_url"
+    t.integer "parent_id"
+    t.integer "post_id"
+    t.datetime "updated_at", null: false
+    t.integer "user_id"
     t.index ["federails_actor_id"], name: "index_comments_on_federails_actor_id"
     t.index ["parent_id"], name: "index_comments_on_parent_id"
     t.index ["post_id"], name: "index_comments_on_post_id"
@@ -28,41 +28,43 @@ ActiveRecord::Schema[7.2].define(version: 2025_11_21_160720) do
   end
 
   create_table "federails_activities", force: :cascade do |t|
-    t.string "entity_type", null: false
-    t.integer "entity_id", null: false
     t.string "action", null: false
     t.integer "actor_id", null: false
+    t.string "cc"
     t.datetime "created_at", null: false
+    t.integer "entity_id", null: false
+    t.string "entity_type", null: false
+    t.string "federated_url"
+    t.string "to"
     t.datetime "updated_at", null: false
     t.string "uuid"
-    t.string "to"
-    t.string "cc"
     t.index ["actor_id"], name: "index_federails_activities_on_actor_id"
     t.index ["entity_type", "entity_id"], name: "index_federails_activities_on_entity"
+    t.index ["federated_url"], name: "index_federails_activities_on_federated_url", unique: true
     t.index ["uuid"], name: "index_federails_activities_on_uuid", unique: true
   end
 
   create_table "federails_actors", force: :cascade do |t|
-    t.string "name"
-    t.string "federated_url"
-    t.string "username"
-    t.string "server"
-    t.string "inbox_url"
-    t.string "outbox_url"
-    t.string "followers_url"
-    t.string "followings_url"
-    t.string "profile_url"
+    t.string "actor_type"
+    t.datetime "created_at", null: false
     t.integer "entity_id"
     t.string "entity_type"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "uuid"
-    t.text "public_key"
-    t.text "private_key"
     t.json "extensions"
+    t.string "federated_url"
+    t.string "followers_url"
+    t.string "followings_url"
+    t.string "inbox_url"
     t.boolean "local", default: false, null: false
-    t.string "actor_type"
+    t.string "name"
+    t.string "outbox_url"
+    t.text "private_key"
+    t.string "profile_url"
+    t.text "public_key"
+    t.string "server"
     t.datetime "tombstoned_at"
+    t.datetime "updated_at", null: false
+    t.string "username"
+    t.string "uuid"
     t.index ["entity_type", "entity_id"], name: "index_federails_actors_on_entity", unique: true
     t.index ["federated_url"], name: "index_federails_actors_on_federated_url", unique: true
     t.index ["uuid"], name: "index_federails_actors_on_uuid", unique: true
@@ -70,10 +72,10 @@ ActiveRecord::Schema[7.2].define(version: 2025_11_21_160720) do
 
   create_table "federails_followings", force: :cascade do |t|
     t.integer "actor_id", null: false
-    t.integer "target_actor_id", null: false
-    t.integer "status", default: 0
-    t.string "federated_url"
     t.datetime "created_at", null: false
+    t.string "federated_url"
+    t.integer "status", default: 0
+    t.integer "target_actor_id", null: false
     t.datetime "updated_at", null: false
     t.string "uuid"
     t.index ["actor_id", "target_actor_id"], name: "index_federails_followings_on_actor_id_and_target_actor_id", unique: true
@@ -83,37 +85,37 @@ ActiveRecord::Schema[7.2].define(version: 2025_11_21_160720) do
   end
 
   create_table "federails_hosts", force: :cascade do |t|
+    t.datetime "created_at", null: false
     t.string "domain", null: false
     t.string "nodeinfo_url"
-    t.string "software_name"
-    t.string "software_version"
     t.text "protocols", default: "[]"
     t.text "services", default: "{}"
-    t.datetime "created_at", null: false
+    t.string "software_name"
+    t.string "software_version"
     t.datetime "updated_at", null: false
     t.index ["domain"], name: "index_federails_hosts_on_domain", unique: true
   end
 
   create_table "posts", force: :cascade do |t|
-    t.string "title", null: false
     t.text "content", null: false
-    t.integer "user_id"
     t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "federated_url"
-    t.integer "federails_actor_id"
     t.datetime "deleted_at"
+    t.integer "federails_actor_id"
+    t.string "federated_url"
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id"
     t.index ["federails_actor_id"], name: "index_posts_on_federails_actor_id"
     t.index ["user_id"], name: "index_posts_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
+    t.datetime "created_at", null: false
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
-    t.string "reset_password_token"
-    t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
-    t.datetime "created_at", null: false
+    t.datetime "reset_password_sent_at"
+    t.string "reset_password_token"
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true

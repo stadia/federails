@@ -11,6 +11,8 @@ module Federails
   class Activity < ApplicationRecord
     include Federails::HasUuid
 
+    validates :federated_url, uniqueness: true, allow_nil: true
+
     belongs_to :entity, polymorphic: true
     belongs_to :actor
 

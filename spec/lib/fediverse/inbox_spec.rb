@@ -110,6 +110,60 @@ module Fediverse
       end
     end
 
+    describe '.dispatch_request' do
+      let(:payload) do
+        {
+          'id'     => 'http://example.com/activities/1',
+          'type'   => 'Follow',
+          'actor'  => local_actor.federated_url,
+          'object' => distant_actor.federated_url,
+        }
+      end
+
+      before do
+        allow(Fediverse::Request).to receive(:dereference) { |url| { 'id' => url, 'type' => 'Person' } }
+      end
+
+      context 'when the activity has not been seen before' do
+        it 'processes the activity' do
+          expect { described_class.dispatch_request(payload) }.to change(Federails::Following, :count).by(1)
+        end
+
+        it 'records the federated_url on the created activity' do
+          described_class.dispatch_request(payload)
+          expect(Federails::Activity.find_by(federated_url: 'http://example.com/activities/1')).to be_present
+        end
+      end
+
+      context 'when the activity has already been processed' do
+        before do
+          described_class.dispatch_request(payload)
+        end
+
+        it 'returns :duplicate' do
+          expect(described_class.dispatch_request(payload)).to eq(:duplicate)
+        end
+
+        it 'does not process the activity again' do
+          expect { described_class.dispatch_request(payload) }.not_to change(Federails::Following, :count)
+        end
+      end
+
+      context 'when the payload has no id' do
+        let(:payload) do
+          {
+            'type'   => 'Follow',
+            'actor'  => local_actor.federated_url,
+            'object' => distant_actor.federated_url,
+          }
+        end
+
+        it 'processes the activity normally' do
+          expect { described_class.dispatch_request(payload) }.to change(Federails::Following, :count).by(1)
+        end
+      end
+    end
+
     describe '#handle_delete_request' do
       context 'with a DataEntity' do
         let(:payload) do

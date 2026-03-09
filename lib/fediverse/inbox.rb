@@ -25,6 +25,8 @@ module Fediverse
       #
       # @param payload [Hash] Dereferenced activity
       def dispatch_request(payload)
+        return :duplicate if payload['id'].present? && Federails::Activity.exists?(federated_url: payload['id'])
+
         return dispatch_delete_request(payload) if payload['type'] == 'Delete'
 
         payload['object'] = Fediverse::Request.dereference(payload['object']) if payload.key? 'object'
@@ -33,13 +35,24 @@ module Fediverse
         handlers.each_pair do |klass, method|
           klass.send method, payload
         end
-        return true unless handlers.empty?
 
-        Rails.logger.debug { "Unhandled activity type: #{payload['type']}" }
-        false
+        if handlers.empty?
+          Rails.logger.debug { "Unhandled activity type: #{payload['type']}" }
+          return false
+        end
+
+        record_federated_url(payload['id'])
+        true
       end
 
       private
+
+      def record_federated_url(federated_url)
+        return if federated_url.blank?
+
+        activity = Federails::Activity.order(created_at: :desc).first
+        activity&.update(federated_url: federated_url)
+      end
 
       def dispatch_delete_request(payload)
         payload['object'] = payload['object']['id'] unless payload['object'].is_a? String
