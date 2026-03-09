@@ -51,6 +51,59 @@ RSpec.describe Fediverse::NodeInfo do
       end
     end
 
+    context 'when nodeinfo only exposes schema 2.1' do
+      let(:nodeinfo_url) { 'https://mamot.fr/nodeinfo/2.1' }
+      let(:fake_wk_response) do
+        { 'links' => [{ 'rel' => 'http://nodeinfo.diaspora.software/ns/schema/2.1', 'href' => nodeinfo_url }] }
+      end
+      let(:fake_response) do
+        {
+          'version'   => '2.1',
+          'software'  => { 'name' => 'mastodon', 'version' => '4.3.4' },
+          'protocols' => ['activitypub'],
+          'services'  => { 'outbound' => [], 'inbound' => [] },
+        }
+      end
+
+      before do
+        allow(Federails::Utils::JsonRequest).to receive(:get_json).with(wk_nodeinfo_url, follow_redirects: true).and_return(fake_wk_response).once
+        allow(Federails::Utils::JsonRequest).to receive(:get_json).with(nodeinfo_url).and_return(fake_response).once
+      end
+
+      it 'uses schema 2.1 endpoint' do
+        expect(described_class.fetch(domain)[:nodeinfo_url]).to eq nodeinfo_url
+      end
+    end
+
+    context 'when nodeinfo exposes both schema 2.0 and 2.1' do
+      let(:nodeinfo_url) { 'https://mamot.fr/nodeinfo/2.1' }
+      let(:fake_wk_response) do
+        {
+          'links' => [
+            { 'rel' => 'http://nodeinfo.diaspora.software/ns/schema/2.0', 'href' => 'https://mamot.fr/nodeinfo/2.0' },
+            { 'rel' => 'http://nodeinfo.diaspora.software/ns/schema/2.1', 'href' => nodeinfo_url },
+          ],
+        }
+      end
+      let(:fake_response) do
+        {
+          'version'   => '2.1',
+          'software'  => { 'name' => 'mastodon', 'version' => '4.3.4' },
+          'protocols' => ['activitypub'],
+          'services'  => { 'outbound' => [], 'inbound' => [] },
+        }
+      end
+
+      before do
+        allow(Federails::Utils::JsonRequest).to receive(:get_json).with(wk_nodeinfo_url, follow_redirects: true).and_return(fake_wk_response).once
+        allow(Federails::Utils::JsonRequest).to receive(:get_json).with(nodeinfo_url).and_return(fake_response).once
+      end
+
+      it 'prefers schema 2.1 endpoint' do
+        expect(described_class.fetch(domain)[:nodeinfo_url]).to eq nodeinfo_url
+      end
+    end
+
     context 'when node has no nodeinfo' do
       before do
         allow(Federails::Utils::JsonRequest).to receive(:get_json).with(wk_nodeinfo_url, follow_redirects: true).and_raise(Federails::Utils::JsonRequest::UnhandledResponseStatus).once
