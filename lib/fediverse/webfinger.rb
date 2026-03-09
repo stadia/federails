@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 require 'federails/utils/host'
 require 'federails/utils/json_request'
 
@@ -13,6 +15,7 @@ module Fediverse
       # @param account [String] Account string
       #
       # @return [MatchData, nil] Matches with +:username+ and +:domain+ or +nil+
+      #: (String) -> MatchData?
       def split_account(account)
         /\A(acct:|@)?#{ACCOUNT_REGEX}\z/io.match account
       end
@@ -22,6 +25,7 @@ module Fediverse
       # @param hash [Hash, MatchData] Object with +:username+ and +:domain+ keys
       #
       # @return [Boolean]
+      #: (untyped) -> bool
       def local_user?(hash)
         hash[:username] && (hash[:domain].nil? || (hash[:domain] == Federails::Utils::Host.localhost))
       end
@@ -32,6 +36,7 @@ module Fediverse
       # @param domain [String]
       #
       # @return [Federails::Actor, nil] Federails actor or nothing when not found
+      #: (String, String) -> untyped
       def fetch_actor(username, domain)
         fetch_actor_url webfinger(username, domain)
       end
@@ -41,6 +46,7 @@ module Fediverse
       # @param url [String] Actor's federation URL
       #
       # @return [Federails::Actor, nil] Federails actor or nothing when not found
+      #: (String?) -> untyped
       def fetch_actor_url(url)
         webfinger_to_actor get_json url
       end
@@ -51,6 +57,7 @@ module Fediverse
       # @param domain [String]
       #
       # @return [String, nil] Federation URL if found
+      #: (String, String) -> String?
       def webfinger(username, domain)
         json = webfinger_response(username, domain)
         link = json['links'].find { |l| Mime::Type.lookup(l['type']).to_sym == :activitypub }
@@ -65,6 +72,7 @@ module Fediverse
       # @param actor_url [String] Optional Federation URL to provide when known
       #
       # @return [String] The URL to use as follow URL
+      #: (String, String, ?actor_url: String?) -> String?
       def remote_follow_url(username, domain, actor_url: nil)
         json = webfinger_response(username, domain)
         link = json['links'].find { |l| l['rel'] == 'http://ostatus.org/schema/1.0/subscribe' }
@@ -81,6 +89,7 @@ module Fediverse
 
       # Makes a webfinger request for a given username/domain
       # @return [Hash] Webfinger response's content
+      #: (String, String) -> Hash[String, untyped]
       def webfinger_response(username, domain)
         scheme = Federails.configuration.force_ssl ? 'https' : 'http'
         get_json "#{scheme}://#{domain}/.well-known/webfinger", resource: "acct:#{username}@#{domain}"
@@ -88,6 +97,7 @@ module Fediverse
 
       # Extracts the server and port from a string, omitting common ports
       # @return [String] Server and port
+      #: (String) -> String?
       def server_and_port(string)
         uri = URI.parse string
         if uri.port && [80, 443].exclude?(uri.port)
@@ -100,6 +110,7 @@ module Fediverse
       # Builds a +Federails::Actor+ from a Webfinger response
       # @param data [Hash] Webfinger response
       # @return [Federails::Actor]
+      #: (Hash[String, untyped]) -> untyped
       def webfinger_to_actor(data) # rubocop:disable Metrics/MethodLength
         data = data.clone
         id = data.delete('id')
@@ -120,6 +131,7 @@ module Fediverse
       # Makes a simple GET request and returns a +Hash+ from the parsed body
       # @return [Hash]
       # @raise [ActiveRecord::RecordNotFound] when the response is invalid
+      #: (String?, ?Hash[Symbol, untyped]) -> Hash[String, untyped]
       def get_json(url, params = {})
         Federails::Utils::JsonRequest.get_json(url, params: params, follow_redirects: true, headers: { accept: 'application/json' })
       rescue Federails::Utils::JsonRequest::UnhandledResponseStatus => e

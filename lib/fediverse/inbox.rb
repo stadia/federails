@@ -1,8 +1,12 @@
+# rbs_inline: enabled
+
 require 'fediverse/request'
 
 module Fediverse
   class Inbox
     @@handlers = {} # rubocop:todo Style/ClassVars
+    # @rbs @handlers: Hash[String, Hash[String, Hash[untyped, Symbol]]]
+
     class << self
       # Registers a handler for incoming data
       #
@@ -15,6 +19,7 @@ module Fediverse
       #   See https://www.w3.org/TR/activitystreams-vocabulary/#object-types for a list of common object types
       # @param klass [String] Class handling the incoming object
       # @param method [Symbol] Method in the class that will handle the object
+      #: (String, String, untyped, Symbol) -> void
       def register_handler(activity_type, object_type, klass, method)
         @@handlers[activity_type] ||= {}
         @@handlers[activity_type][object_type] ||= {}
@@ -24,6 +29,7 @@ module Fediverse
       # Executes the registered handler for an incoming object
       #
       # @param payload [Hash] Dereferenced activity
+      #: (Hash[String, untyped]) -> (bool | Symbol | nil)
       def dispatch_request(payload)
         return :duplicate if payload['id'].present? && Federails::Activity.exists?(federated_url: payload['id'])
 
@@ -47,6 +53,7 @@ module Fediverse
 
       private
 
+      #: (String?) -> void
       def record_federated_url(federated_url)
         return if federated_url.blank?
 
@@ -54,6 +61,7 @@ module Fediverse
         activity&.update(federated_url: federated_url)
       end
 
+      #: (Hash[String, untyped]) -> nil
       def dispatch_delete_request(payload)
         payload['object'] = payload['object']['id'] unless payload['object'].is_a? String
         object = Federails::Utils::Object.find_distant_object_in_all payload['object']
@@ -62,6 +70,7 @@ module Fediverse
         object.run_callbacks :on_federails_delete_requested
       end
 
+      #: (String?, String?) -> Hash[untyped, Symbol]
       def get_handlers(activity_type, object_type)
         {}.merge(@@handlers.dig(activity_type, object_type) || {})
           .merge(@@handlers.dig(activity_type, '*') || {})
@@ -69,6 +78,7 @@ module Fediverse
           .merge(@@handlers.dig('*', object_type) || {})
       end
 
+      #: (Hash[String, untyped]) -> untyped
       def handle_create_follow_request(activity)
         actor        = Federails::Actor.find_or_create_by_object activity['actor']
         target_actor = Federails::Actor.find_or_create_by_object activity['object']
@@ -76,6 +86,7 @@ module Fediverse
         Federails::Following.create! actor: actor, target_actor: target_actor, federated_url: activity['id']
       end
 
+      #: (Hash[String, untyped]) -> void
       def handle_accept_follow_request(activity)
         original_activity = Request.dereference(activity['object'])
 
@@ -87,6 +98,7 @@ module Fediverse
         follow.accept!
       end
 
+      #: (Hash[String, untyped]) -> void
       def handle_undo_follow_request(activity)
         original_activity = activity['object']
 
@@ -97,6 +109,7 @@ module Fediverse
         follow&.destroy
       end
 
+      #: (Hash[String, untyped]) -> void
       def handle_delete_request(activity)
         object = Federails::Utils::Object.find_distant_object_in_all(activity['object'])
         return if object.blank?
@@ -104,6 +117,7 @@ module Fediverse
         object.run_callbacks :on_federails_delete_requested
       end
 
+      #: (Hash[String, untyped]) -> void
       def handle_undelete_request(activity)
         # Get to original object
         delete_activity = Request.dereference(activity['object'])

@@ -1,0 +1,14 @@
+# Generated from lib/fediverse/signature.rb with RBS::Inline
+
+module Fediverse
+  class Signature
+    # : (sender: untyped, request: untyped) -> String
+    def self.sign: (sender: untyped, request: untyped) -> String
+
+    # : (sender: untyped, request: untyped) -> bool
+    def self.verify: (sender: untyped, request: untyped) -> bool
+
+    # : (request: untyped, headers: String) -> String
+    private def self.signature_payload: (request: untyped, headers: String) -> String
+  end
+end

@@ -1,0 +1,26 @@
+# Generated from lib/fediverse/collection.rb with RBS::Inline
+
+module Fediverse
+  class Collection < Array[untyped]
+    PUBLIC: String
+
+    DEFAULT_MAX_PAGES: Integer
+
+    attr_reader total_items: Integer?
+
+    attr_reader id: String?
+
+    attr_reader type: String?
+
+    # : (String, ?max_pages: Integer) -> Fediverse::Collection
+    def self.fetch: (String, ?max_pages: Integer) -> Fediverse::Collection
+
+    # : (String, ?max_pages: Integer) -> self
+    def fetch: (String, ?max_pages: Integer) -> self
+  end
+
+  module Errors
+    class NotACollection < StandardError
+    end
+  end
+end

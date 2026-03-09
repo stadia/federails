@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 require 'json/ld'
 
 module Fediverse
@@ -8,6 +10,8 @@ module Fediverse
       # @param value [String, Hash]
       #
       # @return [Hash, nil]
+      #: (Hash[String, untyped]) -> Hash[String, untyped]
+      #: (String) -> Hash[String, untyped]?
       def dereference(value)
         return value if value.is_a? Hash
         return get(value) if value.is_a? String
@@ -17,6 +21,7 @@ module Fediverse
 
       private
 
+      #: (String) -> Hash[String, untyped]?
       def get(id)
         json = Federails::Utils::JsonRequest.get_json(id)
 

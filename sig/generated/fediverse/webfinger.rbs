@@ -1,0 +1,81 @@
+# Generated from lib/fediverse/webfinger.rb with RBS::Inline
+
+module Fediverse
+  # Methods related to Webfinger: find accounts, fetch actors,...
+  class Webfinger
+    # Extracts username and domain from an account string.
+    # Accepts forms "user@domain", "@user@domain" and "acct:user@domain"
+    #
+    # @param account [String] Account string
+    #
+    # @return [MatchData, nil] Matches with +:username+ and +:domain+ or +nil+
+    # : (String) -> MatchData?
+    def self.split_account: (String) -> MatchData?
+
+    # Determines if a given account string should be a local account (same host as configured one)
+    #
+    # @param hash [Hash, MatchData] Object with +:username+ and +:domain+ keys
+    #
+    # @return [Boolean]
+    # : (untyped) -> bool
+    def self.local_user?: (untyped) -> bool
+
+    # Fetches a distant actor
+    #
+    # @param username [String]
+    # @param domain [String]
+    #
+    # @return [Federails::Actor, nil] Federails actor or nothing when not found
+    # : (String, String) -> untyped
+    def self.fetch_actor: (String, String) -> untyped
+
+    # Fetches an actor given its URL
+    #
+    # @param url [String] Actor's federation URL
+    #
+    # @return [Federails::Actor, nil] Federails actor or nothing when not found
+    # : (String?) -> untyped
+    def self.fetch_actor_url: (String?) -> untyped
+
+    # Gets the real actor's federation URL from its username and domain
+    #
+    # @param username [String]
+    # @param domain [String]
+    #
+    # @return [String, nil] Federation URL if found
+    # : (String, String) -> String?
+    def self.webfinger: (String, String) -> String?
+
+    # Returns remote follow link template, or complete link if actor_url is provided
+    #
+    # @param username [String]
+    # @param domain [String]
+    # @param actor_url [String] Optional Federation URL to provide when known
+    #
+    # @return [String] The URL to use as follow URL
+    # : (String, String, ?actor_url: String?) -> String?
+    def self.remote_follow_url: (String, String, ?actor_url: String?) -> String?
+
+    # Makes a webfinger request for a given username/domain
+    # @return [Hash] Webfinger response's content
+    # : (String, String) -> Hash[String, untyped]
+    private def self.webfinger_response: (String, String) -> Hash[String, untyped]
+
+    # Extracts the server and port from a string, omitting common ports
+    # @return [String] Server and port
+    # : (String) -> String?
+    private def self.server_and_port: (String) -> String?
+
+    # Builds a +Federails::Actor+ from a Webfinger response
+    # @param data [Hash] Webfinger response
+    # @return [Federails::Actor]
+    # : (Hash[String, untyped]) -> untyped
+    private def self.webfinger_to_actor: (Hash[String, untyped]) -> untyped
+
+    # Makes a simple GET request and returns a +Hash+ from the parsed body
+    # @return [Hash]
+    # @raise [ActiveRecord::RecordNotFound] when the response is invalid
+    # : (String?, ?Hash[Symbol, untyped]) -> Hash[String, untyped]
+    private def self.get_json: (String?, ?Hash[Symbol, untyped]) -> Hash[String, untyped]
+  end
+end

@@ -1,0 +1,18 @@
+# Generated from lib/fediverse/request.rb with RBS::Inline
+
+module Fediverse
+  class Request
+    # Dereferences a value
+    #
+    # @param value [String, Hash]
+    #
+    # @return [Hash, nil]
+    # : (Hash[String, untyped]) -> Hash[String, untyped]
+    # : (String) -> Hash[String, untyped]?
+    def self.dereference: (Hash[String, untyped]) -> Hash[String, untyped]
+                        | (String) -> Hash[String, untyped]?
+
+    # : (String) -> Hash[String, untyped]?
+    private def self.get: (String) -> Hash[String, untyped]?
+  end
+end

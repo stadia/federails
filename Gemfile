@@ -10,6 +10,10 @@ gem 'jbuilder'
 gem 'sprockets-rails'
 gem 'sqlite3'
 
+# Type checking
+gem 'rbs-inline', require: false
+gem 'steep', require: false
+
 # Linters
 gem 'rubocop'
 gem 'rubocop-factory_bot'

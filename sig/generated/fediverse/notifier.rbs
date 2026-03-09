@@ -1,0 +1,43 @@
+# Generated from lib/fediverse/notifier.rb with RBS::Inline
+
+module Fediverse
+  class Notifier
+    MAX_COLLECTION_DEPTH: Integer
+
+    # Posts an activity to its recipients
+    #
+    # @param activity [Federails::Activity]
+    # : (untyped) -> void
+    def self.post_to_inboxes: (untyped) -> void
+
+    # : (Hash[String, untyped], Array[String], ?exclude_actor: String?) -> void
+    def self.forward_activity: (Hash[String, untyped], Array[String], ?exclude_actor: String?) -> void
+
+    # Determines the list of inboxes that the activity should be delivered to
+    #
+    # @return [Array<String>]
+    # : (untyped) -> Array[String]
+    private def self.inboxes_for: (untyped) -> Array[String]
+
+    # : (String, ?max_depth: Integer) -> Array[untyped]
+    private def self.collection_to_actors: (String, ?max_depth: Integer) -> Array[untyped]
+
+    # : (String?) -> String?
+    private def self.actor_inbox_for: (String?) -> String?
+
+    # : (untyped) -> String
+    private def self.payload: (untyped) -> String
+
+    # : (inbox_url: String, message: String, ?from: untyped) -> void
+    private def self.post_to_inbox: (inbox_url: String, message: String, ?from: untyped) -> void
+
+    # : (url: String, message: String, from: untyped) -> untyped
+    private def self.signed_request: (url: String, message: String, from: untyped) -> untyped
+
+    # : (url: String, message: String) -> untyped
+    private def self.request: (url: String, message: String) -> untyped
+
+    # : (String) -> String
+    private def self.digest: (String) -> String
+  end
+end
