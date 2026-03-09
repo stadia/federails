@@ -20,3 +20,4 @@ rspec_examples.txt
 
 # Git worktrees
 /.worktrees/
+.idea
