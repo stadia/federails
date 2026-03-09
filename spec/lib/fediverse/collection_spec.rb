@@ -72,5 +72,34 @@ module Fediverse
         end
       end
     end
+
+    context 'when limiting collection pagination' do
+      let(:url) { 'https://example.com/collection' }
+
+      it 'stops fetching after max_pages is reached' do
+        allow(Fediverse::Request).to receive(:dereference).with(url).and_return({
+                                                                                  'id'         => url,
+                                                                                  'type'       => 'OrderedCollection',
+                                                                                  'totalItems' => 5,
+                                                                                  'first'      => 'https://example.com/collection?page=1',
+                                                                                })
+
+        (1..4).each do |page|
+          allow(Fediverse::Request).to receive(:dereference).with("https://example.com/collection?page=#{page}").and_return({
+                                                                                                                              'orderedItems' => ["https://example.com/actor/#{page}"],
+                                                                                                                              'next'         => (page == 4 ? nil : "https://example.com/collection?page=#{page + 1}"),
+                                                                                                                            })
+        end
+
+        collection = described_class.fetch(url, max_pages: 3)
+
+        expect(collection.length).to eq 3
+        expect(collection).to eq([
+                                   'https://example.com/actor/1',
+                                   'https://example.com/actor/2',
+                                   'https://example.com/actor/3',
+                                 ])
+      end
+    end
   end
 end

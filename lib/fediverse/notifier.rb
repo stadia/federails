@@ -2,6 +2,8 @@ require 'fediverse/signature'
 
 module Fediverse
   class Notifier
+    MAX_COLLECTION_DEPTH = 3
+
     class << self
       # Posts an activity to its recipients
       #
@@ -19,6 +21,21 @@ module Fediverse
         end
       end
 
+      def forward_activity(payload, collection_urls, exclude_actor: nil)
+        inboxes = collection_urls.flat_map do |url|
+          collection_to_actors(url).map(&:inbox_url)
+        end.compact.uniq
+
+        sender_inbox = actor_inbox_for(exclude_actor)
+        inboxes.reject! { |url| url == sender_inbox } if sender_inbox.present?
+
+        message = payload.to_json
+        inboxes.each do |url|
+          Rails.logger.debug { "Forwarding activity to inbox at #{url}" }
+          post_to_inbox(inbox_url: url, message: message)
+        end
+      end
+
       private
 
       # Determines the list of inboxes that the activity should be delivered to
@@ -27,23 +44,43 @@ module Fediverse
       def inboxes_for(activity)
         return [] unless activity.actor.local?
 
-        [activity.to, activity.cc].flatten.compact.reject { |x| x == Fediverse::Collection::PUBLIC }.map do |url|
+        actor_inbox = activity.actor.inbox_url
+        addressing = [
+          activity.to,
+          activity.cc,
+          activity.try(:bto),
+          activity.try(:bcc),
+          activity.try(:audience),
+        ].flatten.compact.uniq.reject { |url| url == Fediverse::Collection::PUBLIC }
+
+        addressing.flat_map do |url|
           actor = Federails::Actor.find_or_create_by_federation_url(url)
           [actor.inbox_url]
         rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid
           collection_to_actors(url).map(&:inbox_url)
-        end.flatten.compact
+        end.compact.uniq.reject { |url| url == actor_inbox }
       end
 
-      def collection_to_actors(url)
+      def collection_to_actors(url, max_depth: MAX_COLLECTION_DEPTH)
+        return [] if max_depth <= 0
+
         collection = Collection.fetch(url)
         collection.filter_map do |actor_url|
           Federails::Actor.find_or_create_by_federation_url(actor_url)
         rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid
-          nil
+          collection_to_actors(actor_url, max_depth: max_depth - 1)
         end
-      rescue Errors::NotACollection
+        .flatten
+      rescue Errors::NotACollection, URI::InvalidURIError
         []
+      end
+
+      def actor_inbox_for(actor_url)
+        return if actor_url.blank?
+
+        Federails::Actor.find_or_create_by_federation_url(actor_url).inbox_url
+      rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid
+        nil
       end
 
       def payload(activity)
