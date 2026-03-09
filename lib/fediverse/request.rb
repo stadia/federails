@@ -19,10 +19,16 @@ module Fediverse
 
       def get(id)
         json = Federails::Utils::JsonRequest.get_json(id)
-
-        JSON::LD::API.compact json, json['@context']
+        compact_json_ld(json)
       rescue JSON::ParserError
         nil
+      end
+
+      def compact_json_ld(json)
+        JSON::LD::API.compact(json, json['@context'])
+      rescue JSON::LD::JsonLdError => e
+        Rails.logger.warn { "Unable to compact JSON-LD for #{json['id'] || 'unknown object'}: #{e.class} #{e.message}" }
+        json
       end
     end
   end

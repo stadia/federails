@@ -8,8 +8,8 @@ json.actor activity.actor.federated_url
 if addressing
   json.merge!(
     {
-      to: activity.to,
-      cc: activity.cc,
+      to:       activity.to,
+      cc:       activity.cc,
       audience: activity.try(:audience),
     }.compact
   )

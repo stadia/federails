@@ -20,6 +20,32 @@ RSpec.describe 'POST federation/actors/:actor_id/inbox with a Note to become a P
     end
 
     context 'with a supported Note' do
+      context 'when JSON-LD compaction fails' do
+        before do
+          VCR.use_cassette 'fediverse/request/get_actor_200' do
+            Federails::Actor.find_or_create_by_federation_url distant_actor_url
+          end
+
+          allow(JSON::LD::API).to receive(:compact).and_raise(
+            JSON::LD::JsonLdError::ProtectedTermRedefinition,
+            'protected term redefinition'
+          )
+        end
+
+        it 'still creates a Post from the inbox payload' do
+          VCR.use_cassette 'dummy/fediverse/request/get_note_200' do
+            expect { make_request }.to change(Post, :count).by 1
+          end
+        end
+
+        it 'returns created' do
+          VCR.use_cassette 'dummy/fediverse/request/get_note_200' do
+            make_request
+            expect(response).to have_http_status(:created)
+          end
+        end
+      end
+
       context 'when actor already exist' do
         before do
           VCR.use_cassette 'fediverse/request/get_actor_200' do
