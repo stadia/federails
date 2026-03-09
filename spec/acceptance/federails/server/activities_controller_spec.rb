@@ -105,6 +105,11 @@ RSpec.describe Federails::Server::ActivitiesController, type: :acceptance do
       test_response_of url, path_params: { actor_id: distant_actor.to_param }, payload: inbox_payload, headers: headers
     end
 
+    for_code 200, with_content_type: Mime[:activitypub] do |url|
+      allow(Fediverse::Inbox).to receive(:dispatch_request).and_return :duplicate
+      test_response_of url, path_params: { actor_id: distant_actor.to_param }, payload: inbox_payload, headers: headers
+    end
+
     for_code 422, with_content_type: Mime[:activitypub] do |url|
       test_response_of url, path_params: { actor_id: distant_actor.to_param }, payload: {}, headers: headers
     end

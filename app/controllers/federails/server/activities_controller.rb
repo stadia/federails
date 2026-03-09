@@ -26,8 +26,14 @@ module Federails
         payload = payload_from_params
         return head :unprocessable_entity unless payload
 
-        if Fediverse::Inbox.dispatch_request(payload)
+        result = Fediverse::Inbox.dispatch_request(payload)
+
+        case result
+        when true
+          Fediverse::Inbox.maybe_forward(payload)
           head :created
+        when :duplicate
+          head :ok
         else
           head :unprocessable_entity
         end

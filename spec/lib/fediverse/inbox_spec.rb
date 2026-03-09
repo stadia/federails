@@ -18,6 +18,10 @@ module Fediverse
         expect(handlers['Accept']['Follow'].keys).to include described_class
       end
 
+      it 'registered a handler for "Reject" activities on "Follow" object' do
+        expect(handlers['Reject']['Follow'].keys).to include described_class
+      end
+
       it 'registered a handler for "Undo" activities on "Follow" object' do
         expect(handlers['Undo']['Follow'].keys).to include described_class
       end
@@ -149,6 +153,75 @@ module Fediverse
         end
       end
 
+      context 'when a Delete activity has already been processed' do
+        let!(:distant_actor_for_delete) { FactoryBot.create :distant_actor }
+        let(:delete_payload) do
+          {
+            'id'     => 'http://example.com/activities/delete_1',
+            'type'   => 'Delete',
+            'actor'  => distant_actor_for_delete.federated_url,
+            'object' => distant_actor_for_delete.federated_url,
+          }
+        end
+
+        before do
+          allow(Federails::Utils::Actor).to receive(:tombstone!)
+          described_class.dispatch_request(delete_payload)
+        end
+
+        it 'returns :duplicate for the same Delete activity' do
+          expect(described_class.dispatch_request(delete_payload)).to eq(:duplicate)
+        end
+
+        it 'records the delete federated_url on a stored activity' do
+          activity = Federails::Activity.find_by(federated_url: delete_payload['id'])
+          expect(activity).to be_present
+          expect(activity.action).to eq('Delete')
+        end
+      end
+
+      context 'when receiving an unauthorized Update activity' do
+        let(:payload) do
+          {
+            'id'     => 'https://evil.com/activities/1',
+            'type'   => 'Update',
+            'actor'  => 'https://evil.com/users/attacker',
+            'object' => {
+              'id'      => 'https://example.com/posts/1',
+              'type'    => 'Note',
+              'content' => 'hacked content',
+            },
+          }
+        end
+
+        it 'rejects the update' do
+          expect(described_class.dispatch_request(payload)).to eq(false)
+        end
+      end
+
+      context 'when receiving an Update with matching origin but no handler' do
+        let(:payload) do
+          {
+            'id'     => 'https://example.com/activities/1',
+            'type'   => 'Update',
+            'actor'  => 'https://example.com/users/author',
+            'object' => {
+              'id'      => 'https://example.com/posts/1',
+              'type'    => 'Note',
+              'content' => 'updated content',
+            },
+          }
+        end
+
+        before do
+          allow(described_class).to receive(:get_handlers).and_return({})
+        end
+
+        it 'falls through as unhandled instead of being rejected by origin check' do
+          expect(described_class.dispatch_request(payload)).to eq(false)
+        end
+      end
+
       context 'when the payload has no id' do
         let(:payload) do
           {
@@ -243,6 +316,96 @@ module Fediverse
 
           described_class.send(:handle_undelete_request, payload)
           expect(Federails::Utils::Actor).to have_received(:untombstone!).once
+        end
+      end
+    end
+
+    describe '#handle_reject_follow_request' do
+      let!(:pending_following) { Federails::Following.create actor: local_actor, target_actor: distant_actor }
+      let(:payload) do
+        {
+          'actor'  => distant_actor.federated_url,
+          'object' => 'https://example.com/follows/1',
+        }
+      end
+      let(:follow_object) do
+        {
+          'type'   => 'Follow',
+          'actor'  => pending_following.actor.federated_url,
+          'object' => pending_following.target_actor.federated_url,
+        }
+      end
+
+      before do
+        allow(Fediverse::Request).to receive(:dereference).with(payload['object']).and_return(follow_object)
+      end
+
+      it 'destroys the pending following' do
+        expect do
+          described_class.send(:handle_reject_follow_request, payload)
+        end.to change(Federails::Following, :count).by(-1)
+      end
+
+      it 'does not raise when no matching following exists' do
+        pending_following.destroy
+
+        expect do
+          described_class.send(:handle_reject_follow_request, payload)
+        end.not_to raise_error
+      end
+    end
+
+    describe '.maybe_forward' do
+      let(:local_actor_2) { FactoryBot.create(:user).federails_actor }
+
+      before do
+        Federails::Following.create! actor: local_actor_2, target_actor: local_actor, status: :accepted
+      end
+
+      context 'when activity references a local collection and local object' do
+        let(:payload) do
+          {
+            'id'     => 'https://remote.example/activities/forward-test',
+            'type'   => 'Create',
+            'actor'  => distant_actor.federated_url,
+            'cc'     => [local_actor.followers_url],
+            'object' => {
+              'id'        => 'https://remote.example/replies/1',
+              'type'      => 'Note',
+              'inReplyTo' => local_actor.federated_url,
+            },
+          }
+        end
+
+        it 'forwards the activity' do
+          allow(Fediverse::Notifier).to receive(:forward_activity)
+
+          described_class.maybe_forward(payload)
+
+          expect(Fediverse::Notifier).to have_received(:forward_activity).once
+        end
+      end
+
+      context 'when activity does not reference a local collection' do
+        let(:payload) do
+          {
+            'id'     => 'https://remote.example/activities/no-forward',
+            'type'   => 'Create',
+            'cc'     => ['https://remote.example/users/someone/followers'],
+            'object' => {
+              'id'        => 'https://remote.example/replies/2',
+              'type'      => 'Note',
+              'inReplyTo' => local_actor.federated_url,
+            },
+          }
+        end
+
+        it 'does not forward the activity' do
+          allow(Fediverse::Notifier).to receive(:forward_activity)
+
+          described_class.maybe_forward(payload)
+
+          expect(Fediverse::Notifier).not_to have_received(:forward_activity)
         end
       end
     end
