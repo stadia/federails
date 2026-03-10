@@ -17,6 +17,8 @@ jobs:
         with:
           ruby-version: .ruby-version
           bundler-cache: true
+        env:
+          BUNDLE_WITHOUT: doc
 
       - name: Set up test database
         run: bundle exec rake db:create db:schema:load
@@ -64,6 +66,8 @@ jobs:
         with:
           ruby-version: .ruby-version
           bundler-cache: true
+        env:
+          BUNDLE_WITHOUT: doc
 
       - name: Run RuboCop
         run: bundle exec rubocop --format github --format progress
