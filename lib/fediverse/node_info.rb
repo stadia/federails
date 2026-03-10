@@ -4,6 +4,10 @@ module Fediverse
   class NodeInfo
     class NotFoundError < StandardError; end
     class NoActivityPubError < StandardError; end
+    NODEINFO_SCHEMA_RELS = [
+      'http://nodeinfo.diaspora.software/ns/schema/2.1',
+      'http://nodeinfo.diaspora.software/ns/schema/2.0',
+    ].freeze
 
     class << self
       #: (String) -> Hash[Symbol, untyped]
@@ -34,7 +38,7 @@ module Fediverse
       #: (String) -> String
       def nodeinfo_url(domain)
         response = Federails::Utils::JsonRequest.get_json "#{base_url(domain)}/.well-known/nodeinfo", follow_redirects: true
-        entry = response['links']&.find { |link| link['rel'] == 'http://nodeinfo.diaspora.software/ns/schema/2.0' }
+        entry = NODEINFO_SCHEMA_RELS.lazy.map { |rel| response['links']&.find { |link| link['rel'] == rel } }.find(&:itself)
 
         entry['href']
       end

@@ -8,7 +8,12 @@ plugins:
   - rubocop-rspec_rails
   - rubocop-factory_bot
 
+inherit_from: .rubocop_todo.yml
+
 AllCops:
+  RubyInterpreters:
+    - ruby
+    - rake
   # Do not lint generated files
   Exclude:
     - bin/*

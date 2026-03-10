@@ -26,8 +26,14 @@ module Federails
         payload = payload_from_params
         return head :unprocessable_entity unless payload
 
-        if Fediverse::Inbox.dispatch_request(payload)
+        result = Fediverse::Inbox.dispatch_request(payload)
+
+        case result
+        when true
+          Fediverse::Inbox.maybe_forward(payload)
           head :created
+        when :duplicate
+          head :ok
         else
           head :unprocessable_entity
         end
@@ -56,7 +62,7 @@ module Federails
           return
         end
 
-        hash = JSON::LD::API.compact payload, payload['@context']
+        hash = compact_payload(payload)
         validate_payload hash
       end
 
@@ -64,6 +70,13 @@ module Federails
         return unless hash['@context'] && hash['id'] && hash['type'] && hash['actor'] && hash['object']
 
         hash
+      end
+
+      def compact_payload(payload)
+        JSON::LD::API.compact(payload, payload['@context'])
+      rescue JSON::LD::JsonLdError => e
+        Rails.logger.warn { "Unable to compact inbox payload #{payload['id'] || '(no id)'}: #{e.class} #{e.message}" }
+        payload
       end
     end
   end

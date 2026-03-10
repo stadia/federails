@@ -125,7 +125,8 @@ module Fediverse
                              followings_url: data.delete('following'),
                              profile_url:    data.delete('url'),
                              public_key:     data.delete('publicKey')&.dig('publicKeyPem'),
-                             extensions:     data.except('@context')
+                             extensions:     data.except('@context'),
+                             local:          false
       end
 
       # Makes a simple GET request and returns a +Hash+ from the parsed body

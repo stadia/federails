@@ -12,7 +12,6 @@ require 'rails_helper'
 # of tools you can use to make these specs even more expressive, but we're
 # sticking to rails and rspec-rails APIs to keep things simple and stable.
 
-# rubocop:disable RSpec/MultipleMemoizedHelpers
 RSpec.describe '/followings', type: :request do
   let(:signed_in_user) { User.find_by email: 'user@example.com' }
   let(:target_actor) { FactoryBot.create(:user).federails_actor }
@@ -184,4 +183,3 @@ RSpec.describe '/followings', type: :request do
     end
   end
 end
-# rubocop:enable RSpec/MultipleMemoizedHelpers

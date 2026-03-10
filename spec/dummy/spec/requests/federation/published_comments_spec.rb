@@ -16,7 +16,7 @@ RSpec.describe '/federation/published', type: :request do
       expect(json['@context']).to include('https://www.w3.org/ns/activitystreams')
     end
 
-    it 'includes additional JSON-LD context' do # rubocop:todo RSpec/MultipleExpectations
+    it 'includes additional JSON-LD context' do
       get federails.server_published_url(publishable_type: 'comments', id: comment.id)
       json = JSON.parse(response.body)
       expect(json['@context']).to include('https://purl.archive.org/miscellany')
