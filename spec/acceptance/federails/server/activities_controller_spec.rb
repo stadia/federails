@@ -125,8 +125,8 @@ RSpec.describe Federails::Server::ActivitiesController, type: :acceptance do
       test_response_of(
         url,
         path_params: { actor_id: distant_actor.to_param },
-        payload: inbox_payload,
-        headers: headers.merge('Content-Type' => 'application/json')
+        payload:     inbox_payload,
+        headers:     headers.merge('Content-Type' => 'application/json')
       )
     end
   end
