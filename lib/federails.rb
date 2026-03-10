@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 require 'jbuilder'
 require 'kaminari'
 require 'pundit'
@@ -14,7 +16,7 @@ require 'fediverse'
 
 # This module includes classes and methods related to Ruby on Rails: engine configuration, models, controllers, etc.
 module Federails
-  DEFAULT_DATA_FILTER_METHOD = :handle_federated_object?
+  DEFAULT_DATA_FILTER_METHOD = :handle_federated_object? #: Symbol
 
   mattr_reader :configuration
   @@configuration = Configuration
@@ -23,10 +25,12 @@ module Federails
   config.factory_bot.definition_file_paths += [File.expand_path('spec/factories', __dir__)] if defined?(FactoryBotRails)
 
   class << self
+    #: () { (singleton(Federails::Configuration)) -> void } -> void
     def configure
       yield @@configuration
     end
 
+    #: (Symbol) -> void
     def config_from(name) # rubocop:disable Metrics/MethodLength
       config = Rails.application.config_for name
       [
@@ -51,11 +55,13 @@ module Federails
     #
     # @example
     #   puts "Follow #{some_actor.name}" if actor_entity? current_user
+    #: (untyped) -> bool
     def actor_entity?(class_or_instance)
       Configuration.actor_types.key? class_or_instance_name(class_or_instance)
     end
 
     # @return [Hash] The configuration for the given actor entity
+    #: (untyped) -> Hash[Symbol, untyped]
     def actor_entity(class_or_instance)
       klass = class_or_instance_name(class_or_instance)
       raise "#{klass} is not a configured actor entity" unless Configuration.actor_types.key?(klass)
@@ -64,6 +70,7 @@ module Federails
     end
 
     # @return [Boolean] True if the given model is a possible data entity
+    #: (untyped) -> bool
     def data_entity?(class_or_instance)
       Configuration.data_types.key? class_or_instance_name(class_or_instance)
     end
@@ -75,6 +82,7 @@ module Federails
     #
     # @example
     #   data_entity_handlers_for 'Note'
+    #: (String) -> Array[Hash[Symbol, untyped]]
     def data_entity_handlers_for(type)
       Federails::Configuration.data_types.select { |_, v| v[:handles] == type }.map(&:last)
     end
@@ -84,6 +92,7 @@ module Federails
     # @param hash [Hash] ActivityPub object hash
     #
     # @return [Hash, nil] Data entity configuration
+    #: (Hash[String, untyped]) -> Hash[Symbol, untyped]?
     def data_entity_handler_for(hash)
       data_entity_handlers_for(hash['type']).find do |handler|
         return true if !handler[:filter_method] && !handler[:class].respond_to?(DEFAULT_DATA_FILTER_METHOD)
@@ -99,12 +108,14 @@ module Federails
     #
     # @example
     #   data_entity_handled_on :articles
+    #: (Symbol | String) -> Hash[Symbol, untyped]?
     def data_entity_handled_on(route_path_segment)
       route_path_segment = route_path_segment.to_sym
       Federails::Configuration.data_types.find { |_, v| v[:route_path_segment] == route_path_segment }&.last
     end
 
     # @return [Hash] The configuration for the given data entity
+    #: (untyped) -> Hash[Symbol, untyped]
     def data_entity_configuration(class_or_instance)
       klass = class_or_instance_name(class_or_instance)
       raise "#{klass} is not a configured data entity" unless Configuration.data_types.key?(klass)
@@ -115,6 +126,7 @@ module Federails
     private
 
     # @return [String] Class name of the provided class or instance
+    #: (untyped) -> String
     def class_or_instance_name(class_or_instance)
       case class_or_instance
       when String

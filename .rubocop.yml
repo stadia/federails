@@ -7,6 +7,7 @@ plugins:
   - rubocop-rspec
   - rubocop-rspec_rails
   - rubocop-factory_bot
+  - rubocop-rbs_inline
 
 inherit_from: .rubocop_todo.yml
 
@@ -191,3 +192,8 @@ Style/TrailingCommaInArrayLiteral:
 
 Style/TrailingCommaInHashLiteral:
   EnforcedStyleForMultiline: comma
+
+Layout/LeadingCommentSpace:
+  Enabled: true
+  AllowRBSInlineAnnotation: true
+  AllowSteepAnnotation: true

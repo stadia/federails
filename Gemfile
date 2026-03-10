@@ -21,6 +21,7 @@ gem 'rubocop-faker'
 gem 'rubocop-performance'
 gem 'rubocop-rails'
 gem 'rubocop-rake'
+gem 'rubocop-rbs_inline'
 gem 'rubocop-rspec'
 gem 'rubocop-rspec_rails'
 

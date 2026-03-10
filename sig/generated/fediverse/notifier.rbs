@@ -25,6 +25,9 @@ module Fediverse
     # : (String?) -> String?
     private def self.actor_inbox_for: (String?) -> String?
 
+    # : (Array[String]) -> untyped
+    private def self.forwarding_sender_for: (Array[String]) -> untyped
+
     # : (untyped) -> String
     private def self.payload: (untyped) -> String
 

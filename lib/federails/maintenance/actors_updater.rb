@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module Federails
   module Maintenance
     class ActorsUpdater
@@ -21,6 +23,7 @@ module Federails
         #     Federails::Maintenance::ActorUpdater.run Federails::Actor.last(10)
         #   Update all distant actors and puts status for each actor
         #     Federails::Maintenance::ActorUpdater.run {|actor, status| puts "#{actor.federated_url}: #{status}"}
+        #: (?untyped) ?{ (untyped, Symbol) -> void } -> void
         def run(actors = nil, &block)
           actors_list(actors).each do |actor|
             status = update(actor)
@@ -32,6 +35,7 @@ module Federails
         private
 
         # Make a list of actors to update from the passed attribute
+        #: (untyped) -> untyped
         def actors_list(param)
           if param.nil?
             Federails::Actor.distant
@@ -51,6 +55,7 @@ module Federails
         end
 
         # @param actor [Federails::Actor]
+        #: (untyped) -> Symbol
         def update(actor)
           return :ignored_local if actor.local?
 

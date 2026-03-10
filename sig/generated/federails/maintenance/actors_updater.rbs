@@ -1,0 +1,37 @@
+# Generated from lib/federails/maintenance/actors_updater.rb with RBS::Inline
+
+module Federails
+  module Maintenance
+    class ActorsUpdater
+      # Fetches all distant actors again and update their local copy
+      #
+      # A block can be passed with two arguments: the actor being updated and the update status
+      #
+      # @param actors [Integer, Federails::Actor, Array<Federails::Actor>, nil] Actor ID, Actor or list of actors to update.
+      #   If nothing is passed, all distant actors are processed
+      # @example
+      #   Update all distant actors
+      #     Federails::Maintenance::ActorUpdater.run
+      #   With an actor id:
+      #     Federails::Maintenance::ActorUpdater.run 1
+      #   With a federated URL:
+      #     Federails::Maintenance::ActorUpdater.run 'https://example.com/actor'
+      #   With a federated URL:
+      #     Federails::Maintenance::ActorUpdater.run ['https://example.com/actors/1', 'https://example.com/actors/1']
+      #   With actors:
+      #     Federails::Maintenance::ActorUpdater.run Federails::Actor.last(10)
+      #   Update all distant actors and puts status for each actor
+      #     Federails::Maintenance::ActorUpdater.run {|actor, status| puts "#{actor.federated_url}: #{status}"}
+      # : (?untyped) ?{ (untyped, Symbol) -> void } -> void
+      def self.run: (?untyped) ?{ (untyped, Symbol) -> void } -> void
+
+      # Make a list of actors to update from the passed attribute
+      # : (untyped) -> untyped
+      private def self.actors_list: (untyped) -> untyped
+
+      # @param actor [Federails::Actor]
+      # : (untyped) -> Symbol
+      private def self.update: (untyped) -> Symbol
+    end
+  end
+end

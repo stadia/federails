@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module Federails
   module Utils
     # Methods to manipulate incoming objects
@@ -11,6 +13,7 @@ module Federails
         # @param object_or_id [String, Hash] String identifier or incoming object
         #
         # @return [ApplicationRecord, nil] Entity or nil when invalid/not found
+        #: (String | Hash[String, untyped]) -> untyped
         def find_or_initialize(object_or_id)
           federated_url = object_or_id.is_a?(Hash) ? object_or_id['id'] : object_or_id
 
@@ -26,6 +29,7 @@ module Federails
         #
         # @param federated_url [String] Object identifier
         # @return [Federails::Actor, Federails::DataEntity, Federails::Following, nil]
+        #: (String) -> untyped
         def find_distant_object_in_all(federated_url)
           # Search in actors
           object = Federails::Actor.find_by federated_url: federated_url
@@ -52,6 +56,7 @@ module Federails
         # @param object_or_id [String, Hash] String identifier or incoming object
         #
         # @return [ApplicationRecord, nil] Entity or nil when invalid/not found
+        #: (String | Hash[String, untyped]) -> untyped
         def find_or_initialize!(object_or_id)
           entity = find_or_initialize object_or_id
           raise ActiveRecord::RecordNotFound unless entity
@@ -69,6 +74,7 @@ module Federails
         # @param object_or_id [String, Hash] String identifier or incoming object
         #
         # @return [ApplicationRecord, nil] Entity or nil when invalid/not found
+        #: (String | Hash[String, untyped]) -> untyped
         def find_or_create!(object_or_id)
           entity = find_or_initialize! object_or_id
           return entity if entity.persisted?
@@ -82,6 +88,7 @@ module Federails
         # @param hash [Hash] ActivityPub object
         #
         # @return [Hash] Hash with timestamps
+        #: (Hash[String, untyped]) -> Hash[Symbol, untyped]
         def timestamp_attributes(hash)
           {
             created_at: hash['published'] ||= Time.current,
@@ -91,6 +98,7 @@ module Federails
 
         private
 
+        #: (String?) -> Hash[Symbol, untyped]?
         def local_route(url)
           route = Utils::Host.local_route(url)
 
@@ -99,6 +107,7 @@ module Federails
           route
         end
 
+        #: (Hash[Symbol, untyped]) -> untyped
         def from_local_route(route)
           config = Federails.data_entity_handled_on route[:publishable_type]
           return unless config
@@ -108,6 +117,7 @@ module Federails
           nil
         end
 
+        #: (String | Hash[String, untyped]) -> untyped
         def from_distant_server(federated_url)
           hash = Fediverse::Request.dereference(federated_url)
           return unless hash

@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 require 'faraday'
 require 'faraday/follow_redirects'
 
@@ -7,7 +9,7 @@ module Federails
     module JsonRequest
       class UnhandledResponseStatus < StandardError; end
 
-      BASE_HEADERS = {
+      BASE_HEADERS = { #: Hash[String, String]
         'Content-Type' => 'application/json',
         'Accept'       => 'application/json',
       }.freeze
@@ -23,6 +25,7 @@ module Federails
       # @return The parsed JSON object
       #
       # @raise [UnhandledResponseStatus] when response status is not the expected_status
+      #: (String?, ?params: Hash[Symbol, untyped], ?headers: Hash[String, untyped], ?follow_redirects: bool, ?expected_status: Integer?) -> untyped
       def self.get_json(url, params: {}, headers: {}, follow_redirects: false, expected_status: 200)
         headers = BASE_HEADERS.merge headers
 

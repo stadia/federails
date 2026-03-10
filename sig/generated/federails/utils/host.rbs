@@ -1,0 +1,33 @@
+# Generated from lib/federails/utils/host.rb with RBS::Inline
+
+module Federails
+  module Utils
+    class Host
+      # #
+      #  @return [String] Host and port of the current instance
+      # : () -> String
+      def self.localhost: () -> String
+
+      # #
+      #  Checks if the given URL points somewhere on current instance
+      #
+      #  @param url [String] URL to check
+      #
+      #  @return [true, false]
+      # : (String) -> bool
+      def self.local_url?: (String) -> bool
+
+      # #
+      #  Gets the route on the current instance, or nil
+      #
+      #  @param url [String] URL to check
+      #
+      #  @return [ActionDispatch::Routing::RouteSet, nil] nil when URL do not match a route
+      # : (String) -> Hash[Symbol, untyped]?
+      def self.local_route: (String) -> Hash[Symbol, untyped]?
+
+      # : (String?, Integer?) -> String
+      private def self.host_and_port: (String?, Integer?) -> String
+    end
+  end
+end

@@ -1,11 +1,14 @@
+# rbs_inline: enabled
+
 module Federails
   module Utils
     class Host
       class << self
-        COMMON_PORTS = [80, 443].freeze
+        COMMON_PORTS = [80, 443].freeze #: Array[Integer]
 
         ##
         # @return [String] Host and port of the current instance
+        #: () -> String
         def localhost
           uri = URI.parse Federails.configuration.site_host
           host_and_port (uri.host || 'localhost'), Federails.configuration.site_port
@@ -17,6 +20,7 @@ module Federails
         # @param url [String] URL to check
         #
         # @return [true, false]
+        #: (String) -> bool
         def local_url?(url)
           uri = URI.parse url
           host = host_and_port uri.host, uri.port
@@ -29,6 +33,7 @@ module Federails
         # @param url [String] URL to check
         #
         # @return [ActionDispatch::Routing::RouteSet, nil] nil when URL do not match a route
+        #: (String) -> Hash[Symbol, untyped]?
         def local_route(url)
           return nil unless local_url? url
 
@@ -39,6 +44,7 @@ module Federails
 
         private
 
+        #: (String?, Integer?) -> String
         def host_and_port(host, port)
           port_string = if port.present? && COMMON_PORTS.exclude?(port)
                           ":#{port}"

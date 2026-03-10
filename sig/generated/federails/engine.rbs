@@ -1,0 +1,6 @@
+# Generated from lib/federails/engine.rb with RBS::Inline
+
+module Federails
+  class Engine < ::Rails::Engine
+  end
+end

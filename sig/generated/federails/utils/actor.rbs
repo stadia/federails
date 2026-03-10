@@ -1,0 +1,30 @@
+# Generated from lib/federails/utils/actor.rb with RBS::Inline
+
+module Federails
+  module Utils
+    class Actor
+      # List of the attributes computed for local actors
+      COMPUTED_ATTRIBUTES: untyped
+
+      # @param actor [Federails::Actor]
+      # @return [Federails::Actor]
+      # : (untyped) -> untyped
+      def self.tombstone!: (untyped) -> untyped
+
+      # : (untyped) -> void
+      def self.untombstone!: (untyped) -> void
+
+      # : (untyped) -> void
+      private def self.tombstone_local_actor: (untyped) -> void
+
+      # : (untyped) -> void
+      private def self.untombstone_local_actor: (untyped) -> void
+
+      # : (untyped) -> void
+      private def self.tombstone_distant_actor: (untyped) -> void
+
+      # : (untyped) -> void
+      private def self.untombstone_distant_actor: (untyped) -> void
+    end
+  end
+end

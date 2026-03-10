@@ -1,0 +1,68 @@
+# Generated from lib/federails/utils/object.rb with RBS::Inline
+
+module Federails
+  module Utils
+    # Methods to manipulate incoming objects
+    class Object
+      # Finds data from an object or its ID.
+      #
+      # When data exists locally, the entity is returned.
+      # For distant data, a new instance is returned unless the target does not exist.
+      #
+      # @param object_or_id [String, Hash] String identifier or incoming object
+      #
+      # @return [ApplicationRecord, nil] Entity or nil when invalid/not found
+      # : (String | Hash[String, untyped]) -> untyped
+      def self.find_or_initialize: (String | Hash[String, untyped]) -> untyped
+
+      # Search for a distant object in actors and configured data entities.
+      #
+      # This is useful to find something when the type is unknown, as an object from a Delete activity.
+      #
+      # @param federated_url [String] Object identifier
+      # @return [Federails::Actor, Federails::DataEntity, Federails::Following, nil]
+      # : (String) -> untyped
+      def self.find_distant_object_in_all: (String) -> untyped
+
+      # Finds or initializes an entity from an ActivityPub object or id
+      #
+      # @see .find_or_initialize
+      #
+      # @param object_or_id [String, Hash] String identifier or incoming object
+      #
+      # @return [ApplicationRecord, nil] Entity or nil when invalid/not found
+      # : (String | Hash[String, untyped]) -> untyped
+      def self.find_or_initialize!: (String | Hash[String, untyped]) -> untyped
+
+      # Finds or create an entity from an ActivityPub object or id
+      #
+      # Note that the data transformer MUST return timestamps from the ActivityPub object if used on the model,
+      # as they won't be set automatically.
+      #
+      # @see .find_or_initialize!
+      #
+      # @param object_or_id [String, Hash] String identifier or incoming object
+      #
+      # @return [ApplicationRecord, nil] Entity or nil when invalid/not found
+      # : (String | Hash[String, untyped]) -> untyped
+      def self.find_or_create!: (String | Hash[String, untyped]) -> untyped
+
+      # Returns the timestamps to use from an ActivityPub object
+      #
+      # @param hash [Hash] ActivityPub object
+      #
+      # @return [Hash] Hash with timestamps
+      # : (Hash[String, untyped]) -> Hash[Symbol, untyped]
+      def self.timestamp_attributes: (Hash[String, untyped]) -> Hash[Symbol, untyped]
+
+      # : (String?) -> Hash[Symbol, untyped]?
+      private def self.local_route: (String?) -> Hash[Symbol, untyped]?
+
+      # : (Hash[Symbol, untyped]) -> untyped
+      private def self.from_local_route: (Hash[Symbol, untyped]) -> untyped
+
+      # : (String | Hash[String, untyped]) -> untyped
+      private def self.from_distant_server: (String | Hash[String, untyped]) -> untyped
+    end
+  end
+end

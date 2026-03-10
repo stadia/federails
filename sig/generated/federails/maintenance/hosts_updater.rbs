@@ -1,0 +1,11 @@
+# Generated from lib/federails/maintenance/hosts_updater.rb with RBS::Inline
+
+module Federails
+  module Maintenance
+    class HostsUpdater
+      # Update information for all known hosts, and complete if some are missing
+      # : (?cache_interval: untyped?) -> void
+      def self.run: (?cache_interval: untyped?) -> void
+    end
+  end
+end

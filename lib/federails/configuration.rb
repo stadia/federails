@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module Federails
   # rubocop:disable Style/ClassVars
 
@@ -31,6 +33,7 @@ module Federails
     # Can either be a static boolean, or a Proc which will be called to get the state.
     mattr_writer :open_registrations
     @@open_registrations = false
+    #: () -> bool
     def self.open_registrations
       @@open_registrations.is_a?(Proc) ? @@open_registrations.call : @@open_registrations
     end
@@ -39,6 +42,7 @@ module Federails
     # Can either be a static hash, or a Proc which will be called to get the state.
     mattr_writer :nodeinfo_metadata
     @@nodeinfo_metadata = {}
+    #: () -> Hash[Symbol, untyped]
     def self.nodeinfo_metadata
       @@nodeinfo_metadata.is_a?(Proc) ? @@nodeinfo_metadata.call : @@nodeinfo_metadata
     end
@@ -79,11 +83,13 @@ module Federails
     mattr_accessor :remote_follow_url_method
     @@remote_follow_url_method = 'federails.new_client_following_url'
 
+    #: (String?) -> void
     def self.site_host=(value)
       @@site_host = value
       Federails::Engine.routes.default_url_options[:host] = value
     end
 
+    #: (Integer?) -> void
     def self.site_port=(value)
       @@site_port = value
       Federails::Engine.routes.default_url_options[:port] = value
@@ -99,6 +105,7 @@ module Federails
     mattr_reader :actor_types
     @@actor_types = {}
 
+    #: (untyped, ?Hash[Symbol, untyped]) -> void
     def self.register_actor_class(klass, config = {})
       @@actor_types[klass.name] = config.merge(class: klass)
     end
@@ -107,6 +114,7 @@ module Federails
     mattr_reader :data_types
     @@data_types = {}
 
+    #: (untyped, ?Hash[Symbol, untyped]) -> void
     def self.register_data_type(klass, config = {})
       @@data_types[klass.name] = config.merge(class: klass)
     end

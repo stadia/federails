@@ -1,7 +1,10 @@
+# rbs_inline: enabled
+
 require 'fediverse/request'
 
 module Fediverse
   class Inbox
+    # @rbs @handlers: Hash[String, Hash[String, Hash[untyped, Symbol]]]
     @@handlers = {} # rubocop:todo Style/ClassVars
     class << self
       # Registers a handler for incoming data
@@ -15,6 +18,7 @@ module Fediverse
       #   See https://www.w3.org/TR/activitystreams-vocabulary/#object-types for a list of common object types
       # @param klass [String] Class handling the incoming object
       # @param method [Symbol] Method in the class that will handle the object
+      #: (String, String, untyped, Symbol) -> void
       def register_handler(activity_type, object_type, klass, method)
         @@handlers[activity_type] ||= {}
         @@handlers[activity_type][object_type] ||= {}
@@ -31,6 +35,7 @@ module Fediverse
       # @return [true] when the activity was successfully handled
       # @return [:duplicate] when the activity has already been processed
       # @return [false] when no handler matched or verification failed
+      #: (Hash[String, untyped]) -> (true | :duplicate | false)
       def dispatch_request(payload)
         return :duplicate if payload['id'].present? && Federails::Activity.exists?(federated_url: payload['id'])
 
@@ -72,6 +77,7 @@ module Fediverse
       # 3. inReplyTo/object/target/tag references an object owned by this server
       #
       # @param payload [Hash] The activity payload that was just dispatched
+      #: (Hash[String, untyped]) -> void
       def maybe_forward(payload)
         return unless references_local_object?(payload)
 
@@ -86,6 +92,7 @@ module Fediverse
       # Best-effort recording of processed activity for de-duplication.
       # Uses actor as fallback entity when the actual object cannot be resolved.
       # Failures here must not propagate since the activity was already handled successfully.
+      #: (Hash[String, untyped], Time) -> void
       def record_processed_activity(payload, dispatched_at)
         federated_url = payload['id']
         return if federated_url.blank?
@@ -119,6 +126,7 @@ module Fediverse
       end
 
       # Handles Delete activities by finding the local object and triggering its delete callback.
+      #: (Hash[String, untyped]) -> untyped
       def dispatch_delete_request(payload)
         payload['object'] = payload['object']['id'] unless payload['object'].is_a? String
         object = Federails::Utils::Object.find_distant_object_in_all payload['object']
@@ -129,6 +137,7 @@ module Fediverse
 
       # Returns merged handlers matching the given activity and object types,
       # including wildcard ('*') registrations.
+      #: (String?, String?) -> Hash[untyped, Symbol]
       def get_handlers(activity_type, object_type)
         {}.merge(@@handlers.dig(activity_type, object_type) || {})
           .merge(@@handlers.dig(activity_type, '*') || {})
@@ -137,6 +146,7 @@ module Fediverse
       end
 
       # Creates a Following record from an incoming Follow activity.
+      #: (Hash[String, untyped]) -> untyped
       def handle_create_follow_request(activity)
         actor        = Federails::Actor.find_or_create_by_object activity['actor']
         target_actor = Federails::Actor.find_or_create_by_object activity['object']
@@ -145,6 +155,7 @@ module Fediverse
       end
 
       # Marks a pending Following as accepted when the target actor confirms.
+      #: (Hash[String, untyped]) -> void
       def handle_accept_follow_request(activity)
         original_activity = Request.dereference(activity['object'])
 
@@ -157,6 +168,7 @@ module Fediverse
       end
 
       # Destroys a Following record when the follower undoes their Follow.
+      #: (Hash[String, untyped]) -> void
       def handle_undo_follow_request(activity)
         original_activity = activity['object']
 
@@ -169,6 +181,7 @@ module Fediverse
 
       # Destroys a pending Following when the target actor rejects the request.
       # AP Section 7.7: MUST NOT add to Following collection on Reject.
+      #: (Hash[String, untyped]) -> void
       def handle_reject_follow_request(activity)
         original_activity = Request.dereference(activity['object'])
 
@@ -181,6 +194,7 @@ module Fediverse
       end
 
       # Triggers on_federails_delete_requested callback on the matching local object.
+      #: (Hash[String, untyped]) -> void
       def handle_delete_request(activity)
         object = Federails::Utils::Object.find_distant_object_in_all(activity['object'])
         return if object.blank?
@@ -189,6 +203,7 @@ module Fediverse
       end
 
       # Triggers on_federails_undelete_requested callback when an Undo+Delete is received.
+      #: (Hash[String, untyped]) -> void
       def handle_undelete_request(activity)
         delete_activity = Request.dereference(activity['object'])
         object = Federails::Utils::Object.find_distant_object_in_all(delete_activity['object'])
@@ -198,6 +213,7 @@ module Fediverse
       end
 
       # Compares host and port of two URLs for same-origin verification (AP Section 7.3).
+      #: (String?, String?) -> bool
       def same_origin?(actor_url, object_url)
         return false if actor_url.blank? || object_url.blank?
 
@@ -209,11 +225,13 @@ module Fediverse
       end
 
       # Returns true if to/cc/audience addresses a collection owned by this server.
+      #: (Hash[String, untyped]) -> bool
       def references_local_collection?(payload)
         addressed_local_collections(payload).any?
       end
 
       # Returns true if inReplyTo, object, target, or tag references an object owned by this server.
+      #: (Hash[String, untyped]) -> bool
       def references_local_object?(payload)
         object = payload['object'].is_a?(Hash) ? payload['object'] : {}
         refs = [
@@ -228,12 +246,14 @@ module Fediverse
       end
 
       # Extracts local collection URLs from to/cc/audience addressing fields.
+      #: (Hash[String, untyped]) -> Array[String]
       def addressed_local_collections(payload)
         [payload['to'], payload['cc'], payload['audience']].flatten.compact.select { |url| local_collection_url?(url) }
       end
 
       # Checks if a URL resolves to a local followers collection via route recognition.
       # AP Section 7.1.2: forwarding targets followers collections only, not following.
+      #: (String) -> bool
       def local_collection_url?(url)
         route = Federails::Utils::Host.local_route(url)
         route.present? && route[:controller] == 'federails/server/actors' && route[:action] == 'followers'
@@ -242,6 +262,7 @@ module Fediverse
       end
 
       # Checks if a URL resolves to any local Federails resource via route recognition.
+      #: (String) -> bool
       def local_object_reference?(url)
         route = Federails::Utils::Host.local_route(url)
         return false if route.blank?
@@ -253,6 +274,7 @@ module Fediverse
 
       # Resolves the entity (polymorphic object) for a processed activity record.
       # Falls back to actor when the actual object cannot be resolved.
+      #: (Hash[String, untyped], untyped) -> untyped
       def entity_for_processed_activity(payload, actor)
         object = payload['object']
         return actor if payload['type'] == 'Delete' && object == actor.federated_url

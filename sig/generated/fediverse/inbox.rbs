@@ -18,34 +18,97 @@ module Fediverse
     # : (String, String, untyped, Symbol) -> void
     def self.register_handler: (String, String, untyped, Symbol) -> void
 
-    # Executes the registered handler for an incoming object
+    # Dispatches an incoming ActivityPub activity to the appropriate handler.
     #
-    # @param payload [Hash] Dereferenced activity
-    # : (Hash[String, untyped]) -> (bool | Symbol | nil)
-    def self.dispatch_request: (Hash[String, untyped]) -> (bool | Symbol | nil)
+    # Performs de-duplication (AP Section 5.2), origin verification for Update
+    # activities (AP Section 7.3), and records processed activity IDs for
+    # future de-duplication.
+    #
+    # @param payload [Hash] Raw activity JSON from the inbox POST
+    # @return [true] when the activity was successfully handled
+    # @return [:duplicate] when the activity has already been processed
+    # @return [false] when no handler matched or verification failed
+    # : (Hash[String, untyped]) -> (true | :duplicate | false)
+    def self.dispatch_request: (Hash[String, untyped]) -> (true | :duplicate | false)
 
-    # : (String?) -> void
-    private def self.record_federated_url: (String?) -> void
+    # Checks whether an incoming activity should be forwarded to local followers.
+    # AP Section 7.1.2: forward when all conditions are met:
+    # 1. Activity has not been seen before (handled by dispatch_request de-duplication)
+    # 2. to/cc/audience addresses a collection owned by this server
+    # 3. inReplyTo/object/target/tag references an object owned by this server
+    #
+    # @param payload [Hash] The activity payload that was just dispatched
+    # : (Hash[String, untyped]) -> void
+    def self.maybe_forward: (Hash[String, untyped]) -> void
 
-    # : (Hash[String, untyped]) -> nil
-    private def self.dispatch_delete_request: (Hash[String, untyped]) -> nil
+    # Best-effort recording of processed activity for de-duplication.
+    # Uses actor as fallback entity when the actual object cannot be resolved.
+    # Failures here must not propagate since the activity was already handled successfully.
+    # : (Hash[String, untyped], Time) -> void
+    private def self.record_processed_activity: (Hash[String, untyped], Time) -> void
 
+    # Handles Delete activities by finding the local object and triggering its delete callback.
+    # : (Hash[String, untyped]) -> untyped
+    private def self.dispatch_delete_request: (Hash[String, untyped]) -> untyped
+
+    # Returns merged handlers matching the given activity and object types,
+    # including wildcard ('*') registrations.
     # : (String?, String?) -> Hash[untyped, Symbol]
     private def self.get_handlers: (String?, String?) -> Hash[untyped, Symbol]
 
+    # Creates a Following record from an incoming Follow activity.
     # : (Hash[String, untyped]) -> untyped
     private def self.handle_create_follow_request: (Hash[String, untyped]) -> untyped
 
+    # Marks a pending Following as accepted when the target actor confirms.
     # : (Hash[String, untyped]) -> void
     private def self.handle_accept_follow_request: (Hash[String, untyped]) -> void
 
+    # Destroys a Following record when the follower undoes their Follow.
     # : (Hash[String, untyped]) -> void
     private def self.handle_undo_follow_request: (Hash[String, untyped]) -> void
 
+    # Destroys a pending Following when the target actor rejects the request.
+    # AP Section 7.7: MUST NOT add to Following collection on Reject.
+    # : (Hash[String, untyped]) -> void
+    private def self.handle_reject_follow_request: (Hash[String, untyped]) -> void
+
+    # Triggers on_federails_delete_requested callback on the matching local object.
     # : (Hash[String, untyped]) -> void
     private def self.handle_delete_request: (Hash[String, untyped]) -> void
 
+    # Triggers on_federails_undelete_requested callback when an Undo+Delete is received.
     # : (Hash[String, untyped]) -> void
     private def self.handle_undelete_request: (Hash[String, untyped]) -> void
+
+    # Compares host and port of two URLs for same-origin verification (AP Section 7.3).
+    # : (String?, String?) -> bool
+    private def self.same_origin?: (String?, String?) -> bool
+
+    # Returns true if to/cc/audience addresses a collection owned by this server.
+    # : (Hash[String, untyped]) -> bool
+    private def self.references_local_collection?: (Hash[String, untyped]) -> bool
+
+    # Returns true if inReplyTo, object, target, or tag references an object owned by this server.
+    # : (Hash[String, untyped]) -> bool
+    private def self.references_local_object?: (Hash[String, untyped]) -> bool
+
+    # Extracts local collection URLs from to/cc/audience addressing fields.
+    # : (Hash[String, untyped]) -> Array[String]
+    private def self.addressed_local_collections: (Hash[String, untyped]) -> Array[String]
+
+    # Checks if a URL resolves to a local followers collection via route recognition.
+    # AP Section 7.1.2: forwarding targets followers collections only, not following.
+    # : (String) -> bool
+    private def self.local_collection_url?: (String) -> bool
+
+    # Checks if a URL resolves to any local Federails resource via route recognition.
+    # : (String) -> bool
+    private def self.local_object_reference?: (String) -> bool
+
+    # Resolves the entity (polymorphic object) for a processed activity record.
+    # Falls back to actor when the actual object cannot be resolved.
+    # : (Hash[String, untyped], untyped) -> untyped
+    private def self.entity_for_processed_activity: (Hash[String, untyped], untyped) -> untyped
   end
 end

@@ -1,0 +1,63 @@
+# Generated from lib/federails.rb with RBS::Inline
+
+# This module includes classes and methods related to Ruby on Rails: engine configuration, models, controllers, etc.
+module Federails
+  DEFAULT_DATA_FILTER_METHOD: Symbol
+
+  # : () { (singleton(Federails::Configuration)) -> void } -> void
+  def self.configure: () { (singleton(Federails::Configuration)) -> void } -> void
+
+  # : (Symbol) -> void
+  def self.config_from: (Symbol) -> void
+
+  # @return [Boolean] True if the given model is a possible actor
+  #
+  # @example
+  #   puts "Follow #{some_actor.name}" if actor_entity? current_user
+  # : (untyped) -> bool
+  def self.actor_entity?: (untyped) -> bool
+
+  # @return [Hash] The configuration for the given actor entity
+  # : (untyped) -> Hash[Symbol, untyped]
+  def self.actor_entity: (untyped) -> Hash[Symbol, untyped]
+
+  # @return [Boolean] True if the given model is a possible data entity
+  # : (untyped) -> bool
+  def self.data_entity?: (untyped) -> bool
+
+  # Finds configured data types from ActivityPub type
+  #
+  # @param type [String] ActivityPub object type, as configured with `:handles`
+  # @return [Array] List of data entity configurations
+  #
+  # @example
+  #   data_entity_handlers_for 'Note'
+  # : (String) -> Array[Hash[Symbol, untyped]]
+  def self.data_entity_handlers_for: (String) -> Array[Hash[Symbol, untyped]]
+
+  # Finds the configured handler for a given ActivityPub object
+  #
+  # @param hash [Hash] ActivityPub object hash
+  #
+  # @return [Hash, nil] Data entity configuration
+  # : (Hash[String, untyped]) -> Hash[Symbol, untyped]?
+  def self.data_entity_handler_for: (Hash[String, untyped]) -> Hash[Symbol, untyped]?
+
+  # Finds configured data type from route path segment
+  #
+  # @param route_path_segment [Symbol, String] Route path segment, as configured with `:route_path_segment`
+  # @return [Hash, nil] Entity configuration
+  #
+  # @example
+  #   data_entity_handled_on :articles
+  # : (Symbol | String) -> Hash[Symbol, untyped]?
+  def self.data_entity_handled_on: (Symbol | String) -> Hash[Symbol, untyped]?
+
+  # @return [Hash] The configuration for the given data entity
+  # : (untyped) -> Hash[Symbol, untyped]
+  def self.data_entity_configuration: (untyped) -> Hash[Symbol, untyped]
+
+  # @return [String] Class name of the provided class or instance
+  # : (untyped) -> String
+  private def self.class_or_instance_name: (untyped) -> String
+end

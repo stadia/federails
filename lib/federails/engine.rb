@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module Federails
   class Engine < ::Rails::Engine
     isolate_namespace Federails

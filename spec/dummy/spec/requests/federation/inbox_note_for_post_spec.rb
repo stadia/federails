@@ -17,7 +17,7 @@ RSpec.describe 'POST federation/actors/:actor_id/inbox with a Note to become a P
     let(:headers) do
       {
         'Content-Type' => 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"',
-        'Accept' => 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"',
+        'Accept'       => 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"',
       }
     end
     let(:make_request) do
@@ -28,7 +28,7 @@ RSpec.describe 'POST federation/actors/:actor_id/inbox with a Note to become a P
       it 'rejects non-ActivityPub content types' do
         post(
           federails.server_actor_inbox_url(actor_id: local_actor.id),
-          params: fediverse_object,
+          params:  fediverse_object,
           headers: headers.merge('Content-Type' => 'application/json')
         )
 
