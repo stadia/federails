@@ -32,7 +32,7 @@ module Federails
         private
 
         # Make a list of actors to update from the passed attribute
-        def actors_list(param) # rubocop:disable Metrics/PerceivedComplexity, Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/AbcSize
+        def actors_list(param)
           if param.nil?
             Federails::Actor.distant
           elsif param.is_a? String

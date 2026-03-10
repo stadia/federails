@@ -39,7 +39,7 @@ RSpec.describe '/federation/actors', type: :request do
       expect(json['@context']).to include('https://w3id.org/security/v1')
     end
 
-    it 'includes additional context from actor' do # rubocop:todo RSpec/ExampleLength
+    it 'includes additional context from actor' do
       get federails.server_actor_url(user.federails_actor), headers: { accept: Mime[:activitypub] }
       json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
       expect(json['@context']).to include(

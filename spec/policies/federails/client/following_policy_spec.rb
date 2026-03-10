@@ -1,7 +1,6 @@
 require 'rails_helper'
 require 'pundit/rspec'
 
-# rubocop:disable RSpec/MultipleMemoizedHelpers
 RSpec.describe Federails::Client::FollowingPolicy, type: :policy do
   let(:user) { FactoryBot.create :user }
   let(:signed_in_user) { FactoryBot.create :user }
@@ -41,4 +40,3 @@ RSpec.describe Federails::Client::FollowingPolicy, type: :policy do
     end
   end
 end
-# rubocop:enable RSpec/MultipleMemoizedHelpers
