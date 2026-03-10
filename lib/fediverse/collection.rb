@@ -16,12 +16,12 @@ module Fediverse
       @type = json['type']
       raise Errors::NotACollection unless %w[OrderedCollection Collection].include?(@type)
 
-      next_url = json['first']
+      next_url_or_page = json['first']
       pages_fetched = 0
-      while next_url && pages_fetched < max_pages
-        page = Fediverse::Request.dereference(next_url)
-        concat(page['orderedItems'] || page['items'])
-        next_url = page['next']
+      while next_url_or_page && pages_fetched < max_pages
+        page = next_url_or_page.is_a?(Hash) ? next_url_or_page : Fediverse::Request.dereference(next_url_or_page)
+        concat(page['orderedItems'] || page['items'] || [])
+        next_url_or_page = page['next']
         pages_fetched += 1
       end
       self

@@ -4,8 +4,8 @@ if params[:page].blank?
   json.id collection_id
   json.type 'OrderedCollection'
   json.totalItems @total_actors
-  json.first Federails::Engine.routes.url_helpers.following_server_actor_url(@actor)
-  json.last @actors.total_pages == 1 ? Federails::Engine.routes.url_helpers.following_server_actor_url(@actor) : Federails::Engine.routes.url_helpers.following_server_actor_url(@actor, page: @actors.total_pages)
+  json.first Federails::Engine.routes.url_helpers.following_server_actor_url(@actor, page: 1)
+  json.last @actors.total_pages == 1 ? Federails::Engine.routes.url_helpers.following_server_actor_url(@actor, page: 1) : Federails::Engine.routes.url_helpers.following_server_actor_url(@actor, page: @actors.total_pages)
   json.current do |j|
     j.type 'OrderedCollectionPage'
     j.id Federails::Engine.routes.url_helpers.following_server_actor_url(@actor)
