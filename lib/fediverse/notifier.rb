@@ -29,10 +29,11 @@ module Fediverse
         sender_inbox = actor_inbox_for(exclude_actor)
         inboxes.reject! { |url| url == sender_inbox } if sender_inbox.present?
 
+        sender = forwarding_sender_for(collection_urls)
         message = payload.to_json
         inboxes.each do |url|
           Rails.logger.debug { "Forwarding activity to inbox at #{url}" }
-          post_to_inbox(inbox_url: url, message: message)
+          post_to_inbox(inbox_url: url, message: message, from: sender)
         end
       end
 
@@ -81,6 +82,17 @@ module Fediverse
         Federails::Actor.find_or_create_by_federation_url(actor_url).inbox_url
       rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid
         nil
+      end
+
+      def forwarding_sender_for(collection_urls)
+        collection_urls.filter_map do |url|
+          route = Federails::Utils::Host.local_route(url)
+          next unless route.present? && route[:controller] == 'federails/server/actors' && route[:action] == 'followers'
+
+          Federails::Actor.find_param(route[:id])
+        rescue ActiveRecord::RecordNotFound
+          nil
+        end.first
       end
 
       def payload(activity)

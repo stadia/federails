@@ -176,7 +176,7 @@ module Fediverse
         target_actor = Federails::Actor.find_or_create_by_object(original_activity['object'])
         raise 'Follow not rejected by target actor but by someone else' if activity['actor'] != target_actor.federated_url
 
-        follow = Federails::Following.find_by(actor: actor, target_actor: target_actor)
+        follow = Federails::Following.pending.find_by(actor: actor, target_actor: target_actor)
         follow&.destroy
       end
 
