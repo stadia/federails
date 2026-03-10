@@ -390,6 +390,16 @@ module Fediverse
         end.not_to raise_error
       end
 
+      it 'does not destroy an accepted following' do
+        pending_following.update!(status: :accepted)
+
+        expect do
+          described_class.send(:handle_reject_follow_request, payload)
+        end.not_to change(Federails::Following, :count)
+
+        expect(pending_following.reload).to be_accepted
+      end
+
       context 'when the activity actor is not the target of the follow' do
         let(:other_actor) { FactoryBot.create :distant_actor }
         let(:payload) do

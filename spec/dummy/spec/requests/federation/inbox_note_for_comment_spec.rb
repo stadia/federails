@@ -21,12 +21,27 @@ RSpec.describe 'POST federation/actors/:actor_id/inbox with a Note to become a C
         'object'   => 'https://mastodon.me.uk/users/Floppy/statuses/113741998973323773',
       }.to_json
     end
-    let(:headers) { { 'Content-Type' => 'application/json', 'Accept' => 'application/json' } }
+    let(:headers) do
+      {
+        'Content-Type' => 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"',
+        'Accept' => 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"',
+      }
+    end
     let(:make_request) do
       post federails.server_actor_inbox_url(actor_id: local_actor.id), params: fediverse_object, headers: headers
     end
 
     context 'with a supported Note' do
+      it 'rejects non-ActivityPub content types' do
+        post(
+          federails.server_actor_inbox_url(actor_id: local_actor.id),
+          params: fediverse_object,
+          headers: headers.merge('Content-Type' => 'application/json')
+        )
+
+        expect(response).to have_http_status(:unsupported_media_type)
+      end
+
       context 'when actors already exist' do
         before do
           VCR.use_cassette 'dummy/fediverse/request/get_comment_actors_200' do

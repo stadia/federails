@@ -23,6 +23,8 @@ module Federails
       def create
         skip_authorization
 
+        return head :unsupported_media_type unless supported_inbox_content_type?
+
         payload = payload_from_params
         return head :unprocessable_entity unless payload
 
@@ -77,6 +79,13 @@ module Federails
       rescue JSON::LD::JsonLdError => e
         Rails.logger.warn { "Unable to compact inbox payload #{payload['id'] || '(no id)'}: #{e.class} #{e.message}" }
         payload
+      end
+
+      def supported_inbox_content_type?
+        return true if request.media_type == 'application/activity+json'
+        return false unless request.media_type == 'application/ld+json'
+
+        request.media_type_params['profile'] == 'https://www.w3.org/ns/activitystreams'
       end
     end
   end

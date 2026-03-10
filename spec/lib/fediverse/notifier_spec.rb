@@ -110,13 +110,18 @@ module Fediverse
     describe '.forward_activity' do
       let(:payload) { { 'id' => 'https://example.com/activities/1', 'type' => 'Create' } }
 
-      it 'forwards to local collection members and excludes the original sender inbox' do
+      it 'forwards to local collection members, excludes the original sender inbox, and signs as the local collection owner' do
         allow(described_class).to receive(:collection_to_actors).and_return([local_actor, distant_target_actor])
         allow(described_class).to receive(:post_to_inbox)
 
         described_class.forward_activity(payload, [local_actor.followers_url], exclude_actor: local_actor.federated_url)
 
-        expect(described_class).to have_received(:post_to_inbox).with(hash_including(inbox_url: distant_target_actor.inbox_url)).once
+        expect(described_class).to have_received(:post_to_inbox).with(
+          hash_including(
+            inbox_url: distant_target_actor.inbox_url,
+            from:      local_actor
+          )
+        ).once
         expect(described_class).not_to have_received(:post_to_inbox).with(hash_including(inbox_url: local_actor.inbox_url))
       end
     end
