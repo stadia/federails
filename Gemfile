@@ -48,5 +48,5 @@ group :doc do
   #
   # For now, compiling SCSS results in 1000+ lines of deprecation warnings leading to
   # plugins being hard to debug
-  gem 'sass-embedded', '< 1.78.0'
+  gem 'sass-embedded'
 end

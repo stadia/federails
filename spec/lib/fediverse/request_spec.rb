@@ -16,6 +16,21 @@ module Fediverse
             expect(described_class.dereference('https://mamot.fr/users/mtancoigne')).to be_a Hash
           end
         end
+
+        it 'falls back to the original JSON when JSON-LD compaction fails' do
+          json = {
+            '@context' => 'https://www.w3.org/ns/activitystreams',
+            'id'       => 'https://example.com/actors/1',
+            'type'     => 'Person',
+          }
+          allow(Federails::Utils::JsonRequest).to receive(:get_json).and_return(json)
+          allow(JSON::LD::API).to receive(:compact).and_raise(
+            JSON::LD::JsonLdError::ProtectedTermRedefinition,
+            'protected term redefinition'
+          )
+
+          expect(described_class.dereference('https://example.com/actors/1')).to eq(json)
+        end
       end
     end
   end

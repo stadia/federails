@@ -62,7 +62,7 @@ module Federails
           return
         end
 
-        hash = JSON::LD::API.compact payload, payload['@context']
+        hash = compact_payload(payload)
         validate_payload hash
       end
 
@@ -70,6 +70,13 @@ module Federails
         return unless hash['@context'] && hash['id'] && hash['type'] && hash['actor'] && hash['object']
 
         hash
+      end
+
+      def compact_payload(payload)
+        JSON::LD::API.compact(payload, payload['@context'])
+      rescue JSON::LD::JsonLdError => e
+        Rails.logger.warn { "Unable to compact inbox payload #{payload['id'] || '(no id)'}: #{e.class} #{e.message}" }
+        payload
       end
     end
   end
