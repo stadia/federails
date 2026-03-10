@@ -60,7 +60,7 @@ RSpec.describe '/nodeinfo', type: :request do
       expect(JSON.parse(response.body)['openRegistrations']).to be false # rubocop:disable Rails/ResponseParsedBody
     end
 
-    it 'shows open registrations if set' do # rubocop:todo RSpec/ExampleLength
+    it 'shows open registrations if set' do
       prev = Federails::Configuration.open_registrations
       Federails::Configuration.open_registrations = true
       get federails.show_node_info_url
@@ -69,7 +69,7 @@ RSpec.describe '/nodeinfo', type: :request do
       Federails::Configuration.open_registrations = prev
     end
 
-    it 'gets open registrations from a proc' do # rubocop:todo RSpec/ExampleLength
+    it 'gets open registrations from a proc' do
       prev = Federails::Configuration.open_registrations
       Federails::Configuration.open_registrations = -> { true }
       get federails.show_node_info_url
@@ -78,7 +78,7 @@ RSpec.describe '/nodeinfo', type: :request do
       Federails::Configuration.open_registrations = prev
     end
 
-    it 'includes extra nodeinfo metadata from a hash' do # rubocop:todo RSpec/ExampleLength
+    it 'includes extra nodeinfo metadata from a hash' do
       prev = Federails::Configuration.nodeinfo_metadata
       Federails::Configuration.nodeinfo_metadata = { 'faspBaseUrl' => 'https://fedi.example.com/fasp' }
       get federails.show_node_info_url
@@ -87,7 +87,7 @@ RSpec.describe '/nodeinfo', type: :request do
       Federails::Configuration.nodeinfo_metadata = prev
     end
 
-    it 'includes extra nodeinfo metadata from a proc' do # rubocop:todo RSpec/ExampleLength
+    it 'includes extra nodeinfo metadata from a proc' do
       prev = Federails::Configuration.nodeinfo_metadata
       Federails::Configuration.nodeinfo_metadata = -> { { 'faspBaseUrl' => 'https://fedi.example.com/fasp' } }
       get federails.show_node_info_url

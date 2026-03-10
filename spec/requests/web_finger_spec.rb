@@ -64,21 +64,21 @@ RSpec.describe '/well-known', type: :request do
         expect(result['subject']).to eq "acct:#{user.id}@localhost"
       end
 
-      it 'includes HTML profile link' do # rubocop:disable RSpec/MultipleExpectations
+      it 'includes HTML profile link' do
         html_profile = result['links'].find { |x| x['rel'] == 'https://webfinger.net/rel/profile-page' }
         expect(html_profile).to be_present
         expect(html_profile['type']).to eq 'text/html'
         expect(html_profile['href']).to eq user.federails_actor.profile_url
       end
 
-      it 'includes self link to activitypub actor' do # rubocop:disable RSpec/MultipleExpectations
+      it 'includes self link to activitypub actor' do
         self_link = result['links'].find { |x| x['rel'] == 'self' }
         expect(self_link).to be_present
         expect(self_link['type']).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"'
         expect(self_link['href']).to eq user.federails_actor.federated_url
       end
 
-      it 'includes ostatus subscribe template for remote following' do # rubocop:disable RSpec/MultipleExpectations
+      it 'includes ostatus subscribe template for remote following' do
         remote_follow = result['links'].find { |x| x['rel'] == 'http://ostatus.org/schema/1.0/subscribe' }
         expect(remote_follow).to be_present
         expect(remote_follow['template']).to eq 'http://localhost:3000/app/followings/new?uri={uri}'

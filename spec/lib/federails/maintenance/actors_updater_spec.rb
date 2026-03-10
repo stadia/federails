@@ -39,7 +39,7 @@ RSpec.describe Federails::Maintenance::ActorsUpdater do
   end
 
   describe 'private #actors_list' do
-    it 'handles various values as parameter' do # rubocop:disable RSpec/ExampleLength
+    it 'handles various values as parameter' do
       aggregate_failures do
         expect(described_class.send(:actors_list, distant_actor.id)).to eq [distant_actor]
         expect(described_class.send(:actors_list, distant_actor.federated_url)).to eq [distant_actor]

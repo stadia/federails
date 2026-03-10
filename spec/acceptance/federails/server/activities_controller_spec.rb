@@ -81,7 +81,7 @@ RSpec.describe Federails::Server::ActivitiesController, type: :acceptance do
     end
   end
 
-  on_post '/federation/actors/:actor_id/inbox', "Actor's inbox" do # rubocop:todo RSpec/MultipleMemoizedHelpers
+  on_post '/federation/actors/:actor_id/inbox', "Actor's inbox" do
     let(:distant_actor) { FactoryBot.create :distant_actor }
     let(:inbox_payload) do
       {

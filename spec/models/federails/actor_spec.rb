@@ -1,7 +1,6 @@
 require 'rails_helper'
 
 module Federails
-  # rubocop:disable RSpec/MultipleMemoizedHelpers
   RSpec.describe Actor, type: :model do
     let(:distant_actor_attributes) { FactoryBot.build(:distant_actor).attributes }
     let(:distant_url) { 'https://mamot.fr/users/mtancoigne' }
@@ -22,7 +21,7 @@ module Federails
         existing_distant_actor.update_columns(uuid: nil) # rubocop:disable Rails/SkipsModelValidations
       end
 
-      it 'creates a UUID on demand' do # rubocop:disable RSpec/MultipleExpectations
+      it 'creates a UUID on demand' do
         # Check it's generated on demand
         uuid = existing_distant_actor.uuid
         expect(uuid).to be_present
@@ -80,7 +79,7 @@ module Federails
       end
 
       describe 'on_federails_undelete_requested' do
-        it 'un-tombstones the actor' do # rubocop:disable RSpec/MultipleExpectations, RSpec/ExampleLength
+        it 'un-tombstones the actor' do
           actor = FactoryBot.create :distant_actor, tombstoned_at: Time.current
           allow(actor).to receive(:sync!)
 
@@ -159,7 +158,7 @@ module Federails
         end
       end
 
-      it 'does not create existing distant actor' do # rubocop:disable RSpec/ExampleLength
+      it 'does not create existing distant actor' do
         VCR.use_cassette 'actor/find_or_create_by_account_get' do
           existing_distant_actor
           expect do
@@ -212,7 +211,7 @@ module Federails
         end
       end
 
-      it 'does not create existing distant actor' do # rubocop:disable RSpec/ExampleLength
+      it 'does not create existing distant actor' do
         VCR.use_cassette 'actor/find_or_create_by_federation_url_get' do
           existing_distant_actor
           expect do
@@ -500,5 +499,4 @@ module Federails
       end
     end
   end
-  # rubocop:enable RSpec/MultipleMemoizedHelpers
 end
