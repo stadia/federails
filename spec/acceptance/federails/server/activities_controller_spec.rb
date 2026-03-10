@@ -102,7 +102,9 @@ RSpec.describe Federails::Server::ActivitiesController, type: :acceptance do
 
     for_code 201, with_content_type: Mime[:activitypub] do |url|
       allow(Fediverse::Inbox).to receive(:dispatch_request).and_return true
+      allow(Fediverse::Inbox).to receive(:maybe_forward)
       test_response_of url, path_params: { actor_id: distant_actor.to_param }, payload: inbox_payload, headers: headers
+      expect(Fediverse::Inbox).to have_received(:maybe_forward).once
     end
 
     for_code 200, with_content_type: Mime[:activitypub] do |url|

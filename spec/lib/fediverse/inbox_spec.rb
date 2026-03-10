@@ -180,6 +180,24 @@ module Fediverse
         end
       end
 
+      context 'when receiving an Update with no actor' do
+        let(:payload) do
+          {
+            'id'     => 'https://evil.com/activities/3',
+            'type'   => 'Update',
+            'object' => {
+              'id'      => 'https://example.com/posts/1',
+              'type'    => 'Note',
+              'content' => 'hacked content',
+            },
+          }
+        end
+
+        it 'rejects the update' do
+          expect(described_class.dispatch_request(payload)).to eq(false)
+        end
+      end
+
       context 'when receiving an unauthorized Update activity' do
         let(:payload) do
           {
@@ -370,6 +388,22 @@ module Fediverse
         expect do
           described_class.send(:handle_reject_follow_request, payload)
         end.not_to raise_error
+      end
+
+      context 'when the activity actor is not the target of the follow' do
+        let(:other_actor) { FactoryBot.create :distant_actor }
+        let(:payload) do
+          {
+            'actor'  => other_actor.federated_url,
+            'object' => 'https://example.com/follows/1',
+          }
+        end
+
+        it 'raises an error' do
+          expect do
+            described_class.send(:handle_reject_follow_request, payload)
+          end.to raise_error 'Follow not rejected by target actor but by someone else'
+        end
       end
     end
 

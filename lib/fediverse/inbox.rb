@@ -44,8 +44,8 @@ module Fediverse
 
         payload['object'] = Fediverse::Request.dereference(payload['object']) if payload.key? 'object'
 
-        if payload['type'] == 'Update' && payload['actor'].present?
-          unless payload.dig('object', 'id').present? && same_origin?(payload['actor'], payload.dig('object', 'id'))
+        if payload['type'] == 'Update'
+          unless payload['actor'].present? && payload.dig('object', 'id').present? && same_origin?(payload['actor'], payload.dig('object', 'id'))
             Rails.logger.warn do
               "Rejected Update: origin verification failed (actor: #{payload['actor']}, object: #{payload.dig('object', 'id')})"
             end
@@ -75,7 +75,6 @@ module Fediverse
       #
       # @param payload [Hash] The activity payload that was just dispatched
       def maybe_forward(payload)
-        return unless references_local_collection?(payload)
         return unless references_local_object?(payload)
 
         collection_urls = addressed_local_collections(payload)
@@ -101,7 +100,7 @@ module Fediverse
                                              .order(created_at: :desc)
                                              .first
 
-        return recent_activity.update!(federated_url: federated_url) if recent_activity
+        return recent_activity.update(federated_url: federated_url) if recent_activity
 
         entity = entity_for_processed_activity(payload, actor)
         return unless entity
@@ -177,6 +176,7 @@ module Fediverse
 
         actor = Federails::Actor.find_or_create_by_object(original_activity['actor'])
         target_actor = Federails::Actor.find_or_create_by_object(original_activity['object'])
+        raise 'Follow not rejected by target actor but by someone else' if activity['actor'] != target_actor.federated_url
 
         follow = Federails::Following.find_by(actor: actor, target_actor: target_actor)
         follow&.destroy
@@ -199,11 +199,13 @@ module Fediverse
         object.run_callbacks :on_federails_undelete_requested
       end
 
-      # Compares hostnames of two URLs for same-origin verification (AP Section 7.3).
+      # Compares host and port of two URLs for same-origin verification (AP Section 7.3).
       def same_origin?(actor_url, object_url)
         return false if actor_url.blank? || object_url.blank?
 
-        URI.parse(actor_url).host == URI.parse(object_url).host
+        actor_uri = URI.parse(actor_url)
+        object_uri = URI.parse(object_url)
+        actor_uri.host == object_uri.host && actor_uri.port == object_uri.port
       rescue URI::InvalidURIError
         false
       end
@@ -232,11 +234,12 @@ module Fediverse
         [payload['to'], payload['cc'], payload['audience']].flatten.compact.select { |url| local_collection_url?(url) }
       end
 
-      # Checks if a URL resolves to a local followers/following collection via route recognition.
+      # Checks if a URL resolves to a local followers collection via route recognition.
+      # AP Section 7.1.2: forwarding targets followers collections only, not following.
       def local_collection_url?(url)
         route = Federails::Utils::Host.local_route(url)
-        route.present? && route[:controller] == 'federails/server/actors' && %w[followers following].include?(route[:action])
-      rescue URI::InvalidURIError
+        route.present? && route[:controller] == 'federails/server/actors' && route[:action] == 'followers'
+      rescue URI::InvalidURIError, ActionController::RoutingError
         false
       end
 
@@ -246,7 +249,7 @@ module Fediverse
         return false unless route.present?
 
         %w[federails/server/actors federails/server/followings federails/server/activities federails/server/published].include?(route[:controller])
-      rescue URI::InvalidURIError
+      rescue URI::InvalidURIError, ActionController::RoutingError
         false
       end
 
