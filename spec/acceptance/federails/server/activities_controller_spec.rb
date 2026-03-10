@@ -2,7 +2,12 @@ require 'rails_helper'
 
 RSpec.describe Federails::Server::ActivitiesController, type: :acceptance do
   resource 'Federation/Activities', 'Activities management'
-  let(:headers) { { accept: 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"' } }
+  let(:headers) do
+    {
+      accept: 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"',
+      'Content-Type' => 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"',
+    }
+  end
   let(:actor) { FactoryBot.create(:user).federails_actor }
   let(:following) { FactoryBot.create :following, actor: actor }
   let(:following_activity) { following.follow_activity }
@@ -114,6 +119,15 @@ RSpec.describe Federails::Server::ActivitiesController, type: :acceptance do
 
     for_code 422, with_content_type: Mime[:activitypub] do |url|
       test_response_of url, path_params: { actor_id: distant_actor.to_param }, payload: {}, headers: headers
+    end
+
+    for_code 415, with_content_type: Mime[:activitypub] do |url|
+      test_response_of(
+        url,
+        path_params: { actor_id: distant_actor.to_param },
+        payload: inbox_payload,
+        headers: headers.merge('Content-Type' => 'application/json')
+      )
     end
   end
 end
