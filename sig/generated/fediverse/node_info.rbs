@@ -8,6 +8,8 @@ module Fediverse
     class NoActivityPubError < StandardError
     end
 
+    NODEINFO_SCHEMA_RELS: untyped
+
     # : (String) -> Hash[Symbol, untyped]
     def self.fetch: (String) -> Hash[Symbol, untyped]
 

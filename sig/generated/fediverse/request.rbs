@@ -14,5 +14,7 @@ module Fediverse
 
     # : (String) -> Hash[String, untyped]?
     private def self.get: (String) -> Hash[String, untyped]?
+
+    private def self.compact_json_ld: (untyped json) -> untyped
   end
 end
