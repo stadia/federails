@@ -44,13 +44,11 @@ module Fediverse
 
         payload['object'] = Fediverse::Request.dereference(payload['object']) if payload.key? 'object'
 
-        if payload['type'] == 'Update'
-          unless payload['actor'].present? && payload.dig('object', 'id').present? && same_origin?(payload['actor'], payload.dig('object', 'id'))
-            Rails.logger.warn do
-              "Rejected Update: origin verification failed (actor: #{payload['actor']}, object: #{payload.dig('object', 'id')})"
-            end
-            return false
+        if (payload['type'] == 'Update') && !(payload['actor'].present? && payload.dig('object', 'id').present? && same_origin?(payload['actor'], payload.dig('object', 'id')))
+          Rails.logger.warn do
+            "Rejected Update: origin verification failed (actor: #{payload['actor']}, object: #{payload.dig('object', 'id')})"
           end
+          return false
         end
 
         handlers = get_handlers(payload['type'], payload.dig('object', 'type'))
@@ -96,7 +94,7 @@ module Fediverse
         return unless actor
 
         recent_activity = Federails::Activity.where(actor: actor, federated_url: nil)
-                                             .where('created_at >= ?', dispatched_at)
+                                             .where(created_at: dispatched_at..)
                                              .order(created_at: :desc)
                                              .first
 
@@ -246,7 +244,7 @@ module Fediverse
       # Checks if a URL resolves to any local Federails resource via route recognition.
       def local_object_reference?(url)
         route = Federails::Utils::Host.local_route(url)
-        return false unless route.present?
+        return false if route.blank?
 
         %w[federails/server/actors federails/server/followings federails/server/activities federails/server/published].include?(route[:controller])
       rescue URI::InvalidURIError, ActionController::RoutingError

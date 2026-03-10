@@ -194,7 +194,7 @@ module Fediverse
         end
 
         it 'rejects the update' do
-          expect(described_class.dispatch_request(payload)).to eq(false)
+          expect(described_class.dispatch_request(payload)).to be(false)
         end
       end
 
@@ -213,7 +213,7 @@ module Fediverse
         end
 
         it 'rejects the update' do
-          expect(described_class.dispatch_request(payload)).to eq(false)
+          expect(described_class.dispatch_request(payload)).to be(false)
         end
       end
 
@@ -231,7 +231,7 @@ module Fediverse
         end
 
         it 'rejects the update' do
-          expect(described_class.dispatch_request(payload)).to eq(false)
+          expect(described_class.dispatch_request(payload)).to be(false)
         end
       end
 
@@ -254,7 +254,7 @@ module Fediverse
         end
 
         it 'falls through as unhandled instead of being rejected by origin check' do
-          expect(described_class.dispatch_request(payload)).to eq(false)
+          expect(described_class.dispatch_request(payload)).to be(false)
         end
       end
 
