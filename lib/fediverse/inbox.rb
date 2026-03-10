@@ -93,7 +93,7 @@ module Fediverse
         actor = Federails::Actor.find_or_create_by_object(payload['actor'])
         return unless actor
 
-        recent_activity = Federails::Activity.where(actor: actor, ction: payload['type'], federated_url: nil)
+        recent_activity = Federails::Activity.where(actor: actor, action: payload['type'], federated_url: nil)
                                              .where(created_at: dispatched_at..)
                                              .order(created_at: :asc) # oldest = most likely ours
                                              .first
