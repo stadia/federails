@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  rspec:
+    name: RSpec
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Set up test database
+        run: bundle exec rake db:create db:schema:load
+        env:
+          RAILS_ENV: test
+
+      - name: Run RSpec
+        run: bundle exec rspec --format progress --format json --out tmp/rspec_results.json
+        env:
+          RAILS_ENV: test
+
+      - name: Summarize test results
+        if: always()
+        run: |
+          if [ -f tmp/rspec_results.json ]; then
+            ruby -e "
+              require 'json'
+              r = JSON.parse(File.read('tmp/rspec_results.json'))
+              s = r['summary']
+              puts '## RSpec Results'
+              puts ''
+              puts \"| Examples | Failures | Pending | Duration |\"
+              puts \"|----------|----------|---------|----------|\"
+              puts \"| #{s['example_count']} | #{s['failure_count']} | #{s['pending_count']} | #{s['duration'].round(2)}s |\"
+              if s['failure_count'] > 0
+                puts ''
+                puts '### Failures'
+                r['examples'].select { |e| e['status'] == 'failed' }.each do |e|
+                  puts \"- \`#{e['full_description']}\`\"
+                  puts \"  #{e['exception']['message'].lines.first.strip}\" rescue nil
+                end
+              end
+            " >> \$GITHUB_STEP_SUMMARY
+          fi
+
+  rubocop:
+    name: RuboCop
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Run RuboCop
+        run: bundle exec rubocop --format github --format progress
