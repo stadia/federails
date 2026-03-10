@@ -8,6 +8,9 @@ jobs:
   rspec:
     name: RSpec
     runs-on: ubuntu-latest
+    env:
+      BUNDLE_WITHOUT: doc
+      RAILS_ENV: test
 
     steps:
       - uses: actions/checkout@v4
@@ -17,18 +20,12 @@ jobs:
         with:
           ruby-version: .ruby-version
           bundler-cache: true
-        env:
-          BUNDLE_WITHOUT: doc
 
       - name: Set up test database
         run: bundle exec rake db:create db:schema:load
-        env:
-          RAILS_ENV: test
 
       - name: Run RSpec
         run: bundle exec rspec --format progress --format json --out tmp/rspec_results.json
-        env:
-          RAILS_ENV: test
 
       - name: Summarize test results
         if: always()
@@ -51,12 +48,14 @@ jobs:
                   puts \"  #{e['exception']['message'].lines.first.strip}\" rescue nil
                 end
               end
-            " >> \$GITHUB_STEP_SUMMARY
+            " >> $GITHUB_STEP_SUMMARY
           fi
 
   rubocop:
     name: RuboCop
     runs-on: ubuntu-latest
+    env:
+      BUNDLE_WITHOUT: doc
 
     steps:
       - uses: actions/checkout@v4
@@ -66,8 +65,6 @@ jobs:
         with:
           ruby-version: .ruby-version
           bundler-cache: true
-        env:
-          BUNDLE_WITHOUT: doc
 
       - name: Run RuboCop
         run: bundle exec rubocop --format github --format progress
