@@ -91,12 +91,14 @@ module Federails
       end
 
       def supported_inbox_content_type?
-        return true if request.media_type == 'application/activity+json'
-        return false unless request.media_type == 'application/ld+json'
-
+        # NOTE: request.media_type returns the registered primary type (application/ld+json; profile="...")
+        # even when the actual Content-Type header is application/activity+json (a registered alias).
+        # So we must check the raw header directly.
         content_type = request.headers['Content-Type'].to_s
-        content_type.include?('https://www.w3.org/ns/activitystreams') ||
-          request.media_type_params['profile'] == 'https://www.w3.org/ns/activitystreams'
+        return true if content_type.start_with?('application/activity+json')
+        return false unless content_type.start_with?('application/ld+json')
+
+        content_type.include?('https://www.w3.org/ns/activitystreams')
       end
     end
   end
