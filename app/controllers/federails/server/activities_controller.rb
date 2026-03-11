@@ -32,7 +32,7 @@ module Federails
 
         payload = payload_from_params
         unless payload
-          Rails.logger.info { "[Inbox] Rejected: invalid or missing payload fields" }
+          Rails.logger.info { '[Inbox] Rejected: invalid or missing payload fields' }
           return head :unprocessable_entity
         end
 
