@@ -23,12 +23,21 @@ module Federails
       def create
         skip_authorization
 
-        return head :unsupported_media_type unless supported_inbox_content_type?
+        Rails.logger.info { "[Inbox] Content-Type: #{request.headers['Content-Type'].inspect}, media_type: #{request.media_type.inspect}, media_type_params: #{request.media_type_params.inspect}" }
+
+        unless supported_inbox_content_type?
+          Rails.logger.info { "[Inbox] Rejected: unsupported media type (Content-Type: #{request.headers['Content-Type'].inspect})" }
+          return head :unsupported_media_type
+        end
 
         payload = payload_from_params
-        return head :unprocessable_entity unless payload
+        unless payload
+          Rails.logger.info { "[Inbox] Rejected: invalid or missing payload fields" }
+          return head :unprocessable_entity
+        end
 
         result = Fediverse::Inbox.dispatch_request(payload)
+        Rails.logger.info { "[Inbox] dispatch_request result: #{result.inspect} for activity #{payload['id']}" }
 
         case result
         when true
@@ -85,7 +94,9 @@ module Federails
         return true if request.media_type == 'application/activity+json'
         return false unless request.media_type == 'application/ld+json'
 
-        request.media_type_params['profile'] == 'https://www.w3.org/ns/activitystreams'
+        content_type = request.headers['Content-Type'].to_s
+        content_type.include?('https://www.w3.org/ns/activitystreams') ||
+          request.media_type_params['profile'] == 'https://www.w3.org/ns/activitystreams'
       end
     end
   end
