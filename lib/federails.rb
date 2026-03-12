@@ -7,6 +7,10 @@ require 'federails/engine'
 require 'federails/configuration'
 require 'federails/utils/object'
 require 'federails/utils/json_request'
+require 'federails/utils/actor'
+require 'federails/data_transformer/note'
+require 'federails/maintenance/actors_updater'
+require 'federails/maintenance/hosts_updater'
 
 require 'fediverse'
 
