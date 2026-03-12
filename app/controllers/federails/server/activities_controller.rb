@@ -23,18 +23,10 @@ module Federails
       def create
         skip_authorization
 
-        Rails.logger.info { "[Inbox] Content-Type: #{request.headers['Content-Type'].inspect}, media_type: #{request.media_type.inspect}, media_type_params: #{request.media_type_params.inspect}" }
-
-        unless supported_inbox_content_type?
-          Rails.logger.info { "[Inbox] Rejected: unsupported media type (Content-Type: #{request.headers['Content-Type'].inspect})" }
-          return head :unsupported_media_type
-        end
+        return head :unsupported_media_type unless supported_inbox_content_type?
 
         payload = payload_from_params
-        unless payload
-          Rails.logger.info { '[Inbox] Rejected: invalid or missing payload fields' }
-          return head :unprocessable_entity
-        end
+        return head :unprocessable_entity unless payload
 
         result = Fediverse::Inbox.dispatch_request(payload)
         Rails.logger.info { "[Inbox] dispatch_request result: #{result.inspect} for activity #{payload['id']}" }
