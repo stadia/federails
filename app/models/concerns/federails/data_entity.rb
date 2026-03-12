@@ -240,7 +240,7 @@ module Federails
 
     def federails_sync!
       if local_federails_entity?
-        Rails.logger.info { "Ignored attempt to sync a local #{self.class.name}" }
+        Federails.logger.info { "Ignored attempt to sync a local #{self.class.name}" }
         return false
       end
 

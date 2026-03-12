@@ -148,7 +148,7 @@ module Federails
     # @raise [ActiveRecord::RecordNotFound] when distant data was not found
     def sync!
       if local?
-        Rails.logger.info 'Ignored attempt to sync a local actor'
+        Federails.logger.info 'Ignored attempt to sync a local actor'
         return false
       end
 

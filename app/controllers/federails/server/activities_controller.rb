@@ -29,7 +29,7 @@ module Federails
         return head :unprocessable_entity unless payload
 
         result = Fediverse::Inbox.dispatch_request(payload)
-        Rails.logger.info { "[Inbox] dispatch_request result: #{result.inspect} for activity #{payload['id']}" }
+        Federails.logger.info { "[Inbox] dispatch_request result: #{result.inspect} for activity #{payload['id']}" }
 
         case result
         when true
@@ -78,7 +78,7 @@ module Federails
       def compact_payload(payload)
         JSON::LD::API.compact(payload, payload['@context'])
       rescue JSON::LD::JsonLdError => e
-        Rails.logger.warn { "Unable to compact inbox payload #{payload['id'] || '(no id)'}: #{e.class} #{e.message}" }
+        Federails.logger.warn { "Unable to compact inbox payload #{payload['id'] || '(no id)'}: #{e.class} #{e.message}" }
         payload
       end
 

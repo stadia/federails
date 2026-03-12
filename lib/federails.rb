@@ -27,6 +27,12 @@ module Federails
       yield @@configuration
     end
 
+    # rubocop:disable Rails/Delegate
+    def logger
+      Configuration.logger
+    end
+    # rubocop:enable Rails/Delegate
+
     def config_from(name) # rubocop:disable Metrics/MethodLength
       config = Rails.application.config_for name
       [

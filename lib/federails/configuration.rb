@@ -1,3 +1,5 @@
+require 'logger'
+
 module Federails
   # rubocop:disable Style/ClassVars
 
@@ -46,6 +48,16 @@ module Federails
     # Application layout
     mattr_accessor :app_layout
     @@app_layout = nil
+
+    # Logger used by Federails internals.
+    # Applications can inject their own logger, for example `Rails.logger`.
+    mattr_writer :logger
+    @@logger = nil
+    def self.logger
+      @@logger ||= Logger.new($stderr).tap do |logger|
+        logger.progname = 'federails'
+      end
+    end
 
     # Route path for the federation URLs (to "Federails::Server::*" controllers)
     mattr_accessor :server_routes_path

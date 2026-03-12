@@ -45,7 +45,7 @@ module Fediverse
         payload['object'] = Fediverse::Request.dereference(payload['object']) if payload.key? 'object'
 
         if (payload['type'] == 'Update') && !(payload['actor'].present? && payload.dig('object', 'id').present? && same_origin?(payload['actor'], payload.dig('object', 'id')))
-          Rails.logger.warn do
+          Federails.logger.warn do
             "Rejected Update: origin verification failed (actor: #{payload['actor']}, object: #{payload.dig('object', 'id')})"
           end
           return false
@@ -57,7 +57,7 @@ module Fediverse
         end
 
         if handlers.empty?
-          Rails.logger.debug { "Unhandled activity type: #{payload['type']}" }
+          Federails.logger.debug { "Unhandled activity type: #{payload['type']}" }
           return false
         end
 
@@ -115,7 +115,7 @@ module Fediverse
           audience:      payload['audience']
         )
       rescue StandardError => e
-        Rails.logger.warn { "Failed to record processed activity #{federated_url}: #{e.message}" }
+        Federails.logger.warn { "Failed to record processed activity #{federated_url}: #{e.message}" }
       end
 
       # Handles Delete activities by finding the local object and triggering its delete callback.

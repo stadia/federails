@@ -124,15 +124,15 @@ module Fediverse
       def get_json(url, params = {})
         Federails::Utils::JsonRequest.get_json(url, params: params, follow_redirects: true, headers: { accept: 'application/json' })
       rescue Federails::Utils::JsonRequest::UnhandledResponseStatus => e
-        Rails.logger.debug { e.message }
+        Federails.logger.debug { e.message }
 
         raise ActiveRecord::RecordNotFound
       rescue Faraday::ConnectionFailed
-        Rails.logger.debug { "Failed to reach server for GET #{url}" }
+        Federails.logger.debug { "Failed to reach server for GET #{url}" }
 
         raise ActiveRecord::RecordNotFound
       rescue JSON::ParserError
-        Rails.logger.debug { "Invalid JSON response for GET #{url}" }
+        Federails.logger.debug { "Invalid JSON response for GET #{url}" }
 
         raise ActiveRecord::RecordNotFound
       end

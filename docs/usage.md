@@ -40,6 +40,16 @@ Federails.configure do |config|
 end
 ```
 
+Object-like dependencies such as the logger should be configured in the initializer rather than YAML:
+
+```rb
+Federails.configure do |config|
+  config.logger = Rails.logger
+end
+```
+
+If no logger is injected, Federails falls back to Ruby's standard `Logger`.
+
 For now, refer to [the source code](https://gitlab.com/experimentslabs/federails/-/blob/main/lib/federails/configuration.rb) 
 for the full list of options.
 
@@ -192,7 +202,7 @@ class Note < ApplicationRecord
   
   acts_as_federails_data
 
-  on_federails_delete_requested -> { Rails.logger.info { 'Deletion requested' } }
+  on_federails_delete_requested -> { logger.info { 'Deletion requested' } }
 end
 ```
 

@@ -11,12 +11,12 @@ module Fediverse
       def post_to_inboxes(activity)
         # Get the list of actors we need to send the activity to
         inboxes = inboxes_for(activity)
-        Rails.logger.debug('Nobody to notice') && return if inboxes.none?
+        Federails.logger.debug('Nobody to notice') && return if inboxes.none?
 
         # Deliver to each inbox
         message = payload(activity)
         inboxes.each do |url|
-          Rails.logger.debug { "Sending activity ##{activity.id} to inbox at #{url}" }
+          Federails.logger.debug { "Sending activity ##{activity.id} to inbox at #{url}" }
           post_to_inbox(inbox_url: url, message: message, from: activity.actor)
         end
       end
@@ -32,7 +32,7 @@ module Fediverse
         sender = forwarding_sender_for(collection_urls)
         message = payload.to_json
         inboxes.each do |url|
-          Rails.logger.debug { "Forwarding activity to inbox at #{url}" }
+          Federails.logger.debug { "Forwarding activity to inbox at #{url}" }
           post_to_inbox(inbox_url: url, message: message, from: sender)
         end
       end
