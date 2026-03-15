@@ -38,7 +38,6 @@ module Federails
       #
       # @example
       #   acts_as_federails_actor username_field: :username, name_field: :display_name, profile_url_method: :url_for, actor_type: 'Person'
-      # rubocop:disable Metrics/ParameterLists
       def acts_as_federails_actor(
         name_field:,
         username_field:,
@@ -57,7 +56,6 @@ module Federails
           auto_create_actors: auto_create_actors
         )
       end
-      # rubocop:enable Metrics/ParameterLists
 
       # Define a method that will be called after the entity receives a follow request.
       # The follow request will be passed as an argument to the method.
@@ -107,7 +105,7 @@ module Federails
 
     included do
       # No "dependent: :xyz" as the "before_destroy" hook should have nullified the actor
-      has_one :federails_actor, class_name: 'Federails::Actor', as: :entity # rubocop:disable Rails/HasManyOrHasOneDependent
+      has_one :federails_actor, class_name: 'Federails::Actor', as: :entity
 
       after_create :create_federails_actor, if: lambda {
         raise("Entity not configured for #{self.class.name}. Did you use \"acts_as_federails_actor\"?") unless Federails.actor_entity? self

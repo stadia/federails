@@ -9,7 +9,7 @@ module Federails
   #
   # See also:
   #  - https://www.w3.org/TR/activitypub/#actor-objects
-  class Actor < ApplicationRecord # rubocop:disable Metrics/ClassLength
+  class Actor < ApplicationRecord
     class TombstonedError < StandardError; end
 
     include Federails::HasUuid

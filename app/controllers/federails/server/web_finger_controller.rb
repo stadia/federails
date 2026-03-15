@@ -9,7 +9,7 @@ module Federails
         resource = params.require(:resource)
         case resource
         when %r{^https?://.+}
-          @user = Federails::Actor.find_by_federation_url!(resource).entity # rubocop:disable Rails/DynamicFindBy
+          @user = Federails::Actor.find_by!(federation_url: resource).entity
         when /^acct:.+/
           actor = Federails::Actor.find_local_by_username(username)
           raise Federails::Actor::TombstonedError if actor&.tombstoned?

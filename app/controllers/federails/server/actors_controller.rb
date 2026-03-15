@@ -33,8 +33,8 @@ module Federails
       end
 
       def followings_queries
-        @pagy_actors, @actors = pagy(@actors)
-        @total_actors         = @pagy_actors.count
+        @pagy, @actors = pagy(@actors)
+        @total_actors = @pagy.count
       end
     end
   end

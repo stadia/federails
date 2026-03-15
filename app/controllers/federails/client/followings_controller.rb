@@ -85,7 +85,7 @@ module Federails
         params.require(:account)
       end
 
-      def save_and_render # rubocop:disable Metrics/AbcSize
+      def save_and_render
         url = federails.client_actor_url current_user.federails_actor
 
         respond_to do |format|

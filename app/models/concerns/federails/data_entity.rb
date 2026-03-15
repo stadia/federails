@@ -124,7 +124,6 @@ module Federails
       #
       # @example
       #   acts_as_federails_data handles: 'Note', with: :note_handler, route_path_segment: :articles, actor_entity_method: :user
-      # rubocop:disable Metrics/ParameterLists, Metrics/MethodLength
       def acts_as_federails_data(
         handles:,
         with: :handle_incoming_fediverse_data,
@@ -153,7 +152,6 @@ module Federails
         Fediverse::Inbox.register_handler 'Create', handles, self, with
         Fediverse::Inbox.register_handler 'Update', handles, self, with
       end
-      # rubocop:enable Metrics/ParameterLists, Metrics/MethodLength
 
       # Instantiates a new instance from an ActivityPub object
       #

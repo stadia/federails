@@ -6,7 +6,7 @@ class CommentsController < ApplicationController
   def edit; end
 
   # POST /comments or /comments.json
-  def create # rubocop:disable Metrics/AbcSize
+  def create
     @comment = Comment.new(comment_params)
     @comment.user = current_user
 
