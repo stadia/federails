@@ -1,5 +1,5 @@
 require 'jbuilder'
-require 'kaminari'
+require 'pagy'
 require 'pundit'
 
 require 'federails/version'

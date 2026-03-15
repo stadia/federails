@@ -5,13 +5,13 @@ if params[:page].blank?
   json.type 'OrderedCollection'
   json.totalItems @total_actors
   json.first Federails::Engine.routes.url_helpers.following_server_actor_url(@actor, page: 1)
-  json.last @actors.total_pages == 1 ? Federails::Engine.routes.url_helpers.following_server_actor_url(@actor, page: 1) : Federails::Engine.routes.url_helpers.following_server_actor_url(@actor, page: @actors.total_pages)
+  json.last @pagy_actors.pages == 1 ? Federails::Engine.routes.url_helpers.following_server_actor_url(@actor, page: 1) : Federails::Engine.routes.url_helpers.following_server_actor_url(@actor, page: @pagy_actors.pages)
 else
   json.id Federails::Engine.routes.url_helpers.following_server_actor_url(@actor, page: params[:page])
   json.type 'OrderedCollectionPage'
   json.totalItems @total_actors
-  json.prev Federails::Engine.routes.url_helpers.following_server_actor_url(@actor, page: @actors.prev_page) if @actors.prev_page
-  json.next Federails::Engine.routes.url_helpers.following_server_actor_url(@actor, page: @actors.next_page) if @actors.next_page
+  json.prev Federails::Engine.routes.url_helpers.following_server_actor_url(@actor, page: @pagy_actors.prev) if @pagy_actors.prev
+  json.next Federails::Engine.routes.url_helpers.following_server_actor_url(@actor, page: @pagy_actors.next) if @pagy_actors.next
   json.partOf collection_id
   json.orderedItems do
     json.array! @actors.map(&:federated_url)

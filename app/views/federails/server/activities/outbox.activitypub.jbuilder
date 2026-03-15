@@ -5,13 +5,13 @@ if params[:page].blank?
   json.type 'OrderedCollection'
   json.totalItems @total_activities
   json.first Federails::Engine.routes.url_helpers.server_actor_outbox_url(@actor, page: 1)
-  json.last @activities.total_pages == 1 ? Federails::Engine.routes.url_helpers.server_actor_outbox_url(@actor, page: 1) : Federails::Engine.routes.url_helpers.server_actor_outbox_url(@actor, page: @activities.total_pages)
+  json.last @pagy.pages == 1 ? Federails::Engine.routes.url_helpers.server_actor_outbox_url(@actor, page: 1) : Federails::Engine.routes.url_helpers.server_actor_outbox_url(@actor, page: @pagy.pages)
 else
   json.id Federails::Engine.routes.url_helpers.server_actor_outbox_url(@actor, page: params[:page])
   json.type 'OrderedCollectionPage'
   json.totalItems @total_activities
-  json.prev Federails::Engine.routes.url_helpers.server_actor_outbox_url(@actor, page: @activities.prev_page) if @activities.prev_page
-  json.next Federails::Engine.routes.url_helpers.server_actor_outbox_url(@actor, page: @activities.next_page) if @activities.next_page
+  json.prev Federails::Engine.routes.url_helpers.server_actor_outbox_url(@actor, page: @pagy.prev) if @pagy.prev
+  json.next Federails::Engine.routes.url_helpers.server_actor_outbox_url(@actor, page: @pagy.next) if @pagy.next
   json.partOf collection_id
   json.orderedItems do
     json.array! @activities, partial: 'federails/server/activities/activity', as: :activity, context: false

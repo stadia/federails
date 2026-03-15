@@ -12,8 +12,8 @@ module Federails
 
         @actor            = Actor.find_param(params[:actor_id])
         @activities       = policy_scope(Federails::Activity, policy_scope_class: Federails::Server::ActivityPolicy::Scope).where(actor: @actor).order(created_at: :desc)
-        @total_activities = @activities.count
-        @activities       = @activities.page(params[:page])
+        @pagy, @activities = pagy(@activities)
+        @total_activities  = @pagy.count
       end
 
       # GET /federation/actors/1/activities/1.json
