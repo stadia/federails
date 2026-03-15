@@ -81,10 +81,10 @@ RSpec.describe '/federation/activities', type: :request do
       context 'when there are multiple pages' do
         before do
           FactoryBot.create :following, :to_distant, actor: local_actor, target_actor: FactoryBot.create(:distant_actor)
-          Kaminari.configure { |c| c.default_per_page = 1 }
+          Pagy::OPTIONS[:limit] = 1
         end
 
-        after { Kaminari.configure { |c| c.default_per_page = 25 } }
+        after { Pagy::OPTIONS.delete(:limit) }
 
         it 'includes next on first page' do
           get federails.server_actor_outbox_url(local_actor, page: 1), headers: { accept: Mime[:activitypub] }

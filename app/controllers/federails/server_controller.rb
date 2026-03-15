@@ -1,6 +1,6 @@
 module Federails
   class ServerController < ::ActionController::Base # rubocop:disable Rails/ApplicationController
-    include Pagy::Backend
+    include Pagy::Method
     include Pundit::Authorization
 
     after_action :verify_authorized

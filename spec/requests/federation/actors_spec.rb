@@ -163,10 +163,10 @@ RSpec.describe '/federation/actors', type: :request do
 
         before do
           Federails::Following.create actor: third_user.federails_actor, target_actor: user.federails_actor
-          Kaminari.configure { |c| c.default_per_page = 1 }
+          Pagy::OPTIONS[:limit] = 1
         end
 
-        after { Kaminari.configure { |c| c.default_per_page = 25 } }
+        after { Pagy::OPTIONS.delete(:limit) }
 
         it 'includes next on first page' do
           get federails.followers_server_actor_url(user.federails_actor, page: 1), headers: { accept: Mime[:activitypub] }
@@ -245,10 +245,10 @@ RSpec.describe '/federation/actors', type: :request do
 
         before do
           Federails::Following.create actor: user.federails_actor, target_actor: third_user.federails_actor
-          Kaminari.configure { |c| c.default_per_page = 1 }
+          Pagy::OPTIONS[:limit] = 1
         end
 
-        after { Kaminari.configure { |c| c.default_per_page = 25 } }
+        after { Pagy::OPTIONS.delete(:limit) }
 
         it 'includes next on first page' do
           get federails.following_server_actor_url(user.federails_actor, page: 1), headers: { accept: Mime[:activitypub] }

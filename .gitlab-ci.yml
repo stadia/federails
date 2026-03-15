@@ -8,7 +8,7 @@ stages:
   image: ruby:$RUBY_VERSION
   parallel:
     matrix:
-      - RUBY_VERSION: ['3.1', '3.2', '3.3', '3.4']
+      - RUBY_VERSION: ['3.2', '3.3', '3.4']
 
 .cache: &cache_definition
   untracked: true
@@ -79,7 +79,7 @@ rspec:
     matrix:
       - RUBY_VERSION: [ '3.2', '3.3', '3.4' ]
         RAILS_VERSION: [ '8.0' ]
-      - RUBY_VERSION: [ '3.1', '3.2', '3.3', '3.4' ]
+      - RUBY_VERSION: [ '3.2', '3.3', '3.4' ]
         RAILS_VERSION: [ '7.2' ]
   stage: test
   script:
@@ -91,14 +91,11 @@ rspec:
 # Gitlab pages
 # ======================================
 pages:
-  image: ruby:3.1
+  image: ruby:3.2
   stage: deploy
   rules:
     - if: $CI_COMMIT_TAG
   script:
-    # This step should be removed for Ruby > 3.1
-    # See: https://github.com/jekyll/jekyll/issues/9563
-    - gem update --system
     - bundle config unset --local without
     - bundle install --quiet
     - .gitlab/scripts/copy_documentation_files

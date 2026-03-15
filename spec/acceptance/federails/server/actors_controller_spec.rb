@@ -59,7 +59,6 @@ RSpec.describe Federails::Server::ActorsController, type: :acceptance do
          type:       { type: :string, description: 'Object type (OrderedCollection)' },
          # CollectionPage (except items)
          totalItems: { type: :integer, description: 'Total number of pages in this collection' },
-         current:    { type: :object, description: 'OrderedCollectionPage with list of actor IDs', attributes: :actors_ordered_collection_page },
          first:      { type: :string, description: 'URL to the furthest preceding page' },
          last:       { type: :string, description: 'URL to the furthest proceeding page' }
 

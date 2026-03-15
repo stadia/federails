@@ -10,7 +10,7 @@ else
   json.id Federails::Engine.routes.url_helpers.server_actor_outbox_url(@actor, page: params[:page])
   json.type 'OrderedCollectionPage'
   json.totalItems @total_activities
-  json.prev Federails::Engine.routes.url_helpers.server_actor_outbox_url(@actor, page: @pagy.prev) if @pagy.prev
+  json.prev Federails::Engine.routes.url_helpers.server_actor_outbox_url(@actor, page: @pagy.previous) if @pagy.previous
   json.next Federails::Engine.routes.url_helpers.server_actor_outbox_url(@actor, page: @pagy.next) if @pagy.next
   json.partOf collection_id
   json.orderedItems do

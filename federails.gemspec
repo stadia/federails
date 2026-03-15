@@ -1,7 +1,7 @@
 require_relative 'lib/federails/version'
 
 Gem::Specification.new do |spec|
-  spec.required_ruby_version = '>= 3.1.2'
+  spec.required_ruby_version = '>= 3.2.0'
   spec.name        = 'federails'
   spec.version     = Federails::VERSION
   spec.authors     = ['Manuel Tancoigne']
@@ -26,7 +26,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'json-ld', '>= 3.2.0'
   spec.add_dependency 'json-ld-preloaded', '>= 3.2.0'
   spec.add_dependency 'ostruct'
-  spec.add_dependency 'pagy', '>= 9.4.0', '< 43'
+  spec.add_dependency 'pagy', '>= 43'
   spec.add_dependency 'pundit', '>= 2.3.0'
   spec.add_dependency 'rails', '>= 7.0.4'
 end
