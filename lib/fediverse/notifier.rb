@@ -17,7 +17,8 @@ module Fediverse
         message = payload(activity)
         inboxes.each do |url|
           Federails.logger.debug { "Sending activity ##{activity.id} to inbox at #{url}" }
-          post_to_inbox(inbox_url: url, message: message, from: activity.actor)
+          resp = post_to_inbox(inbox_url: url, message: message, from: activity.actor)
+          Federails.logger.debug { "#{resp.status}, #{resp.body}" }
         end
       end
 
@@ -33,7 +34,8 @@ module Fediverse
         message = payload.to_json
         inboxes.each do |url|
           Federails.logger.debug { "Forwarding activity to inbox at #{url}" }
-          post_to_inbox(inbox_url: url, message: message, from: sender)
+          resp = post_to_inbox(inbox_url: url, message: message, from: sender)
+          Federails.logger.debug { "#{resp.status}, #{resp.body}" }
         end
       end
 
