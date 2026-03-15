@@ -1,18 +1,19 @@
 set_json_ld_context(json)
 collection_id = @actor.outbox_url
-json.id collection_id
-json.type 'OrderedCollectionPage'
-json.totalItems @total_activities
-json.first collection_id
-json.last @activities.total_pages == 1 ? Federails::Engine.routes.url_helpers.server_actor_outbox_url(@actor) : Federails::Engine.routes.url_helpers.server_actor_outbox_url(@actor, page: @activities.total_pages)
-json.current do |j|
-  j.type 'OrderedCollectionPage'
-  j.id @activities.current_page == 1 ? Federails::Engine.routes.url_helpers.server_actor_outbox_url(@actor) : Federails::Engine.routes.url_helpers.server_actor_outbox_url(@actor, page: @activities.current_page)
-  j.partOf collection_id
-  j.next @activities.next_page
-  j.prev @activities.prev_page
-  j.totalItems @total_activities
-  j.orderedItems do
+if params[:page].blank?
+  json.id collection_id
+  json.type 'OrderedCollection'
+  json.totalItems @total_activities
+  json.first Federails::Engine.routes.url_helpers.server_actor_outbox_url(@actor, page: 1)
+  json.last @activities.total_pages == 1 ? Federails::Engine.routes.url_helpers.server_actor_outbox_url(@actor, page: 1) : Federails::Engine.routes.url_helpers.server_actor_outbox_url(@actor, page: @activities.total_pages)
+else
+  json.id Federails::Engine.routes.url_helpers.server_actor_outbox_url(@actor, page: params[:page])
+  json.type 'OrderedCollectionPage'
+  json.totalItems @total_activities
+  json.prev Federails::Engine.routes.url_helpers.server_actor_outbox_url(@actor, page: @activities.prev_page) if @activities.prev_page
+  json.next Federails::Engine.routes.url_helpers.server_actor_outbox_url(@actor, page: @activities.next_page) if @activities.next_page
+  json.partOf collection_id
+  json.orderedItems do
     json.array! @activities, partial: 'federails/server/activities/activity', as: :activity, context: false
   end
 end

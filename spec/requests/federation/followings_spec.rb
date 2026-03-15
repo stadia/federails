@@ -29,5 +29,16 @@ RSpec.describe '/federation/followings', type: :request do
         expect(response.content_type).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"; charset=utf-8'
       end
     end
+
+    it 'returns a Follow object with required fields' do
+      get federails.server_actor_following_url(actor, following), headers: { accept: Mime[:activitypub] }
+      json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+      aggregate_failures do
+        expect(json['type']).to eq 'Follow'
+        expect(json['id']).to eq following.federated_url
+        expect(json['actor']).to eq actor.federated_url
+        expect(json['object']).to eq target_actor.federated_url
+      end
+    end
   end
 end

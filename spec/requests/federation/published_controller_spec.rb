@@ -17,5 +17,15 @@ RSpec.describe '/federation/published', type: :request do
         end
       end
     end
+
+    it 'returns a publishable object with required fields' do
+      get federails.server_published_url(:articles, entity), headers: { accept: Mime[:activitypub] }
+      json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+      aggregate_failures do
+        expect(json['type']).to eq 'Note'
+        expect(json['id']).to eq entity.federated_url
+        expect(json['actor']).to eq actor.federated_url
+      end
+    end
   end
 end

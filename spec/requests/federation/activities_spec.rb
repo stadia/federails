@@ -33,6 +33,72 @@ RSpec.describe '/federation/activities', type: :request do
         expect(response.content_type).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"; charset=utf-8'
       end
     end
+
+    context 'without page param' do
+      it 'returns an OrderedCollection' do
+        get federails.server_actor_outbox_url(local_actor), headers: { accept: Mime[:activitypub] }
+        json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+        expect(json['type']).to eq 'OrderedCollection'
+      end
+
+      it 'includes id, totalItems, first, last' do
+        get federails.server_actor_outbox_url(local_actor), headers: { accept: Mime[:activitypub] }
+        json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+        aggregate_failures do
+          expect(json['id']).to eq local_actor.outbox_url
+          expect(json['totalItems']).to eq 1
+          expect(json['first']).to be_present
+          expect(json['last']).to be_present
+        end
+      end
+
+      it 'does not embed orderedItems directly' do
+        get federails.server_actor_outbox_url(local_actor), headers: { accept: Mime[:activitypub] }
+        json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+        expect(json.keys).not_to include('orderedItems', 'current')
+      end
+    end
+
+    context 'with page param' do
+      it 'returns an OrderedCollectionPage' do
+        get federails.server_actor_outbox_url(local_actor, page: 1), headers: { accept: Mime[:activitypub] }
+        json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+        expect(json['type']).to eq 'OrderedCollectionPage'
+      end
+
+      it 'includes partOf pointing to the collection' do
+        get federails.server_actor_outbox_url(local_actor, page: 1), headers: { accept: Mime[:activitypub] }
+        json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+        expect(json['partOf']).to eq local_actor.outbox_url
+      end
+
+      it 'includes orderedItems' do
+        get federails.server_actor_outbox_url(local_actor, page: 1), headers: { accept: Mime[:activitypub] }
+        json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+        expect(json['orderedItems']).to be_an(Array)
+      end
+
+      context 'when there are multiple pages' do
+        before do
+          FactoryBot.create :following, :to_distant, actor: local_actor, target_actor: FactoryBot.create(:distant_actor)
+          Kaminari.configure { |c| c.default_per_page = 1 }
+        end
+
+        after { Kaminari.configure { |c| c.default_per_page = 25 } }
+
+        it 'includes next on first page' do
+          get federails.server_actor_outbox_url(local_actor, page: 1), headers: { accept: Mime[:activitypub] }
+          json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+          expect(json['next']).to be_present
+        end
+
+        it 'includes prev on second page' do
+          get federails.server_actor_outbox_url(local_actor, page: 2), headers: { accept: Mime[:activitypub] }
+          json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+          expect(json['prev']).to be_present
+        end
+      end
+    end
   end
 
   describe 'GET /show' do
@@ -51,6 +117,17 @@ RSpec.describe '/federation/activities', type: :request do
       it "responds with LD in response to a #{accept} request" do
         get federails.server_actor_activity_url(activity.actor.to_param, activity.to_param), headers: { accept: accept }
         expect(response.content_type).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"; charset=utf-8'
+      end
+    end
+
+    it 'returns an activity object with required fields' do
+      get federails.server_actor_activity_url(activity.actor.to_param, activity.to_param), headers: { accept: Mime[:activitypub] }
+      json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+      aggregate_failures do
+        expect(json['type']).to eq activity.action
+        expect(json['id']).to be_present
+        expect(json['actor']).to eq activity.actor.federated_url
+        expect(json['object']).to be_present
       end
     end
   end

@@ -60,6 +60,25 @@ RSpec.describe '/federation/actors', type: :request do
       end
     end
 
+    it 'returns an actor object with required fields' do
+      get federails.server_actor_url(user.federails_actor), headers: { accept: Mime[:activitypub] }
+      json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+      aggregate_failures do
+        expect(json['type']).to eq user.federails_actor.actor_type
+        expect(json['id']).to eq user.federails_actor.federated_url
+        expect(json['inbox']).to eq user.federails_actor.inbox_url
+        expect(json['outbox']).to eq user.federails_actor.outbox_url
+        expect(json['followers']).to eq user.federails_actor.followers_url
+        expect(json['following']).to eq user.federails_actor.followings_url
+      end
+    end
+
+    it 'responds with the Tombstone object with correct type' do
+      get federails.server_actor_url(user.federails_actor), headers: { accept: Mime[:activitypub] }
+      json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+      expect(json['type']).to eq user.federails_actor.actor_type
+    end
+
     context 'when the actor is tombstoned' do
       before do
         user.federails_actor.tombstone!
@@ -94,6 +113,74 @@ RSpec.describe '/federation/actors', type: :request do
         expect(response.content_type).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"; charset=utf-8'
       end
     end
+
+    context 'without page param' do
+      it 'returns an OrderedCollection' do
+        get federails.followers_server_actor_url(user.federails_actor), headers: { accept: Mime[:activitypub] }
+        json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+        expect(json['type']).to eq 'OrderedCollection'
+      end
+
+      it 'includes id, totalItems, first, last' do
+        get federails.followers_server_actor_url(user.federails_actor), headers: { accept: Mime[:activitypub] }
+        json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+        aggregate_failures do
+          expect(json['id']).to eq user.federails_actor.followers_url
+          expect(json['totalItems']).to eq 1
+          expect(json['first']).to be_present
+          expect(json['last']).to be_present
+        end
+      end
+
+      it 'does not embed orderedItems directly' do
+        get federails.followers_server_actor_url(user.federails_actor), headers: { accept: Mime[:activitypub] }
+        json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+        expect(json.keys).not_to include('orderedItems', 'current')
+      end
+    end
+
+    context 'with page param' do
+      it 'returns an OrderedCollectionPage' do
+        get federails.followers_server_actor_url(user.federails_actor, page: 1), headers: { accept: Mime[:activitypub] }
+        json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+        expect(json['type']).to eq 'OrderedCollectionPage'
+      end
+
+      it 'includes partOf pointing to the collection' do
+        get federails.followers_server_actor_url(user.federails_actor, page: 1), headers: { accept: Mime[:activitypub] }
+        json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+        expect(json['partOf']).to eq user.federails_actor.followers_url
+      end
+
+      it 'includes orderedItems with follower URLs' do
+        get federails.followers_server_actor_url(user.federails_actor, page: 1), headers: { accept: Mime[:activitypub] }
+        json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+        expect(json['orderedItems']).to include(other_user.federails_actor.federated_url)
+      end
+
+      context 'when there are multiple pages' do
+        let(:third_user) { FactoryBot.create :user }
+
+        before do
+          Federails::Following.create actor: third_user.federails_actor, target_actor: user.federails_actor
+          Kaminari.configure { |c| c.default_per_page = 1 }
+        end
+
+        after { Kaminari.configure { |c| c.default_per_page = 25 } }
+
+        it 'includes next on first page' do
+          get federails.followers_server_actor_url(user.federails_actor, page: 1), headers: { accept: Mime[:activitypub] }
+          json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+          expect(json['next']).to be_present
+        end
+
+        it 'includes prev on second page' do
+          get federails.followers_server_actor_url(user.federails_actor, page: 2), headers: { accept: Mime[:activitypub] }
+          json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+          expect(json['prev']).to be_present
+        end
+      end
+    end
   end
 
   describe 'GET /following' do
@@ -106,6 +193,74 @@ RSpec.describe '/federation/actors', type: :request do
       it "responds with LD in response to a #{accept} request" do
         get federails.following_server_actor_url(user.federails_actor), headers: { accept: accept }
         expect(response.content_type).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"; charset=utf-8'
+      end
+    end
+
+    context 'without page param' do
+      it 'returns an OrderedCollection' do
+        get federails.following_server_actor_url(user.federails_actor), headers: { accept: Mime[:activitypub] }
+        json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+        expect(json['type']).to eq 'OrderedCollection'
+      end
+
+      it 'includes id, totalItems, first, last' do
+        get federails.following_server_actor_url(user.federails_actor), headers: { accept: Mime[:activitypub] }
+        json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+        aggregate_failures do
+          expect(json['id']).to eq user.federails_actor.followings_url
+          expect(json['totalItems']).to eq 1
+          expect(json['first']).to be_present
+          expect(json['last']).to be_present
+        end
+      end
+
+      it 'does not embed orderedItems directly' do
+        get federails.following_server_actor_url(user.federails_actor), headers: { accept: Mime[:activitypub] }
+        json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+        expect(json.keys).not_to include('orderedItems', 'current')
+      end
+    end
+
+    context 'with page param' do
+      it 'returns an OrderedCollectionPage' do
+        get federails.following_server_actor_url(user.federails_actor, page: 1), headers: { accept: Mime[:activitypub] }
+        json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+        expect(json['type']).to eq 'OrderedCollectionPage'
+      end
+
+      it 'includes partOf pointing to the collection' do
+        get federails.following_server_actor_url(user.federails_actor, page: 1), headers: { accept: Mime[:activitypub] }
+        json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+        expect(json['partOf']).to eq user.federails_actor.followings_url
+      end
+
+      it 'includes orderedItems with following URLs' do
+        get federails.following_server_actor_url(user.federails_actor, page: 1), headers: { accept: Mime[:activitypub] }
+        json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+        expect(json['orderedItems']).to include(other_user.federails_actor.federated_url)
+      end
+
+      context 'when there are multiple pages' do
+        let(:third_user) { FactoryBot.create :user }
+
+        before do
+          Federails::Following.create actor: user.federails_actor, target_actor: third_user.federails_actor
+          Kaminari.configure { |c| c.default_per_page = 1 }
+        end
+
+        after { Kaminari.configure { |c| c.default_per_page = 25 } }
+
+        it 'includes next on first page' do
+          get federails.following_server_actor_url(user.federails_actor, page: 1), headers: { accept: Mime[:activitypub] }
+          json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+          expect(json['next']).to be_present
+        end
+
+        it 'includes prev on second page' do
+          get federails.following_server_actor_url(user.federails_actor, page: 2), headers: { accept: Mime[:activitypub] }
+          json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+          expect(json['prev']).to be_present
+        end
       end
     end
   end
