@@ -17,8 +17,10 @@ if @user.federails_actor.profile_url
              href: @user.federails_actor.profile_url
 end
 
-# Remote following
-links.push rel:      'http://ostatus.org/schema/1.0/subscribe',
-           template: "#{remote_follow_url}?uri={uri}"
+if remote_follow_url
+  # Remote following
+  links.push rel:      'http://ostatus.org/schema/1.0/subscribe',
+             template: "#{remote_follow_url}?uri={uri}"
+end
 
 json.links links
