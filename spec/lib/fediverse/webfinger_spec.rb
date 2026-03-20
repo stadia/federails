@@ -50,6 +50,20 @@ module Fediverse
         end
       end
 
+      context 'with uppercase characters in username' do
+        let(:account) { '@ZyryabRoma@mastodon.social' }
+
+        it 'extracts username preserving case' do
+          results = described_class.split_account(account)
+          expect(results[:username]).to eq 'ZyryabRoma'
+        end
+
+        it 'extracts domain' do
+          results = described_class.split_account(account)
+          expect(results[:domain]).to eq 'mastodon.social'
+        end
+      end
+
       context 'with a full acct: URI' do
         let(:resource_string) { 'acct:user@domain.tld' }
 

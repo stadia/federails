@@ -5,7 +5,7 @@ module Fediverse
   # Methods related to Webfinger: find accounts, fetch actors,...
   class Webfinger
     class << self
-      ACCOUNT_REGEX = /(?<username>[a-z0-9\-_.]+)(?:@(?<domain>.*))?/
+      ACCOUNT_REGEX = /(?<username>[a-z0-9\-_.]+)(?:@(?<domain>.*))?/i
 
       # Extracts username and domain from an account string.
       # Accepts forms "user@domain", "@user@domain" and "acct:user@domain"
