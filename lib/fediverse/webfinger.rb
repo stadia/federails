@@ -53,7 +53,12 @@ module Fediverse
       # @return [String, nil] Federation URL if found
       def webfinger(username, domain)
         json = webfinger_response(username, domain)
-        link = json['links'].find { |l| Mime::Type.lookup(l['type']).to_sym == :activitypub }
+        unless json.is_a?(Hash)
+          Federails.logger.debug { "Invalid WebFinger payload for #{username}@#{domain}: #{json.inspect}" }
+          raise ActiveRecord::RecordNotFound
+        end
+
+        link = Array(json['links']).find { |l| Mime::Type.lookup(l['type']).to_sym == :activitypub }
 
         link['href'] if link
       end
@@ -67,7 +72,12 @@ module Fediverse
       # @return [String] The URL to use as follow URL
       def remote_follow_url(username, domain, actor_url: nil)
         json = webfinger_response(username, domain)
-        link = json['links'].find { |l| l['rel'] == 'http://ostatus.org/schema/1.0/subscribe' }
+        unless json.is_a?(Hash)
+          Federails.logger.debug { "Invalid remote follow payload for #{username}@#{domain}: #{json.inspect}" }
+          raise ActiveRecord::RecordNotFound
+        end
+
+        link = Array(json['links']).find { |l| l['rel'] == 'http://ostatus.org/schema/1.0/subscribe' }
         return nil if link&.dig('template').nil?
 
         if actor_url
@@ -101,6 +111,11 @@ module Fediverse
       # @param data [Hash] Webfinger response
       # @return [Federails::Actor]
       def webfinger_to_actor(data) # rubocop:disable Metrics/MethodLength
+        unless data.is_a?(Hash)
+          Federails.logger.debug { "Invalid actor payload: #{data.inspect}" }
+          raise ActiveRecord::RecordNotFound
+        end
+
         data = data.clone
         id = data.delete('id')
         Federails::Actor.new federated_url:  id,

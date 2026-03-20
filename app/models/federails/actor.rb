@@ -177,6 +177,10 @@ module Federails
       # @return [Federails::Actor, nil]
       def find_by_account(account)
         parts = Fediverse::Webfinger.split_account account
+        if parts.nil? || parts[:username].blank?
+          Federails.logger.debug { "Invalid actor account format for lookup: #{account.inspect}" }
+          raise ActiveRecord::RecordNotFound
+        end
 
         if Fediverse::Webfinger.local_user? parts
           actor = find_local_by_username! parts[:username]

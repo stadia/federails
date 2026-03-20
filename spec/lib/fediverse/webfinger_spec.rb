@@ -125,6 +125,14 @@ module Fediverse
         end
       end
 
+      it 'raises an error on invalid payloads' do
+        allow(described_class).to receive(:webfinger_response).and_return(nil)
+
+        expect do
+          described_class.webfinger('mtancoigne', 'mamot.fr')
+        end.to raise_error ActiveRecord::RecordNotFound
+      end
+
       it 'fetches remote follow URL template' do
         VCR.use_cassette 'fediverse/webfinger/webfinger_get_200' do
           expect(described_class.remote_follow_url('mtancoigne', 'mamot.fr')).to eq 'https://mamot.fr/authorize_interaction?uri={uri}'
@@ -157,6 +165,14 @@ module Fediverse
             described_class.fetch_actor_url('https://example.com/users/jdoe')
           end.to raise_error ActiveRecord::RecordNotFound
         end
+      end
+
+      it 'raises an error on invalid actor payloads' do
+        allow(described_class).to receive(:get_json).and_return(nil)
+
+        expect do
+          described_class.fetch_actor_url('https://example.com/users/jdoe')
+        end.to raise_error ActiveRecord::RecordNotFound
       end
     end
 
