@@ -141,7 +141,15 @@ module Fediverse
         actor        = Federails::Actor.find_or_create_by_object activity['actor']
         target_actor = Federails::Actor.find_or_create_by_object activity['object']
 
-        Federails::Following.create! actor: actor, target_actor: target_actor, federated_url: activity['id']
+        following = Federails::Following.find_or_initialize_by actor: actor, target_actor: target_actor
+        if following.new_record?
+          following.federated_url = activity['id']
+          following.save!
+        elsif following.federated_url.blank? && activity['id'].present?
+          following.update! federated_url: activity['id']
+        end
+
+        following
       end
 
       # Marks a pending Following as accepted when the target actor confirms.

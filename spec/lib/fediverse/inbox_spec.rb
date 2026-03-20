@@ -49,6 +49,14 @@ module Fediverse
           described_class.send(:handle_create_follow_request, distant_following)
         end.to change(Federails::Following, :count).by 1
       end
+
+      it 'treats duplicate follow requests as idempotent' do
+        described_class.send(:handle_create_follow_request, distant_following)
+
+        expect do
+          described_class.send(:handle_create_follow_request, distant_following)
+        end.not_to change(Federails::Following, :count)
+      end
     end
 
     describe '#handle_accept_follow_request' do
