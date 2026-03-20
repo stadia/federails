@@ -9,9 +9,6 @@ module Federails
       else
         Rails.application.routes.url_helpers.send(method_name)
       end
-    rescue NoMethodError => e
-      Federails.logger.error e
-      nil
     end
 
     def set_json_ld_context(json, additional: nil)
