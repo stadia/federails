@@ -34,9 +34,5 @@ module Federails
     def error_gone(exception = nil)
       error_fallback(exception, 'Resource is gone', :gone)
     end
-
-    def current_user
-      nil
-    end
   end
 end
