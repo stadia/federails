@@ -20,7 +20,8 @@ module Fediverse
       def get(id)
         json = Federails::Utils::JsonRequest.get_json(id)
         compact_json_ld(json)
-      rescue JSON::ParserError
+      rescue JSON::ParserError, Federails::Utils::JsonRequest::UnhandledResponseStatus => e
+        Federails.logger.warn { "Failed to dereference #{id}: #{e.message}" }
         nil
       end
 
