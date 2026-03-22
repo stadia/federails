@@ -1,5 +1,6 @@
 require 'federails/utils/host'
 require 'federails/utils/json_request'
+require 'fediverse/signature'
 
 module Fediverse
   # Methods related to Webfinger: find accounts, fetch actors,...
@@ -42,7 +43,12 @@ module Fediverse
       #
       # @return [Federails::Actor, nil] Federails actor or nothing when not found
       def fetch_actor_url(url)
-        webfinger_to_actor get_json url
+        json = begin
+          get_json url
+        rescue ActiveRecord::RecordNotFound
+          signed_get_json(url)
+        end
+        webfinger_to_actor json
       end
 
       # Gets the real actor's federation URL from its username and domain
@@ -131,6 +137,27 @@ module Fediverse
                              public_key:     data.delete('publicKey')&.dig('publicKeyPem'),
                              extensions:     data.except('@context'),
                              local:          false
+      end
+
+      # Performs a signed GET request using a local actor for authentication
+      # Used as fallback when servers require Authorized Fetch (Secure Mode)
+      # @return [Hash]
+      # @raise [ActiveRecord::RecordNotFound] when no local actor exists or request fails
+      def signed_get_json(url)
+        actor = Federails::Actor.where(local: true).where.not(entity_type: nil).first
+        raise ActiveRecord::RecordNotFound, 'No local actor available for signed fetch' unless actor
+
+        Federails.logger.debug { "Retrying with signed GET for #{url}" }
+        Fediverse::Signature.signed_get(url, actor: actor)
+      rescue Federails::Utils::JsonRequest::UnhandledResponseStatus => e
+        Federails.logger.debug { e.message }
+        raise ActiveRecord::RecordNotFound
+      rescue Faraday::ConnectionFailed
+        Federails.logger.debug { "Failed to reach server for signed GET #{url}" }
+        raise ActiveRecord::RecordNotFound
+      rescue JSON::ParserError
+        Federails.logger.debug { "Invalid JSON response for signed GET #{url}" }
+        raise ActiveRecord::RecordNotFound
       end
 
       # Makes a simple GET request and returns a +Hash+ from the parsed body

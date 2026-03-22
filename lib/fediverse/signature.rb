@@ -16,6 +16,36 @@ module Fediverse
         }.map { |k, v| "#{k}=\"#{v}\"" }.join(',')
       end
 
+      # Performs a signed GET request on behalf of a local actor
+      #
+      # @param url [String] Target URL
+      # @param actor [Federails::Actor] Local actor to sign as
+      # @return [Hash, nil] Parsed JSON response or nil on failure
+      def signed_get(url, actor:)
+        uri = URI.parse(url)
+        body = ''
+
+        req = Faraday.default_connection.build_request(:get) do |r|
+          r.url url
+          r.body = body
+          r.headers['Accept'] = 'application/activity+json'
+          r.headers['Host'] = uri.host
+          r.headers['Date'] = Time.now.utc.httpdate
+          r.headers['Digest'] = "SHA-256=#{Base64.strict_encode64(OpenSSL::Digest.new('SHA256').digest(body))}"
+        end
+
+        req.headers['Signature'] = sign(sender: actor, request: req)
+
+        response = Faraday.get(url) do |r|
+          req.headers.each { |k, v| r.headers[k] = v }
+        end
+
+        raise Federails::Utils::JsonRequest::UnhandledResponseStatus,
+              "Unhandled status code #{response.status} for signed GET #{url}" unless response.status == 200
+
+        JSON.parse(response.body)
+      end
+
       def verify(sender:, request:)
         raise 'Unsigned headers' unless request.headers['Signature']
 
