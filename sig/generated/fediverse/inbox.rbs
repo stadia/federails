@@ -1,0 +1,93 @@
+# Generated from lib/fediverse/inbox.rb with RBS::Inline
+
+module Fediverse
+  class Inbox
+    # Registers a handler for incoming data
+    #
+    # Unless a specific type is not implemented in Federails, you should leave the 'Delete' activity to Federails:
+    # it will dispatch a `on_federails_delete_requested` event on the right objects.
+    #
+    # @param activity_type [String] Target activity type ('Create', 'Follow', 'Like', ...)
+    #   See https://www.w3.org/TR/activitystreams-vocabulary/#activity-types for a list of common ones
+    # @param object_type [String] Type of the related object ('Article', 'Note', ...)
+    #   See https://www.w3.org/TR/activitystreams-vocabulary/#object-types for a list of common object types
+    # @param klass [String] Class handling the incoming object
+    # @param method [Symbol] Method in the class that will handle the object
+    def self.register_handler: (untyped activity_type, untyped object_type, untyped klass, untyped method) -> untyped
+
+    # Dispatches an incoming ActivityPub activity to the appropriate handler.
+    #
+    # Performs de-duplication (AP Section 5.2), origin verification for Update
+    # activities (AP Section 7.3), and records processed activity IDs for
+    # future de-duplication.
+    #
+    # @param payload [Hash] Raw activity JSON from the inbox POST
+    # @return [true] when the activity was successfully handled
+    # @return [:duplicate] when the activity has already been processed
+    # @return [false] when no handler matched or verification failed
+    def self.dispatch_request: (untyped payload) -> untyped
+
+    # Checks whether an incoming activity should be forwarded to local followers.
+    # AP Section 7.1.2: forward when all conditions are met:
+    # 1. Activity has not been seen before (handled by dispatch_request de-duplication)
+    # 2. to/cc/audience addresses a collection owned by this server
+    # 3. inReplyTo/object/target/tag references an object owned by this server
+    #
+    # @param payload [Hash] The activity payload that was just dispatched
+    def self.maybe_forward: (untyped payload) -> untyped
+
+    # Best-effort recording of processed activity for de-duplication.
+    # Uses actor as fallback entity when the actual object cannot be resolved.
+    # Failures here must not propagate since the activity was already handled successfully.
+    private def self.record_processed_activity: (untyped payload, untyped dispatched_at) -> untyped
+
+    # Handles Delete activities by finding the local object and triggering its delete callback.
+    private def self.dispatch_delete_request: (untyped payload) -> untyped
+
+    # Returns merged handlers matching the given activity and object types,
+    # including wildcard ('*') registrations.
+    private def self.get_handlers: (untyped activity_type, untyped object_type) -> untyped
+
+    # Creates a Following record from an incoming Follow activity.
+    private def self.handle_create_follow_request: (untyped activity) -> untyped
+
+    # Marks a pending Following as accepted when the target actor confirms.
+    private def self.handle_accept_follow_request: (untyped activity) -> untyped
+
+    # Destroys a Following record when the follower undoes their Follow.
+    private def self.handle_undo_follow_request: (untyped activity) -> untyped
+
+    # Destroys a pending Following when the target actor rejects the request.
+    # AP Section 7.7: MUST NOT add to Following collection on Reject.
+    private def self.handle_reject_follow_request: (untyped activity) -> untyped
+
+    # Triggers on_federails_delete_requested callback on the matching local object.
+    private def self.handle_delete_request: (untyped activity) -> untyped
+
+    # Triggers on_federails_undelete_requested callback when an Undo+Delete is received.
+    private def self.handle_undelete_request: (untyped activity) -> untyped
+
+    # Compares host and port of two URLs for same-origin verification (AP Section 7.3).
+    private def self.same_origin?: (untyped actor_url, untyped object_url) -> untyped
+
+    # Returns true if to/cc/audience addresses a collection owned by this server.
+    private def self.references_local_collection?: (untyped payload) -> untyped
+
+    # Returns true if inReplyTo, object, target, or tag references an object owned by this server.
+    private def self.references_local_object?: (untyped payload) -> untyped
+
+    # Extracts local collection URLs from to/cc/audience addressing fields.
+    private def self.addressed_local_collections: (untyped payload) -> untyped
+
+    # Checks if a URL resolves to a local followers collection via route recognition.
+    # AP Section 7.1.2: forwarding targets followers collections only, not following.
+    private def self.local_collection_url?: (untyped url) -> untyped
+
+    # Checks if a URL resolves to any local Federails resource via route recognition.
+    private def self.local_object_reference?: (untyped url) -> untyped
+
+    # Resolves the entity (polymorphic object) for a processed activity record.
+    # Falls back to actor when the actual object cannot be resolved.
+    private def self.entity_for_processed_activity: (untyped payload, untyped actor) -> untyped
+  end
+end

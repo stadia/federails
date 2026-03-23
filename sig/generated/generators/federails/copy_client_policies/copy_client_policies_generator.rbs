@@ -1,0 +1,7 @@
+# Generated from lib/generators/federails/copy_client_policies/copy_client_policies_generator.rb with RBS::Inline
+
+module Federails
+  class CopyClientPoliciesGenerator < Rails::Generators::Base
+    def copy_policies: () -> untyped
+  end
+end

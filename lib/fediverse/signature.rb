@@ -1,6 +1,9 @@
+# rbs_inline: enabled
+
 module Fediverse
   class Signature
     class << self
+      #: (sender: Federails::Actor, request: untyped) -> String
       def sign(sender:, request:)
         private_key = OpenSSL::PKey::RSA.new sender.private_key, Rails.application.credentials.secret_key_base
         headers = '(request-target) host date digest'
@@ -40,12 +43,15 @@ module Fediverse
           req.headers.each { |k, v| r.headers[k] = v }
         end
 
-        raise Federails::Utils::JsonRequest::UnhandledResponseStatus,
-              "Unhandled status code #{response.status} for signed GET #{url}" unless response.status == 200
+        unless response.status == 200
+          raise Federails::Utils::JsonRequest::UnhandledResponseStatus,
+                "Unhandled status code #{response.status} for signed GET #{url}"
+        end
 
         JSON.parse(response.body)
       end
 
+      #: (sender: Federails::Actor, request: untyped) -> bool
       def verify(sender:, request:)
         raise 'Unsigned headers' unless request.headers['Signature']
 
@@ -65,6 +71,7 @@ module Fediverse
 
       private
 
+      #: (request: untyped, headers: String) -> String
       def signature_payload(request:, headers:)
         headers.split.map do |signed_header_name|
           if signed_header_name == '(request-target)'

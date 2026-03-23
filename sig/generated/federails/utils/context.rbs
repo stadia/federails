@@ -1,0 +1,10 @@
+# Generated from lib/federails/utils/context.rb with RBS::Inline
+
+module Federails
+  module Utils
+    module Context
+      # : (?additional: String | Array[String] | nil) -> String | Array[String]
+      def self.generate: (?additional: String | Array[String] | nil) -> String
+    end
+  end
+end

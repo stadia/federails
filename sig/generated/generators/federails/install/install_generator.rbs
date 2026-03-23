@@ -1,0 +1,7 @@
+# Generated from lib/generators/federails/install/install_generator.rb with RBS::Inline
+
+module Federails
+  class InstallGenerator < Rails::Generators::Base
+    def copy_files: () -> untyped
+  end
+end

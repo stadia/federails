@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module Federails
   module Utils
     class Actor
@@ -12,7 +14,7 @@ module Federails
         :followers_url,
         :followings_url,
         :profile_url,
-      ].freeze
+      ].freeze #: Array[Symbol]
 
       class << self
         # @param actor [Federails::Actor]
@@ -27,6 +29,7 @@ module Federails
           actor
         end
 
+        #: (Federails::Actor) -> void
         def untombstone!(actor)
           if actor.local?
             untombstone_local_actor actor
@@ -37,6 +40,7 @@ module Federails
 
         private
 
+        #: (Federails::Actor) -> void
         def tombstone_local_actor(actor)
           Federails::Actor.transaction do
             hash = {
@@ -52,6 +56,7 @@ module Federails
           end
         end
 
+        #: (Federails::Actor) -> void
         def untombstone_local_actor(actor)
           return unless actor.tombstoned?
           raise 'Cannot restore a local actor without an entity' if actor.entity.blank?
@@ -70,10 +75,12 @@ module Federails
           end
         end
 
+        #: (Federails::Actor) -> void
         def tombstone_distant_actor(actor)
           actor.update! tombstoned_at: Time.current
         end
 
+        #: (Federails::Actor) -> void
         def untombstone_distant_actor(actor)
           actor.tombstoned_at = nil
           actor.sync!

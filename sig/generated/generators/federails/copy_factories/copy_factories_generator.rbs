@@ -1,0 +1,17 @@
+# Generated from lib/generators/federails/copy_factories/copy_factories_generator.rb with RBS::Inline
+
+module Federails
+  class CopyFactoriesGenerator < Rails::Generators::Base
+    SOURCE_DIRECTORY: untyped
+
+    FACTORY_DEFINITION_REGEX: ::Regexp
+
+    def initialize: () -> untyped
+
+    def copy_factories: () -> untyped
+
+    private
+
+    def substitute_values!: () -> untyped
+  end
+end

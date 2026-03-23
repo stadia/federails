@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 require 'json/ld'
 
 module Fediverse
@@ -17,6 +19,7 @@ module Fediverse
 
       private
 
+      #: (String) -> Hash[String, untyped]?
       def get(id)
         json = Federails::Utils::JsonRequest.get_json(id)
         compact_json_ld(json)
@@ -25,6 +28,7 @@ module Fediverse
         nil
       end
 
+      #: (Hash[String, untyped]) -> Hash[String, untyped]
       def compact_json_ld(json)
         JSON::LD::API.compact(json, json['@context'])
       rescue JSON::LD::JsonLdError => e

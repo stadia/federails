@@ -1,0 +1,21 @@
+# Generated from lib/fediverse/signature.rb with RBS::Inline
+
+module Fediverse
+  class Signature
+    # : (sender: Federails::Actor, request: untyped) -> String
+    def self.sign: (sender: Federails::Actor, request: untyped) -> String
+
+    # Performs a signed GET request on behalf of a local actor
+    #
+    # @param url [String] Target URL
+    # @param actor [Federails::Actor] Local actor to sign as
+    # @return [Hash, nil] Parsed JSON response or nil on failure
+    def self.signed_get: (untyped url, actor: untyped) -> untyped
+
+    # : (sender: Federails::Actor, request: untyped) -> bool
+    def self.verify: (sender: Federails::Actor, request: untyped) -> bool
+
+    # : (request: untyped, headers: String) -> String
+    private def self.signature_payload: (request: untyped, headers: String) -> String
+  end
+end

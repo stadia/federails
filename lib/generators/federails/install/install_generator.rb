@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module Federails
   class InstallGenerator < Rails::Generators::Base
     source_root File.expand_path('templates', __dir__)

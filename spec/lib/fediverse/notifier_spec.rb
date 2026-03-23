@@ -3,7 +3,7 @@ require 'fediverse/notifier'
 
 module Fediverse
   FakeEntity = Struct.new :federated_url
-  FakeActivity = Struct.new :id, :actor, :recipients, :action, :entity, :to, :cc, :bto, :bcc, :audience, keyword_init: true
+  FakeActivity = Struct.new :id, :actor, :recipients, :action, :entity, :to, :cc, :bto, :bcc, :audience
 
   RSpec.describe Notifier do
     let(:local_actor) { FactoryBot.create(:user).federails_actor }
@@ -26,7 +26,7 @@ module Fediverse
         let(:fake_activity) { FakeActivity.new(id: 1, actor: local_actor, to: [distant_target_actor.federated_url], action: 'Create', entity: fake_entity) }
 
         it 'calls post_to_inbox for each recipient' do
-          allow(described_class).to receive(:post_to_inbox).and_return(double('response', status: 200, body: ''))
+          allow(described_class).to receive(:post_to_inbox).and_return(instance_double(Faraday::Response, status: 200, body: ''))
           described_class.post_to_inboxes(fake_activity)
           expect(described_class).to have_received(:post_to_inbox).with(hash_including(inbox_url: distant_target_actor.inbox_url)).once
         end
@@ -42,7 +42,7 @@ module Fediverse
 
         it 'calls post_to_inbox for each recipient' do
           VCR.use_cassette('fediverse/notifier/get_collection_200') do
-            allow(described_class).to receive(:post_to_inbox).and_return(double('response', status: 200, body: ''))
+            allow(described_class).to receive(:post_to_inbox).and_return(instance_double(Faraday::Response, status: 200, body: ''))
             described_class.post_to_inboxes(fake_activity)
             expect(described_class).to have_received(:post_to_inbox).with(hash_including(inbox_url: 'https://3dp.chat/users/manyfold/inbox')).once
           end
@@ -73,7 +73,7 @@ module Fediverse
         end
 
         it 'does not deliver to the sender inbox' do
-          allow(described_class).to receive(:post_to_inbox).and_return(double('response', status: 200, body: ''))
+          allow(described_class).to receive(:post_to_inbox).and_return(instance_double(Faraday::Response, status: 200, body: ''))
           described_class.post_to_inboxes(fake_activity)
 
           expect(described_class).to have_received(:post_to_inbox).once
@@ -82,16 +82,16 @@ module Fediverse
       end
 
       context 'when using bto, bcc, and audience addressing' do
-        let(:distant_actor_2) { FactoryBot.create :distant_actor }
-        let(:distant_actor_3) { FactoryBot.create :distant_actor }
+        let(:bto_actor) { FactoryBot.create :distant_actor }
+        let(:bcc_actor) { FactoryBot.create :distant_actor }
         let(:fake_entity) { FakeEntity.new('some_url') }
         let(:fake_activity) do
           FakeActivity.new(
             id:       1,
             actor:    local_actor,
             to:       [distant_target_actor.federated_url],
-            bto:      [distant_actor_2.federated_url],
-            bcc:      [distant_actor_3.federated_url],
+            bto:      [bto_actor.federated_url],
+            bcc:      [bcc_actor.federated_url],
             audience: [Fediverse::Collection::PUBLIC],
             action:   'Create',
             entity:   fake_entity
@@ -99,7 +99,7 @@ module Fediverse
         end
 
         it 'delivers to bto and bcc recipients' do
-          allow(described_class).to receive(:post_to_inbox).and_return(double('response', status: 200, body: ''))
+          allow(described_class).to receive(:post_to_inbox).and_return(instance_double(Faraday::Response, status: 200, body: ''))
           described_class.post_to_inboxes(fake_activity)
 
           expect(described_class).to have_received(:post_to_inbox).exactly(3).times
@@ -111,8 +111,7 @@ module Fediverse
       let(:payload) { { 'id' => 'https://example.com/activities/1', 'type' => 'Create' } }
 
       it 'forwards to local collection members, excludes the original sender inbox, and signs as the local collection owner' do
-        allow(described_class).to receive(:collection_to_actors).and_return([local_actor, distant_target_actor])
-        allow(described_class).to receive(:post_to_inbox).and_return(double('response', status: 200, body: ''))
+        allow(described_class).to receive_messages(collection_to_actors: [local_actor, distant_target_actor], post_to_inbox: instance_double(Faraday::Response, status: 200, body: ''))
 
         described_class.forward_activity(payload, [local_actor.followers_url], exclude_actor: local_actor.federated_url)
 

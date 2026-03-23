@@ -426,10 +426,10 @@ module Fediverse
     end
 
     describe '.maybe_forward' do
-      let(:local_actor_2) { FactoryBot.create(:user).federails_actor }
+      let(:local_follower_actor) { FactoryBot.create(:user).federails_actor }
 
       before do
-        Federails::Following.create! actor: local_actor_2, target_actor: local_actor, status: :accepted
+        Federails::Following.create! actor: local_follower_actor, target_actor: local_actor, status: :accepted
       end
 
       context 'when activity references a local collection and local object' do

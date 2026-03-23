@@ -19,12 +19,12 @@ module Federails
 
     # Class methods automatically included in the concern.
     module ClassMethods
-      def on_federails_delete_requested(*args)
-        set_callback :on_federails_delete_requested, *args
+      def on_federails_delete_requested(*)
+        set_callback(:on_federails_delete_requested, *)
       end
 
-      def on_federails_undelete_requested(*args)
-        set_callback :on_federails_undelete_requested, *args
+      def on_federails_undelete_requested(*)
+        set_callback(:on_federails_undelete_requested, *)
       end
     end
 

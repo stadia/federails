@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 require 'faraday'
 require 'faraday/follow_redirects'
 
@@ -10,7 +12,7 @@ module Federails
       BASE_HEADERS = {
         'Content-Type' => 'application/json',
         'Accept'       => 'application/json',
-      }.freeze
+      }.freeze #: Hash[String, String]
 
       # Makes a GET request and returns a +Hash+ from the parsed body
       #

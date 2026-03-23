@@ -1,8 +1,10 @@
+# rbs_inline: enabled
+
 require 'fediverse/signature'
 
 module Fediverse
   class Notifier
-    MAX_COLLECTION_DEPTH = 3
+    MAX_COLLECTION_DEPTH = 3 #: Integer
 
     class << self
       # Posts an activity to its recipients
@@ -22,6 +24,7 @@ module Fediverse
         end
       end
 
+      #: (Hash[String, untyped], Array[String], ?exclude_actor: String?) -> void
       def forward_activity(payload, collection_urls, exclude_actor: nil)
         inboxes = collection_urls.flat_map do |url|
           collection_to_actors(url).map(&:inbox_url)
@@ -67,6 +70,7 @@ module Fediverse
         end.compact.uniq.reject { |url| url == actor_inbox }
       end
 
+      #: (String, ?max_depth: Integer) -> Array[Federails::Actor]
       def collection_to_actors(url, max_depth: MAX_COLLECTION_DEPTH)
         return [] if max_depth <= 0
 
@@ -86,6 +90,7 @@ module Fediverse
         []
       end
 
+      #: (String?) -> String?
       def actor_inbox_for(actor_url)
         return if actor_url.blank?
 
@@ -94,6 +99,7 @@ module Fediverse
         nil
       end
 
+      #: (Array[String]) -> Federails::Actor?
       def forwarding_sender_for(collection_urls)
         collection_urls.filter_map do |url|
           route = Federails::Utils::Host.local_route(url)
@@ -105,6 +111,7 @@ module Fediverse
         end.first
       end
 
+      #: (Federails::Activity) -> String
       def payload(activity)
         Federails::ServerController.renderer.new.render(
           template: 'federails/server/activities/show',
@@ -113,6 +120,7 @@ module Fediverse
         )
       end
 
+      #: (inbox_url: String, message: String, ?from: Federails::Actor?) -> untyped
       def post_to_inbox(inbox_url:, message:, from: nil)
         conn = Faraday.default_connection
         conn.builder.build_response(
@@ -121,13 +129,15 @@ module Fediverse
         )
       end
 
+      #: (url: String, message: String, from: Federails::Actor?) -> untyped
       def signed_request(url:, message:, from:)
         req = request(url: url, message: message)
         req.headers['Signature'] = Fediverse::Signature.sign(sender: from, request: req) if from
         req
       end
 
-      def request(url:, message:) # rubocop:todo Metrics/AbcSize
+      #: (url: String, message: String) -> untyped
+      def request(url:, message:)
         Faraday.default_connection.build_request(:post) do |req|
           req.url url
           req.body = message
@@ -139,6 +149,7 @@ module Fediverse
         end
       end
 
+      #: (String) -> String
       def digest(message)
         "SHA-256=#{Base64.strict_encode64(
           OpenSSL::Digest.new('SHA256').digest(message)

@@ -1,0 +1,22 @@
+# Generated from lib/fediverse/node_info.rb with RBS::Inline
+
+module Fediverse
+  class NodeInfo
+    class NotFoundError < StandardError
+    end
+
+    class NoActivityPubError < StandardError
+    end
+
+    NODEINFO_SCHEMA_RELS: Array[String]
+
+    # : (String) -> Hash[Symbol, untyped]
+    def self.fetch: (String) -> Hash[Symbol, untyped]
+
+    # : (String) -> String
+    private def self.base_url: (String) -> String
+
+    # : (String) -> String
+    private def self.nodeinfo_url: (String) -> String
+  end
+end

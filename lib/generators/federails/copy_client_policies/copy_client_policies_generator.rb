@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module Federails
   class CopyClientPoliciesGenerator < Rails::Generators::Base
     source_root File.expand_path('../../../../app/policies/federails', __dir__)

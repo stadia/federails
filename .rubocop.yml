@@ -9,6 +9,9 @@ plugins:
   - rubocop-factory_bot
 
 inherit_from: .rubocop_todo.yml
+inherit_mode:
+  merge:
+    - Exclude
 
 AllCops:
   RubyInterpreters:
@@ -191,3 +194,6 @@ Style/TrailingCommaInArrayLiteral:
 
 Style/TrailingCommaInHashLiteral:
   EnforcedStyleForMultiline: comma
+
+Layout/LeadingCommentSpace:
+  Enabled: false

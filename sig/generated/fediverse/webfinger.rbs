@@ -1,0 +1,77 @@
+# Generated from lib/fediverse/webfinger.rb with RBS::Inline
+
+module Fediverse
+  # Methods related to Webfinger: find accounts, fetch actors,...
+  class Webfinger
+    # Extracts username and domain from an account string.
+    # Accepts forms "user@domain", "@user@domain" and "acct:user@domain"
+    #
+    # @param account [String] Account string
+    #
+    # @return [MatchData, nil] Matches with +:username+ and +:domain+ or +nil+
+    def self.split_account: (untyped account) -> untyped
+
+    # Determines if a given account string should be a local account (same host as configured one)
+    #
+    # @param hash [Hash, MatchData] Object with +:username+ and +:domain+ keys
+    #
+    # @return [Boolean]
+    def self.local_user?: (untyped hash) -> untyped
+
+    # Fetches a distant actor
+    #
+    # @param username [String]
+    # @param domain [String]
+    #
+    # @return [Federails::Actor, nil] Federails actor or nothing when not found
+    def self.fetch_actor: (untyped username, untyped domain) -> untyped
+
+    # Fetches an actor given its URL
+    #
+    # @param url [String] Actor's federation URL
+    #
+    # @return [Federails::Actor, nil] Federails actor or nothing when not found
+    def self.fetch_actor_url: (untyped url) -> untyped
+
+    # Gets the real actor's federation URL from its username and domain
+    #
+    # @param username [String]
+    # @param domain [String]
+    #
+    # @return [String, nil] Federation URL if found
+    def self.webfinger: (untyped username, untyped domain) -> untyped
+
+    # Returns remote follow link template, or complete link if actor_url is provided
+    #
+    # @param username [String]
+    # @param domain [String]
+    # @param actor_url [String] Optional Federation URL to provide when known
+    #
+    # @return [String] The URL to use as follow URL
+    def self.remote_follow_url: (untyped username, untyped domain, ?actor_url: untyped) -> untyped
+
+    # Makes a webfinger request for a given username/domain
+    # @return [Hash] Webfinger response's content
+    private def self.webfinger_response: (untyped username, untyped domain) -> untyped
+
+    # Extracts the server and port from a string, omitting common ports
+    # @return [String] Server and port
+    private def self.server_and_port: (untyped string) -> untyped
+
+    # Builds a +Federails::Actor+ from a Webfinger response
+    # @param data [Hash] Webfinger response
+    # @return [Federails::Actor]
+    private def self.webfinger_to_actor: (untyped data) -> untyped
+
+    # Performs a signed GET request using a local actor for authentication
+    # Used as fallback when servers require Authorized Fetch (Secure Mode)
+    # @return [Hash]
+    # @raise [ActiveRecord::RecordNotFound] when no local actor exists or request fails
+    private def self.signed_get_json: (untyped url) -> untyped
+
+    # Makes a simple GET request and returns a +Hash+ from the parsed body
+    # @return [Hash]
+    # @raise [ActiveRecord::RecordNotFound] when the response is invalid
+    private def self.get_json: (untyped url, ?untyped params) -> untyped
+  end
+end

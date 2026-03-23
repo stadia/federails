@@ -1,8 +1,10 @@
+# rbs_inline: enabled
+
 module Federails
   module Utils
     class Host
       class << self
-        COMMON_PORTS = [80, 443].freeze
+        COMMON_PORTS = [80, 443].freeze #: Array[Integer]
 
         ##
         # @return [String] Host and port of the current instance
@@ -39,6 +41,7 @@ module Federails
 
         private
 
+        #: (String?, Integer?) -> String
         def host_and_port(host, port)
           port_string = if port.present? && COMMON_PORTS.exclude?(port)
                           ":#{port}"

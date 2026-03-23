@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module Federails
   module Maintenance
     class ActorsUpdater
@@ -50,7 +52,7 @@ module Federails
           end
         end
 
-        # @param actor [Federails::Actor]
+        #: (Federails::Actor) -> Symbol
         def update(actor)
           return :ignored_local if actor.local?
 

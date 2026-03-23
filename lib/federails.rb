@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 require 'jbuilder'
 require 'pagy'
 require 'pundit'
@@ -18,7 +20,7 @@ require 'fediverse'
 
 # This module includes classes and methods related to Ruby on Rails: engine configuration, models, controllers, etc.
 module Federails
-  DEFAULT_DATA_FILTER_METHOD = :handle_federated_object?
+  DEFAULT_DATA_FILTER_METHOD = :handle_federated_object? #: Symbol
 
   mattr_reader :configuration
   @@configuration = Configuration
@@ -27,16 +29,19 @@ module Federails
   config.factory_bot.definition_file_paths += [File.expand_path('spec/factories', __dir__)] if defined?(FactoryBotRails)
 
   class << self
+    #: () { (Federails::Configuration) -> void } -> void
     def configure
       yield @@configuration
     end
 
     # rubocop:disable Rails/Delegate
+    #: () -> Logger
     def logger
       Configuration.logger
     end
     # rubocop:enable Rails/Delegate
 
+    #: (Symbol | String) -> void
     def config_from(name) # rubocop:disable Metrics/MethodLength
       config = Rails.application.config_for name
       [
@@ -61,11 +66,13 @@ module Federails
     #
     # @example
     #   puts "Follow #{some_actor.name}" if actor_entity? current_user
+    #: (String | Class | untyped) -> bool
     def actor_entity?(class_or_instance)
       Configuration.actor_types.key? class_or_instance_name(class_or_instance)
     end
 
     # @return [Hash] The configuration for the given actor entity
+    #: (String | Class | untyped) -> Hash[Symbol, untyped]
     def actor_entity(class_or_instance)
       klass = class_or_instance_name(class_or_instance)
       raise "#{klass} is not a configured actor entity" unless Configuration.actor_types.key?(klass)
@@ -74,6 +81,7 @@ module Federails
     end
 
     # @return [Boolean] True if the given model is a possible data entity
+    #: (String | Class | untyped) -> bool
     def data_entity?(class_or_instance)
       Configuration.data_types.key? class_or_instance_name(class_or_instance)
     end
@@ -115,6 +123,7 @@ module Federails
     end
 
     # @return [Hash] The configuration for the given data entity
+    #: (String | Class | untyped) -> Hash[Symbol, untyped]
     def data_entity_configuration(class_or_instance)
       klass = class_or_instance_name(class_or_instance)
       raise "#{klass} is not a configured data entity" unless Configuration.data_types.key?(klass)
@@ -125,6 +134,7 @@ module Federails
     private
 
     # @return [String] Class name of the provided class or instance
+    #: (String | Class | untyped) -> String
     def class_or_instance_name(class_or_instance)
       case class_or_instance
       when String

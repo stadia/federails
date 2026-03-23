@@ -1,0 +1,27 @@
+# Generated from lib/federails/configuration.rb with RBS::Inline
+
+module Federails
+  # Stores the Federails configuration in a _singleton_.
+  module Configuration
+    # : () -> bool
+    def self.open_registrations: () -> bool
+
+    # : () -> Hash[String, untyped]
+    def self.nodeinfo_metadata: () -> Hash[String, untyped]
+
+    # : () -> Logger
+    def self.logger: () -> Logger
+
+    # : (String?) -> void
+    def self.site_host=: (String?) -> void
+
+    # : (Integer?) -> void
+    def self.site_port=: (Integer?) -> void
+
+    # : (Class, Hash[Symbol, untyped]) -> void
+    def self.register_actor_class: (Class, Hash[Symbol, untyped]) -> void
+
+    # : (Class, Hash[Symbol, untyped]) -> void
+    def self.register_data_type: (Class, Hash[Symbol, untyped]) -> void
+  end
+end

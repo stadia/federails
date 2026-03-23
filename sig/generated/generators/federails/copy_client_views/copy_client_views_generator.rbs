@@ -1,0 +1,7 @@
+# Generated from lib/generators/federails/copy_client_views/copy_client_views_generator.rb with RBS::Inline
+
+module Federails
+  class CopyClientViewsGenerator < Rails::Generators::Base
+    def copy_views: () -> untyped
+  end
+end

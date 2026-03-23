@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module Federails
   module Utils
     # Methods to manipulate incoming objects
@@ -91,6 +93,7 @@ module Federails
 
         private
 
+        #: (String) -> Hash[Symbol, String]?
         def local_route(url)
           route = Utils::Host.local_route(url)
 
@@ -99,6 +102,7 @@ module Federails
           route
         end
 
+        #: (Hash[Symbol, String]) -> untyped
         def from_local_route(route)
           config = Federails.data_entity_handled_on route[:publishable_type]
           return unless config
@@ -108,6 +112,7 @@ module Federails
           nil
         end
 
+        #: (String | Hash[String, untyped]) -> untyped
         def from_distant_server(federated_url)
           hash = Fediverse::Request.dereference(federated_url)
           return unless hash

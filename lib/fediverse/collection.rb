@@ -1,14 +1,20 @@
+# rbs_inline: enabled
+
 module Fediverse
   class Collection < Array
-    PUBLIC = 'https://www.w3.org/ns/activitystreams#Public'.freeze
-    DEFAULT_MAX_PAGES = 100
+    PUBLIC = 'https://www.w3.org/ns/activitystreams#Public'.freeze #: String
+    DEFAULT_MAX_PAGES = 100 #: Integer
 
-    attr_reader :total_items, :id, :type
+    attr_reader :total_items #: Integer?
+    attr_reader :id #: String?
+    attr_reader :type #: String?
 
+    #: (String, ?max_pages: Integer) -> Fediverse::Collection
     def self.fetch(url, max_pages: DEFAULT_MAX_PAGES)
       new.fetch(url, max_pages: max_pages)
     end
 
+    #: (String, ?max_pages: Integer) -> self
     def fetch(url, max_pages: DEFAULT_MAX_PAGES)
       json = Fediverse::Request.dereference(url)
       @total_items = json['totalItems']

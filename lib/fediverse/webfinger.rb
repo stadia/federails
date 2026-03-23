@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 require 'federails/utils/host'
 require 'federails/utils/json_request'
 require 'fediverse/signature'
@@ -116,7 +118,7 @@ module Fediverse
       # Builds a +Federails::Actor+ from a Webfinger response
       # @param data [Hash] Webfinger response
       # @return [Federails::Actor]
-      def webfinger_to_actor(data) # rubocop:disable Metrics/MethodLength
+      def webfinger_to_actor(data)
         unless data.is_a?(Hash)
           Federails.logger.debug { "Invalid actor payload: #{data.inspect}" }
           raise ActiveRecord::RecordNotFound

@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 require 'fediverse/collection'
 
 # This module includes classes and helpers to interact with the Fediverse.

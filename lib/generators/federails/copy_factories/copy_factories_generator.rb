@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module Federails
   class CopyFactoriesGenerator < Rails::Generators::Base
     SOURCE_DIRECTORY = File.expand_path('../../../../spec/factories/federails', __dir__)
