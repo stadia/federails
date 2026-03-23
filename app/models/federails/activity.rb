@@ -17,11 +17,7 @@ module Federails
     belongs_to :actor
 
     scope :feed_for, lambda { |actor|
-      actor_ids = []
-      Following.accepted.where(actor: actor).find_each do |following|
-        actor_ids << following.target_actor_id
-      end
-      where(actor_id: actor_ids)
+      where(actor_id: Following.accepted.where(actor: actor).select(:target_actor_id))
     }
 
     after_create_commit :post_to_inboxes

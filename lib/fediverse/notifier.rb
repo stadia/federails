@@ -56,8 +56,11 @@ module Fediverse
           activity.try(:audience),
         ].flatten.compact.uniq.reject { |url| url == Fediverse::Collection::PUBLIC }
 
+        # Batch-fetch actors already known in DB to avoid N+1 queries
+        known_actors = Federails::Actor.where(federated_url: addressing).index_by(&:federated_url)
+
         addressing.flat_map do |url|
-          actor = Federails::Actor.find_or_create_by_federation_url(url)
+          actor = known_actors[url] || Federails::Actor.find_or_create_by_federation_url(url)
           [actor.inbox_url]
         rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid
           collection_to_actors(url).map(&:inbox_url)
@@ -68,8 +71,13 @@ module Fediverse
         return [] if max_depth <= 0
 
         collection = Collection.fetch(url)
-        collection.filter_map do |actor_url|
-          Federails::Actor.find_or_create_by_federation_url(actor_url)
+        actor_urls = collection.to_a
+
+        # Batch-fetch actors already known in DB to avoid N+1 queries
+        known_actors = Federails::Actor.where(federated_url: actor_urls).index_by(&:federated_url)
+
+        actor_urls.filter_map do |actor_url|
+          known_actors[actor_url] || Federails::Actor.find_or_create_by_federation_url(actor_url)
         rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid
           collection_to_actors(actor_url, max_depth: max_depth - 1)
         end
