@@ -63,6 +63,7 @@ Metrics/AbcSize:
     # Migrations
     - db/migrate/*.rb
     - spec/dummy/db/migrate/*.rb
+    - spec/dummy/app/controllers/comments_controller.rb
 
 Metrics/BlockLength:
   Exclude:
@@ -102,6 +103,7 @@ Rails/DynamicFindBy:
     # In Actor model
     - find_by_account
     - find_by_federation_url
+    - find_by_federation_url!
 
 Rails/FilePath:
   EnforcedStyle: arguments

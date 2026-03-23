@@ -7,8 +7,7 @@ module Federails
 
     validates :domain, presence: true, allow_blank: false, uniqueness: true
 
-    # No "dependent" option here as this is not a hard reference, and we want to keep the actors if the host gets deleted
-    has_many :actors, class_name: 'Federails::Actor', primary_key: :domain, foreign_key: :server, inverse_of: :host
+    has_many :actors, class_name: 'Federails::Actor', primary_key: :domain, foreign_key: :server, inverse_of: :host, dependent: false
 
     scope :same_app, -> { where software_name: Configuration.app_name }
     scope :same_app_and_version, -> { same_app.where app_version: Configuration.app_version }

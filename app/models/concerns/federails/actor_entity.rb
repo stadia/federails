@@ -104,8 +104,7 @@ module Federails
     end
 
     included do
-      # No "dependent: :xyz" as the "before_destroy" hook should have nullified the actor
-      has_one :federails_actor, class_name: 'Federails::Actor', as: :entity
+      has_one :federails_actor, class_name: 'Federails::Actor', as: :entity, dependent: false
 
       after_create :create_federails_actor, if: lambda {
         raise("Entity not configured for #{self.class.name}. Did you use \"acts_as_federails_actor\"?") unless Federails.actor_entity? self

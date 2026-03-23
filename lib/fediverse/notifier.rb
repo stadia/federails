@@ -62,12 +62,13 @@ module Fediverse
         # Batch-fetch actors already known in DB to avoid N+1 queries
         known_actors = Federails::Actor.where(federated_url: addressing).index_by(&:federated_url)
 
-        addressing.flat_map do |url|
+        inboxes = addressing.flat_map do |url|
           actor = known_actors[url] || Federails::Actor.find_or_create_by_federation_url(url)
           [actor.inbox_url]
         rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid
           collection_to_actors(url).map(&:inbox_url)
-        end.compact.uniq.reject { |url| url == actor_inbox }
+        end
+        inboxes.compact.uniq.reject { |url| url == actor_inbox }
       end
 
       #: (String, ?max_depth: Integer) -> Array[Federails::Actor]
