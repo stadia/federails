@@ -40,6 +40,7 @@ RSpec.describe Federails::Server::ActorsController, type: :acceptance do
          attributionDomains: { type: :array, required: false, description: 'Extension used to test custom data' }
 
   entity :actors_ordered_collection_page,
+         '@context':   { type: :string, description: 'JSON-LD context' },
          # Base
          id:           { type: :string, description: 'Unique identifier' },
          type:         { type: :string, description: 'Object type (OrderedCollectionPage)' },
@@ -49,8 +50,8 @@ RSpec.describe Federails::Server::ActorsController, type: :acceptance do
          prev:         { type: :string, required: false, description: 'URL to the previous page of items' },
          # OrderedCollection/Collection
          totalItems:   { type: :integer, description: 'Total number of following/followers in this collection' },
-         # first:        { type: :string, description: 'URL to the furthest preceding page' },
-         # last:         { type: :string, description: 'URL to the furthest proceeding page' },
+         first:        { type: :string, description: 'URL to the furthest preceding page' },
+         last:         { type: :string, description: 'URL to the furthest proceeding page' },
          orderedItems: { type: :array, description: 'List of followings on current page' }
   entity :actors_ordered_collection,
          '@context': { type: :string, description: 'JSON-LD context' },
@@ -59,7 +60,6 @@ RSpec.describe Federails::Server::ActorsController, type: :acceptance do
          type:       { type: :string, description: 'Object type (OrderedCollection)' },
          # CollectionPage (except items)
          totalItems: { type: :integer, description: 'Total number of pages in this collection' },
-         current:    { type: :object, description: 'OrderedCollectionPage with list of actor IDs', attributes: :actors_ordered_collection_page },
          first:      { type: :string, description: 'URL to the furthest preceding page' },
          last:       { type: :string, description: 'URL to the furthest proceeding page' }
 
@@ -86,6 +86,11 @@ RSpec.describe Federails::Server::ActorsController, type: :acceptance do
       test_response_of url, path_params: { id: actor.to_param }, headers: headers
     end
 
+    for_code 200, expect_one: :actors_ordered_collection_page do |url|
+      followers
+      test_response_of url, path_params: { id: actor.to_param, page: 2 }, headers: headers
+    end
+
     for_code 404, with_content_type: Mime[:activitypub] do |url|
       followers
       test_response_of url, path_params: { id: 0 }, headers: headers
@@ -98,6 +103,11 @@ RSpec.describe Federails::Server::ActorsController, type: :acceptance do
     for_code 200, expect_one: :actors_ordered_collection do |url|
       following
       test_response_of url, path_params: { id: actor.to_param }, headers: headers
+    end
+
+    for_code 200, expect_one: :actors_ordered_collection_page do |url|
+      following
+      test_response_of url, path_params: { id: actor.to_param, page: 2 }, headers: headers
     end
 
     for_code 404, with_content_type: Mime[:activitypub] do |url|
