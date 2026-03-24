@@ -18,7 +18,16 @@ module Federails
         end
         raise ActiveRecord::RecordNotFound if @user.nil?
 
-        render formats: [:jrd]
+        render_serialized(
+          Federails::Server::WebFingerResource,
+          Federails::Server::WebFingerPayload.new(
+            subject:           resource,
+            self_href:         @user.federails_actor.federated_url,
+            profile_href:      @user.federails_actor.profile_url,
+            remote_follow_url: remote_follow_url
+          ),
+          content_type: Mime[:jrd]
+        )
       end
 
       def host_meta

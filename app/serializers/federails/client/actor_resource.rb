@@ -1,0 +1,24 @@
+module Federails
+  module Client
+    class ActorResource < BaseResource
+      attributes(
+        :id,
+        :name,
+        :federated_url,
+        :username,
+        :inbox_url,
+        :outbox_url,
+        :followers_url,
+        :followings_url,
+        :profile_url,
+        :at_address,
+        :local,
+        :entity_id,
+        :entity_type,
+        :tombstoned_at,
+        :created_at,
+        :updated_at
+      )
+    end
+  end
+end

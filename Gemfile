@@ -6,7 +6,6 @@ gemspec
 
 # Dummy app
 gem 'devise'
-gem 'jbuilder'
 gem 'sprockets-rails'
 gem 'sqlite3'
 

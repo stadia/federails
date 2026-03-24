@@ -9,12 +9,14 @@ module Federails
       def index
         @activities = policy_scope(Federails::Activity, policy_scope_class: Federails::Client::ActivityPolicy::Scope).all
         @activities = @activities.where actor: Actor.find_param(params[:actor_id]) if params[:actor_id]
+        render_serialized(Federails::Client::ActivityResource, @activities) if request.format.json?
       end
 
       # GET /app/feed
       # GET /app/feed.json
       def feed
         @activities = Activity.feed_for(current_user.federails_actor)
+        render_serialized(Federails::Client::ActivityResource, @activities) if request.format.json?
       end
 
       private
