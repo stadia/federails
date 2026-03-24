@@ -3,7 +3,7 @@ module Federails
     class ActorResource < BaseResource
       attribute :@context do |actor|
         data = actor_data(actor)
-        additional = ['https://w3id.org/security/v1', data.delete(:@context) || data.delete('@context')]
+        additional = ['https://w3id.org/security/v1', data.delete(:@context)]
         Federails::SerializerSupport.json_ld_context(additional: additional)
       end
 
@@ -28,14 +28,11 @@ module Federails
       end
 
       def serializable_hash
-        super.merge(actor_data(object))
+        actor_data(object).merge(super)
       end
 
       def actor_data(actor)
-        @actor_data ||= begin
-          data = actor.entity&.to_activitypub_object || {}
-          data.deep_dup
-        end
+        normalize_activitypub_hash(actor.entity&.to_activitypub_object || {})
       end
     end
   end

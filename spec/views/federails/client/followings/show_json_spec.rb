@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe 'federails/client/followings/show', type: :view do
+RSpec.describe Federails::Client::FollowingResource do
   it 'renders the following as json' do
     following = FactoryBot.create :following
     json = JSON.parse(Federails::Client::FollowingResource.new(following).serialize)

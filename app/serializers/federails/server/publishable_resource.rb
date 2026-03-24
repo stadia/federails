@@ -6,7 +6,7 @@ module Federails
 
         data = publishable_data(publishable)
         activity_streams = 'https://www.w3.org/ns/activitystreams'
-        additional = Array(data.delete(:@context) || data.delete('@context')).flatten.compact.uniq
+        additional = Array(data.delete(:@context)).flatten.compact.uniq
         additional.reject! { |entry| entry == activity_streams }
         additional = additional.presence
         Federails::SerializerSupport.json_ld_context(additional: additional)
@@ -28,10 +28,7 @@ module Federails
       end
 
       def publishable_data(publishable)
-        @publishable_data ||= begin
-          data = publishable.to_activitypub_object || {}
-          data.deep_dup
-        end
+        normalize_activitypub_hash(publishable.to_activitypub_object || {})
       end
     end
   end

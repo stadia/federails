@@ -10,11 +10,8 @@ module Federails
         'Tombstone'
       end
       attribute :deleted, &:tombstoned_at
-
-      def serializable_hash
-        super.tap do |hash|
-          hash[:formerType] = object.attributes['actor_type'] || object.entity_configuration[:actor_type]
-        end
+      attribute :formerType do |actor|
+        actor.attributes['actor_type'] || actor.entity_configuration[:actor_type]
       end
     end
   end

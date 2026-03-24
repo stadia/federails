@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe 'federails/client/activities/index', type: :view do
+RSpec.describe Federails::Client::ActivityResource do
   it 'renders an array of activities as json' do
     activity = FactoryBot.create :activity, :create
     json = JSON.parse(Federails::Client::ActivityResource.new([activity]).serialize)

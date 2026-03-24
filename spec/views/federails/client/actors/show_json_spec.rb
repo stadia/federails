@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe 'federails/client/actors/show', type: :view do
+RSpec.describe Federails::Client::ActorResource do
   it 'renders the actor as json' do
     actor = FactoryBot.create :local_actor
     json = JSON.parse(Federails::Client::ActorResource.new(actor).serialize)
