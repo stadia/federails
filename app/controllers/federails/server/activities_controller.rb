@@ -3,6 +3,8 @@ require 'fediverse/inbox'
 module Federails
   module Server
     class ActivitiesController < Federails::ServerController
+      include Federails::Server::RenderCollections
+
       before_action :set_activity, only: [:show]
 
       # GET /federation/activities
@@ -10,10 +12,16 @@ module Federails
       def outbox
         authorize Federails::Activity, policy_class: Federails::Server::ActivityPolicy
 
-        @actor            = Actor.find_param(params[:actor_id])
-        @activities       = policy_scope(Federails::Activity, policy_scope_class: Federails::Server::ActivityPolicy::Scope).where(actor: @actor).order(created_at: :desc)
-        @total_activities = @activities.count
-        @activities       = @activities.page(params[:page])
+        actor            = Actor.find_param(params[:actor_id])
+        activities       = policy_scope(Federails::Activity, policy_scope_class: Federails::Server::ActivityPolicy::Scope).where(actor: actor).order(created_at: :desc)
+
+        render_collection(
+          collection: activities.page(params[:page]),
+          actor:      actor,
+          url_helper: :server_actor_outbox_url
+        ) do |builder, items|
+          builder.array! items, partial: 'federails/server/activities/activity', as: :activity, context: false
+        end
       end
 
       # GET /federation/actors/1/activities/1.json
