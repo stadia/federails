@@ -175,6 +175,8 @@ module Fediverse
 
       it 'raises an error when failing' do
         VCR.use_cassette 'fediverse/webfinger/webfinger_get_url_404' do
+          allow(described_class).to receive(:signed_get_json).with('https://example.com/users/jdoe').and_raise(ActiveRecord::RecordNotFound)
+
           expect do
             described_class.fetch_actor_url('https://example.com/users/jdoe')
           end.to raise_error ActiveRecord::RecordNotFound
