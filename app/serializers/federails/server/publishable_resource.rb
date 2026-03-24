@@ -1,8 +1,15 @@
 module Federails
   module Server
     class PublishableResource < BaseResource
-      attribute :'@context' do |_publishable|
-        Federails::SerializerSupport.json_ld_context if params.fetch(:context, true)
+      attribute :'@context' do |publishable|
+        next unless params.fetch(:context, true)
+
+        data = publishable_data(publishable)
+        activity_streams = 'https://www.w3.org/ns/activitystreams'
+        additional = Array(data.delete(:@context) || data.delete('@context')).flatten.compact.uniq
+        additional.reject! { |entry| entry == activity_streams }
+        additional = additional.presence
+        Federails::SerializerSupport.json_ld_context(additional: additional)
       end
 
       attribute :id, &:federated_url
@@ -23,7 +30,7 @@ module Federails
       def publishable_data(publishable)
         @publishable_data ||= begin
           data = publishable.to_activitypub_object || {}
-          data.deep_dup.except(:@context, '@context')
+          data.deep_dup
         end
       end
     end
