@@ -19,7 +19,7 @@ RSpec.describe Federails::Client::FollowingsController, type: :controller do
       end.to change(Federails::Following, :count).by(1)
 
       expect(response).to have_http_status(:created)
-      body = JSON.parse(response.body)
+      body = response.parsed_body
 
       aggregate_failures do
         expect(body['actor_id']).to eq(user.federails_actor.id)
@@ -31,23 +31,23 @@ RSpec.describe Federails::Client::FollowingsController, type: :controller do
       post :create, params: { following: { target_actor_id: nil } }, format: :json
 
       expect(response).to have_http_status(:unprocessable_entity)
-      expect(JSON.parse(response.body)).to have_key('target_actor')
+      expect(response.parsed_body).to have_key('target_actor')
     end
   end
 
   describe 'PUT #accept' do
-    let(:incoming_following) { FactoryBot.create(:following, actor: target_actor, target_actor: user.federails_actor) }
+    let(:incoming_following) { FactoryBot.create :following, actor: target_actor, target_actor: user.federails_actor }
 
     it 'accepts and renders the following as json' do
       put :accept, params: { id: incoming_following.to_param }, format: :json
 
       expect(response).to have_http_status(:ok)
-      expect(JSON.parse(response.body)['status']).to eq('accepted')
+      expect(response.parsed_body['status']).to eq('accepted')
     end
   end
 
   describe 'DELETE #destroy' do
-    let!(:following) { FactoryBot.create(:following, actor: user.federails_actor, target_actor: target_actor) }
+    let!(:following) { FactoryBot.create :following, actor: user.federails_actor, target_actor: target_actor }
 
     it 'returns no content' do
       delete :destroy, params: { id: following.to_param }, format: :json

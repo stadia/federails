@@ -36,7 +36,7 @@ RSpec.describe '/well-known', type: :request do
         get federails.webfinger_url, params: { resource: 'acct:nobody@localhost' }, headers: { accept: accept }
         expect(response).to be_not_found
         if accept == 'application/json'
-          expect(JSON.parse(response.body)['error']).to eq 'ActiveRecord::RecordNotFound'
+          expect(response.parsed_body['error']).to eq 'ActiveRecord::RecordNotFound'
         else
           expect(response.body).to be_blank
         end
@@ -51,7 +51,7 @@ RSpec.describe '/well-known', type: :request do
           get federails.webfinger_url, params: { resource: actor.federated_url }, headers: { accept: accept }
           expect(response).to have_http_status :gone
           if accept == 'application/json'
-            expect(JSON.parse(response.body)['error']).to eq 'Federails::Actor::TombstonedError'
+            expect(response.parsed_body['error']).to eq 'Federails::Actor::TombstonedError'
           else
             expect(response.body).to be_blank
           end
@@ -61,7 +61,7 @@ RSpec.describe '/well-known', type: :request do
           get federails.webfinger_url, params: { resource: actor.acct_uri }, headers: { accept: accept }
           expect(response).to have_http_status :gone
           if accept == 'application/json'
-            expect(JSON.parse(response.body)['error']).to eq 'Federails::Actor::TombstonedError'
+            expect(response.parsed_body['error']).to eq 'Federails::Actor::TombstonedError'
           else
             expect(response.body).to be_blank
           end

@@ -20,7 +20,7 @@ module Federails
           url = federails.client_actor_url @following.actor
           if @following.accept!
             format.html { redirect_to url, notice: I18n.t('controller.followings.accept.success') }
-            format.json { render :show, status: :ok, location: @following }
+            format.json { render_serialized(Federails::Client::FollowingResource, @following, status: :ok, location: @following) }
           else
             format.html { redirect_to url, alert: I18n.t('controller.followings.accept.error') }
             format.json { render json: @following.errors, status: :unprocessable_entity }
@@ -91,7 +91,7 @@ module Federails
         respond_to do |format|
           if @following.save
             format.html { redirect_to url, notice: I18n.t('controller.followings.save_and_render.success') }
-            format.json { render :show, status: :created, location: @following }
+            format.json { render_serialized(Federails::Client::FollowingResource, @following, status: :created, location: @following) }
           else
             format.html { redirect_to url, alert: I18n.t('controller.followings.save_and_render.error') }
             format.json { render json: @following.errors, status: :unprocessable_entity }

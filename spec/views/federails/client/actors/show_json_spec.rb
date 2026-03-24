@@ -1,13 +1,9 @@
 require 'rails_helper'
 
-RSpec.describe 'federails/client/actors/show', type: :view do
+RSpec.describe Federails::Client::ActorResource do
   it 'renders the actor as json' do
-    actor = FactoryBot.create(:local_actor)
-    assign(:actor, actor)
-
-    render template: 'federails/client/actors/show', formats: [:json]
-
-    json = JSON.parse(rendered)
+    actor = FactoryBot.create :local_actor
+    json = JSON.parse(Federails::Client::ActorResource.new(actor).serialize)
     aggregate_failures do
       expect(json['id']).to eq(actor.id)
       expect(json['name']).to eq(actor.name)

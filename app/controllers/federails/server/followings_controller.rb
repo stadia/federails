@@ -4,7 +4,9 @@ module Federails
       before_action :set_following, only: [:show]
 
       # GET /federation/actors/1/followings/1.json
-      def show; end
+      def show
+        render_serialized(Federails::Server::FollowingResource, @following, content_type: Mime[:activitypub])
+      end
 
       private
 

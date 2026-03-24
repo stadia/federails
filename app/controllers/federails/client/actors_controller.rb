@@ -10,6 +10,7 @@ module Federails
 
         @actors = policy_scope(Federails::Actor, policy_scope_class: Federails::Client::ActorPolicy::Scope).all
         @actors = @actors.local if params[:local_only]
+        render_serialized(Federails::Client::ActorResource, @actors) if request.format.json?
       end
 
       # GET /app/actors/1
@@ -45,7 +46,7 @@ module Federails
             format.json { render json: { error: I18n.t('controller.actors.gone') }, status: :gone }
           else
             format.html { render :show }
-            format.json { render :show }
+            format.json { render_serialized(Federails::Client::ActorResource, @actor) }
           end
         end
       end

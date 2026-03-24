@@ -38,7 +38,7 @@ RSpec.describe Federails::Maintenance::ActorsUpdater do
     end
 
     it 'returns ignored_local for local actors' do
-      local_actor = FactoryBot.create(:local_actor)
+      local_actor = FactoryBot.create :local_actor
       result = nil
 
       described_class.run(local_actor) { |_actor, status| result = status }

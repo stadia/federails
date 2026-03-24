@@ -2,6 +2,7 @@ module Federails
   class ServerController < ::ActionController::Base # rubocop:disable Rails/ApplicationController
     include Pagy::Method
     include Pundit::Authorization
+    include Federails::ServerHelper
 
     after_action :verify_authorized
 
@@ -33,6 +34,16 @@ module Federails
 
     def error_gone(exception = nil)
       error_fallback(exception, 'Resource is gone', :gone)
+    end
+
+    def render_serialized(resource_class, object, content_type:, status: :ok, location: nil, params: {})
+      render_options = {
+        json:         resource_class.new(object, params: params).serializable_hash,
+        status:       status,
+        content_type: content_type,
+      }
+      render_options[:location] = location if location
+      render(**render_options)
     end
   end
 end

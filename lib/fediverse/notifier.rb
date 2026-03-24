@@ -114,11 +114,7 @@ module Fediverse
 
       #: (Federails::Activity) -> String
       def payload(activity)
-        Federails::ServerController.renderer.new.render(
-          template: 'federails/server/activities/show',
-          assigns:  { activity: activity },
-          format:   :json
-        )
+        Federails::Server::ActivityResource.new(activity).serializable_hash.to_json
       end
 
       #: (inbox_url: String, message: String, ?from: Federails::Actor?) -> untyped

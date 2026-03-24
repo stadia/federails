@@ -4,7 +4,11 @@ module Federails
       def index
         skip_authorization
 
-        render formats: [:nodeinfo]
+        render_serialized(
+          Federails::Server::NodeinfoIndexResource,
+          Federails::Server::NodeinfoIndexPayload.new(href: show_node_info_url),
+          content_type: Mime[:nodeinfo]
+        )
       end
 
       def show # rubocop:todo Metrics/AbcSize
@@ -21,7 +25,20 @@ module Federails
           @active_month += model.send(method, (30.days.ago)...Time.current)
           @active_halfyear += model.send(method, (180.days.ago)...Time.current)
         end
-        render formats: [:nodeinfo]
+        render_serialized(
+          Federails::Server::NodeinfoResource,
+          Federails::Server::NodeinfoPayload.new(
+            software_name:      Federails::Configuration.app_name&.parameterize,
+            software_version:   Federails::Configuration.app_version,
+            open_registrations: Federails::Configuration.open_registrations,
+            has_user_counts:    @has_user_counts,
+            total:              @total,
+            active_month:       @active_month,
+            active_halfyear:    @active_halfyear,
+            metadata:           Federails::Configuration.nodeinfo_metadata || {}
+          ),
+          content_type: Mime[:nodeinfo]
+        )
       end
     end
   end

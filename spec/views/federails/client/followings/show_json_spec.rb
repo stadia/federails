@@ -1,13 +1,9 @@
 require 'rails_helper'
 
-RSpec.describe 'federails/client/followings/show', type: :view do
+RSpec.describe Federails::Client::FollowingResource do
   it 'renders the following as json' do
-    following = FactoryBot.create(:following)
-    assign(:following, following)
-
-    render template: 'federails/client/followings/show', formats: [:json]
-
-    json = JSON.parse(rendered)
+    following = FactoryBot.create :following
+    json = JSON.parse(Federails::Client::FollowingResource.new(following).serialize)
     aggregate_failures do
       expect(json['id']).to eq(following.id)
       expect(json['actor_id']).to eq(following.actor_id)

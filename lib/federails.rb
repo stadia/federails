@@ -1,6 +1,6 @@
 # rbs_inline: enabled
 
-require 'jbuilder'
+require 'alba'
 require 'pagy'
 require 'pundit'
 
