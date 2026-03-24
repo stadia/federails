@@ -158,6 +158,20 @@ module Fediverse
           expect(described_class.remote_follow_url('mtancoigne', 'mamot.fr', actor_url: 'https://example.com')).to eq 'https://mamot.fr/authorize_interaction?uri=https%3A%2F%2Fexample.com'
         end
       end
+
+      it 'returns nil when the remote follow template is missing' do
+        allow(described_class).to receive(:webfinger_response).and_return({ 'links' => [] })
+
+        expect(described_class.remote_follow_url('mtancoigne', 'mamot.fr')).to be_nil
+      end
+
+      it 'raises on invalid payload for remote follow url' do
+        allow(described_class).to receive(:webfinger_response).and_return(nil)
+
+        expect do
+          described_class.remote_follow_url('mtancoigne', 'mamot.fr')
+        end.to raise_error ActiveRecord::RecordNotFound
+      end
     end
 
     describe '#fetch_actor_url' do
@@ -175,6 +189,8 @@ module Fediverse
 
       it 'raises an error when failing' do
         VCR.use_cassette 'fediverse/webfinger/webfinger_get_url_404' do
+          allow(described_class).to receive(:signed_get_json).with('https://example.com/users/jdoe').and_raise(ActiveRecord::RecordNotFound)
+
           expect do
             described_class.fetch_actor_url('https://example.com/users/jdoe')
           end.to raise_error ActiveRecord::RecordNotFound
@@ -187,6 +203,24 @@ module Fediverse
         expect do
           described_class.fetch_actor_url('https://example.com/users/jdoe')
         end.to raise_error ActiveRecord::RecordNotFound
+      end
+
+      it 'uses signed fetch fallback when unsigned fetch fails' do
+        signed_payload = {
+          'id'                => 'https://example.com/users/jdoe',
+          'preferredUsername' => 'jdoe',
+          'type'              => 'Person',
+          'inbox'             => 'https://example.com/users/jdoe/inbox',
+          'outbox'            => 'https://example.com/users/jdoe/outbox',
+          'followers'         => 'https://example.com/users/jdoe/followers',
+          'following'         => 'https://example.com/users/jdoe/following',
+        }
+        allow(described_class).to receive(:get_json).and_raise(ActiveRecord::RecordNotFound)
+        allow(described_class).to receive(:signed_get_json).with('https://example.com/users/jdoe').and_return(signed_payload)
+
+        actor = described_class.fetch_actor_url('https://example.com/users/jdoe')
+
+        expect(actor.username).to eq('jdoe')
       end
     end
 
@@ -208,6 +242,57 @@ module Fediverse
         VCR.use_cassette 'fediverse/webfinger/webfinger_get_404' do
           expect do
             described_class.fetch_actor('some_inexistant_account', 'mamot.fr')
+          end.to raise_error ActiveRecord::RecordNotFound
+        end
+      end
+    end
+
+    describe 'private helpers' do
+      describe '.server_and_port' do
+        it 'omits the default https port' do
+          expect(described_class.send(:server_and_port, 'https://example.com:443/users/alice')).to eq('example.com')
+        end
+
+        it 'keeps non-default ports' do
+          expect(described_class.send(:server_and_port, 'https://example.com:8443/users/alice')).to eq('example.com:8443')
+        end
+      end
+
+      describe '.signed_get_json' do
+        let(:local_actor) { FactoryBot.create(:local_actor) }
+
+        it 'raises when no local actor is available' do
+          allow(Federails::Actor).to receive_message_chain(:where, :where, :not, :first).and_return(nil)
+
+          expect do
+            described_class.send(:signed_get_json, 'https://example.com/users/jdoe')
+          end.to raise_error ActiveRecord::RecordNotFound
+        end
+
+        it 'raises when signed get returns an unhandled status' do
+          allow(Federails::Actor).to receive_message_chain(:where, :where, :not, :first).and_return(local_actor)
+          allow(Fediverse::Signature).to receive(:signed_get).and_raise(Federails::Utils::JsonRequest::UnhandledResponseStatus.new('404'))
+
+          expect do
+            described_class.send(:signed_get_json, 'https://example.com/users/jdoe')
+          end.to raise_error ActiveRecord::RecordNotFound
+        end
+
+        it 'raises when signed get cannot connect' do
+          allow(Federails::Actor).to receive_message_chain(:where, :where, :not, :first).and_return(local_actor)
+          allow(Fediverse::Signature).to receive(:signed_get).and_raise(Faraday::ConnectionFailed.new('boom'))
+
+          expect do
+            described_class.send(:signed_get_json, 'https://example.com/users/jdoe')
+          end.to raise_error ActiveRecord::RecordNotFound
+        end
+
+        it 'raises when signed get returns invalid json' do
+          allow(Federails::Actor).to receive_message_chain(:where, :where, :not, :first).and_return(local_actor)
+          allow(Fediverse::Signature).to receive(:signed_get).and_raise(JSON::ParserError)
+
+          expect do
+            described_class.send(:signed_get_json, 'https://example.com/users/jdoe')
           end.to raise_error ActiveRecord::RecordNotFound
         end
       end
