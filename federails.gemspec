@@ -20,9 +20,9 @@ Gem::Specification.new do |spec|
     Dir['{app,config,db,lib}/**/*', 'LICENSE', 'Rakefile', 'README.md']
   end
 
+  spec.add_dependency 'alba', '>= 3.0'
   spec.add_dependency 'faraday'
   spec.add_dependency 'faraday-follow_redirects'
-  spec.add_dependency 'alba', '>= 3.0'
   spec.add_dependency 'json-ld', '>= 3.2.0'
   spec.add_dependency 'json-ld-preloaded', '>= 3.2.0'
   spec.add_dependency 'ostruct'

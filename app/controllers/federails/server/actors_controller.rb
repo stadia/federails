@@ -19,10 +19,10 @@ module Federails
         render_serialized(
           Federails::Server::OrderedCollectionResource,
           ordered_collection_payload(
-            collection_id:  @actor.followers_url,
-            page_url:       ->(page) { Federails::Engine.routes.url_helpers.followers_server_actor_url(@actor, page: page) },
-            total_items:    @total_actors,
-            ordered_items:  @actors.map(&:federated_url)
+            collection_id: @actor.followers_url,
+            page_url:      ->(page) { Federails::Engine.routes.url_helpers.followers_server_actor_url(@actor, page: page) },
+            total_items:   @total_actors,
+            ordered_items: @actors.map(&:federated_url)
           ),
           content_type: Mime[:activitypub]
         )
@@ -36,10 +36,10 @@ module Federails
         render_serialized(
           Federails::Server::OrderedCollectionResource,
           ordered_collection_payload(
-            collection_id:  @actor.followings_url,
-            page_url:       ->(page) { Federails::Engine.routes.url_helpers.following_server_actor_url(@actor, page: page) },
-            total_items:    @total_actors,
-            ordered_items:  @actors.map(&:federated_url)
+            collection_id: @actor.followings_url,
+            page_url:      ->(page) { Federails::Engine.routes.url_helpers.following_server_actor_url(@actor, page: page) },
+            total_items:   @total_actors,
+            ordered_items: @actors.map(&:federated_url)
           ),
           content_type: Mime[:activitypub]
         )

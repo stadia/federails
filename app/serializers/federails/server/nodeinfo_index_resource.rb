@@ -1,6 +1,6 @@
 module Federails
   module Server
-    NodeinfoIndexPayload = Struct.new(:href, keyword_init: true) unless const_defined?(:NodeinfoIndexPayload)
+    NodeinfoIndexPayload = Struct.new(:href) unless const_defined?(:NodeinfoIndexPayload)
 
     class NodeinfoIndexResource < BaseResource
       attribute :links do |payload|

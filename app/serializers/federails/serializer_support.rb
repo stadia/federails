@@ -1,6 +1,6 @@
 module Federails
   module SerializerSupport
-    extend self
+    module_function
 
     def json_ld_context(additional: nil)
       Federails::Utils::Context.generate(additional: additional)

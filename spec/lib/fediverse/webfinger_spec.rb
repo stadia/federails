@@ -258,7 +258,7 @@ module Fediverse
       end
 
       describe '.signed_get_json' do
-        let(:local_actor) { FactoryBot.create(:local_actor) }
+        let(:local_actor) { FactoryBot.create :local_actor }
 
         it 'raises when no local actor is available' do
           allow(Federails::Actor).to receive_message_chain(:where, :where, :not, :first).and_return(nil)

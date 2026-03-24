@@ -1,7 +1,7 @@
 module Federails
   module Server
     class ActivityResource < BaseResource
-      attribute :'@context' do |_activity|
+      attribute :@context do |_activity|
         Federails::SerializerSupport.json_ld_context if include_context?
       end
 

@@ -1,16 +1,17 @@
 module Federails
   module Server
-    NodeinfoPayload = Struct.new(
-      :software_name,
-      :software_version,
-      :open_registrations,
-      :has_user_counts,
-      :total,
-      :active_month,
-      :active_halfyear,
-      :metadata,
-      keyword_init: true
-    ) unless const_defined?(:NodeinfoPayload)
+    unless const_defined?(:NodeinfoPayload)
+      NodeinfoPayload = Struct.new(
+        :software_name,
+        :software_version,
+        :open_registrations,
+        :has_user_counts,
+        :total,
+        :active_month,
+        :active_halfyear,
+        :metadata
+      )
+    end
 
     class NodeinfoResource < BaseResource
       attribute :version do

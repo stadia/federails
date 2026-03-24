@@ -36,7 +36,7 @@ module Federails
       error_fallback(exception, 'Resource is gone', :gone)
     end
 
-    def render_serialized(resource_class, object, status: :ok, content_type:, location: nil, params: {})
+    def render_serialized(resource_class, object, content_type:, status: :ok, location: nil, params: {})
       render_options = {
         json:         resource_class.new(object, params: params).serializable_hash,
         status:       status,

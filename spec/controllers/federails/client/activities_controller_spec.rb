@@ -5,16 +5,16 @@ RSpec.describe Federails::Client::ActivitiesController, type: :controller do
   render_views
 
   describe 'GET #index' do
-    let!(:activity) { FactoryBot.create(:activity, :create) }
+    let!(:activity) { FactoryBot.create :activity, :create }
 
     it 'renders activities as json' do
       get :index, format: :json
 
       expect(response).to have_http_status(:ok)
-      body = JSON.parse(response.body)
+      body = response.parsed_body
 
       expect(body.first).to include(
-        'id' => activity.id,
+        'id'     => activity.id,
         'action' => activity.action
       )
     end
@@ -29,7 +29,7 @@ RSpec.describe Federails::Client::ActivitiesController, type: :controller do
       get :feed, format: :json
 
       expect(response).to have_http_status(:ok)
-      expect(JSON.parse(response.body)).to be_an(Array)
+      expect(response.parsed_body).to be_an(Array)
     end
   end
 end

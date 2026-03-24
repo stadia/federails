@@ -1,21 +1,22 @@
 module Federails
   module Server
-    OrderedCollectionPayload = Struct.new(
-      :id,
-      :type,
-      :totalItems,
-      :first,
-      :last,
-      :prev,
-      :next,
-      :partOf,
-      :orderedItems,
-      :context,
-      keyword_init: true
-    ) unless const_defined?(:OrderedCollectionPayload)
+    unless const_defined?(:OrderedCollectionPayload)
+      OrderedCollectionPayload = Struct.new(
+        :id,
+        :type,
+        :totalItems,
+        :first,
+        :last,
+        :prev,
+        :next,
+        :partOf,
+        :orderedItems,
+        :context
+      )
+    end
 
     class OrderedCollectionResource < BaseResource
-      attribute :'@context' do |payload|
+      attribute :@context do |payload|
         Federails::SerializerSupport.json_ld_context if payload.context != false
       end
 

@@ -1,7 +1,7 @@
 module Federails
   module Server
     class ActorResource < BaseResource
-      attribute :'@context' do |actor|
+      attribute :@context do |actor|
         data = actor_data(actor)
         additional = ['https://w3id.org/security/v1', data.delete(:@context) || data.delete('@context')]
         Federails::SerializerSupport.json_ld_context(additional: additional)

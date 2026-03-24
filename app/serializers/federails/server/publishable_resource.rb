@@ -1,7 +1,7 @@
 module Federails
   module Server
     class PublishableResource < BaseResource
-      attribute :'@context' do |publishable|
+      attribute :@context do |publishable|
         next unless params.fetch(:context, true)
 
         data = publishable_data(publishable)

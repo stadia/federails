@@ -1,7 +1,7 @@
 module Federails
   module Server
     class ActorTombstoneResource < BaseResource
-      attribute :'@context' do
+      attribute :@context do
         Federails::SerializerSupport.json_ld_context
       end
 

@@ -1,7 +1,7 @@
 module Federails
   module Server
     class FollowingResource < BaseResource
-      attribute :'@context' do |_following|
+      attribute :@context do |_following|
         Federails::SerializerSupport.json_ld_context if params.fetch(:context, true)
       end
 
