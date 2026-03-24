@@ -27,5 +27,45 @@ RSpec.describe '/federation/published', type: :request do
         expect(json['actor']).to eq actor.federated_url
       end
     end
+
+    it 'returns a JSON error body for unknown publishable types' do
+      get federails.server_published_url(publishable_type: 'unsupported', id: entity.id, format: :json)
+
+      expect(response).to have_http_status(:not_found)
+      expect(JSON.parse(response.body)['error']).to eq 'Invalid unsupported type'
+    end
+
+    it 'returns a JSON error body for missing publishables' do
+      get federails.server_published_url(publishable_type: 'articles', id: 'missing', format: :json)
+
+      expect(response).to have_http_status(:not_found)
+      expect(JSON.parse(response.body)['error']).to include("Couldn't find")
+    end
+
+    context 'when the publishable is soft deleted' do
+      let(:deleted_entity) do
+        Fixtures::Classes::FakeArticleDataModel.create!(
+          federails_actor: actor,
+          title: 'title',
+          content: 'content',
+          user: user,
+          deleted_at: Time.current
+        )
+      end
+
+      it 'returns a gone status with no body for ActivityPub requests' do
+        get federails.server_published_url(:articles, deleted_entity), headers: { accept: Mime[:activitypub] }
+
+        expect(response).to have_http_status(:gone)
+        expect(response.body).to be_blank
+      end
+
+      it 'returns a JSON error body for JSON requests' do
+        get federails.server_published_url(publishable_type: 'articles', id: deleted_entity.id, format: :json)
+
+        expect(response).to have_http_status(:gone)
+        expect(JSON.parse(response.body)['error']).to eq 'Federails::DataEntity::TombstonedError'
+      end
+    end
   end
 end

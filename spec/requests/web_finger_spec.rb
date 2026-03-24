@@ -35,6 +35,11 @@ RSpec.describe '/well-known', type: :request do
       it "responds with 404 in response to a #{accept} request for a nonexistent account" do
         get federails.webfinger_url, params: { resource: 'acct:nobody@localhost' }, headers: { accept: accept }
         expect(response).to be_not_found
+        if accept == 'application/json'
+          expect(JSON.parse(response.body)['error']).to eq 'ActiveRecord::RecordNotFound'
+        else
+          expect(response.body).to be_blank
+        end
       end
     end
 
@@ -45,11 +50,21 @@ RSpec.describe '/well-known', type: :request do
         it "returns an error page to a #{accept} request with an URL resource" do
           get federails.webfinger_url, params: { resource: actor.federated_url }, headers: { accept: accept }
           expect(response).to have_http_status :gone
+          if accept == 'application/json'
+            expect(JSON.parse(response.body)['error']).to eq 'Federails::Actor::TombstonedError'
+          else
+            expect(response.body).to be_blank
+          end
         end
 
         it "returns an error page to a #{accept} request with an 'acct:' resource" do
           get federails.webfinger_url, params: { resource: actor.acct_uri }, headers: { accept: accept }
           expect(response).to have_http_status :gone
+          if accept == 'application/json'
+            expect(JSON.parse(response.body)['error']).to eq 'Federails::Actor::TombstonedError'
+          else
+            expect(response.body).to be_blank
+          end
         end
       end
     end
@@ -90,6 +105,13 @@ RSpec.describe '/well-known', type: :request do
     it 'renders a successful response' do
       get federails.host_meta_url
       expect(response).to be_successful
+    end
+
+    it 'includes the lrdd template in the XRD body' do
+      get federails.host_meta_url
+
+      expect(response.body).to include('rel="lrdd"')
+      expect(response.body).to include('resource={uri}')
     end
 
     ['application/xrd+xml', 'application/xml'].each do |accept|
