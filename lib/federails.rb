@@ -106,9 +106,11 @@ module Federails
     # @return [Hash, nil] Data entity configuration
     def data_entity_handler_for(hash)
       data_entity_handlers_for(hash['type']).find do |handler|
-        return true if !handler[:filter_method] && !handler[:class].respond_to?(DEFAULT_DATA_FILTER_METHOD)
-
-        handler[:class].send(handler[:filter_method] || DEFAULT_DATA_FILTER_METHOD, hash)
+        if handler[:filter_method] || handler[:class].respond_to?(DEFAULT_DATA_FILTER_METHOD)
+          handler[:class].send(handler[:filter_method] || DEFAULT_DATA_FILTER_METHOD, hash)
+        else
+          true
+        end
       end
     end
 

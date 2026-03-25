@@ -39,4 +39,15 @@ RSpec.describe Federails do
       expect(result).to be_a Hash
     end
   end
+
+  describe '#data_entity_handler_for' do
+    it 'returns a configuration hash for data entities without an implemented handler check' do
+      result = described_class.data_entity_handler_for({ 'type' => 'TestThing' })
+
+      aggregate_failures do
+        expect(result).to be_a Hash
+        expect(result[:class]).to be Fixtures::Classes::FakeDataModel
+      end
+    end
+  end
 end

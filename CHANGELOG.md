@@ -62,6 +62,7 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
   - Nodeinfo software name format now conforms to spec.
   - Fixed JSON serialization bug on MySQL/MariaDB.
   - Fixed Collection response structures.
+  - Fix error when data entity doesn't have configured or default filter methods.
 - Tasks:
   - Replace factory names in `federails:copy_factories`
 
