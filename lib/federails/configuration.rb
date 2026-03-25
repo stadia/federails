@@ -117,6 +117,10 @@ module Federails
     mattr_accessor :remote_entities_cache_duration
     @@remote_entities_cache_duration = 1.day
 
+    # Job queue name
+    mattr_accessor :job_queue
+    @@job_queue = :default
+
     # List of actor types (classes using Federails::ActorEntity)
     mattr_reader :actor_types
     @@actor_types = {}

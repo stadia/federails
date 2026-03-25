@@ -39,6 +39,8 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 - Configuration:
   - Added `remote_entities_cache_duration` option to define the cache duration in seconds for a remote entity
     to be considered outdated. Only used for `Federails::Host` for now
+  - Added `job_queue` option to allow specifying a queue name. Unless otherwise specified, the `default` queue is
+    used.
 - Actors:
   - Create/update host when created
 - Collections:

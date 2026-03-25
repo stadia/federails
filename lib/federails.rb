@@ -59,6 +59,7 @@ module Federails
         :remote_follow_url_method,
         :base_client_controller,
         :remote_entities_cache_duration,
+        :job_queue,
       ].each { |key| Configuration.send :"#{key}=", config[key] if config.key?(key) }
     end
 
