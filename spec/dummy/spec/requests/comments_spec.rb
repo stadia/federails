@@ -73,7 +73,7 @@ RSpec.describe '/comments', type: :request do
       it "renders a response with 422 status (i.e. to display the 'edit' template)" do
         comment = FactoryBot.create :comment, user: user
         patch comment_url(comment), params: { comment: invalid_attributes }
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(Federails::Utils::ResponseCodes::UNPROCESSABLE_CONTENT)
       end
     end
   end

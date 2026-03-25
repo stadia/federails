@@ -34,7 +34,7 @@ module Federails
         return head :unsupported_media_type unless supported_inbox_content_type?
 
         payload = payload_from_params
-        return head :unprocessable_entity unless payload
+        return head Federails::Utils::ResponseCodes::UNPROCESSABLE_CONTENT unless payload
 
         result = Fediverse::Inbox.dispatch_request(payload)
         Federails.logger.info { "[Inbox] dispatch_request result: #{result.inspect} for activity #{payload['id']}" }
@@ -46,7 +46,7 @@ module Federails
         when :duplicate
           head :ok
         else
-          head :unprocessable_entity
+          head Federails::Utils::ResponseCodes::UNPROCESSABLE_CONTENT
         end
       end
 

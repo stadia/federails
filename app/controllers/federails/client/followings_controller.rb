@@ -23,7 +23,7 @@ module Federails
             format.json { render_serialized(Federails::Client::FollowingResource, @following, status: :ok, location: @following) }
           else
             format.html { redirect_to url, alert: I18n.t('controller.followings.accept.error') }
-            format.json { render json: @following.errors, status: :unprocessable_entity }
+            format.json { render json: @following.errors, status: Federails::Utils::ResponseCodes::UNPROCESSABLE_CONTENT }
           end
         end
       end
@@ -49,7 +49,7 @@ module Federails
           # Renders a 422 instead of a 404
           respond_to do |format|
             format.html { redirect_to federails.client_actors_url, alert: I18n.t('controller.followings.follow.error') }
-            format.json { render json: { target_actor: ['does not exist'] }, status: :unprocessable_entity }
+            format.json { render json: { target_actor: ['does not exist'] }, status: Federails::Utils::ResponseCodes::UNPROCESSABLE_CONTENT }
           end
 
           return
@@ -94,7 +94,7 @@ module Federails
             format.json { render_serialized(Federails::Client::FollowingResource, @following, status: :created, location: @following) }
           else
             format.html { redirect_to url, alert: I18n.t('controller.followings.save_and_render.error') }
-            format.json { render json: @following.errors, status: :unprocessable_entity }
+            format.json { render json: @following.errors, status: Federails::Utils::ResponseCodes::UNPROCESSABLE_CONTENT }
           end
         end
       end

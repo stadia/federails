@@ -17,7 +17,7 @@ class CommentsController < ApplicationController
       else
         # Redirect and lose form content? Well, it's a dummy app.
         format.html { redirect_to posts_url, notice: 'Invalid comment, try again' }
-        format.json { render json: @comment.errors, status: :unprocessable_entity }
+        format.json { render json: @comment.errors, status: Federails::Utils::ResponseCodes::UNPROCESSABLE_CONTENT }
       end
     end
   end
@@ -29,8 +29,8 @@ class CommentsController < ApplicationController
         format.html { redirect_to post_url(@comment.post), notice: 'Comment was successfully updated.' }
         format.json { render json: CommentResource.new(@comment).serializable_hash, status: :ok, location: @comment }
       else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @comment.errors, status: :unprocessable_entity }
+        format.html { render :edit, status: Federails::Utils::ResponseCodes::UNPROCESSABLE_CONTENT }
+        format.json { render json: @comment.errors, status: Federails::Utils::ResponseCodes::UNPROCESSABLE_CONTENT }
       end
     end
   end
