@@ -3,6 +3,8 @@ require 'fediverse/inbox'
 module Federails
   module Server
     class ActivitiesController < Federails::ServerController
+      include Federails::Server::RenderCollections
+
       before_action :set_activity, only: [:show]
 
       # GET /federation/activities
@@ -10,15 +12,14 @@ module Federails
       def outbox
         authorize Federails::Activity, policy_class: Federails::Server::ActivityPolicy
 
-        @actor            = Actor.find_param(params[:actor_id])
-        @activities       = policy_scope(Federails::Activity, policy_scope_class: Federails::Server::ActivityPolicy::Scope).where(actor: @actor).order(created_at: :desc)
-        @pagy, @activities = pagy(@activities)
-        @total_activities  = @pagy.count
-        render_serialized(
-          Federails::Server::OrderedCollectionResource,
-          outbox_payload,
-          content_type: Mime[:activitypub]
-        )
+        actor      = Actor.find_param(params[:actor_id])
+        activities = policy_scope(Federails::Activity, policy_scope_class: Federails::Server::ActivityPolicy::Scope).where(actor: actor).order(created_at: :desc)
+
+        render_collection(
+          collection: activities,
+          actor:      actor,
+          url_helper: :server_actor_outbox_url
+        ) { |items| Federails::Server::ActivityResource.new(items, params: { context: false }).serializable_hash }
       end
 
       # GET /federation/actors/1/activities/1.json
@@ -98,28 +99,6 @@ module Federails
         return false unless content_type.start_with?('application/ld+json')
 
         content_type.include?('https://www.w3.org/ns/activitystreams')
-      end
-
-      def outbox_payload
-        if params[:page].blank?
-          Federails::Server::OrderedCollectionPayload.new(
-            id:         @actor.outbox_url,
-            type:       'OrderedCollection',
-            totalItems: @total_activities,
-            first:      Federails::Engine.routes.url_helpers.server_actor_outbox_url(@actor, page: 1),
-            last:       Federails::Engine.routes.url_helpers.server_actor_outbox_url(@actor, page: @pagy.pages == 1 ? 1 : @pagy.pages)
-          )
-        else
-          Federails::Server::OrderedCollectionPayload.new(
-            id:           Federails::Engine.routes.url_helpers.server_actor_outbox_url(@actor, page: params[:page]),
-            type:         'OrderedCollectionPage',
-            totalItems:   @total_activities,
-            prev:         @pagy.previous ? Federails::Engine.routes.url_helpers.server_actor_outbox_url(@actor, page: @pagy.previous) : nil,
-            next:         @pagy.next ? Federails::Engine.routes.url_helpers.server_actor_outbox_url(@actor, page: @pagy.next) : nil,
-            partOf:       @actor.outbox_url,
-            orderedItems: Federails::Server::ActivityResource.new(@activities, params: { context: false }).serializable_hash
-          )
-        end
       end
     end
   end

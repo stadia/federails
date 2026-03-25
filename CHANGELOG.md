@@ -59,6 +59,7 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
   - Notes now support extra JSON-LD @context provided in `custom`.
   - Nodeinfo software name format now conforms to spec.
   - Fixed JSON serialization bug on MySQL/MariaDB.
+  - Fixed Collection response structures.
 - Tasks:
   - Replace factory names in `federails:copy_factories`
 

@@ -32,15 +32,18 @@ RSpec.describe Federails::Server::ActivitiesController, type: :acceptance do
                                                      })
 
   entity :ordered_collection_page,
+         '@context':   { type: :string, required: false, description: 'JSON-LD context' },
          # Base
          id:           { type: :string, description: 'Unique identifier' },
          type:         { type: :string, description: 'Object type (OrderedCollectionPage)' },
          # CollectionPage
+         totalItems:   { type: :integer, description: 'Total number of following/followers in this collection' },
+         first:        { type: :string, description: 'URL to the furthest preceding page' },
+         last:         { type: :string, description: 'URL to the furthest proceeding page' },
          partOf:       { type: :string, description: 'URL to the collection to which this CollectionPage belong' },
          next:         { type: :string, required: false, description: 'URL to the next page of items' },
          prev:         { type: :string, required: false, description: 'URL to the previous page of items' },
          # OrderedCollection/Collection
-         totalItems:   { type: :integer, description: 'Total number of following/followers in this collection' },
          orderedItems: { type: :array, description: 'List of activities on current page', of: :activity }
   entity :ordered_collection,
          '@context': { type: :string, description: 'JSON-LD context' },
@@ -78,6 +81,10 @@ RSpec.describe Federails::Server::ActivitiesController, type: :acceptance do
 
     for_code 200, expect_one: :ordered_collection do |url|
       test_response_of url, path_params: { actor_id: following_activity.actor.to_param }, headers: headers
+    end
+
+    for_code 200, expect_one: :ordered_collection_page do |url|
+      test_response_of url, path_params: { actor_id: following_activity.actor.to_param, page: 2 }, headers: headers
     end
 
     for_code 404, with_content_type: Mime[:activitypub] do |url|
