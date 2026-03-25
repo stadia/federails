@@ -60,7 +60,7 @@ module Fediverse
         ].flatten.compact.uniq.reject { |url| url == Fediverse::Collection::PUBLIC }
 
         # Batch-fetch actors already known in DB to avoid N+1 queries
-        known_actors = Federails::Actor.where(federated_url: addressing).index_by(&:federated_url)
+        known_actors = Federails::Actor.includes(:entity).where(federated_url: addressing).index_by(&:federated_url)
 
         inboxes = addressing.flat_map do |url|
           actor = known_actors[url] || Federails::Actor.find_or_create_by_federation_url(url)
@@ -79,7 +79,7 @@ module Fediverse
         actor_urls = collection.to_a
 
         # Batch-fetch actors already known in DB to avoid N+1 queries
-        known_actors = Federails::Actor.where(federated_url: actor_urls).index_by(&:federated_url)
+        known_actors = Federails::Actor.includes(:entity).where(federated_url: actor_urls).index_by(&:federated_url)
 
         actor_urls.filter_map do |actor_url|
           known_actors[actor_url] || Federails::Actor.find_or_create_by_federation_url(actor_url)

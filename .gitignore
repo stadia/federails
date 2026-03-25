@@ -22,3 +22,4 @@ rspec_examples.txt
 /.worktrees/
 .idea
 .gem_rbs_collection
+spec/dummy/log/test.log.0

@@ -5,7 +5,7 @@ module Federails
     queue_as :default
 
     def perform(activity)
-      activity = Activity.includes(:actor, :entity).find(activity.id)
+      activity = Activity.includes(:entity, actor: :entity).find(activity.id)
       Fediverse::Notifier.post_to_inboxes(activity)
     end
   end
