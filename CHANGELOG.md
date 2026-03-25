@@ -32,6 +32,12 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ### Added
 
+### Fixed
+
+## [0.8.0] 2026-03-25
+
+### Added
+
 - Set custom metadata for nodeinfo response using `Federails::Configuration.nodeinfo_metadata`, providing a hash or
   a Proc that will return a hash when required.
 - Hosts:
