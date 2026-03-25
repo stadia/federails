@@ -32,12 +32,12 @@ module Federails
         skip_authorization
 
         payload = payload_from_params
-        return head :unprocessable_entity unless payload
+        return head Federails::Utils::ResponseCodes::UNPROCESSABLE_CONTENT unless payload
 
         if Fediverse::Inbox.dispatch_request(payload)
           head :created
         else
-          head :unprocessable_entity
+          head Federails::Utils::ResponseCodes::UNPROCESSABLE_CONTENT
         end
       end
 

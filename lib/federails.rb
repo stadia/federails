@@ -7,6 +7,7 @@ require 'federails/engine'
 require 'federails/configuration'
 require 'federails/utils/object'
 require 'federails/utils/json_request'
+require 'federails/utils/response_codes'
 
 require 'fediverse'
 
