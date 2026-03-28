@@ -5,9 +5,10 @@ module Federails
       def show
         @publishable = type_scope.find_untombstoned_by!(url_param => params[:id])
         authorize @publishable, policy_class: Federails::Server::PublishablePolicy
-        resource_class = @publishable.federails_tombstoned? ? Federails::Server::PublishableTombstoneResource : Federails::Server::PublishableResource
-        status = @publishable.federails_tombstoned? ? :gone : :ok
-        render_serialized(resource_class, @publishable, status: status, content_type: Mime[:activitypub])
+        render_serialized(Federails::Server::PublishableResource, @publishable, status: :ok, content_type: Mime[:activitypub])
+      rescue Federails::DataEntity::TombstonedError
+        @publishable = type_scope.find_by!(url_param => params[:id])
+        render_serialized(Federails::Server::PublishableTombstoneResource, @publishable, status: :gone, content_type: Mime[:activitypub])
       end
 
       private
