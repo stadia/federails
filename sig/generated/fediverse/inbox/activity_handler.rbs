@@ -1,0 +1,13 @@
+# Generated from lib/fediverse/inbox/activity_handler.rb with RBS::Inline
+
+module Fediverse
+  class Inbox
+    module ActivityHandler
+      private
+
+      def process_activity: (untyped activity, String action) -> bool
+
+      def process_undo_activity: (untyped activity, String action) -> bool
+    end
+  end
+end
