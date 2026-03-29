@@ -3,7 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe 'Inbox HTTP Signature Verification', type: :request do
-  let(:actor) { FactoryBot.create(:local_actor) }
+  let(:actor) { FactoryBot.create :local_actor }
   let(:payload) { { '@context' => 'https://www.w3.org/ns/activitystreams', 'id' => 'https://remote.example/activity/1', 'type' => 'Follow', 'actor' => 'https://remote.example/actor', 'object' => actor.federated_url }.to_json }
 
   context 'when verify_signatures is true' do

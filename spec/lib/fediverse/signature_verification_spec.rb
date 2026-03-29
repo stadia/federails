@@ -10,8 +10,8 @@ RSpec.describe Fediverse::Signature do
       result = described_class.parse_signature_header(header)
 
       expect(result).to eq(
-        key_id: 'https://example.com/actor#main-key',
-        headers: '(request-target) host date digest',
+        key_id:    'https://example.com/actor#main-key',
+        headers:   '(request-target) host date digest',
         signature: 'abc123=',
         algorithm: nil
       )
@@ -64,7 +64,7 @@ RSpec.describe Fediverse::Signature do
         r.headers['Digest'] = digest_header if digest_header
       end
       # Wrap body in StringIO to support read/rewind
-      req.define_singleton_method(:body) { @_string_io ||= StringIO.new(body_str) }
+      req.define_singleton_method(:body) { @body ||= StringIO.new(body_str) }
       req
     end
 
@@ -107,7 +107,7 @@ RSpec.describe Fediverse::Signature do
       req.headers['Signature'] = described_class.sign(sender: signing_actor, request: req)
 
       # Wrap body as StringIO for read/rewind support
-      req.define_singleton_method(:body) { @_string_io ||= StringIO.new(body_str) }
+      req.define_singleton_method(:body) { @body ||= StringIO.new(body_str) }
       req
     end
 
@@ -149,8 +149,7 @@ RSpec.describe Fediverse::Signature do
 
       allow(Federails::Actor).to receive(:find_or_create_by_federation_url)
         .with(actor_uri).and_return(actor)
-      allow(actor).to receive(:public_key).and_return(wrong_key.public_key.to_pem)
-      allow(actor).to receive(:updated_at).and_return(1.minute.ago)
+      allow(actor).to receive_messages(public_key: wrong_key.public_key.to_pem, updated_at: 1.minute.ago)
       allow(actor).to receive(:sync!)
 
       expect { described_class.verify_request!(request) }
@@ -166,8 +165,7 @@ RSpec.describe Fediverse::Signature do
 
       allow(Federails::Actor).to receive(:find_or_create_by_federation_url)
         .with(actor_uri).and_return(actor)
-      allow(actor).to receive(:public_key).and_return(wrong_key.public_key.to_pem)
-      allow(actor).to receive(:updated_at).and_return(2.days.ago)
+      allow(actor).to receive_messages(public_key: wrong_key.public_key.to_pem, updated_at: 2.days.ago)
       allow(actor).to receive(:sync!)
 
       expect { described_class.verify_request!(request) }

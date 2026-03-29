@@ -99,9 +99,9 @@ module Fediverse
 
         expected = "SHA-256=#{Base64.strict_encode64(OpenSSL::Digest.new('SHA256').digest(body))}"
 
-        unless ActiveSupport::SecurityUtils.secure_compare(digest_header, expected)
-          raise SignatureVerificationError, 'Digest mismatch'
-        end
+        return if ActiveSupport::SecurityUtils.secure_compare(digest_header, expected)
+
+        raise SignatureVerificationError, 'Digest mismatch'
       end
 
       # Verify an inbound request's HTTP Signature, returning the sending actor
@@ -120,9 +120,7 @@ module Fediverse
 
         digest = OpenSSL::Digest.new('SHA256')
 
-        if key.verify(digest, raw_signature, comparison_string)
-          return actor
-        end
+        return actor if key.verify(digest, raw_signature, comparison_string)
 
         # Key rotation retry: only re-fetch if the cached actor is stale
         if actor.updated_at < Federails::Configuration.remote_entities_cache_duration.ago
