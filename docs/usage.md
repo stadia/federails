@@ -267,114 +267,56 @@ Federails registers built-in inbox handlers for the following ActivityPub activi
 - `Announce` / `Undo Announce`
 - `Block` / `Undo Block`
 
-These handlers are loaded automatically from `Fediverse::Inbox`, so you do not need any extra initializer code to enable them.
-Once your routes and actors are configured, incoming inbox requests will be dispatched to the matching handler.
+For `Like` and `Announce`, Federails routes the activity to callback points on `Federails::DataEntity`.
+The gem provides the callback names; applications register their own methods on models that include `Federails::DataEntity`.
 
-### Like
+Register callbacks on the model that includes `Federails::DataEntity`:
 
-Incoming `Like` activities create a `Federails::Activity` record with:
+```rb
+# app/models/post.rb
+class Post < ApplicationRecord
+  include Federails::DataEntity
 
-- `action: 'Like'`
-- `actor`: the remote actor that sent the Like
-- `entity`: the local or remote object referenced by `activity['object']`
-- `federated_url`: the incoming activity id
+  on_federails_like_received :handle_federails_like!
+  on_federails_unlike_received :handle_federails_unlike!
+  on_federails_announce_received :handle_federails_announce!
+  on_federails_unannounce_received :handle_federails_unannounce!
 
-Example payload:
+  def handle_federails_like!
+    # Custom Like behavior for this entity
+    true
+  end
 
-```json
-{
-  "id": "https://remote.example/activities/like-1",
-  "type": "Like",
-  "actor": "https://remote.example/users/alice",
-  "object": "https://your-app.example/federation/published/Post/42"
-}
+  def handle_federails_unlike!
+    # Custom Undo Like behavior for this entity
+    true
+  end
+
+  def handle_federails_announce!
+    # Custom Announce behavior for this entity
+    true
+  end
+
+  def handle_federails_unannounce!
+    # Custom Undo Announce behavior for this entity
+    true
+  end
+end
 ```
 
-To undo a like, the remote server sends an `Undo` whose `object` points to the original Like activity:
+The built-in handlers resolve the target object and call:
 
-```json
-{
-  "id": "https://remote.example/activities/undo-like-1",
-  "type": "Undo",
-  "actor": "https://remote.example/users/alice",
-  "object": {
-    "id": "https://remote.example/activities/like-1",
-    "type": "Like"
-  }
-}
-```
+- `object.run_callbacks :on_federails_like_received`
+- `object.run_callbacks :on_federails_unlike_received`
+- `object.run_callbacks :on_federails_announce_received`
+- `object.run_callbacks :on_federails_unannounce_received`
 
-For safety, `Undo Like` is only accepted when the `Undo` sender matches the actor that created the original Like activity.
+The application is responsible for deciding how to:
 
-### Announce
-
-Incoming `Announce` activities are stored as `Federails::Activity` records with `action: 'Announce'`.
-The announced object is resolved from `activity['object']`, and the announcing actor is resolved from `activity['actor']`.
-
-Example payload:
-
-```json
-{
-  "id": "https://remote.example/activities/announce-1",
-  "type": "Announce",
-  "actor": "https://remote.example/users/alice",
-  "object": "https://your-app.example/federation/published/Post/42"
-}
-```
-
-`Undo Announce` removes the matching announce record when the original activity id is referenced:
-
-```json
-{
-  "id": "https://remote.example/activities/undo-announce-1",
-  "type": "Undo",
-  "actor": "https://remote.example/users/alice",
-  "object": {
-    "id": "https://remote.example/activities/announce-1",
-    "type": "Announce"
-  }
-}
-```
-
-As with likes, the `Undo` actor must match the actor that created the original Announce activity.
-
-### Block
-
-Incoming `Block` activities create a `Federails::Block` record between the sender and the target actor.
-When a block is created, Federails also removes any `Federails::Following` records in both directions.
-
-Example payload:
-
-```json
-{
-  "id": "https://remote.example/activities/block-1",
-  "type": "Block",
-  "actor": "https://remote.example/users/alice",
-  "object": "https://your-app.example/federation/actors/42"
-}
-```
-
-To undo a block, send an `Undo` whose `object` contains the original Block object:
-
-```json
-{
-  "id": "https://remote.example/activities/undo-block-1",
-  "type": "Undo",
-  "actor": "https://remote.example/users/alice",
-  "object": {
-    "type": "Block",
-    "actor": "https://remote.example/users/alice",
-    "object": "https://your-app.example/federation/actors/42"
-  }
-}
-```
-
-`Undo Block` deletes the matching `Federails::Block` record when the actor and target actor can be resolved successfully.
-
-### Delivery behavior for blocked actors
-
-When Federails delivers outbound activities, inboxes belonging to actors who have blocked the sender are filtered out automatically.
-This means a remote actor who blocked one of your local actors will no longer receive deliveries for that actor's outbound activities.
+- persist the activity
+- enforce actor/object validation rules
+- update app models
+- implement undo semantics
 
 If it's a good starting point, it might be disabled once you made your own integration by setting `client_routes_path`
 to a `nil` value.

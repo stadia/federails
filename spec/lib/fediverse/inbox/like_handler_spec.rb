@@ -2,89 +2,65 @@ require 'rails_helper'
 require 'fediverse/inbox/like_handler'
 
 RSpec.describe Fediverse::Inbox::LikeHandler do
-  let(:distant_actor) { FactoryBot.create :distant_actor }
-  let(:local_actor) { FactoryBot.create(:user).federails_actor }
-
   describe '.handle_like' do
-    let(:activity) do
-      {
-        'id'     => 'https://example.com/activities/like-1',
-        'type'   => 'Like',
-        'actor'  => distant_actor.federated_url,
-        'object' => local_actor.federated_url,
-      }
+    let(:entity) do
+      Fixtures::Classes::FakeArticleDataModel.create!(
+        user:    FactoryBot.create(:user),
+        title:   'A post',
+        content: 'body'
+      )
     end
+    let(:activity) { { 'type' => 'Like', 'object' => entity.federated_url } }
 
-    before do
-      allow(Federails::Actor).to receive(:find_or_create_by_federation_url)
-        .with(distant_actor.federated_url).and_return(distant_actor)
-      allow(Federails::Utils::Object).to receive(:find_or_initialize)
-        .with(local_actor.federated_url).and_return(local_actor)
-    end
+    it 'dispatches to the data entity hook' do
+      allow(Federails::Utils::Object).to receive(:find_or_initialize).with(entity.federated_url).and_return(entity)
+      allow(entity).to receive(:run_callbacks).with(:on_federails_like_received).and_yield
 
-    it 'creates an activity with action Like' do
-      expect { described_class.handle_like(activity) }
-        .to change(Federails::Activity, :count).by(1)
-
-      like = Federails::Activity.last
-      expect(like.action).to eq('Like')
-      expect(like.actor).to eq(distant_actor)
-      expect(like.entity).to eq(local_actor)
-      expect(like.federated_url).to eq('https://example.com/activities/like-1')
-    end
-
-    it 'returns true on success' do
       expect(described_class.handle_like(activity)).to be true
+      expect(entity).to have_received(:run_callbacks).with(:on_federails_like_received)
     end
 
-    it 'returns false when actor cannot be found' do
-      allow(Federails::Actor).to receive(:find_or_create_by_federation_url).and_return(nil)
-      expect(described_class.handle_like(activity)).to be false
+    it 'returns true when no target entity is resolved' do
+      allow(Federails::Utils::Object).to receive(:find_or_initialize).and_return(nil)
+      expect(described_class.handle_like(activity)).to be true
     end
   end
 
   describe '.handle_undo_like' do
-    let(:other_actor) { FactoryBot.create :distant_actor }
-    let(:like_activity) do
-      FactoryBot.create :activity, actor: distant_actor, entity: local_actor,
-                                   action: 'Like', federated_url: 'https://example.com/activities/like-1'
+    let(:actor_url) { 'https://remote.example/users/alice' }
+    let(:entity) do
+      Fixtures::Classes::FakeArticleDataModel.create!(
+        user:    FactoryBot.create(:user),
+        title:   'A post',
+        content: 'body'
+      )
     end
-
     let(:activity) do
       {
-        'id'     => 'https://example.com/activities/undo-like-1',
         'type'   => 'Undo',
-        'actor'  => distant_actor.federated_url,
-        'object' => {
-          'id'   => 'https://example.com/activities/like-1',
-          'type' => 'Like',
-        },
+        'actor'  => actor_url,
+        'object' => { 'type' => 'Like', 'actor' => actor_url, 'object' => entity.federated_url },
       }
     end
 
-    before do
-      like_activity
+    it 'dispatches to the data entity undo hook' do
+      allow(Fediverse::Request).to receive(:dereference).with(activity['object']).and_return(activity['object'])
+      allow(Federails::Utils::Object).to receive(:find_or_initialize).with(entity.federated_url).and_return(entity)
+      allow(entity).to receive(:run_callbacks).with(:on_federails_unlike_received).and_yield
+
+      expect(described_class.handle_undo_like(activity)).to be true
+      expect(entity).to have_received(:run_callbacks).with(:on_federails_unlike_received)
     end
 
-    it 'destroys the like activity' do
-      expect { described_class.handle_undo_like(activity) }
-        .to change(Federails::Activity, :count).by(-1)
-    end
-
-    it 'returns true on success' do
+    it 'returns true when no target entity is resolved' do
+      allow(Fediverse::Request).to receive(:dereference).with(activity['object']).and_return(activity['object'])
+      allow(Federails::Utils::Object).to receive(:find_or_initialize).and_return(nil)
       expect(described_class.handle_undo_like(activity)).to be true
     end
 
-    it 'returns false when like activity not found' do
-      activity['object']['id'] = 'https://example.com/nonexistent'
-      expect(described_class.handle_undo_like(activity)).to be false
-    end
+    it 'returns false when undo actor does not match original actor' do
+      allow(Fediverse::Request).to receive(:dereference).with(activity['object']).and_return(activity['object'].merge('actor' => 'https://remote.example/users/bob'))
 
-    it 'returns false when undo actor does not match like actor' do
-      activity['actor'] = other_actor.federated_url
-
-      expect { described_class.handle_undo_like(activity) }
-        .not_to change(Federails::Activity, :count)
       expect(described_class.handle_undo_like(activity)).to be false
     end
   end

@@ -1,7 +1,6 @@
 # rbs_inline: enabled
 
 require 'fediverse/request'
-require 'fediverse/inbox/activity_handler'
 require 'fediverse/inbox/like_handler'
 require 'fediverse/inbox/announce_handler'
 require 'fediverse/inbox/block_handler'

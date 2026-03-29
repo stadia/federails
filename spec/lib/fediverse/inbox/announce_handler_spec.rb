@@ -2,89 +2,65 @@ require 'rails_helper'
 require 'fediverse/inbox/announce_handler'
 
 RSpec.describe Fediverse::Inbox::AnnounceHandler do
-  let(:distant_actor) { FactoryBot.create :distant_actor }
-  let(:local_actor) { FactoryBot.create(:user).federails_actor }
-
   describe '.handle_announce' do
-    let(:activity) do
-      {
-        'id'     => 'https://example.com/activities/announce-1',
-        'type'   => 'Announce',
-        'actor'  => distant_actor.federated_url,
-        'object' => local_actor.federated_url,
-      }
+    let(:entity) do
+      Fixtures::Classes::FakeArticleDataModel.create!(
+        user:    FactoryBot.create(:user),
+        title:   'A post',
+        content: 'body'
+      )
     end
+    let(:activity) { { 'type' => 'Announce', 'object' => entity.federated_url } }
 
-    before do
-      allow(Federails::Actor).to receive(:find_or_create_by_federation_url)
-        .with(distant_actor.federated_url).and_return(distant_actor)
-      allow(Federails::Utils::Object).to receive(:find_or_initialize)
-        .with(local_actor.federated_url).and_return(local_actor)
-    end
+    it 'dispatches to the data entity hook' do
+      allow(Federails::Utils::Object).to receive(:find_or_initialize).with(entity.federated_url).and_return(entity)
+      allow(entity).to receive(:run_callbacks).with(:on_federails_announce_received).and_yield
 
-    it 'creates an activity with action Announce' do
-      expect { described_class.handle_announce(activity) }
-        .to change(Federails::Activity, :count).by(1)
-
-      announce = Federails::Activity.last
-      expect(announce.action).to eq('Announce')
-      expect(announce.actor).to eq(distant_actor)
-      expect(announce.entity).to eq(local_actor)
-      expect(announce.federated_url).to eq('https://example.com/activities/announce-1')
-    end
-
-    it 'returns true on success' do
       expect(described_class.handle_announce(activity)).to be true
+      expect(entity).to have_received(:run_callbacks).with(:on_federails_announce_received)
     end
 
-    it 'returns false when actor cannot be found' do
-      allow(Federails::Actor).to receive(:find_or_create_by_federation_url).and_return(nil)
-      expect(described_class.handle_announce(activity)).to be false
+    it 'returns true when no target entity is resolved' do
+      allow(Federails::Utils::Object).to receive(:find_or_initialize).and_return(nil)
+      expect(described_class.handle_announce(activity)).to be true
     end
   end
 
   describe '.handle_undo_announce' do
-    let(:other_actor) { FactoryBot.create :distant_actor }
-    let(:announce_activity) do
-      FactoryBot.create :activity, actor: distant_actor, entity: local_actor,
-                                   action: 'Announce', federated_url: 'https://example.com/activities/announce-1'
+    let(:actor_url) { 'https://remote.example/users/alice' }
+    let(:entity) do
+      Fixtures::Classes::FakeArticleDataModel.create!(
+        user:    FactoryBot.create(:user),
+        title:   'A post',
+        content: 'body'
+      )
     end
-
     let(:activity) do
       {
-        'id'     => 'https://example.com/activities/undo-announce-1',
         'type'   => 'Undo',
-        'actor'  => distant_actor.federated_url,
-        'object' => {
-          'id'   => 'https://example.com/activities/announce-1',
-          'type' => 'Announce',
-        },
+        'actor'  => actor_url,
+        'object' => { 'type' => 'Announce', 'actor' => actor_url, 'object' => entity.federated_url },
       }
     end
 
-    before do
-      announce_activity
+    it 'dispatches to the data entity undo hook' do
+      allow(Fediverse::Request).to receive(:dereference).with(activity['object']).and_return(activity['object'])
+      allow(Federails::Utils::Object).to receive(:find_or_initialize).with(entity.federated_url).and_return(entity)
+      allow(entity).to receive(:run_callbacks).with(:on_federails_unannounce_received).and_yield
+
+      expect(described_class.handle_undo_announce(activity)).to be true
+      expect(entity).to have_received(:run_callbacks).with(:on_federails_unannounce_received)
     end
 
-    it 'destroys the announce activity' do
-      expect { described_class.handle_undo_announce(activity) }
-        .to change(Federails::Activity, :count).by(-1)
-    end
-
-    it 'returns true on success' do
+    it 'returns true when no target entity is resolved' do
+      allow(Fediverse::Request).to receive(:dereference).with(activity['object']).and_return(activity['object'])
+      allow(Federails::Utils::Object).to receive(:find_or_initialize).and_return(nil)
       expect(described_class.handle_undo_announce(activity)).to be true
     end
 
-    it 'returns false when announce activity not found' do
-      activity['object']['id'] = 'https://example.com/nonexistent'
-      expect(described_class.handle_undo_announce(activity)).to be false
-    end
+    it 'returns false when undo actor does not match original actor' do
+      allow(Fediverse::Request).to receive(:dereference).with(activity['object']).and_return(activity['object'].merge('actor' => 'https://remote.example/users/bob'))
 
-    it 'returns false when undo actor does not match announce actor' do
-      activity['actor'] = other_actor.federated_url
-
-      expect { described_class.handle_undo_announce(activity) }
-        .not_to change(Federails::Activity, :count)
       expect(described_class.handle_undo_announce(activity)).to be false
     end
   end

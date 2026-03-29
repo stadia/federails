@@ -158,5 +158,14 @@ module Federails
         expect(Fixtures::Classes::FakeDataModel).to have_received(:handle_incoming_fediverse_data).once
       end
     end
+
+    describe 'social activity hooks' do
+      it 'defines callback registration methods' do
+        expect(Fixtures::Classes::FakeDataModel).to respond_to(:on_federails_like_received)
+        expect(Fixtures::Classes::FakeDataModel).to respond_to(:on_federails_unlike_received)
+        expect(Fixtures::Classes::FakeDataModel).to respond_to(:on_federails_announce_received)
+        expect(Fixtures::Classes::FakeDataModel).to respond_to(:on_federails_unannounce_received)
+      end
+    end
   end
 end

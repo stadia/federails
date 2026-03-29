@@ -100,6 +100,7 @@ module Federails
 
     extend ActiveSupport::Concern
     include Federails::HandlesDeleteRequests
+    include Federails::HandlesSocialActivities
 
     # Class methods automatically included in the concern.
     module ClassMethods

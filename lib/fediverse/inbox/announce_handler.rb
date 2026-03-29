@@ -1,19 +1,38 @@
 # rbs_inline: enabled
 
-require 'fediverse/inbox/activity_handler'
+require 'fediverse/request'
 
 module Fediverse
   class Inbox
     module AnnounceHandler
-      extend ActivityHandler
-
       class << self
         def handle_announce(activity)
-          process_activity(activity, 'Announce')
+          entity = resolve_target_entity(activity['object'])
+          return true unless entity
+
+          entity.run_callbacks :on_federails_announce_received
         end
 
         def handle_undo_announce(activity)
-          process_undo_activity(activity, 'Announce')
+          original_activity = Fediverse::Request.dereference(activity['object'])
+          return false unless original_activity
+          return false unless activity['actor'] == original_activity['actor']
+
+          entity = resolve_target_entity(original_activity&.dig('object'))
+          return true unless entity
+
+          entity.run_callbacks :on_federails_unannounce_received
+        end
+
+        private
+
+        def resolve_target_entity(object)
+          entity = Federails::Utils::Object.find_or_initialize(object)
+          return unless entity.is_a?(Federails::DataEntity)
+
+          entity
+        rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid
+          nil
         end
       end
     end
