@@ -112,19 +112,27 @@ module Fediverse
         verify_digest!(request)
 
         actor_uri = parsed[:key_id].sub(/#.*\z/, '')
-        actor = Federails::Actor.find_or_create_by_federation_url(actor_uri)
+        actor = begin
+          Federails::Actor.find_or_create_by_federation_url(actor_uri)
+        rescue StandardError => e
+          raise SignatureVerificationError, "Unable to load signed actor: #{e.message}"
+        end
 
         comparison_string = signature_payload(request: request, headers: parsed[:headers])
         raw_signature = Base64.decode64(parsed[:signature])
         key = OpenSSL::PKey::RSA.new(actor.public_key)
-
         digest = OpenSSL::Digest.new('SHA256')
 
         return actor if key.verify(digest, raw_signature, comparison_string)
 
         # Key rotation retry: only re-fetch if the cached actor is stale
         if actor.updated_at < Federails::Configuration.remote_entities_cache_duration.ago
-          actor.sync!
+          begin
+            actor.sync!
+          rescue StandardError => e
+            raise SignatureVerificationError, "Unable to refresh signed actor: #{e.message}"
+          end
+
           key = OpenSSL::PKey::RSA.new(actor.public_key)
           return actor if key.verify(digest, raw_signature, comparison_string)
         end

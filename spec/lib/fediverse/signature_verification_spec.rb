@@ -96,14 +96,22 @@ RSpec.describe Fediverse::Signature do
     let(:body) { '{"type":"Create"}' }
     let(:digest) { "SHA-256=#{Base64.strict_encode64(OpenSSL::Digest.new('SHA256').digest(body))}" }
 
-    def build_signed_request(signing_actor, body_str)
-      req = Faraday.default_connection.build_request(:post) do |r|
+    def request_digest(body_str)
+      "SHA-256=#{Base64.strict_encode64(OpenSSL::Digest.new('SHA256').digest(body_str))}"
+    end
+
+    def build_faraday_request(body_str)
+      Faraday.default_connection.build_request(:post) do |r|
         r.url '/inbox'
         r.body = body_str
         r.headers['Host'] = 'example.com'
         r.headers['Date'] = Time.now.utc.httpdate
-        r.headers['Digest'] = "SHA-256=#{Base64.strict_encode64(OpenSSL::Digest.new('SHA256').digest(body_str))}"
+        r.headers['Digest'] = request_digest(body_str)
       end
+    end
+
+    def build_signed_request(signing_actor, body_str)
+      req = build_faraday_request(body_str)
       req.headers['Signature'] = described_class.sign(sender: signing_actor, request: req)
 
       # Wrap body as StringIO for read/rewind support
@@ -183,6 +191,30 @@ RSpec.describe Fediverse::Signature do
 
       expect(Federails::Actor).to have_received(:find_or_create_by_federation_url)
         .with(actor.federated_url)
+    end
+
+    it 'wraps actor lookup errors as SignatureVerificationError' do
+      request = build_signed_request(actor, body)
+
+      allow(Federails::Actor).to receive(:find_or_create_by_federation_url)
+        .with(actor.federated_url).and_raise(ActiveRecord::RecordNotFound)
+
+      expect { described_class.verify_request!(request) }
+        .to raise_error(Fediverse::Signature::SignatureVerificationError, /Unable to load signed actor/)
+    end
+
+    it 'wraps stale actor refresh errors as SignatureVerificationError' do
+      request = build_signed_request(actor, body)
+      actor_uri = actor.federated_url
+      wrong_key = OpenSSL::PKey::RSA.new(2048)
+
+      allow(Federails::Actor).to receive(:find_or_create_by_federation_url)
+        .with(actor_uri).and_return(actor)
+      allow(actor).to receive_messages(public_key: wrong_key.public_key.to_pem, updated_at: 2.days.ago)
+      allow(actor).to receive(:sync!).and_raise(Faraday::ConnectionFailed.new('boom'))
+
+      expect { described_class.verify_request!(request) }
+        .to raise_error(Fediverse::Signature::SignatureVerificationError, /Unable to refresh signed actor/)
     end
   end
 end
