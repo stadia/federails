@@ -3,7 +3,7 @@ module Federails
     class ActorsController < Federails::ServerController
       include Federails::Server::RenderCollections
 
-      before_action :set_actor, only: [:show, :followers, :following]
+      before_action :set_actor, only: [:show, :followers, :following, :liked, :featured, :featured_tags]
 
       # GET /federation/actors/1
       # GET /federation/actors/1.json
@@ -31,6 +31,33 @@ module Federails
           actor:      @actor,
           url_helper: :following_server_actor_url
         ) { |items| items.map(&:federated_url) }
+      end
+
+      # GET /federation/actors/:id/liked
+      def liked
+        render_collection(
+          collection: Federails::Activity.where(actor: @actor, action: 'Like').order(created_at: :desc),
+          actor:      @actor,
+          url_helper: :liked_server_actor_url
+        ) { |items| items.map { |a| Federails::Server::ActivityResource.new(a, params: { context: false }).serializable_hash } }
+      end
+
+      # GET /federation/actors/:id/featured
+      def featured
+        render_collection(
+          collection: @actor.featured_items.order(created_at: :desc),
+          actor:      @actor,
+          url_helper: :featured_server_actor_url
+        ) { |items| items.map { |item| { id: item.federated_url, type: 'Note' } } }
+      end
+
+      # GET /federation/actors/:id/featured_tags
+      def featured_tags
+        render_collection(
+          collection: @actor.featured_tags.order(created_at: :desc),
+          actor:      @actor,
+          url_helper: :featured_tags_server_actor_url
+        ) { |items| items.map { |tag| { type: 'Hashtag', href: tag.name, name: "##{tag.name}" } } }
       end
 
       private

@@ -17,6 +17,18 @@ module Federails
       attribute :following, &:followings_url
       attribute :url, &:profile_url
 
+      attribute :liked do |actor|
+        Federails::SerializerSupport.route_helpers.liked_server_actor_url(actor) if actor.local?
+      end
+
+      attribute :featured do |actor|
+        Federails::SerializerSupport.route_helpers.featured_server_actor_url(actor) if actor.local?
+      end
+
+      attribute :featuredTags do |actor|
+        Federails::SerializerSupport.route_helpers.featured_tags_server_actor_url(actor) if actor.local?
+      end
+
       attribute :publicKey do |actor|
         next unless actor.public_key
 
