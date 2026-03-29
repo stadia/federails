@@ -96,6 +96,14 @@ module Federails
       use_entity_attributes? ? Federails::Engine.routes.url_helpers.following_server_actor_url(self) : attributes['followings_url']
     end
 
+    def shared_inbox_url
+      if use_entity_attributes?
+        Federails::Engine.routes.url_helpers.server_shared_inbox_url
+      else
+        self[:shared_inbox_url]
+      end
+    end
+
     def profile_url
       return attributes['profile_url'].presence unless use_entity_attributes?
 

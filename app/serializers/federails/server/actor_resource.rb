@@ -17,6 +17,12 @@ module Federails
       attribute :following, &:followings_url
       attribute :url, &:profile_url
 
+      attribute :endpoints do |actor|
+        if actor.local?
+          { sharedInbox: Federails::SerializerSupport.route_helpers.server_shared_inbox_url }
+        end
+      end
+
       attribute :publicKey do |actor|
         next unless actor.public_key
 

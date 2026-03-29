@@ -51,6 +51,7 @@ module Fediverse
         return [] unless activity.actor.local?
 
         actor_inbox = activity.actor.inbox_url
+        actor_shared_inbox = activity.actor.try(:shared_inbox_url)
         addressing = [
           activity.to,
           activity.cc,
@@ -64,11 +65,13 @@ module Fediverse
 
         inboxes = addressing.flat_map do |url|
           actor = known_actors[url] || Federails::Actor.find_or_create_by_federation_url(url)
-          [actor.inbox_url]
+          [actor.shared_inbox_url.presence || actor.inbox_url]
         rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid
-          collection_to_actors(url).map(&:inbox_url)
+          collection_to_actors(url).map { |a| a.shared_inbox_url.presence || a.inbox_url }
         end
-        inboxes.compact.uniq.reject { |url| url == actor_inbox }
+
+        excluded = [actor_inbox, actor_shared_inbox].compact
+        inboxes.compact.uniq.reject { |url| excluded.include?(url) }
       end
 
       #: (String, ?max_depth: Integer) -> Array[Federails::Actor]
