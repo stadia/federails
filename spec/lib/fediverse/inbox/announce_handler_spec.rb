@@ -46,10 +46,10 @@ RSpec.describe Fediverse::Inbox::AnnounceHandler do
     it 'dispatches to the data entity undo hook' do
       allow(Fediverse::Request).to receive(:dereference).with(activity['object']).and_return(activity['object'])
       allow(Federails::Utils::Object).to receive(:find_or_initialize).with(entity.federated_url).and_return(entity)
-      allow(entity).to receive(:run_callbacks).with(:on_federails_unannounce_received).and_yield
+      allow(entity).to receive(:run_callbacks).with(:on_federails_undo_announce_received).and_yield
 
       expect(described_class.handle_undo_announce(activity)).to be true
-      expect(entity).to have_received(:run_callbacks).with(:on_federails_unannounce_received)
+      expect(entity).to have_received(:run_callbacks).with(:on_federails_undo_announce_received)
     end
 
     it 'returns true when no target entity is resolved' do

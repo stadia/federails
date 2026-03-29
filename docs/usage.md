@@ -278,9 +278,9 @@ class Post < ApplicationRecord
   include Federails::DataEntity
 
   on_federails_like_received :handle_federails_like!
-  on_federails_unlike_received :handle_federails_unlike!
+  on_federails_undo_like_received :handle_federails_undo_like!
   on_federails_announce_received :handle_federails_announce!
-  on_federails_unannounce_received :handle_federails_unannounce!
+  on_federails_undo_announce_received :handle_federails_undo_announce!
 
   def handle_federails_like!
     # Custom Like behavior for this entity
@@ -307,9 +307,9 @@ end
 The built-in handlers resolve the target object and call:
 
 - `object.run_callbacks :on_federails_like_received`
-- `object.run_callbacks :on_federails_unlike_received`
+- `object.run_callbacks :on_federails_undo_like_received`
 - `object.run_callbacks :on_federails_announce_received`
-- `object.run_callbacks :on_federails_unannounce_received`
+- `object.run_callbacks :on_federails_undo_announce_received`
 
 The application is responsible for deciding how to:
 

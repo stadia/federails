@@ -46,10 +46,10 @@ RSpec.describe Fediverse::Inbox::LikeHandler do
     it 'dispatches to the data entity undo hook' do
       allow(Fediverse::Request).to receive(:dereference).with(activity['object']).and_return(activity['object'])
       allow(Federails::Utils::Object).to receive(:find_or_initialize).with(entity.federated_url).and_return(entity)
-      allow(entity).to receive(:run_callbacks).with(:on_federails_unlike_received).and_yield
+      allow(entity).to receive(:run_callbacks).with(:on_federails_undo_like_received).and_yield
 
       expect(described_class.handle_undo_like(activity)).to be true
-      expect(entity).to have_received(:run_callbacks).with(:on_federails_unlike_received)
+      expect(entity).to have_received(:run_callbacks).with(:on_federails_undo_like_received)
     end
 
     it 'returns true when no target entity is resolved' do

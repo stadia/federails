@@ -10,7 +10,7 @@ module Fediverse
           entity = resolve_target_entity(activity['object'])
           return true unless entity
 
-          entity.run_callbacks :on_federails_like_received
+          entity.run_callbacks(:on_federails_like_received) { true }
         end
 
         def handle_undo_like(activity)
@@ -21,7 +21,7 @@ module Fediverse
           entity = resolve_target_entity(original_activity&.dig('object'))
           return true unless entity
 
-          entity.run_callbacks :on_federails_unlike_received
+          entity.run_callbacks(:on_federails_undo_like_received) { true }
         end
 
         private

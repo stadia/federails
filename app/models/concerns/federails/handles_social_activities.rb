@@ -9,24 +9,24 @@ module Federails
         set_callback(:on_federails_like_received, *)
       end
 
-      def on_federails_unlike_received(*)
-        set_callback(:on_federails_unlike_received, *)
+      def on_federails_undo_like_received(*)
+        set_callback(:on_federails_undo_like_received, *)
       end
 
       def on_federails_announce_received(*)
         set_callback(:on_federails_announce_received, *)
       end
 
-      def on_federails_unannounce_received(*)
-        set_callback(:on_federails_unannounce_received, *)
+      def on_federails_undo_announce_received(*)
+        set_callback(:on_federails_undo_announce_received, *)
       end
     end
 
     included do
       define_callbacks :on_federails_like_received
-      define_callbacks :on_federails_unlike_received
+      define_callbacks :on_federails_undo_like_received
       define_callbacks :on_federails_announce_received
-      define_callbacks :on_federails_unannounce_received
+      define_callbacks :on_federails_undo_announce_received
     end
   end
 end
