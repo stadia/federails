@@ -166,6 +166,28 @@ module Federails
         expect(Fixtures::Classes::FakeDataModel).to respond_to(:on_federails_announce_received)
         expect(Fixtures::Classes::FakeDataModel).to respond_to(:on_federails_undo_announce_received)
       end
+
+      it 'passes the social activity actor to registered callback methods' do
+        klass = Class.new do
+          include ActiveSupport::Callbacks
+          include Federails::HandlesSocialActivities
+
+          attr_reader :received_actor
+
+          on_federails_like_received :handle_like
+
+          def handle_like(actor)
+            @received_actor = actor
+          end
+        end
+
+        instance = klass.new
+        instance.current_federails_activity_actor = 'https://remote.example/users/alice'
+
+        instance.run_callbacks(:on_federails_like_received) { true }
+
+        expect(instance.received_actor).to eq('https://remote.example/users/alice')
+      end
     end
   end
 end

@@ -282,22 +282,22 @@ class Post < ApplicationRecord
   on_federails_announce_received :handle_federails_announce!
   on_federails_undo_announce_received :handle_federails_undo_announce!
 
-  def handle_federails_like!
+  def handle_federails_like!(actor_url)
     # Custom Like behavior for this entity
     true
   end
 
-  def handle_federails_unlike!
+  def handle_federails_undo_like!(actor_url)
     # Custom Undo Like behavior for this entity
     true
   end
 
-  def handle_federails_announce!
+  def handle_federails_announce!(actor_url)
     # Custom Announce behavior for this entity
     true
   end
 
-  def handle_federails_unannounce!
+  def handle_federails_undo_announce!(actor_url)
     # Custom Undo Announce behavior for this entity
     true
   end
@@ -310,6 +310,8 @@ The built-in handlers resolve the target object and call:
 - `object.run_callbacks :on_federails_undo_like_received`
 - `object.run_callbacks :on_federails_announce_received`
 - `object.run_callbacks :on_federails_undo_announce_received`
+
+Registered callback methods receive the activity actor as their argument.
 
 The application is responsible for deciding how to:
 

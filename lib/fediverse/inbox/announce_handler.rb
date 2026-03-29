@@ -10,7 +10,7 @@ module Fediverse
           entity = resolve_target_entity(activity['object'])
           return true unless entity
 
-          entity.run_callbacks(:on_federails_announce_received) { true }
+          dispatch_callback(entity, :on_federails_announce_received, activity['actor'])
         end
 
         def handle_undo_announce(activity)
@@ -21,10 +21,18 @@ module Fediverse
           entity = resolve_target_entity(original_activity&.dig('object'))
           return true unless entity
 
-          entity.run_callbacks(:on_federails_undo_announce_received) { true }
+          dispatch_callback(entity, :on_federails_undo_announce_received, activity['actor'])
         end
 
         private
+
+        def dispatch_callback(entity, callback_name, actor)
+          previous_actor = entity.current_federails_activity_actor
+          entity.current_federails_activity_actor = actor
+          entity.run_callbacks(callback_name) { true }
+        ensure
+          entity.current_federails_activity_actor = previous_actor
+        end
 
         def resolve_target_entity(object)
           entity = Federails::Utils::Object.find_or_initialize(object)
