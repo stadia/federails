@@ -6,9 +6,6 @@ module Federails
         @publishable = type_scope.find_untombstoned_by!(url_param => params[:id])
         authorize @publishable, policy_class: Federails::Server::PublishablePolicy
         render_serialized(Federails::Server::PublishableResource, @publishable, status: :ok, content_type: Mime[:activitypub])
-      rescue Federails::DataEntity::TombstonedError
-        @publishable = type_scope.find_by!(url_param => params[:id])
-        render_serialized(Federails::Server::PublishableTombstoneResource, @publishable, status: :gone, content_type: Mime[:activitypub])
       end
 
       private

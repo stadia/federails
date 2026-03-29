@@ -33,6 +33,7 @@ module Federails
     end
 
     def error_gone(exception = nil)
+      skip_authorization
       error_fallback(exception, 'Resource is gone', :gone)
     end
 
