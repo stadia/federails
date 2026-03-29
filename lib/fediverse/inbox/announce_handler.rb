@@ -6,6 +6,14 @@ module Fediverse
           actor_url = activity['actor']
           object = activity['object']
 
+          # If object is inline (Hash) with signature, verify it
+          if object.is_a?(Hash) && object['signature']
+            ld_result = Fediverse::LinkedDataSignature.verify(object)
+            if ld_result && !ld_result[:verified]
+              Federails.logger.warn "LD Signature verification failed for Announce inner object: #{ld_result[:error]}"
+            end
+          end
+
           object_url = object.is_a?(Hash) ? object['id'] : object
           actor = Federails::Actor.find_or_create_by_federation_url(actor_url)
           return false unless actor
