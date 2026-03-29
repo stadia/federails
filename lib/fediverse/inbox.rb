@@ -47,7 +47,10 @@ module Fediverse
           return result
         end
 
-        payload['object'] = Fediverse::Request.dereference(payload['object']) if payload.key? 'object'
+        if payload.key?('object')
+          original_object = payload['object']
+          payload['object'] = Fediverse::Request.dereference(original_object) || original_object
+        end
 
         if (payload['type'] == 'Update') && !(payload['actor'].present? && payload.dig('object', 'id').present? && same_origin?(payload['actor'], payload.dig('object', 'id')))
           Federails.logger.warn do
@@ -273,9 +276,9 @@ module Fediverse
         return actor if object.nil?
 
         if object.is_a?(String)
-          Federails::Utils::Object.find_distant_object_in_all(object) || actor
+          Federails::Utils::Object.find_or_initialize(object) || actor
         elsif object.is_a?(Hash) && object['id'].present?
-          Federails::Utils::Object.find_distant_object_in_all(object['id']) || actor
+          Federails::Utils::Object.find_or_initialize(object) || actor
         else
           actor
         end
