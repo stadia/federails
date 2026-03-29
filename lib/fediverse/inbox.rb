@@ -1,6 +1,10 @@
 # rbs_inline: enabled
 
 require 'fediverse/request'
+require 'fediverse/inbox/activity_handler'
+require 'fediverse/inbox/like_handler'
+require 'fediverse/inbox/announce_handler'
+require 'fediverse/inbox/block_handler'
 
 module Fediverse
   class Inbox
@@ -285,10 +289,6 @@ module Fediverse
     register_handler 'Undo', 'Follow', self, :handle_undo_follow_request
     register_handler 'Delete', '*', self, :handle_delete_request
     register_handler 'Undo', 'Delete', self, :handle_undelete_request
-    require 'fediverse/inbox/like_handler'
-    require 'fediverse/inbox/announce_handler'
-    require 'fediverse/inbox/block_handler'
-
     register_handler 'Like', '*', Fediverse::Inbox::LikeHandler, :handle_like
     register_handler 'Undo', 'Like', Fediverse::Inbox::LikeHandler, :handle_undo_like
     register_handler 'Announce', '*', Fediverse::Inbox::AnnounceHandler, :handle_announce
