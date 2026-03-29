@@ -13,9 +13,9 @@ module Fediverse
 
           Federails::Block.find_or_create_by!(actor: actor, target_actor: target_actor)
 
-          # Destroy followings in both directions
-          Federails::Following.where(actor: actor, target_actor: target_actor).destroy_all
-          Federails::Following.where(actor: target_actor, target_actor: actor).destroy_all
+          Federails::Following.where(actor: actor, target_actor: target_actor)
+                              .or(Federails::Following.where(actor: target_actor, target_actor: actor))
+                              .destroy_all
 
           true
         end
