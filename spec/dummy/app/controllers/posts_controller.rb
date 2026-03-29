@@ -23,16 +23,13 @@ class PostsController < ApplicationController
 
   # POST /posts or /posts.json
   def create
-    @post = Post.new(post_params)
-    @post.user = current_user
+    build_post
 
     respond_to do |format|
       if @post.save
-        format.html { redirect_to post_url(@post), notice: 'Post was successfully created.' }
-        format.json { render json: PostResource.new(@post).serializable_hash, status: :created, location: @post }
+        render_create_success(format)
       else
-        format.html { render :new, status: Federails::Utils::ResponseCodes::UNPROCESSABLE_CONTENT }
-        format.json { render json: @post.errors, status: Federails::Utils::ResponseCodes::UNPROCESSABLE_CONTENT }
+        render_create_failure(format)
       end
     end
   end
@@ -70,5 +67,20 @@ class PostsController < ApplicationController
   # Only allow a list of trusted parameters through.
   def post_params
     params.require(:post).permit(:title, :content, :user_id)
+  end
+
+  def build_post
+    @post = Post.new(post_params)
+    @post.user = current_user
+  end
+
+  def render_create_success(format)
+    format.html { redirect_to post_url(@post), notice: 'Post was successfully created.' }
+    format.json { render json: PostResource.new(@post).serializable_hash, status: :created, location: @post }
+  end
+
+  def render_create_failure(format)
+    format.html { render :new, status: Federails::Utils::ResponseCodes::UNPROCESSABLE_CONTENT }
+    format.json { render json: @post.errors, status: Federails::Utils::ResponseCodes::UNPROCESSABLE_CONTENT }
   end
 end

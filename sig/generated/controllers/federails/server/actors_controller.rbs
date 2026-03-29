@@ -1,0 +1,26 @@
+# Generated from app/controllers/federails/server/actors_controller.rb with RBS::Inline
+
+module Federails
+  module Server
+    class ActorsController < Federails::ServerController
+      include Federails::Server::RenderCollections
+
+      # GET /federation/actors/1
+      # GET /federation/actors/1.json
+      def show: () -> untyped
+
+      # GET /federation/actors/:id/followers
+      # GET /federation/actors/:id/followers.json
+      def followers: () -> untyped
+
+      # GET /federation/actors/:id/followers
+      # GET /federation/actors/:id/followers.json
+      def following: () -> untyped
+
+      private
+
+      # Use callbacks to share common setup or constraints between actions.
+      def set_actor: () -> untyped
+    end
+  end
+end

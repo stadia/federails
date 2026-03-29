@@ -36,7 +36,7 @@ module Federails
         )
       end
 
-      def collection_page_payload(actor:, pagy:, paged:, url_helper:, &items_block)
+      def collection_page_payload(actor:, pagy:, paged:, url_helper:)
         Federails::Server::OrderedCollectionPayload.new(
           id:           url_for_collection(url_helper, actor, page: params[:page]),
           type:         'OrderedCollectionPage',
@@ -46,7 +46,7 @@ module Federails
           prev:         pagy.previous ? url_for_collection(url_helper, actor, page: pagy.previous) : nil,
           next:         pagy.next ? url_for_collection(url_helper, actor, page: pagy.next) : nil,
           partOf:       url_for_collection(url_helper, actor),
-          orderedItems: items_block.call(paged)
+          orderedItems: yield(paged)
         )
       end
 

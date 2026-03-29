@@ -1,0 +1,11 @@
+# Generated from app/controllers/federails/server/nodeinfo_controller.rb with RBS::Inline
+
+module Federails
+  module Server
+    class NodeinfoController < Federails::ServerController
+      def index: () -> untyped
+
+      def show: () -> untyped
+    end
+  end
+end

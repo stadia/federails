@@ -1,0 +1,37 @@
+# Generated from app/controllers/federails/server/activities_controller.rb with RBS::Inline
+
+module Federails
+  module Server
+    class ActivitiesController < Federails::ServerController
+      include Federails::Server::RenderCollections
+
+      # GET /federation/activities
+      # GET /federation/actors/1/outbox.json
+      def outbox: () -> untyped
+
+      # GET /federation/actors/1/activities/1.json
+      def show: () -> untyped
+
+      # POST /federation/actors/1/inbox
+      def create: () -> untyped
+
+      private
+
+      def verify_http_signature!: () -> untyped
+
+      # Use callbacks to share common setup or constraints between actions.
+      def set_activity: () -> untyped
+
+      # Only allow a list of trusted parameters through.
+      def activity_params: () -> untyped
+
+      def payload_from_params: () -> untyped
+
+      def validate_payload: (untyped hash) -> untyped
+
+      def compact_payload: (untyped payload) -> untyped
+
+      def supported_inbox_content_type?: () -> untyped
+    end
+  end
+end

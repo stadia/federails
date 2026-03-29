@@ -1,0 +1,18 @@
+# Generated from app/controllers/federails/server/published_controller.rb with RBS::Inline
+
+module Federails
+  module Server
+    # Controller to render ActivityPub representation of entities configured with Federails::DataEntity
+    class PublishedController < Federails::ServerController
+      def show: () -> untyped
+
+      private
+
+      def publishable_config: () -> untyped
+
+      def url_param: () -> untyped
+
+      def type_scope: () -> untyped
+    end
+  end
+end
