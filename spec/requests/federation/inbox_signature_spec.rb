@@ -8,7 +8,6 @@ RSpec.describe 'Inbox HTTP Signature Verification', type: :request do
 
   context 'when verify_signatures is true' do
     before { Federails::Configuration.verify_signatures = true }
-    after { Federails::Configuration.verify_signatures = true }
 
     it 'rejects unsigned POST with 401' do
       post federails.server_actor_inbox_path(actor), params: payload, headers: { 'Content-Type' => 'application/activity+json' }
@@ -17,9 +16,6 @@ RSpec.describe 'Inbox HTTP Signature Verification', type: :request do
   end
 
   context 'when verify_signatures is false' do
-    before { Federails::Configuration.verify_signatures = false }
-    after { Federails::Configuration.verify_signatures = true }
-
     it 'accepts unsigned POST' do
       allow(Fediverse::Inbox).to receive(:dispatch_request).and_return(true)
       post federails.server_actor_inbox_path(actor), params: payload, headers: { 'Content-Type' => 'application/activity+json' }

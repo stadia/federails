@@ -76,7 +76,7 @@ module Fediverse
       def parse_signature_header(header)
         raise SignatureVerificationError, 'Missing Signature header' if header.blank?
 
-        params = header.scan(/(\w+)="([^"]*)"/).to_h
+        params = header.scan(/(\w+)="((?:[^"\\]|\\.)*)"/).to_h.transform_values { |v| v.gsub('\\"', '"') }
         key_id    = params['keyId']
         headers   = params['headers']
         signature = params['signature']
@@ -118,19 +118,20 @@ module Fediverse
         raw_signature = Base64.decode64(parsed[:signature])
         key = OpenSSL::PKey::RSA.new(actor.public_key)
 
-        if key.verify(OpenSSL::Digest.new('SHA256'), raw_signature, comparison_string)
+        digest = OpenSSL::Digest.new('SHA256')
+
+        if key.verify(digest, raw_signature, comparison_string)
           return actor
         end
 
-        # Key rotation retry: re-fetch actor and try once more
-        actor.sync!
-        key = OpenSSL::PKey::RSA.new(actor.public_key)
-
-        unless key.verify(OpenSSL::Digest.new('SHA256'), raw_signature, comparison_string)
-          raise SignatureVerificationError, 'Signature verification failed'
+        # Key rotation retry: only re-fetch if the cached actor is stale
+        if actor.updated_at < Federails::Configuration.remote_entities_cache_duration.ago
+          actor.sync!
+          key = OpenSSL::PKey::RSA.new(actor.public_key)
+          return actor if key.verify(digest, raw_signature, comparison_string)
         end
 
-        actor
+        raise SignatureVerificationError, 'Signature verification failed'
       end
 
       private
@@ -139,7 +140,7 @@ module Fediverse
       def signature_payload(request:, headers:)
         headers.split.map do |signed_header_name|
           if signed_header_name == '(request-target)'
-            "(request-target): #{request.http_method} #{URI.parse(request.path).path}"
+            "(request-target): #{(request.try(:http_method) || request.request_method).downcase} #{URI.parse(request.path).path}"
           else
             "#{signed_header_name}: #{request.headers[signed_header_name.capitalize]}"
           end

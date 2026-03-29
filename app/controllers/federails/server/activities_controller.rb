@@ -37,6 +37,14 @@ module Federails
         payload = payload_from_params
         return head Federails::Utils::ResponseCodes::UNPROCESSABLE_CONTENT unless payload
 
+        if Federails::Configuration.verify_signatures && @signed_actor
+          payload_actor_url = payload['actor'].is_a?(String) ? payload['actor'] : payload.dig('actor', 'id')
+          unless @signed_actor.federated_url == payload_actor_url
+            Federails.logger.warn "Signature actor mismatch: signed=#{@signed_actor.federated_url} payload=#{payload_actor_url}"
+            return head :unauthorized
+          end
+        end
+
         result = Fediverse::Inbox.dispatch_request(payload)
         Federails.logger.info { "[Inbox] dispatch_request result: #{result.inspect} for activity #{payload['id']}" }
 

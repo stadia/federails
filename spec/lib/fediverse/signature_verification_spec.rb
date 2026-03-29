@@ -122,30 +122,40 @@ RSpec.describe Fediverse::Signature do
       expect(result).to eq(actor)
     end
 
-    it 'retries after sync! on initial verification failure' do
+    it 'retries after sync! on initial verification failure when actor is stale' do
       request = build_signed_request(actor, body)
       actor_uri = actor.federated_url
 
       # Simulate key rotation: first call returns actor with wrong key, after sync! key is correct
       wrong_key = OpenSSL::PKey::RSA.new(2048)
-      call_count = 0
+      real_public_key = actor.class.find(actor.id).public_key
 
       allow(Federails::Actor).to receive(:find_or_create_by_federation_url)
         .with(actor_uri).and_return(actor)
-      allow(actor).to receive(:public_key) {
-        call_count += 1
-        call_count <= 1 ? wrong_key.public_key.to_pem : actor.reload.public_key
-      }
-      allow(actor).to receive(:sync!)
-
-      # Need the real public key on retry - reset the stub
-      real_public_key = actor.class.find(actor.id).public_key
       allow(actor).to receive(:public_key).and_return(wrong_key.public_key.to_pem, real_public_key)
+      allow(actor).to receive(:updated_at).and_return(2.days.ago)
       allow(actor).to receive(:sync!)
 
       result = described_class.verify_request!(request)
       expect(result).to eq(actor)
       expect(actor).to have_received(:sync!)
+    end
+
+    it 'does not retry sync! when actor is fresh' do
+      request = build_signed_request(actor, body)
+      actor_uri = actor.federated_url
+
+      wrong_key = OpenSSL::PKey::RSA.new(2048)
+
+      allow(Federails::Actor).to receive(:find_or_create_by_federation_url)
+        .with(actor_uri).and_return(actor)
+      allow(actor).to receive(:public_key).and_return(wrong_key.public_key.to_pem)
+      allow(actor).to receive(:updated_at).and_return(1.minute.ago)
+      allow(actor).to receive(:sync!)
+
+      expect { described_class.verify_request!(request) }
+        .to raise_error(Fediverse::Signature::SignatureVerificationError, /Signature verification failed/)
+      expect(actor).not_to have_received(:sync!)
     end
 
     it 'raises SignatureVerificationError when signature is invalid even after retry' do
@@ -157,6 +167,7 @@ RSpec.describe Fediverse::Signature do
       allow(Federails::Actor).to receive(:find_or_create_by_federation_url)
         .with(actor_uri).and_return(actor)
       allow(actor).to receive(:public_key).and_return(wrong_key.public_key.to_pem)
+      allow(actor).to receive(:updated_at).and_return(2.days.ago)
       allow(actor).to receive(:sync!)
 
       expect { described_class.verify_request!(request) }
