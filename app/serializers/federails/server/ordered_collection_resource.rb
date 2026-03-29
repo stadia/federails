@@ -1,5 +1,6 @@
 module Federails
   module Server
+    # rubocop:disable Naming/MethodName
     unless const_defined?(:OrderedCollectionPayload)
       OrderedCollectionPayload = Struct.new(
         :id,
@@ -22,5 +23,6 @@ module Federails
 
       attributes :id, :type, :totalItems, :first, :last, :prev, :next, :partOf, :orderedItems
     end
+    # rubocop:enable Naming/MethodName
   end
 end
