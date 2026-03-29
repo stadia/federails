@@ -285,5 +285,15 @@ module Fediverse
     register_handler 'Undo', 'Follow', self, :handle_undo_follow_request
     register_handler 'Delete', '*', self, :handle_delete_request
     register_handler 'Undo', 'Delete', self, :handle_undelete_request
+    require 'fediverse/inbox/like_handler'
+    require 'fediverse/inbox/announce_handler'
+    require 'fediverse/inbox/block_handler'
+
+    register_handler 'Like', '*', Fediverse::Inbox::LikeHandler, :handle_like
+    register_handler 'Undo', 'Like', Fediverse::Inbox::LikeHandler, :handle_undo_like
+    register_handler 'Announce', '*', Fediverse::Inbox::AnnounceHandler, :handle_announce
+    register_handler 'Undo', 'Announce', Fediverse::Inbox::AnnounceHandler, :handle_undo_announce
+    register_handler 'Block', '*', Fediverse::Inbox::BlockHandler, :handle_block
+    register_handler 'Undo', 'Block', Fediverse::Inbox::BlockHandler, :handle_undo_block
   end
 end
