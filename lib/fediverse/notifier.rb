@@ -68,6 +68,14 @@ module Fediverse
         rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid
           collection_to_actors(url).map(&:inbox_url)
         end
+        # Filter out actors who have blocked the sender
+        blocked_actor_ids = Federails::Block.where(target_actor: activity.actor).select(:actor_id)
+        if blocked_actor_ids.exists?
+          blocked_actors = Federails::Actor.where(id: blocked_actor_ids)
+          blocked_inbox_urls = blocked_actors.flat_map { |a| [a.inbox_url, a.try(:shared_inbox_url)] }.compact.to_set
+          inboxes.reject! { |url| blocked_inbox_urls.include?(url) }
+        end
+
         inboxes.compact.uniq.reject { |url| url == actor_inbox }
       end
 
