@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module Federails
   module Server
     # Controller to render ActivityPub representation of entities configured with Federails::DataEntity
