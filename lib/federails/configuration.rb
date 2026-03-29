@@ -117,6 +117,10 @@ module Federails
     mattr_accessor :remote_entities_cache_duration
     @@remote_entities_cache_duration = 1.day
 
+    # Whether to verify HTTP signatures on incoming requests
+    mattr_accessor :verify_signatures
+    @@verify_signatures = true
+
     # Job queue name
     mattr_accessor :job_queue
     @@job_queue = :default

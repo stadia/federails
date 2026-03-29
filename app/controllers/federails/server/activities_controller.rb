@@ -5,6 +5,7 @@ module Federails
     class ActivitiesController < Federails::ServerController
       include Federails::Server::RenderCollections
 
+      before_action :verify_http_signature!, only: :create
       before_action :set_activity, only: [:show]
 
       # GET /federation/activities
@@ -51,6 +52,15 @@ module Federails
       end
 
       private
+
+      def verify_http_signature!
+        return unless Federails::Configuration.verify_signatures
+
+        @signed_actor = Fediverse::Signature.verify_request!(request)
+      rescue Fediverse::Signature::SignatureVerificationError => e
+        Federails.logger.warn "Signature verification failed: #{e.message}"
+        head :unauthorized
+      end
 
       # Use callbacks to share common setup or constraints between actions.
       def set_activity
