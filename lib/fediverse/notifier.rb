@@ -120,10 +120,26 @@ module Fediverse
       #: (inbox_url: String, message: String, ?from: Federails::Actor?) -> untyped
       def post_to_inbox(inbox_url:, message:, from: nil)
         conn = Faraday.default_connection
-        conn.builder.build_response(
+        resp = conn.builder.build_response(
           conn,
           signed_request(url: inbox_url, message: message, from: from)
         )
+
+        status = resp.status
+        return resp if status.between?(200, 299)
+
+        if [404, 410].include?(status)
+          raise Federails::PermanentDeliveryError.new(
+            "Delivery to #{inbox_url} failed permanently: HTTP #{status}",
+            response_code: status, inbox_url: inbox_url
+          )
+        else
+          message = "Delivery to #{inbox_url} failed: HTTP #{status}"
+          message += " (Retry-After: #{resp.headers['Retry-After']})" if status == 429 && resp.headers['Retry-After']
+          raise Federails::TemporaryDeliveryError.new(
+            message, response_code: status, inbox_url: inbox_url
+          )
+        end
       end
 
       #: (url: String, message: String, from: Federails::Actor?) -> untyped
