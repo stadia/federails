@@ -1,6 +1,7 @@
 module Fediverse
   class Inbox
     module BlockHandler
+      # rubocop:disable Naming/PredicateMethod
       class << self
         def handle_block(activity)
           actor = Federails::Actor.find_or_create_by_federation_url(activity['actor'])
@@ -20,7 +21,9 @@ module Fediverse
         def handle_undo_block(activity)
           object = activity['object']
           actor = Federails::Actor.find_or_create_by_federation_url(activity['actor'])
-          target_url = object.is_a?(Hash) ? (object['object'].is_a?(Hash) ? object['object']['id'] : object['object']) : nil
+          target_url = if object.is_a?(Hash)
+                         object['object'].is_a?(Hash) ? object['object']['id'] : object['object']
+                       end
           return false unless actor && target_url
 
           target_actor = Federails::Actor.find_or_create_by_federation_url(target_url)
@@ -33,6 +36,7 @@ module Fediverse
           true
         end
       end
+      # rubocop:enable Naming/PredicateMethod
     end
   end
 end

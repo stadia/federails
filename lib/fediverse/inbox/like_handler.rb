@@ -1,6 +1,7 @@
 module Fediverse
   class Inbox
     module LikeHandler
+      # rubocop:disable Naming/PredicateMethod
       class << self
         def handle_like(activity)
           actor_url = activity['actor']
@@ -11,9 +12,9 @@ module Fediverse
           entity = Federails::Utils::Object.find_or_initialize(object_url)
 
           Federails::Activity.create!(
-            action: 'Like',
-            actor: actor,
-            entity: entity,
+            action:        'Like',
+            actor:         actor,
+            entity:        entity,
             federated_url: activity['id']
           )
           true
@@ -29,6 +30,7 @@ module Fediverse
           true
         end
       end
+      # rubocop:enable Naming/PredicateMethod
     end
   end
 end

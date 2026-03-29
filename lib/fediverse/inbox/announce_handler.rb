@@ -1,6 +1,7 @@
 module Fediverse
   class Inbox
     module AnnounceHandler
+      # rubocop:disable Naming/PredicateMethod
       class << self
         def handle_announce(activity)
           actor_url = activity['actor']
@@ -13,9 +14,9 @@ module Fediverse
           entity = Federails::Utils::Object.find_or_initialize(object_url)
 
           Federails::Activity.create!(
-            action: 'Announce',
-            actor: actor,
-            entity: entity,
+            action:        'Announce',
+            actor:         actor,
+            entity:        entity,
             federated_url: activity['id']
           )
           true
@@ -31,6 +32,7 @@ module Fediverse
           true
         end
       end
+      # rubocop:enable Naming/PredicateMethod
     end
   end
 end

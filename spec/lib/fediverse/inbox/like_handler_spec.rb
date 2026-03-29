@@ -2,16 +2,16 @@ require 'rails_helper'
 require 'fediverse/inbox/like_handler'
 
 RSpec.describe Fediverse::Inbox::LikeHandler do
-  let(:distant_actor) { FactoryBot.create(:distant_actor) }
+  let(:distant_actor) { FactoryBot.create :distant_actor }
   let(:local_actor) { FactoryBot.create(:user).federails_actor }
 
   describe '.handle_like' do
     let(:activity) do
       {
-        'id' => 'https://example.com/activities/like-1',
-        'type' => 'Like',
-        'actor' => distant_actor.federated_url,
-        'object' => local_actor.federated_url
+        'id'     => 'https://example.com/activities/like-1',
+        'type'   => 'Like',
+        'actor'  => distant_actor.federated_url,
+        'object' => local_actor.federated_url,
       }
     end
 
@@ -44,21 +44,25 @@ RSpec.describe Fediverse::Inbox::LikeHandler do
   end
 
   describe '.handle_undo_like' do
-    let!(:like_activity) do
-      FactoryBot.create(:activity, actor: distant_actor, entity: local_actor,
-                                   action: 'Like', federated_url: 'https://example.com/activities/like-1')
+    let(:like_activity) do
+      FactoryBot.create :activity, actor: distant_actor, entity: local_actor,
+                                   action: 'Like', federated_url: 'https://example.com/activities/like-1'
     end
 
     let(:activity) do
       {
-        'id' => 'https://example.com/activities/undo-like-1',
-        'type' => 'Undo',
-        'actor' => distant_actor.federated_url,
+        'id'     => 'https://example.com/activities/undo-like-1',
+        'type'   => 'Undo',
+        'actor'  => distant_actor.federated_url,
         'object' => {
-          'id' => 'https://example.com/activities/like-1',
-          'type' => 'Like'
-        }
+          'id'   => 'https://example.com/activities/like-1',
+          'type' => 'Like',
+        },
       }
+    end
+
+    before do
+      like_activity
     end
 
     it 'destroys the like activity' do

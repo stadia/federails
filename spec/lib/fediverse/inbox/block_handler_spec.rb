@@ -2,7 +2,7 @@ require 'rails_helper'
 require 'fediverse/inbox/block_handler'
 
 RSpec.describe Fediverse::Inbox::BlockHandler do
-  let(:distant_actor) { FactoryBot.create(:distant_actor) }
+  let(:distant_actor) { FactoryBot.create :distant_actor }
   let(:local_actor) { FactoryBot.create(:user).federails_actor }
 
   before do
@@ -15,10 +15,10 @@ RSpec.describe Fediverse::Inbox::BlockHandler do
   describe '.handle_block' do
     let(:activity) do
       {
-        'id' => 'https://example.com/activities/block-1',
-        'type' => 'Block',
-        'actor' => distant_actor.federated_url,
-        'object' => local_actor.federated_url
+        'id'     => 'https://example.com/activities/block-1',
+        'type'   => 'Block',
+        'actor'  => distant_actor.federated_url,
+        'object' => local_actor.federated_url,
       }
     end
 
@@ -61,14 +61,14 @@ RSpec.describe Fediverse::Inbox::BlockHandler do
 
     let(:activity) do
       {
-        'id' => 'https://example.com/activities/undo-block-1',
-        'type' => 'Undo',
-        'actor' => distant_actor.federated_url,
+        'id'     => 'https://example.com/activities/undo-block-1',
+        'type'   => 'Undo',
+        'actor'  => distant_actor.federated_url,
         'object' => {
-          'type' => 'Block',
-          'actor' => distant_actor.federated_url,
-          'object' => local_actor.federated_url
-        }
+          'type'   => 'Block',
+          'actor'  => distant_actor.federated_url,
+          'object' => local_actor.federated_url,
+        },
       }
     end
 

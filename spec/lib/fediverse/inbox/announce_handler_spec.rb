@@ -2,16 +2,16 @@ require 'rails_helper'
 require 'fediverse/inbox/announce_handler'
 
 RSpec.describe Fediverse::Inbox::AnnounceHandler do
-  let(:distant_actor) { FactoryBot.create(:distant_actor) }
+  let(:distant_actor) { FactoryBot.create :distant_actor }
   let(:local_actor) { FactoryBot.create(:user).federails_actor }
 
   describe '.handle_announce' do
     let(:activity) do
       {
-        'id' => 'https://example.com/activities/announce-1',
-        'type' => 'Announce',
-        'actor' => distant_actor.federated_url,
-        'object' => local_actor.federated_url
+        'id'     => 'https://example.com/activities/announce-1',
+        'type'   => 'Announce',
+        'actor'  => distant_actor.federated_url,
+        'object' => local_actor.federated_url,
       }
     end
 
@@ -44,21 +44,25 @@ RSpec.describe Fediverse::Inbox::AnnounceHandler do
   end
 
   describe '.handle_undo_announce' do
-    let!(:announce_activity) do
-      FactoryBot.create(:activity, actor: distant_actor, entity: local_actor,
-                                   action: 'Announce', federated_url: 'https://example.com/activities/announce-1')
+    let(:announce_activity) do
+      FactoryBot.create :activity, actor: distant_actor, entity: local_actor,
+                                   action: 'Announce', federated_url: 'https://example.com/activities/announce-1'
     end
 
     let(:activity) do
       {
-        'id' => 'https://example.com/activities/undo-announce-1',
-        'type' => 'Undo',
-        'actor' => distant_actor.federated_url,
+        'id'     => 'https://example.com/activities/undo-announce-1',
+        'type'   => 'Undo',
+        'actor'  => distant_actor.federated_url,
         'object' => {
-          'id' => 'https://example.com/activities/announce-1',
-          'type' => 'Announce'
-        }
+          'id'   => 'https://example.com/activities/announce-1',
+          'type' => 'Announce',
+        },
       }
+    end
+
+    before do
+      announce_activity
     end
 
     it 'destroys the announce activity' do
