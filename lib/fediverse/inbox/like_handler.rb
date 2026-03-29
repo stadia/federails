@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module Fediverse
   class Inbox
     module LikeHandler
@@ -25,6 +27,7 @@ module Fediverse
           like_url = object.is_a?(Hash) ? object['id'] : object
           like = Federails::Activity.find_by(federated_url: like_url, action: 'Like')
           return false unless like
+          return false unless like.actor&.federated_url == activity['actor']
 
           like.destroy!
           true

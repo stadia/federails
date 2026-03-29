@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module Fediverse
   class Inbox
     module AnnounceHandler
@@ -27,6 +29,7 @@ module Fediverse
           announce_url = object.is_a?(Hash) ? object['id'] : object
           announce = Federails::Activity.find_by(federated_url: announce_url, action: 'Announce')
           return false unless announce
+          return false unless announce.actor&.federated_url == activity['actor']
 
           announce.destroy!
           true

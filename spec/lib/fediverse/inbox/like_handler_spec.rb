@@ -44,6 +44,7 @@ RSpec.describe Fediverse::Inbox::LikeHandler do
   end
 
   describe '.handle_undo_like' do
+    let(:other_actor) { FactoryBot.create :distant_actor }
     let(:like_activity) do
       FactoryBot.create :activity, actor: distant_actor, entity: local_actor,
                                    action: 'Like', federated_url: 'https://example.com/activities/like-1'
@@ -76,6 +77,14 @@ RSpec.describe Fediverse::Inbox::LikeHandler do
 
     it 'returns false when like activity not found' do
       activity['object']['id'] = 'https://example.com/nonexistent'
+      expect(described_class.handle_undo_like(activity)).to be false
+    end
+
+    it 'returns false when undo actor does not match like actor' do
+      activity['actor'] = other_actor.federated_url
+
+      expect { described_class.handle_undo_like(activity) }
+        .not_to change(Federails::Activity, :count)
       expect(described_class.handle_undo_like(activity)).to be false
     end
   end

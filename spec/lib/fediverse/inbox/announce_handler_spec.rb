@@ -44,6 +44,7 @@ RSpec.describe Fediverse::Inbox::AnnounceHandler do
   end
 
   describe '.handle_undo_announce' do
+    let(:other_actor) { FactoryBot.create :distant_actor }
     let(:announce_activity) do
       FactoryBot.create :activity, actor: distant_actor, entity: local_actor,
                                    action: 'Announce', federated_url: 'https://example.com/activities/announce-1'
@@ -76,6 +77,14 @@ RSpec.describe Fediverse::Inbox::AnnounceHandler do
 
     it 'returns false when announce activity not found' do
       activity['object']['id'] = 'https://example.com/nonexistent'
+      expect(described_class.handle_undo_announce(activity)).to be false
+    end
+
+    it 'returns false when undo actor does not match announce actor' do
+      activity['actor'] = other_actor.federated_url
+
+      expect { described_class.handle_undo_announce(activity) }
+        .not_to change(Federails::Activity, :count)
       expect(described_class.handle_undo_announce(activity)).to be false
     end
   end
