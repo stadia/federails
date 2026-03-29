@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module Federails
   class ServerController < ::ActionController::Base # rubocop:disable Rails/ApplicationController
     include Pagy::Method
