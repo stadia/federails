@@ -180,7 +180,10 @@ module Fediverse
                      end
 
         followings.filter_map do |following|
-          route[:action] == 'followers' ? following.actor : following.target_actor
+          target_actor = route[:action] == 'followers' ? following.actor : following.target_actor
+          next if target_actor.local?
+
+          target_actor
         end
       rescue ActiveRecord::RecordNotFound
         []

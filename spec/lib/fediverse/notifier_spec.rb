@@ -145,6 +145,16 @@ module Fediverse
         expect(Collection).not_to have_received(:fetch)
       end
 
+      it 'excludes local actors from local followers collections' do
+        second_local_actor = FactoryBot.create(:user).federails_actor
+        FactoryBot.create :following, actor: distant_target_actor, target_actor: local_actor
+        FactoryBot.create :following, actor: second_local_actor, target_actor: local_actor
+
+        actors = described_class.send(:collection_to_actors, "#{local_actor.followers_url}?page=1")
+
+        expect(actors).to contain_exactly(distant_target_actor)
+      end
+
       it 'returns an empty list when fetching a collection returns an unhandled status' do
         allow(Collection).to receive(:fetch).and_raise(
           Federails::Utils::JsonRequest::UnhandledResponseStatus,
