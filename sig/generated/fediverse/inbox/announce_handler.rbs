@@ -1,0 +1,11 @@
+# Generated from lib/fediverse/inbox/announce_handler.rb with RBS::Inline
+
+module Fediverse
+  class Inbox
+    module AnnounceHandler
+      def self.handle_announce: (untyped activity) -> untyped
+
+      def self.handle_undo_announce: (untyped activity) -> untyped
+    end
+  end
+end

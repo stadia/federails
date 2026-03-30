@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module Federails
   module Server
     class ActorsController < Federails::ServerController

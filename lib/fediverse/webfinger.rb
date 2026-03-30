@@ -160,6 +160,9 @@ module Fediverse
       rescue JSON::ParserError
         Federails.logger.debug { "Invalid JSON response for signed GET #{url}" }
         raise ActiveRecord::RecordNotFound
+      rescue URI::InvalidURIError
+        Federails.logger.debug { "Invalid URI for signed GET #{url}" }
+        raise ActiveRecord::RecordNotFound
       end
 
       # Makes a simple GET request and returns a +Hash+ from the parsed body
@@ -177,6 +180,10 @@ module Fediverse
         raise ActiveRecord::RecordNotFound
       rescue JSON::ParserError
         Federails.logger.debug { "Invalid JSON response for GET #{url}" }
+
+        raise ActiveRecord::RecordNotFound
+      rescue URI::InvalidURIError
+        Federails.logger.debug { "Invalid URI for GET #{url}" }
 
         raise ActiveRecord::RecordNotFound
       end

@@ -259,9 +259,18 @@ module Fediverse
 
       describe '.signed_get_json' do
         let(:local_actor) { FactoryBot.create :local_actor }
+        let(:local_scope) { instance_double(ActiveRecord::Relation) }
+        let(:where_chain) { instance_double(ActiveRecord::QueryMethods::WhereChain) }
+
+        before do
+          allow(Federails::Actor).to receive(:where).with(local: true).and_return(local_scope)
+          allow(local_scope).to receive(:where).with(no_args).and_return(where_chain)
+          allow(where_chain).to receive(:not).with(entity_type: nil).and_return(local_scope)
+          allow(local_scope).to receive(:first).and_return(local_actor)
+        end
 
         it 'raises when no local actor is available' do
-          allow(Federails::Actor).to receive_message_chain(:where, :where, :not, :first).and_return(nil)
+          allow(local_scope).to receive(:first).and_return(nil)
 
           expect do
             described_class.send(:signed_get_json, 'https://example.com/users/jdoe')
@@ -269,7 +278,6 @@ module Fediverse
         end
 
         it 'raises when signed get returns an unhandled status' do
-          allow(Federails::Actor).to receive_message_chain(:where, :where, :not, :first).and_return(local_actor)
           allow(Fediverse::Signature).to receive(:signed_get).and_raise(Federails::Utils::JsonRequest::UnhandledResponseStatus.new('404'))
 
           expect do
@@ -278,7 +286,6 @@ module Fediverse
         end
 
         it 'raises when signed get cannot connect' do
-          allow(Federails::Actor).to receive_message_chain(:where, :where, :not, :first).and_return(local_actor)
           allow(Fediverse::Signature).to receive(:signed_get).and_raise(Faraday::ConnectionFailed.new('boom'))
 
           expect do
@@ -287,7 +294,6 @@ module Fediverse
         end
 
         it 'raises when signed get returns invalid json' do
-          allow(Federails::Actor).to receive_message_chain(:where, :where, :not, :first).and_return(local_actor)
           allow(Fediverse::Signature).to receive(:signed_get).and_raise(JSON::ParserError)
 
           expect do

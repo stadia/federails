@@ -68,12 +68,23 @@ module Fediverse
         rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid
           collection_to_actors(url).map(&:inbox_url)
         end
+        # Filter out actors who have blocked the sender
+        blocked_actor_ids = Federails::Block.where(target_actor: activity.actor).select(:actor_id)
+        if blocked_actor_ids.exists?
+          blocked_actors = Federails::Actor.where(id: blocked_actor_ids)
+          blocked_inbox_urls = blocked_actors.flat_map { |a| [a.inbox_url, a.try(:shared_inbox_url)] }.compact.to_set
+          inboxes.reject! { |url| blocked_inbox_urls.include?(url) }
+        end
+
         inboxes.compact.uniq.reject { |url| url == actor_inbox }
       end
 
       #: (String, ?max_depth: Integer) -> Array[Federails::Actor]
       def collection_to_actors(url, max_depth: MAX_COLLECTION_DEPTH)
         return [] if max_depth <= 0
+
+        local_actors = actors_for_local_collection(url)
+        return local_actors if local_actors
 
         collection = Collection.fetch(url)
         actor_urls = collection.to_a
@@ -87,7 +98,7 @@ module Fediverse
           collection_to_actors(actor_url, max_depth: max_depth - 1)
         end
         .flatten
-      rescue Errors::NotACollection, URI::InvalidURIError
+      rescue Errors::NotACollection, URI::InvalidURIError, Federails::Utils::JsonRequest::UnhandledResponseStatus
         []
       end
 
@@ -114,7 +125,10 @@ module Fediverse
 
       #: (Federails::Activity) -> String
       def payload(activity)
-        Federails::Server::ActivityResource.new(activity).serializable_hash.to_json
+        json = Federails::Server::ActivityResource.new(activity).serializable_hash
+        json.delete(:bto)
+        json.delete(:bcc)
+        json.to_json
       end
 
       #: (inbox_url: String, message: String, ?from: Federails::Actor?) -> untyped
@@ -151,6 +165,31 @@ module Fediverse
         "SHA-256=#{Base64.strict_encode64(
           OpenSSL::Digest.new('SHA256').digest(message)
         )}"
+      end
+
+      #: (String) -> Array[Federails::Actor]?
+      def actors_for_local_collection(url)
+        route = Federails::Utils::Host.local_route(url)
+        return unless route.present? && route[:controller] == 'federails/server/actors'
+
+        actor = Federails::Actor.find_param(route[:id])
+        followings = case route[:action]
+                     when 'followers'
+                       actor.following_followers.includes(:actor)
+                     when 'following'
+                       actor.following_follows.includes(:target_actor)
+                     else
+                       return
+                     end
+
+        followings.filter_map do |following|
+          target_actor = route[:action] == 'followers' ? following.actor : following.target_actor
+          next if target_actor.local?
+
+          target_actor
+        end
+      rescue ActiveRecord::RecordNotFound
+        []
       end
     end
   end

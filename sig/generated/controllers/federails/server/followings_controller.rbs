@@ -1,0 +1,15 @@
+# Generated from app/controllers/federails/server/followings_controller.rb with RBS::Inline
+
+module Federails
+  module Server
+    class FollowingsController < Federails::ServerController
+      # GET /federation/actors/1/followings/1.json
+      def show: () -> untyped
+
+      private
+
+      # Use callbacks to share common setup or constraints between actions.
+      def set_following: () -> untyped
+    end
+  end
+end

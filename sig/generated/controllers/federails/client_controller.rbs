@@ -1,0 +1,11 @@
+# Generated from app/controllers/federails/client_controller.rb with RBS::Inline
+
+module Federails
+  class ClientController
+    include Pundit::Authorization
+
+    private
+
+    def render_serialized: (untyped resource_class, untyped object, ?status: untyped, ?location: untyped, ?params: untyped) -> untyped
+  end
+end
