@@ -15,8 +15,7 @@ module Fediverse
 
         def handle_undo_like(activity)
           original_activity = Fediverse::Request.dereference(activity['object'])
-          return false unless original_activity
-          return false unless activity['actor'] == original_activity['actor']
+          return false unless original_activity && activity['actor'] == original_activity['actor']
 
           entity = resolve_target_entity(original_activity&.dig('object'))
           return true unless entity
@@ -36,7 +35,7 @@ module Fediverse
 
         def resolve_target_entity(object)
           entity = Federails::Utils::Object.find_or_initialize(object)
-          return unless entity.is_a?(Federails::DataEntity)
+          return unless entity.is_a?(Federails::DataEntity) && entity.persisted?
 
           entity
         rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid
