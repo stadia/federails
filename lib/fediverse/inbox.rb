@@ -277,9 +277,7 @@ module Fediverse
         return actor if object.is_a?(Hash) && object['id'] == actor.federated_url
         return actor if object.nil?
 
-        if object.is_a?(String)
-          Federails::Utils::Object.find_or_initialize(object) || actor
-        elsif object.is_a?(Hash) && object['id'].present?
+        if object.is_a?(String) || (object.is_a?(Hash) && object['id'].present?)
           Federails::Utils::Object.find_or_initialize(object) || actor
         else
           actor

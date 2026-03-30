@@ -125,7 +125,10 @@ module Fediverse
 
       #: (Federails::Activity) -> String
       def payload(activity)
-        Federails::Server::ActivityResource.new(activity).serializable_hash.to_json
+        json = Federails::Server::ActivityResource.new(activity).serializable_hash
+        json.delete(:bto)
+        json.delete(:bcc)
+        json.to_json
       end
 
       #: (inbox_url: String, message: String, ?from: Federails::Actor?) -> untyped

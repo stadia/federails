@@ -101,11 +101,11 @@ RSpec.describe Federails::Server::ActivityResource do
     let(:activity) do
       FactoryBot.create(
         :activity,
-        actor: local_actor,
+        actor:  local_actor,
         entity: post,
         action: 'Like',
-        to: [post.federails_actor.federated_url],
-        cc: []
+        to:     [post.federails_actor.federated_url],
+        cc:     []
       )
     end
     let(:json_result) { render_activity(activity) }
@@ -120,21 +120,21 @@ RSpec.describe Federails::Server::ActivityResource do
     let(:like_activity) do
       FactoryBot.create(
         :activity,
-        actor: local_actor,
+        actor:  local_actor,
         entity: post,
         action: 'Like',
-        to: [post.federails_actor.federated_url],
-        cc: []
+        to:     [post.federails_actor.federated_url],
+        cc:     []
       )
     end
     let(:undo_activity) do
       FactoryBot.create(
         :activity,
-        actor: local_actor,
+        actor:  local_actor,
         entity: like_activity,
         action: 'Undo',
-        to: [post.federails_actor.federated_url],
-        cc: []
+        to:     [post.federails_actor.federated_url],
+        cc:     []
       )
     end
     let(:json_result) { render_activity(undo_activity) }
