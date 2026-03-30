@@ -52,14 +52,16 @@ module Fediverse
           payload['object'] = Fediverse::Request.dereference(original_object) || original_object
         end
 
-        if (payload['type'] == 'Update') && !(payload['actor'].present? && payload.dig('object', 'id').present? && same_origin?(payload['actor'], payload.dig('object', 'id')))
+        object_id = payload['object'].is_a?(Hash) ? payload['object']['id'] : payload['object']
+        if (payload['type'] == 'Update') && !(payload['actor'].present? && object_id.present? && same_origin?(payload['actor'], object_id))
           Federails.logger.warn do
-            "Rejected Update: origin verification failed (actor: #{payload['actor']}, object: #{payload.dig('object', 'id')})"
+            "Rejected Update: origin verification failed (actor: #{payload['actor']}, object: #{object_id})"
           end
           return false
         end
 
-        handlers = get_handlers(payload['type'], payload.dig('object', 'type'))
+        object_type = payload['object'].is_a?(Hash) ? payload['object']['type'] : nil
+        handlers = get_handlers(payload['type'], object_type)
         handlers.each_pair do |klass, method|
           klass.send method, payload
         end
