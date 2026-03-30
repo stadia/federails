@@ -96,6 +96,54 @@ RSpec.describe Federails::Server::ActivityResource do
     end
   end
 
+  context 'when rendering a Like activity' do
+    let(:post) { FactoryBot.create :post, :distant }
+    let(:activity) do
+      FactoryBot.create(
+        :activity,
+        actor: local_actor,
+        entity: post,
+        action: 'Like',
+        to: [post.federails_actor.federated_url],
+        cc: []
+      )
+    end
+    let(:json_result) { render_activity(activity) }
+
+    it 'serializes the liked object as its URI' do
+      expect(json_result['object']).to eq post.federated_url
+    end
+  end
+
+  context 'when rendering an Undo of a Like activity' do
+    let(:post) { FactoryBot.create :post, :distant }
+    let(:like_activity) do
+      FactoryBot.create(
+        :activity,
+        actor: local_actor,
+        entity: post,
+        action: 'Like',
+        to: [post.federails_actor.federated_url],
+        cc: []
+      )
+    end
+    let(:undo_activity) do
+      FactoryBot.create(
+        :activity,
+        actor: local_actor,
+        entity: like_activity,
+        action: 'Undo',
+        to: [post.federails_actor.federated_url],
+        cc: []
+      )
+    end
+    let(:json_result) { render_activity(undo_activity) }
+
+    it 'keeps the nested Like object as the original URI' do
+      expect(json_result.dig('object', 'object')).to eq post.federated_url
+    end
+  end
+
   context 'when rendering a public Create activity' do
     let!(:activity) { FactoryBot.create :activity, :create, entity: local_actor }
     let(:json_result) { render_activity(activity) }
