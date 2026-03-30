@@ -41,7 +41,7 @@ module Federails
           collection: Federails::Activity.where(actor: @actor, action: 'Like').order(created_at: :desc),
           actor:      @actor,
           url_helper: :liked_server_actor_url
-        ) { |items| items.map { |a| Federails::Server::ActivityResource.new(a, params: { context: false }).serializable_hash } }
+        ) { |items| items.filter_map { |a| a.entity&.federated_url } }
       end
 
       # GET /federation/actors/:id/featured
@@ -50,7 +50,7 @@ module Federails
           collection: @actor.featured_items.order(created_at: :desc),
           actor:      @actor,
           url_helper: :featured_server_actor_url
-        ) { |items| items.map { |item| { id: item.federated_url, type: 'Note' } } }
+        ) { |items| items.map(&:federated_url) }
       end
 
       # GET /federation/actors/:id/featured_tags
@@ -59,7 +59,10 @@ module Federails
           collection: @actor.featured_tags.order(created_at: :desc),
           actor:      @actor,
           url_helper: :featured_tags_server_actor_url
-        ) { |items| items.map { |tag| { type: 'Hashtag', href: tag.name, name: "##{tag.name}" } } }
+        ) do |items|
+          base_url = featured_tags_server_actor_url(@actor)
+          items.map { |tag| { type: 'Hashtag', href: "#{base_url}##{tag.name}", name: tag.name } }
+        end
       end
 
       private
