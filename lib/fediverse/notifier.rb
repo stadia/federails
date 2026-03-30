@@ -83,6 +83,9 @@ module Fediverse
       def collection_to_actors(url, max_depth: MAX_COLLECTION_DEPTH)
         return [] if max_depth <= 0
 
+        local_actors = actors_for_local_collection(url)
+        return local_actors if local_actors
+
         collection = Collection.fetch(url)
         actor_urls = collection.to_a
 
@@ -95,7 +98,7 @@ module Fediverse
           collection_to_actors(actor_url, max_depth: max_depth - 1)
         end
         .flatten
-      rescue Errors::NotACollection, URI::InvalidURIError
+      rescue Errors::NotACollection, URI::InvalidURIError, Federails::Utils::JsonRequest::UnhandledResponseStatus
         []
       end
 
@@ -159,6 +162,28 @@ module Fediverse
         "SHA-256=#{Base64.strict_encode64(
           OpenSSL::Digest.new('SHA256').digest(message)
         )}"
+      end
+
+      #: (String) -> Array[Federails::Actor]?
+      def actors_for_local_collection(url)
+        route = Federails::Utils::Host.local_route(url)
+        return unless route.present? && route[:controller] == 'federails/server/actors'
+
+        actor = Federails::Actor.find_param(route[:id])
+        followings = case route[:action]
+        when 'followers'
+          actor.following_followers.includes(:actor)
+        when 'following'
+          actor.following_follows.includes(:target_actor)
+        else
+          return
+        end
+
+        followings.filter_map do |following|
+          route[:action] == 'followers' ? following.actor : following.target_actor
+        end
+      rescue ActiveRecord::RecordNotFound
+        []
       end
     end
   end

@@ -62,6 +62,17 @@ RSpec.describe Federails::Utils::Host do
         url = 'http://localhost/'
         expect(described_class.local_route(url)).to be_a Hash
       end
+
+      it 'recognizes a local URL with query params' do
+        actor = FactoryBot.create(:user).federails_actor
+        url = "#{actor.followers_url}?page=1"
+
+        expect(described_class.local_route(url)).to include(
+          controller: 'federails/server/actors',
+          action: 'followers',
+          id: actor.to_param
+        )
+      end
     end
 
     context 'when URL is not a local url' do

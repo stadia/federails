@@ -34,8 +34,9 @@ module Federails
         def local_route(url)
           return nil unless local_url? url
 
-          Rails.application.routes.recognize_path(url)
-        rescue ActionController::RoutingError
+          uri = URI.parse(url)
+          Rails.application.routes.recognize_path(uri.path, method: :get)
+        rescue URI::InvalidURIError, ActionController::RoutingError
           nil
         end
 
