@@ -7,17 +7,17 @@ module Fediverse
   RSpec.describe Notifier, '.payload bto/bcc stripping' do
     let(:actor) { FactoryBot.create(:user).federails_actor }
     let(:target_actor) { FactoryBot.create(:user).federails_actor }
-    let(:entity) { FactoryBot.create(:post) }
+    let(:entity) { FactoryBot.create :post }
 
     let(:activity) do
       Federails::Activity.create!(
-        actor: actor,
+        actor:  actor,
         entity: entity,
         action: 'Create',
-        to: [target_actor.federated_url],
-        cc: ['https://www.w3.org/ns/activitystreams#Public'],
-        bto: ['https://example.com/users/secret-recipient'],
-        bcc: ['https://example.com/users/hidden-recipient']
+        to:     [target_actor.federated_url],
+        cc:     ['https://www.w3.org/ns/activitystreams#Public'],
+        bto:    ['https://example.com/users/secret-recipient'],
+        bcc:    ['https://example.com/users/hidden-recipient']
       )
     end
 
