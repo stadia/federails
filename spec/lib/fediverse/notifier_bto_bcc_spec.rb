@@ -21,24 +21,22 @@ module Fediverse
       )
     end
 
+    let(:payload_json) { JSON.parse(described_class.send(:payload, activity)) }
+
     it 'strips bto from outbound payload' do
-      json = JSON.parse(described_class.send(:payload, activity))
-      expect(json).not_to have_key('bto')
+      expect(payload_json).not_to have_key('bto')
     end
 
     it 'strips bcc from outbound payload' do
-      json = JSON.parse(described_class.send(:payload, activity))
-      expect(json).not_to have_key('bcc')
+      expect(payload_json).not_to have_key('bcc')
     end
 
     it 'preserves to in outbound payload' do
-      json = JSON.parse(described_class.send(:payload, activity))
-      expect(json['to']).to be_present
+      expect(payload_json['to']).to be_present
     end
 
     it 'preserves cc in outbound payload' do
-      json = JSON.parse(described_class.send(:payload, activity))
-      expect(json['cc']).to be_present
+      expect(payload_json['cc']).to be_present
     end
 
     it 'includes bto/bcc recipients in delivery targets' do

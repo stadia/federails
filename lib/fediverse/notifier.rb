@@ -128,8 +128,6 @@ module Fediverse
         json = Federails::Server::ActivityResource.new(activity).serializable_hash
         json.delete(:bto)
         json.delete(:bcc)
-        json.delete('bto')
-        json.delete('bcc')
         json.to_json
       end
 
