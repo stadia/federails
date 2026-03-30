@@ -135,7 +135,7 @@ module Fediverse
       end
 
       it 'resolves local followers collections without fetching over http' do
-        FactoryBot.create(:following, actor: distant_target_actor, target_actor: local_actor)
+        FactoryBot.create :following, actor: distant_target_actor, target_actor: local_actor
 
         allow(Collection).to receive(:fetch)
 

@@ -69,8 +69,8 @@ RSpec.describe Federails::Utils::Host do
 
         expect(described_class.local_route(url)).to include(
           controller: 'federails/server/actors',
-          action: 'followers',
-          id: actor.to_param
+          action:     'followers',
+          id:         actor.to_param
         )
       end
     end

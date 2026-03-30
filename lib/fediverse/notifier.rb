@@ -171,13 +171,13 @@ module Fediverse
 
         actor = Federails::Actor.find_param(route[:id])
         followings = case route[:action]
-        when 'followers'
-          actor.following_followers.includes(:actor)
-        when 'following'
-          actor.following_follows.includes(:target_actor)
-        else
-          return
-        end
+                     when 'followers'
+                       actor.following_followers.includes(:actor)
+                     when 'following'
+                       actor.following_follows.includes(:target_actor)
+                     else
+                       return
+                     end
 
         followings.filter_map do |following|
           route[:action] == 'followers' ? following.actor : following.target_actor

@@ -38,6 +38,7 @@ module Federails
 
         payload = payload_from_params
         return head Federails::Utils::ResponseCodes::UNPROCESSABLE_CONTENT unless payload
+
         log_social_activity_payload(payload)
 
         if Federails::Configuration.verify_signatures && @signed_actor
@@ -123,18 +124,18 @@ module Federails
       end
 
       def log_social_activity_payload(payload)
-        type = payload["type"]
+        type = payload['type']
         return unless type.in?(%w[Like Undo])
 
         Federails.logger.info do
           {
-            message: "[Inbox] social activity payload",
-            type:,
-            id: payload["id"],
-            actor: payload["actor"],
-            object: payload["object"],
+            message:      '[Inbox] social activity payload',
+            type:         type,
+            id:           payload['id'],
+            actor:        payload['actor'],
+            object:       payload['object'],
             signed_actor: @signed_actor&.federated_url,
-            content_type: request.headers["Content-Type"]
+            content_type: request.headers['Content-Type'],
           }.inspect
         end
       end
