@@ -1,6 +1,9 @@
 # rbs_inline: enabled
 
 require 'fediverse/request'
+require 'fediverse/inbox/like_handler'
+require 'fediverse/inbox/announce_handler'
+require 'fediverse/inbox/block_handler'
 
 module Fediverse
   class Inbox
@@ -44,16 +47,21 @@ module Fediverse
           return result
         end
 
-        payload['object'] = Fediverse::Request.dereference(payload['object']) if payload.key? 'object'
+        if payload.key?('object')
+          original_object = payload['object']
+          payload['object'] = Fediverse::Request.dereference(original_object) || original_object
+        end
 
-        if (payload['type'] == 'Update') && !(payload['actor'].present? && payload.dig('object', 'id').present? && same_origin?(payload['actor'], payload.dig('object', 'id')))
+        object_id = payload['object'].is_a?(Hash) ? payload['object']['id'] : payload['object']
+        if (payload['type'] == 'Update') && !(payload['actor'].present? && object_id.present? && same_origin?(payload['actor'], object_id))
           Federails.logger.warn do
-            "Rejected Update: origin verification failed (actor: #{payload['actor']}, object: #{payload.dig('object', 'id')})"
+            "Rejected Update: origin verification failed (actor: #{payload['actor']}, object: #{object_id})"
           end
           return false
         end
 
-        handlers = get_handlers(payload['type'], payload.dig('object', 'type'))
+        object_type = payload['object'].is_a?(Hash) ? payload['object']['type'] : nil
+        handlers = get_handlers(payload['type'], object_type)
         handlers.each_pair do |klass, method|
           klass.send method, payload
         end
@@ -270,9 +278,9 @@ module Fediverse
         return actor if object.nil?
 
         if object.is_a?(String)
-          Federails::Utils::Object.find_distant_object_in_all(object) || actor
+          Federails::Utils::Object.find_or_initialize(object) || actor
         elsif object.is_a?(Hash) && object['id'].present?
-          Federails::Utils::Object.find_distant_object_in_all(object['id']) || actor
+          Federails::Utils::Object.find_or_initialize(object) || actor
         else
           actor
         end
@@ -285,5 +293,11 @@ module Fediverse
     register_handler 'Undo', 'Follow', self, :handle_undo_follow_request
     register_handler 'Delete', '*', self, :handle_delete_request
     register_handler 'Undo', 'Delete', self, :handle_undelete_request
+    register_handler 'Like', '*', Fediverse::Inbox::LikeHandler, :handle_like
+    register_handler 'Undo', 'Like', Fediverse::Inbox::LikeHandler, :handle_undo_like
+    register_handler 'Announce', '*', Fediverse::Inbox::AnnounceHandler, :handle_announce
+    register_handler 'Undo', 'Announce', Fediverse::Inbox::AnnounceHandler, :handle_undo_announce
+    register_handler 'Block', '*', Fediverse::Inbox::BlockHandler, :handle_block
+    register_handler 'Undo', 'Block', Fediverse::Inbox::BlockHandler, :handle_undo_block
   end
 end

@@ -2,6 +2,8 @@
 
 module Fediverse
   class Signature
+    class SignatureVerificationError < StandardError; end
+
     class << self
       #: (sender: Federails::Actor, request: untyped) -> String
       def sign(sender:, request:)
@@ -69,13 +71,82 @@ module Fediverse
         key.verify(OpenSSL::Digest.new('SHA256'), signature, comparison_string)
       end
 
+      # Parse an HTTP Signature header into its components
+      #: (String) -> { key_id: String, headers: String, signature: String, algorithm: String? }
+      def parse_signature_header(header)
+        raise SignatureVerificationError, 'Missing Signature header' if header.blank?
+
+        params = header.scan(/(\w+)="((?:[^"\\]|\\.)*)"/).to_h.transform_values { |v| v.gsub('\\"', '"') }
+        key_id    = params['keyId']
+        headers   = params['headers']
+        signature = params['signature']
+
+        raise SignatureVerificationError, 'Malformed Signature header: missing keyId' if key_id.blank?
+        raise SignatureVerificationError, 'Malformed Signature header: missing signature' if signature.blank?
+        raise SignatureVerificationError, 'Malformed Signature header: missing headers' if headers.blank?
+
+        { key_id: key_id, headers: headers, signature: signature, algorithm: params['algorithm'] }
+      end
+
+      # Verify the Digest header matches the request body
+      #: (untyped) -> void
+      def verify_digest!(request)
+        digest_header = request.headers['Digest']
+        raise SignatureVerificationError, 'Missing Digest header' if digest_header.blank?
+
+        body = request.body.read
+        request.body.rewind
+
+        expected = "SHA-256=#{Base64.strict_encode64(OpenSSL::Digest.new('SHA256').digest(body))}"
+
+        return if ActiveSupport::SecurityUtils.secure_compare(digest_header, expected)
+
+        raise SignatureVerificationError, 'Digest mismatch'
+      end
+
+      # Verify an inbound request's HTTP Signature, returning the sending actor
+      #: (untyped) -> Federails::Actor
+      def verify_request!(request)
+        parsed = parse_signature_header(request.headers['Signature'])
+
+        verify_digest!(request)
+
+        actor_uri = parsed[:key_id].sub(/#.*\z/, '')
+        actor = begin
+          Federails::Actor.find_or_create_by_federation_url(actor_uri)
+        rescue StandardError => e
+          raise SignatureVerificationError, "Unable to load signed actor: #{e.message}"
+        end
+
+        comparison_string = signature_payload(request: request, headers: parsed[:headers])
+        raw_signature = Base64.decode64(parsed[:signature])
+        key = OpenSSL::PKey::RSA.new(actor.public_key)
+        digest = OpenSSL::Digest.new('SHA256')
+
+        return actor if key.verify(digest, raw_signature, comparison_string)
+
+        # Key rotation retry: only re-fetch if the cached actor is stale
+        if actor.updated_at < Federails::Configuration.remote_entities_cache_duration.ago
+          begin
+            actor.sync!
+          rescue StandardError => e
+            raise SignatureVerificationError, "Unable to refresh signed actor: #{e.message}"
+          end
+
+          key = OpenSSL::PKey::RSA.new(actor.public_key)
+          return actor if key.verify(digest, raw_signature, comparison_string)
+        end
+
+        raise SignatureVerificationError, 'Signature verification failed'
+      end
+
       private
 
       #: (request: untyped, headers: String) -> String
       def signature_payload(request:, headers:)
         headers.split.map do |signed_header_name|
           if signed_header_name == '(request-target)'
-            "(request-target): #{request.http_method} #{URI.parse(request.path).path}"
+            "(request-target): #{(request.try(:http_method) || request.request_method).downcase} #{URI.parse(request.path).path}"
           else
             "#{signed_header_name}: #{request.headers[signed_header_name.capitalize]}"
           end

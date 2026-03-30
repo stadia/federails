@@ -100,6 +100,7 @@ module Federails
 
     extend ActiveSupport::Concern
     include Federails::HandlesDeleteRequests
+    include Federails::HandlesSocialActivities
 
     # Class methods automatically included in the concern.
     module ClassMethods
@@ -174,7 +175,7 @@ module Federails
         entity = Federails::Utils::Object.find_or_create!(object)
 
         if activity['type'] == 'Update'
-          entity.assign_attributes from_activitypub_object(object)
+          entity.assign_attributes entity.class.from_activitypub_object(object)
 
           # Use timestamps from attributes
           entity.save! touch: false

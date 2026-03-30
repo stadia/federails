@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module Federails
   class ServerController < ::ActionController::Base # rubocop:disable Rails/ApplicationController
     include Pagy::Method
@@ -33,6 +35,7 @@ module Federails
     end
 
     def error_gone(exception = nil)
+      skip_authorization
       error_fallback(exception, 'Resource is gone', :gone)
     end
 

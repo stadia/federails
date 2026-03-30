@@ -3,10 +3,12 @@ module Federails
     class BaseResource
       include Alba::Resource
 
+      # rubocop:disable Naming/PredicateMethod
       # ActivityPub responses omit absent fields instead of rendering explicit nulls.
       def select(_key, value)
         !value.nil?
       end
+      # rubocop:enable Naming/PredicateMethod
 
       private
 

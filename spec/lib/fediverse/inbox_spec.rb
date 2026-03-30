@@ -33,6 +33,30 @@ module Fediverse
       it 'registered a handler for "Undo" activities on "Delete" activities' do
         expect(handlers['Undo']['Delete'].keys).to include described_class
       end
+
+      it 'registers a built-in handler for Like activities' do
+        expect(handlers['Like']['*'].keys).to include(Fediverse::Inbox::LikeHandler)
+      end
+
+      it 'registers a built-in handler for Undo Like activities' do
+        expect(handlers['Undo']['Like'].keys).to include(Fediverse::Inbox::LikeHandler)
+      end
+
+      it 'registers a built-in handler for Announce activities' do
+        expect(handlers['Announce']['*'].keys).to include(Fediverse::Inbox::AnnounceHandler)
+      end
+
+      it 'registers a built-in handler for Undo Announce activities' do
+        expect(handlers['Undo']['Announce'].keys).to include(Fediverse::Inbox::AnnounceHandler)
+      end
+
+      it 'registers a built-in handler for Block activities' do
+        expect(handlers['Block']['*'].keys).to include(Fediverse::Inbox::BlockHandler)
+      end
+
+      it 'registers a built-in handler for Undo Block activities' do
+        expect(handlers['Undo']['Block'].keys).to include(Fediverse::Inbox::BlockHandler)
+      end
     end
 
     describe '#handle_create_follow_request' do
@@ -277,6 +301,47 @@ module Fediverse
 
         it 'processes the activity normally' do
           expect { described_class.dispatch_request(payload) }.to change(Federails::Following, :count).by(1)
+        end
+      end
+
+      context 'when a host app overrides a built-in handler' do
+        let(:payload) do
+          {
+            'id'     => 'https://example.com/activities/like-1',
+            'type'   => 'Like',
+            'actor'  => local_actor.federated_url,
+            'object' => distant_actor.federated_url,
+          }
+        end
+
+        let(:custom_handler) do
+          Class.new do
+            class << self
+              # rubocop:disable Naming/PredicateMethod
+              attr_reader :received_payload
+
+              def handle_like_activity(activity)
+                @received_payload = activity
+                true
+              end
+              # rubocop:enable Naming/PredicateMethod
+            end
+          end
+        end
+
+        around do |example|
+          handlers = described_class.class_variable_get(:@@handlers)
+          original_like_handlers = handlers['Like'].deep_dup
+
+          described_class.register_handler('Like', '*', custom_handler, :handle_like_activity)
+          example.run
+
+          handlers['Like'] = original_like_handlers
+        end
+
+        it 'dispatches to the overriding handler' do
+          expect(described_class.dispatch_request(payload)).to be true
+          expect(custom_handler.received_payload).to eq(payload)
         end
       end
     end
