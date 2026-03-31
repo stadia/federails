@@ -37,6 +37,9 @@ RSpec.describe Federails::Server::ActorsController, type: :acceptance do
          following:          { type: :string, description: 'URL to the followings list' },
          url:                { type: :string, required: false, description: 'URL to a human readable profile' },
          publicKey:          { type: :object, required: false, description: 'Public key used for signing messages', attributes: :public_key },
+         liked:              { type: :string, required: false, description: 'URL to the liked collection' },
+         featured:           { type: :string, required: false, description: 'URL to the featured collection' },
+         featuredTags:       { type: :string, required: false, description: 'URL to the featured tags collection' },
          attributionDomains: { type: :array, required: false, description: 'Extension used to test custom data' }
 
   entity :actors_ordered_collection_page,
