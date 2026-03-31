@@ -1,0 +1,15 @@
+# Generated from app/controllers/federails/server/web_finger_controller.rb with RBS::Inline
+
+module Federails
+  module Server
+    class WebFingerController < Federails::ServerController
+      def find: () -> untyped
+
+      def host_meta: () -> untyped
+
+      private
+
+      def username: () -> untyped
+    end
+  end
+end

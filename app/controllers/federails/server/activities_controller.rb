@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 require 'fediverse/inbox'
 
 module Federails
@@ -36,6 +38,16 @@ module Federails
 
         payload = payload_from_params
         return head Federails::Utils::ResponseCodes::UNPROCESSABLE_CONTENT unless payload
+
+        log_social_activity_payload(payload)
+
+        if Federails::Configuration.verify_signatures && @signed_actor
+          payload_actor_url = payload['actor'].is_a?(String) ? payload['actor'] : payload.dig('actor', 'id')
+          unless @signed_actor.federated_url == payload_actor_url
+            Federails.logger.warn "Signature actor mismatch: signed=#{@signed_actor.federated_url} payload=#{payload_actor_url}"
+            return head :unauthorized
+          end
+        end
 
         result = Fediverse::Inbox.dispatch_request(payload)
         Federails.logger.info { "[Inbox] dispatch_request result: #{result.inspect} for activity #{payload['id']}" }
@@ -109,6 +121,23 @@ module Federails
         return false unless content_type.start_with?('application/ld+json')
 
         content_type.include?('https://www.w3.org/ns/activitystreams')
+      end
+
+      def log_social_activity_payload(payload)
+        type = payload['type']
+        return unless type.in?(%w[Like Undo])
+
+        Federails.logger.info do
+          {
+            message:      '[Inbox] social activity payload',
+            type:         type,
+            id:           payload['id'],
+            actor:        payload['actor'],
+            object:       payload['object'],
+            signed_actor: @signed_actor&.federated_url,
+            content_type: request.headers['Content-Type'],
+          }.inspect
+        end
       end
     end
   end

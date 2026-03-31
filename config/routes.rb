@@ -41,6 +41,9 @@ Federails::Engine.routes.draw do
       member do
         get :followers
         get :following
+        get :liked
+        get :featured
+        get :featured_tags
       end
       get :outbox, to: 'activities#outbox'
       post :inbox, to: 'activities#create'

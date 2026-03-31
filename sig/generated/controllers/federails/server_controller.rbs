@@ -1,0 +1,21 @@
+# Generated from app/controllers/federails/server_controller.rb with RBS::Inline
+
+module Federails
+  class ServerController < ::ActionController::Base
+    include Pagy::Method
+
+    include Pundit::Authorization
+
+    include Federails::ServerHelper
+
+    private
+
+    def error_fallback: (untyped exception, untyped fallback_message, untyped status) -> untyped
+
+    def error_not_found: (?untyped exception) -> untyped
+
+    def error_gone: (?untyped exception) -> untyped
+
+    def render_serialized: (untyped resource_class, untyped object, content_type: untyped, ?status: untyped, ?location: untyped, ?params: untyped) -> untyped
+  end
+end

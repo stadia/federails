@@ -258,6 +258,68 @@ end
 Federails comes with a client, enabled by default, that provides basic views to display and interact with Federails data,
 accessible on `/app` by default (changeable with the configuration option `client_routes_path`)
 
+## Inbox activity handlers
+
+Federails registers built-in inbox handlers for the following ActivityPub activities:
+
+- `Follow` / `Accept` / `Reject` / `Delete`
+- `Like` / `Undo Like`
+- `Announce` / `Undo Announce`
+- `Block` / `Undo Block`
+
+For `Like` and `Announce`, Federails routes the activity to callback points on `Federails::DataEntity`.
+The gem provides the callback names; applications register their own methods on models that include `Federails::DataEntity`.
+
+Register callbacks on the model that includes `Federails::DataEntity`:
+
+```rb
+# app/models/post.rb
+class Post < ApplicationRecord
+  include Federails::DataEntity
+
+  on_federails_like_received :handle_federails_like!
+  on_federails_undo_like_received :handle_federails_undo_like!
+  on_federails_announce_received :handle_federails_announce!
+  on_federails_undo_announce_received :handle_federails_undo_announce!
+
+  def handle_federails_like!(actor_url)
+    # Custom Like behavior for this entity
+    true
+  end
+
+  def handle_federails_undo_like!(actor_url)
+    # Custom Undo Like behavior for this entity
+    true
+  end
+
+  def handle_federails_announce!(actor_url)
+    # Custom Announce behavior for this entity
+    true
+  end
+
+  def handle_federails_undo_announce!(actor_url)
+    # Custom Undo Announce behavior for this entity
+    true
+  end
+end
+```
+
+The built-in handlers resolve the target object and call:
+
+- `object.run_callbacks :on_federails_like_received`
+- `object.run_callbacks :on_federails_undo_like_received`
+- `object.run_callbacks :on_federails_announce_received`
+- `object.run_callbacks :on_federails_undo_announce_received`
+
+Registered callback methods receive the activity actor as their argument.
+
+The application is responsible for deciding how to:
+
+- persist the activity
+- enforce actor/object validation rules
+- update app models
+- implement undo semantics
+
 If it's a good starting point, it might be disabled once you made your own integration by setting `client_routes_path`
 to a `nil` value.
 
