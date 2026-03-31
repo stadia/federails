@@ -3,7 +3,12 @@ module Federails
     class ActorResource < BaseResource
       attribute :@context do |actor|
         data = actor_data(actor)
-        additional = ['https://w3id.org/security/v1', data.delete(:@context)]
+        toot_context = {
+          'toot'         => 'http://joinmastodon.org/ns#',
+          'featured'     => { '@id' => 'toot:featured', '@type' => '@id' },
+          'featuredTags' => { '@id' => 'toot:featuredTags', '@type' => '@id' },
+        }
+        additional = ['https://w3id.org/security/v1', toot_context, data.delete(:@context)]
         Federails::SerializerSupport.json_ld_context(additional: additional)
       end
 

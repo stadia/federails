@@ -60,8 +60,8 @@ module Federails
           actor:      @actor,
           url_helper: :featured_tags_server_actor_url
         ) do |items|
-          base_url = featured_tags_server_actor_url(@actor)
-          items.map { |tag| { type: 'Hashtag', href: "#{base_url}##{tag.name}", name: tag.name } }
+          base_url = Federails.configuration.site_host
+          items.map { |tag| { type: 'Hashtag', href: "#{base_url}/tags/#{tag.name}", name: "##{tag.name}" } }
         end
       end
 

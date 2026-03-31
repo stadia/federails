@@ -62,7 +62,7 @@ RSpec.describe 'Federation collections (liked, featured, featured_tags)', type: 
       it 'includes featured tags on page' do
         get federails.featured_tags_server_actor_url(actor, page: 1), headers: { accept: Mime[:activitypub] }
         json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
-        expect(json['orderedItems']).to include(hash_including('type' => 'Hashtag', 'name' => 'ruby'))
+        expect(json['orderedItems']).to include(hash_including('type' => 'Hashtag', 'name' => '#ruby', 'href' => %r{/tags/ruby$}))
       end
     end
   end
