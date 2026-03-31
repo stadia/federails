@@ -120,8 +120,6 @@ module Federails
       "acct:#{username}@#{server}"
     end
 
-    # Checks if a given actor follows the current actor
-    #
     def feature(federated_url)
       featured_items.find_or_create_by!(federated_url: federated_url)
     end
@@ -130,6 +128,8 @@ module Federails
       featured_items.find_by(federated_url: federated_url)&.destroy!
     end
 
+    # Checks if a given actor follows the current actor
+    #
     # @return [Federails::Following, false]
     def follows?(actor)
       list = following_follows.where target_actor: actor

@@ -50,7 +50,7 @@ module Federails
           collection: @actor.featured_items.order(created_at: :desc),
           actor:      @actor,
           url_helper: :featured_server_actor_url
-        ) { |items| items.map(&:federated_url) }
+        ) { |items| items.map { |item| { type: 'Note', id: item.federated_url } } }
       end
 
       # GET /federation/actors/:id/featured_tags
@@ -61,7 +61,7 @@ module Federails
           url_helper: :featured_tags_server_actor_url
         ) do |items|
           base_url = Federails.configuration.site_host
-          items.map { |tag| { type: 'Hashtag', href: "#{base_url}/tags/#{tag.name}", name: "##{tag.name}" } }
+          items.map { |tag| { type: 'Hashtag', href: "#{base_url}/tags/#{CGI.escape(tag.name)}", name: "##{tag.name}" } }
         end
       end
 

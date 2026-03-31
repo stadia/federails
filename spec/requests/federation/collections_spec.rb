@@ -15,6 +15,20 @@ RSpec.describe 'Federation collections (liked, featured, featured_tags)', type: 
       json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
       expect(json['type']).to eq 'OrderedCollection'
     end
+
+    context 'with liked activities' do
+      let(:post) { FactoryBot.create :post }
+
+      before do
+        Federails::Activity.create!(actor: actor, entity: post, action: 'Like')
+      end
+
+      it 'includes liked object URLs on page' do
+        get federails.liked_server_actor_url(actor, page: 1), headers: { accept: Mime[:activitypub] }
+        json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+        expect(json['orderedItems']).to include(post.federated_url)
+      end
+    end
   end
 
   describe 'GET /featured' do
@@ -37,7 +51,7 @@ RSpec.describe 'Federation collections (liked, featured, featured_tags)', type: 
       it 'includes featured items on page' do
         get federails.featured_server_actor_url(actor, page: 1), headers: { accept: Mime[:activitypub] }
         json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
-        expect(json['orderedItems']).to include('https://remote.example/posts/1')
+        expect(json['orderedItems']).to include(hash_including('type' => 'Note', 'id' => 'https://remote.example/posts/1'))
       end
     end
   end
