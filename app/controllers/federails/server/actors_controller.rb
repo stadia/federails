@@ -38,7 +38,7 @@ module Federails
       # GET /federation/actors/:id/liked
       def liked
         render_collection(
-          collection: Federails::Activity.where(actor: @actor, action: 'Like').order(created_at: :desc),
+          collection: Federails::Activity.includes(:entity).where(actor: @actor, action: 'Like').order(created_at: :desc),
           actor:      @actor,
           url_helper: :liked_server_actor_url
         ) { |items| items.filter_map { |a| a.entity&.federated_url } }
