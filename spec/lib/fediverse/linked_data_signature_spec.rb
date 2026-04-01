@@ -116,6 +116,19 @@ RSpec.describe Fediverse::LinkedDataSignature do
       end
     end
 
+    context 'when actor has no public key' do
+      it 'returns verified false with error' do
+        actor.update!(public_key: nil)
+        signed = sign_document(document)
+        allow(Federails::Actor).to receive(:find_or_create_by_federation_url).and_return(actor)
+
+        result = described_class.verify(signed)
+
+        expect(result[:verified]).to be false
+        expect(result[:error]).to eq('Actor has no public key')
+      end
+    end
+
     context 'when actor cannot be resolved' do
       it 'returns verified false with error' do
         signed = sign_document(document)

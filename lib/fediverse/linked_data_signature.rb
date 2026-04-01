@@ -5,14 +5,11 @@ module Fediverse
         signature = document['signature']
         return { verified: false, error: 'No signature block' } unless signature
 
-        creator_uri = signature['creator']&.sub(/#.*\z/, '')
-        return { verified: false, error: 'No creator in signature' } unless creator_uri
-
-        actor = Federails::Actor.find_or_create_by_federation_url(creator_uri)
-        return { verified: false, error: 'Could not resolve signing actor' } unless actor
+        actor = resolve_actor(signature)
+        return actor if actor.is_a?(Hash)
 
         to_verify = build_verification_string(document, signature)
-        verified = check_signature(actor, signature['signatureValue'], to_verify)
+        verified = verify_with_retry(actor, signature['signatureValue'], to_verify)
         { verified: verified, actor: actor }
       rescue StandardError => e
         { verified: false, error: e.message }
@@ -20,6 +17,28 @@ module Fediverse
 
       private
 
+      def resolve_actor(signature)
+        creator_uri = signature['creator']&.sub(/#.*\z/, '')
+        return { verified: false, error: 'No creator in signature' } unless creator_uri
+
+        actor = Federails::Actor.find_or_create_by_federation_url(creator_uri)
+        return { verified: false, error: 'Could not resolve signing actor' } unless actor
+        return { verified: false, error: 'Actor has no public key' } if actor.public_key.blank?
+
+        actor
+      end
+
+      # Retries with a refreshed key if the first verification fails.
+      def verify_with_retry(actor, signature_value, to_verify)
+        verified = check_signature(actor, signature_value, to_verify)
+        return verified if verified || !actor.respond_to?(:sync!)
+
+        actor.sync!
+        check_signature(actor, signature_value, to_verify)
+      end
+
+      # Excludes 'type', 'id', and 'signatureValue' from signature options per LD Signatures spec.
+      # Note: excluding 'type' is also required for Misskey/Calckey compatibility.
       def build_verification_string(document, signature)
         options_hash = hash_options(signature.except('type', 'id', 'signatureValue'))
         document_hash = hash_document(document.except('signature'))
