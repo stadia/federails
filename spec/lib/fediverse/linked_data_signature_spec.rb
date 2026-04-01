@@ -19,21 +19,23 @@ RSpec.describe Fediverse::LinkedDataSignature do
   end
 
   before do
-    actor.update_columns(public_key: keypair.public_key.to_pem, private_key: keypair.to_pem)
+    actor.update!(public_key: keypair.public_key.to_pem, private_key: keypair.to_pem)
     # Stub normalize to avoid JSON-LD remote context fetching issues in tests
     allow(described_class).to receive(:normalize).and_wrap_original do |_method, document|
       document.to_json
     end
   end
 
-  def sign_document(doc)
-    options = {
+  def signature_options
+    {
       'creator' => "#{actor.federated_url}#main-key",
       'created' => Time.now.utc.iso8601,
     }
-    options_hash = described_class.send(:hash_options, options)
-    document_hash = described_class.send(:hash_document, doc)
-    to_sign = options_hash + document_hash
+  end
+
+  def sign_document(doc)
+    options = signature_options
+    to_sign = described_class.send(:build_verification_string, doc, options)
     signature_value = Base64.strict_encode64(keypair.sign(OpenSSL::Digest.new('SHA256'), to_sign))
 
     doc.merge('signature' => options.merge('type' => 'RsaSignature2017', 'signatureValue' => signature_value))
@@ -65,10 +67,11 @@ RSpec.describe Fediverse::LinkedDataSignature do
     end
 
     context 'with no signature block' do
-      it 'returns nil' do
+      it 'returns verified false with error' do
         result = described_class.verify(document)
 
-        expect(result).to be_nil
+        expect(result[:verified]).to be false
+        expect(result[:error]).to eq('No signature block')
       end
     end
 
@@ -80,6 +83,36 @@ RSpec.describe Fediverse::LinkedDataSignature do
 
         expect(result[:verified]).to be false
         expect(result[:error]).to eq('No creator in signature')
+      end
+    end
+
+    context 'with invalid Base64 in signatureValue' do
+      it 'returns verified false with error' do
+        doc = document.merge(
+          'signature' => {
+            'creator'        => "#{actor.federated_url}#main-key",
+            'signatureValue' => '!!!invalid-base64!!!',
+          }
+        )
+        allow(Federails::Actor).to receive(:find_or_create_by_federation_url).and_return(actor)
+
+        result = described_class.verify(doc)
+
+        expect(result[:verified]).to be false
+        expect(result[:error]).to be_present
+      end
+    end
+
+    context 'with invalid public key PEM' do
+      it 'returns verified false with error' do
+        signed = sign_document(document)
+        actor.update!(public_key: 'not-a-valid-pem')
+        allow(Federails::Actor).to receive(:find_or_create_by_federation_url).and_return(actor)
+
+        result = described_class.verify(signed)
+
+        expect(result[:verified]).to be false
+        expect(result[:error]).to be_present
       end
     end
 
