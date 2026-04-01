@@ -7,15 +7,36 @@ module Fediverse
     MAX_COLLECTION_DEPTH = 3 #: Integer
 
     class << self
-      # Posts an activity to its recipients
+      # Enqueues a separate delivery job for each recipient inbox.
       #
       # @param activity [Federails::Activity]
-      def post_to_inboxes(activity)
-        # Get the list of actors we need to send the activity to
+      def enqueue_deliveries(activity)
         inboxes = inboxes_for(activity)
         Federails.logger.debug('Nobody to notice') && return if inboxes.none?
 
-        # Deliver to each inbox
+        inboxes.each do |url|
+          Federails::NotifyInboxJob.perform_later(activity, url)
+        end
+      end
+
+      # Delivers an activity to a single inbox. Called by NotifyInboxJob.
+      #
+      # @param activity [Federails::Activity]
+      # @param inbox_url [String]
+      def deliver_to_inbox(activity, inbox_url)
+        message = payload(activity)
+        Federails.logger.debug { "Sending activity ##{activity.id} to inbox at #{inbox_url}" }
+        resp = post_to_inbox(inbox_url: inbox_url, message: message, from: activity.actor)
+        Federails.logger.debug { "#{resp.status}, #{resp.body}" }
+      end
+
+      # Posts an activity to its recipients (legacy synchronous delivery).
+      #
+      # @param activity [Federails::Activity]
+      def post_to_inboxes(activity)
+        inboxes = inboxes_for(activity)
+        Federails.logger.debug('Nobody to notice') && return if inboxes.none?
+
         message = payload(activity)
         inboxes.each do |url|
           Federails.logger.debug { "Sending activity ##{activity.id} to inbox at #{url}" }
@@ -150,10 +171,10 @@ module Fediverse
             response_code: status, inbox_url: inbox_url
           )
         else
-          message = "Delivery to #{inbox_url} failed: HTTP #{status}"
-          message += " (Retry-After: #{resp.headers['Retry-After']})" if status == 429 && resp.headers['Retry-After']
+          error_message = "Delivery to #{inbox_url} failed: HTTP #{status}"
+          error_message += " (Retry-After: #{resp.headers['Retry-After']})" if status == 429 && resp.headers['Retry-After']
           raise Federails::TemporaryDeliveryError.new(
-            message, response_code: status, inbox_url: inbox_url
+            error_message, response_code: status, inbox_url: inbox_url
           )
         end
       end
