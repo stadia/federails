@@ -51,7 +51,7 @@ module Fediverse
         return [] unless activity.actor.local?
 
         actor_inbox = activity.actor.inbox_url
-        actor_shared_inbox = activity.actor.try(:shared_inbox_url)
+        actor_shared_inbox = activity.actor.shared_inbox_url
         addressing = [
           activity.to,
           activity.cc,
@@ -73,7 +73,7 @@ module Fediverse
         blocked_actor_ids = Federails::Block.where(target_actor: activity.actor).select(:actor_id)
         if blocked_actor_ids.exists?
           blocked_actors = Federails::Actor.where(id: blocked_actor_ids)
-          blocked_inbox_urls = blocked_actors.flat_map { |a| [a.inbox_url, a.try(:shared_inbox_url)] }.compact.to_set
+          blocked_inbox_urls = blocked_actors.flat_map { |a| [a.inbox_url, a.shared_inbox_url] }.compact.to_set
           inboxes.reject! { |url| blocked_inbox_urls.include?(url) }
         end
 
