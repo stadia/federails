@@ -81,6 +81,7 @@ With `routes_path = 'federation'`, routes will be:
 /federation/actors/:id/followers(.:format)
 /federation/actors/:id/following(.:format)
 /federation/actors/:actor_id/outbox(.:format)
+/federation/inbox(.:format)
 /federation/actors/:actor_id/inbox(.:format)
 /federation/actors/:actor_id/activities/:id(.:format)
 /federation/actors/:actor_id/followings/:id(.:format)
@@ -257,6 +258,21 @@ end
 
 Federails comes with a client, enabled by default, that provides basic views to display and interact with Federails data,
 accessible on `/app` by default (changeable with the configuration option `client_routes_path`)
+
+## Shared Inbox
+
+Federails provides a server-level shared inbox endpoint (`POST /federation/inbox`) as defined in the
+[ActivityPub specification](https://www.w3.org/TR/activitypub/#shared-inbox-delivery). This allows remote servers to
+deliver a single copy of an activity for all recipients on your server, rather than posting to each actor's individual
+inbox separately.
+
+The shared inbox is automatically enabled -- no additional configuration is required. Local actors advertise their
+shared inbox URL via the `endpoints.sharedInbox` property in their ActivityPub actor document, and when delivering
+activities to remote servers, Federails will prefer the remote actor's shared inbox when available.
+
+The shared inbox goes through the same processing pipeline as the per-actor inbox: HTTP Signature verification,
+JSON-LD compaction, payload validation, and handler dispatch. From the host application's perspective, there is no
+difference between an activity received via the shared inbox and one received via a personal inbox.
 
 ## Inbox activity handlers
 
