@@ -28,10 +28,12 @@ module Fediverse
         actor
       end
 
-      # Retries with a refreshed key if the first verification fails.
+      # Retries with a refreshed key if the first verification fails and the actor is stale.
+      # This prevents unnecessary network requests on every failed verification (e.g., tampered signatures).
       def verify_with_retry(actor, signature_value, to_verify)
         verified = check_signature(actor, signature_value, to_verify)
         return verified if verified || !actor.respond_to?(:sync!)
+        return false unless actor.updated_at < Federails::Configuration.remote_entities_cache_duration.ago
 
         actor.sync!
         check_signature(actor, signature_value, to_verify)
