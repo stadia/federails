@@ -44,7 +44,7 @@ module Fediverse
           VCR.use_cassette('fediverse/notifier/get_collection_200') do
             allow(described_class).to receive(:post_to_inbox).and_return(instance_double(Faraday::Response, status: 200, body: ''))
             described_class.post_to_inboxes(fake_activity)
-            expect(described_class).to have_received(:post_to_inbox).with(hash_including(inbox_url: 'https://3dp.chat/users/manyfold/inbox')).once
+            expect(described_class).to have_received(:post_to_inbox).with(hash_including(inbox_url: 'https://3dp.chat/inbox')).once
           end
         end
       end
