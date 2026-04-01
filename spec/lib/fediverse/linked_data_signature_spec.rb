@@ -8,13 +8,13 @@ RSpec.describe Fediverse::LinkedDataSignature do
   let(:document) do
     {
       '@context' => 'https://www.w3.org/ns/activitystreams',
-      'id' => 'https://remote.example/users/alice/statuses/1',
-      'type' => 'Create',
-      'actor' => actor.federated_url,
-      'object' => {
-        'type' => 'Note',
-        'content' => 'Hello world'
-      }
+      'id'       => 'https://remote.example/users/alice/statuses/1',
+      'type'     => 'Create',
+      'actor'    => actor.federated_url,
+      'object'   => {
+        'type'    => 'Note',
+        'content' => 'Hello world',
+      },
     }
   end
 
@@ -29,7 +29,7 @@ RSpec.describe Fediverse::LinkedDataSignature do
   def sign_document(doc)
     options = {
       'creator' => "#{actor.federated_url}#main-key",
-      'created' => Time.now.utc.iso8601
+      'created' => Time.now.utc.iso8601,
     }
     options_hash = described_class.send(:hash_options, options)
     document_hash = described_class.send(:hash_document, doc)
