@@ -22,15 +22,8 @@ module Federails
         )
       end
 
-      it 'records a dead letter and does not retry' do
-        expect do
-          described_class.perform_now(activity)
-        end.to change(DeadLetter, :count).by(1)
-
-        dl = DeadLetter.last
-        expect(dl.activity).to eq activity
-        expect(dl.target_inbox).to eq inbox_url
-        expect(dl.last_error).to eq 'Gone'
+      it 'discards the job without retrying' do
+        expect { described_class.perform_now(activity) }.not_to raise_error
       end
     end
 

@@ -97,7 +97,7 @@
 
 | # | 피처 | 근거 |
 |---|---|---|
-| P1-1 | Delivery reliability | ActiveJob retry + 활동 순서 보장 + dead letter |
+| P1-1 | Delivery reliability | ActiveJob retry + 활동 순서 보장 |
 | P1-2 | Like activity | Mastodon 즐겨찾기, Misskey 리액션의 기반 |
 | P1-3 | Announce activity | Mastodon 부스트, Misskey 리노트 |
 | P1-4 | Block activity | 수신 차단 + 배달 목록에서 제외 |
@@ -186,17 +186,16 @@
 
 ### P1-1: Delivery Reliability
 
-**ActiveJob retry + 순서 보장 + dead letter**
+**ActiveJob retry + 순서 보장**
 
 - `NotifyInboxJob`에 `retry_on` 적용: 지수 백오프 (30s, 1m, 5m, 30m, 2h, 12h), 최대 6회
 - HTTP 응답별 분류:
   - 2xx → 성공
-  - 404/410 → 즉시 포기, dead letter에 기록 + actor tombstone 후보 플래그
+  - 404/410 → 즉시 포기, 추가 추적 상태는 남기지 않음
   - 429 → `Retry-After` 헤더 존중
   - 5xx / 네트워크 에러 → retry 대상
 - **활동 순서 보장:** 동일 target inbox에 대해 activity를 `created_at` 순으로 배달. `NotifyInboxJob`에 inbox URL 기반 concurrency key를 두어 같은 inbox에 대한 job이 직렬 실행되도록 함 (ActiveJob 백엔드가 지원하지 않으면 `federails_delivery_locks` 테이블로 advisory lock)
-- **Dead letter:** `Federails::DeadLetter` 모델 (activity_id, target_inbox, last_error, attempts, last_attempted_at, created_at). 최종 실패시 기록. 호스트앱이 조회/재시도/정리할 수 있는 인터페이스 제공
-- Rake task: `federails:delivery:retry_dead_letters`, `federails:delivery:cleanup[days]`
+- **현재 범위:** 실패 배달의 별도 영속 추적이나 운영용 rake task는 포함하지 않음
 
 ### P1-2: Like Activity
 
