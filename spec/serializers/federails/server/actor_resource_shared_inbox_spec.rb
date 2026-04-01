@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe 'Actor JSON endpoints.sharedInbox', type: :request do
-  let(:user) { FactoryBot.create(:user) }
+  let(:user) { FactoryBot.create :user }
   let(:actor) { user.federails_actor }
 
   it 'includes endpoints.sharedInbox' do

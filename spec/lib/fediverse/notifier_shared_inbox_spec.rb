@@ -2,16 +2,16 @@ require 'rails_helper'
 require 'fediverse/notifier'
 
 module Fediverse
-  FakeEntity ||= Struct.new(:federated_url)
-  FakeActivity ||= Struct.new(:id, :actor, :recipients, :action, :entity, :to, :cc, :bto, :bcc, :audience)
+  FakeEntity = Struct.new(:federated_url)
+  FakeActivity = Struct.new(:id, :actor, :recipients, :action, :entity, :to, :cc, :bto, :bcc, :audience)
 
   RSpec.describe Notifier do
     let(:local_actor) { FactoryBot.create(:user).federails_actor }
 
     describe 'shared inbox deduplication' do
       let(:shared_inbox) { 'https://example.com/inbox' }
-      let(:actor1) { FactoryBot.create(:distant_actor, shared_inbox_url: shared_inbox) }
-      let(:actor2) { FactoryBot.create(:distant_actor, shared_inbox_url: shared_inbox) }
+      let(:actor1) { FactoryBot.create :distant_actor, shared_inbox_url: shared_inbox }
+      let(:actor2) { FactoryBot.create :distant_actor, shared_inbox_url: shared_inbox }
 
       let(:fake_activity) do
         FakeActivity.new(
@@ -35,7 +35,7 @@ module Fediverse
     end
 
     describe 'fallback to personal inbox' do
-      let(:actor_without_shared) { FactoryBot.create(:distant_actor, shared_inbox_url: nil) }
+      let(:actor_without_shared) { FactoryBot.create :distant_actor, shared_inbox_url: nil }
 
       let(:fake_activity) do
         FakeActivity.new(

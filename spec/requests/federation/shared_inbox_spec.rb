@@ -3,14 +3,14 @@
 require 'rails_helper'
 
 RSpec.describe '/federation/inbox (shared)', type: :request do
-  let(:actor) { FactoryBot.create(:local_actor) }
+  let(:actor) { FactoryBot.create :local_actor }
   let(:payload) do
     {
       '@context' => 'https://www.w3.org/ns/activitystreams',
-      'id' => 'https://remote.example/activity/1',
-      'type' => 'Follow',
-      'actor' => 'https://remote.example/actor',
-      'object' => actor.federated_url,
+      'id'       => 'https://remote.example/activity/1',
+      'type'     => 'Follow',
+      'actor'    => 'https://remote.example/actor',
+      'object'   => actor.federated_url,
     }.to_json
   end
 
