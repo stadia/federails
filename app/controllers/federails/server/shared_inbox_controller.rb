@@ -47,7 +47,8 @@ module Federails
 
         begin
           payload = JSON.parse(payload_string)
-        rescue JSON::ParserError
+        rescue JSON::ParserError => e
+          Federails.logger.warn { "Failed to parse shared inbox payload: #{e.message}" }
           return
         end
 
@@ -70,10 +71,9 @@ module Federails
 
       def supported_inbox_content_type?
         content_type = request.headers['Content-Type'].to_s
-        return true if content_type.start_with?('application/activity+json')
-        return false unless content_type.start_with?('application/ld+json')
-
-        content_type.include?('https://www.w3.org/ns/activitystreams')
+        content_type.start_with?('application/activity+json') ||
+          (content_type.start_with?('application/ld+json') &&
+            content_type.include?('https://www.w3.org/ns/activitystreams'))
       end
     end
   end

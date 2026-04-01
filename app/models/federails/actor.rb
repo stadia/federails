@@ -103,7 +103,7 @@ module Federails
       if use_entity_attributes?
         Federails::Engine.routes.url_helpers.server_shared_inbox_url
       else
-        self[:shared_inbox_url]
+        attributes['shared_inbox_url']
       end
     end
 
