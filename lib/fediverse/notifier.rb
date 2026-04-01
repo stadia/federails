@@ -7,20 +7,43 @@ module Fediverse
     MAX_COLLECTION_DEPTH = 3 #: Integer
 
     class << self
-      # Posts an activity to its recipients
+      # Enqueues a separate delivery job for each recipient inbox.
       #
       # @param activity [Federails::Activity]
-      def post_to_inboxes(activity)
-        # Get the list of actors we need to send the activity to
+      def enqueue_deliveries(activity)
         inboxes = inboxes_for(activity)
         Federails.logger.debug('Nobody to notice') && return if inboxes.none?
 
-        # Deliver to each inbox
+        inboxes.each do |url|
+          Federails::NotifyInboxJob.perform_later(activity, url)
+        end
+      end
+
+      # Delivers an activity to a single inbox. Called by NotifyInboxJob.
+      #
+      # @param activity [Federails::Activity]
+      # @param inbox_url [String]
+      def deliver_to_inbox(activity, inbox_url)
+        message = payload(activity)
+        Federails.logger.debug { "Sending activity ##{activity.id} to inbox at #{inbox_url}" }
+        resp = post_to_inbox(inbox_url: inbox_url, message: message, from: activity.actor)
+        Federails.logger.debug { "#{resp.status}, #{resp.body}" }
+      end
+
+      # Posts an activity to its recipients (legacy synchronous delivery).
+      #
+      # @param activity [Federails::Activity]
+      def post_to_inboxes(activity)
+        inboxes = inboxes_for(activity)
+        Federails.logger.debug('Nobody to notice') && return if inboxes.none?
+
         message = payload(activity)
         inboxes.each do |url|
           Federails.logger.debug { "Sending activity ##{activity.id} to inbox at #{url}" }
           resp = post_to_inbox(inbox_url: url, message: message, from: activity.actor)
           Federails.logger.debug { "#{resp.status}, #{resp.body}" }
+        rescue Federails::PermanentDeliveryError, Federails::TemporaryDeliveryError => e
+          Federails.logger.warn { "Delivery failed for #{url}: #{e.message}" }
         end
       end
 
@@ -39,6 +62,8 @@ module Fediverse
           Federails.logger.debug { "Forwarding activity to inbox at #{url}" }
           resp = post_to_inbox(inbox_url: url, message: message, from: sender)
           Federails.logger.debug { "#{resp.status}, #{resp.body}" }
+        rescue Federails::PermanentDeliveryError, Federails::TemporaryDeliveryError => e
+          Federails.logger.warn { "Forward delivery failed for #{url}: #{e.message}" }
         end
       end
 
@@ -136,9 +161,31 @@ module Fediverse
       #: (inbox_url: String, message: String, ?from: Federails::Actor?) -> untyped
       def post_to_inbox(inbox_url:, message:, from: nil)
         conn = Faraday.default_connection
-        conn.builder.build_response(
+        resp = conn.builder.build_response(
           conn,
           signed_request(url: inbox_url, message: message, from: from)
+        )
+
+        status = resp.status
+        return resp if status.between?(200, 299)
+
+        if [404, 410].include?(status)
+          raise Federails::PermanentDeliveryError.new(
+            "Delivery to #{inbox_url} failed permanently: HTTP #{status}",
+            response_code: status, inbox_url: inbox_url
+          )
+        else
+          retry_after = resp.headers['Retry-After'] if status == 429
+          error_message = "Delivery to #{inbox_url} failed: HTTP #{status}"
+          error_message += " (Retry-After: #{retry_after})" if retry_after
+          raise Federails::TemporaryDeliveryError.new(
+            error_message, response_code: status, inbox_url: inbox_url, retry_after: retry_after&.to_i
+          )
+        end
+      rescue Faraday::ConnectionFailed, Faraday::TimeoutError, Faraday::SSLError => e
+        raise Federails::TemporaryDeliveryError.new(
+          "Delivery to #{inbox_url} failed: #{e.class} #{e.message}",
+          response_code: nil, inbox_url: inbox_url
         )
       end
 

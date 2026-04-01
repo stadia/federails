@@ -1,5 +1,7 @@
 # rbs_inline: enabled
 
+require 'federails/delivery_errors'
+
 module Federails
   class Engine < ::Rails::Engine
     isolate_namespace Federails
