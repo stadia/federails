@@ -11,6 +11,7 @@ module Federails
       def create
         payload = payload_from_params
         return head Federails::Utils::ResponseCodes::UNPROCESSABLE_CONTENT unless payload
+        return head :unauthorized unless actor_match?(payload)
 
         result = Fediverse::Inbox.dispatch_request(payload)
         Federails.logger.info { "[SharedInbox] dispatch_request result: #{result.inspect} for activity #{payload['id']}" }
@@ -35,6 +36,16 @@ module Federails
       rescue Fediverse::Signature::SignatureVerificationError => e
         Federails.logger.warn "Signature verification failed: #{e.message}"
         head :unauthorized
+      end
+
+      def actor_match?(payload)
+        return true unless Federails::Configuration.verify_signatures && @signed_actor
+
+        payload_actor_url = payload['actor'].is_a?(String) ? payload['actor'] : payload.dig('actor', 'id')
+        return true if @signed_actor.federated_url == payload_actor_url
+
+        Federails.logger.warn "Signature actor mismatch: signed=#{@signed_actor.federated_url} payload=#{payload_actor_url}"
+        false
       end
 
       def validate_content_type!

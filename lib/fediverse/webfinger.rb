@@ -126,19 +126,21 @@ module Fediverse
 
         data = data.clone
         id = data.delete('id')
-        Federails::Actor.new federated_url:  id,
-                             username:       data.delete('preferredUsername'),
-                             actor_type:     data.delete('type'),
-                             name:           data.delete('name'),
-                             server:         server_and_port(id),
-                             inbox_url:      data.delete('inbox'),
-                             outbox_url:     data.delete('outbox'),
-                             followers_url:  data.delete('followers'),
-                             followings_url: data.delete('following'),
-                             profile_url:    data.delete('url'),
-                             public_key:     data.delete('publicKey')&.dig('publicKeyPem'),
-                             extensions:     data.except('@context'),
-                             local:          false
+        endpoints = data.delete('endpoints')
+        Federails::Actor.new federated_url:    id,
+                             username:         data.delete('preferredUsername'),
+                             actor_type:       data.delete('type'),
+                             name:             data.delete('name'),
+                             server:           server_and_port(id),
+                             inbox_url:        data.delete('inbox'),
+                             outbox_url:       data.delete('outbox'),
+                             followers_url:    data.delete('followers'),
+                             followings_url:   data.delete('following'),
+                             profile_url:      data.delete('url'),
+                             shared_inbox_url: endpoints&.dig('sharedInbox'),
+                             public_key:       data.delete('publicKey')&.dig('publicKeyPem'),
+                             extensions:       data.except('@context'),
+                             local:            false
       end
 
       # Performs a signed GET request using a local actor for authentication
