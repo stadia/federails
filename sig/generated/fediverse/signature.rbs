@@ -2,6 +2,9 @@
 
 module Fediverse
   class Signature
+    class SignatureVerificationError < StandardError
+    end
+
     # : (sender: Federails::Actor, request: untyped) -> String
     def self.sign: (sender: Federails::Actor, request: untyped) -> String
 
@@ -14,6 +17,18 @@ module Fediverse
 
     # : (sender: Federails::Actor, request: untyped) -> bool
     def self.verify: (sender: Federails::Actor, request: untyped) -> bool
+
+    # Parse an HTTP Signature header into its components
+    # : (String) -> { key_id: String, headers: String, signature: String, algorithm: String? }
+    def self.parse_signature_header: (String) -> { key_id: String, headers: String, signature: String, algorithm: String? }
+
+    # Verify the Digest header matches the request body
+    # : (untyped) -> void
+    def self.verify_digest!: (untyped) -> void
+
+    # Verify an inbound request's HTTP Signature, returning the sending actor
+    # : (untyped) -> Federails::Actor
+    def self.verify_request!: (untyped) -> Federails::Actor
 
     # : (request: untyped, headers: String) -> String
     private def self.signature_payload: (request: untyped, headers: String) -> String

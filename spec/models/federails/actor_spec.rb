@@ -310,6 +310,26 @@ module Federails
       end
     end
 
+    describe '.shared_inbox_url' do
+      context 'with a local actor' do
+        it 'returns the server shared inbox route' do
+          expected_url = Federails::Engine.routes.url_helpers.server_shared_inbox_url
+          expect(existing_local_actor.shared_inbox_url).to eq expected_url
+        end
+      end
+
+      context 'with a distant actor' do
+        it 'returns the stored shared_inbox_url' do
+          existing_distant_actor.update! shared_inbox_url: 'https://mamot.fr/inbox'
+          expect(existing_distant_actor.shared_inbox_url).to eq 'https://mamot.fr/inbox'
+        end
+
+        it 'returns nil when not set' do
+          expect(existing_distant_actor.shared_inbox_url).to be_nil
+        end
+      end
+    end
+
     describe '.tombstone!' do
       context 'with a distant actor' do
         let(:entity) { described_class.create! distant_actor_attributes }

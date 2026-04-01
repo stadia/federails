@@ -1,9 +1,13 @@
+# rbs_inline: enabled
+
 require 'fediverse/inbox'
 
 module Federails
   module Server
     class ActivitiesController < Federails::ServerController
       include Federails::Server::RenderCollections
+      include Federails::Server::VerifySignature
+      include Federails::Server::InboxPayload
 
       before_action :verify_http_signature!, only: :create
       before_action :set_activity, only: [:show]
@@ -36,6 +40,10 @@ module Federails
 
         payload = payload_from_params
         return head Federails::Utils::ResponseCodes::UNPROCESSABLE_CONTENT unless payload
+
+        log_social_activity_payload(payload)
+
+        return head :unauthorized unless actor_match?(payload)
 
         result = Fediverse::Inbox.dispatch_request(payload)
         Federails.logger.info { "[Inbox] dispatch_request result: #{result.inspect} for activity #{payload['id']}" }
@@ -73,42 +81,21 @@ module Federails
         params.fetch(:activity, {})
       end
 
-      def payload_from_params
-        payload_string = request.body.read
-        request.body.rewind if request.body.respond_to? :rewind
+      def log_social_activity_payload(payload)
+        type = payload['type']
+        return unless type.in?(%w[Like Undo])
 
-        begin
-          payload = JSON.parse(payload_string)
-        rescue JSON::ParserError
-          return
+        Federails.logger.info do
+          {
+            message:      '[Inbox] social activity payload',
+            type:         type,
+            id:           payload['id'],
+            actor:        payload['actor'],
+            object:       payload['object'],
+            signed_actor: @signed_actor&.federated_url,
+            content_type: request.headers['Content-Type'],
+          }.inspect
         end
-
-        hash = compact_payload(payload)
-        validate_payload hash
-      end
-
-      def validate_payload(hash)
-        return unless hash['@context'] && hash['id'] && hash['type'] && hash['actor'] && hash['object']
-
-        hash
-      end
-
-      def compact_payload(payload)
-        JSON::LD::API.compact(payload, payload['@context'])
-      rescue JSON::LD::JsonLdError => e
-        Federails.logger.warn { "Unable to compact inbox payload #{payload['id'] || '(no id)'}: #{e.class} #{e.message}" }
-        payload
-      end
-
-      def supported_inbox_content_type?
-        # NOTE: request.media_type returns the registered primary type (application/ld+json; profile="...")
-        # even when the actual Content-Type header is application/activity+json (a registered alias).
-        # So we must check the raw header directly.
-        content_type = request.headers['Content-Type'].to_s
-        return true if content_type.start_with?('application/activity+json')
-        return false unless content_type.start_with?('application/ld+json')
-
-        content_type.include?('https://www.w3.org/ns/activitystreams')
       end
     end
   end

@@ -10,8 +10,8 @@ RSpec.describe Fediverse::Signature do
       result = described_class.parse_signature_header(header)
 
       expect(result).to eq(
-        key_id: 'https://example.com/actor#main-key',
-        headers: '(request-target) host date digest',
+        key_id:    'https://example.com/actor#main-key',
+        headers:   '(request-target) host date digest',
         signature: 'abc123=',
         algorithm: nil
       )
@@ -64,7 +64,7 @@ RSpec.describe Fediverse::Signature do
         r.headers['Digest'] = digest_header if digest_header
       end
       # Wrap body in StringIO to support read/rewind
-      req.define_singleton_method(:body) { @_string_io ||= StringIO.new(body_str) }
+      req.define_singleton_method(:body) { @body ||= StringIO.new(body_str) }
       req
     end
 
@@ -96,18 +96,26 @@ RSpec.describe Fediverse::Signature do
     let(:body) { '{"type":"Create"}' }
     let(:digest) { "SHA-256=#{Base64.strict_encode64(OpenSSL::Digest.new('SHA256').digest(body))}" }
 
-    def build_signed_request(signing_actor, body_str)
-      req = Faraday.default_connection.build_request(:post) do |r|
+    def request_digest(body_str)
+      "SHA-256=#{Base64.strict_encode64(OpenSSL::Digest.new('SHA256').digest(body_str))}"
+    end
+
+    def build_faraday_request(body_str)
+      Faraday.default_connection.build_request(:post) do |r|
         r.url '/inbox'
         r.body = body_str
         r.headers['Host'] = 'example.com'
         r.headers['Date'] = Time.now.utc.httpdate
-        r.headers['Digest'] = "SHA-256=#{Base64.strict_encode64(OpenSSL::Digest.new('SHA256').digest(body_str))}"
+        r.headers['Digest'] = request_digest(body_str)
       end
+    end
+
+    def build_signed_request(signing_actor, body_str)
+      req = build_faraday_request(body_str)
       req.headers['Signature'] = described_class.sign(sender: signing_actor, request: req)
 
       # Wrap body as StringIO for read/rewind support
-      req.define_singleton_method(:body) { @_string_io ||= StringIO.new(body_str) }
+      req.define_singleton_method(:body) { @body ||= StringIO.new(body_str) }
       req
     end
 
@@ -122,30 +130,39 @@ RSpec.describe Fediverse::Signature do
       expect(result).to eq(actor)
     end
 
-    it 'retries after sync! on initial verification failure' do
+    it 'retries after sync! on initial verification failure when actor is stale' do
       request = build_signed_request(actor, body)
       actor_uri = actor.federated_url
 
       # Simulate key rotation: first call returns actor with wrong key, after sync! key is correct
       wrong_key = OpenSSL::PKey::RSA.new(2048)
-      call_count = 0
+      real_public_key = actor.class.find(actor.id).public_key
 
       allow(Federails::Actor).to receive(:find_or_create_by_federation_url)
         .with(actor_uri).and_return(actor)
-      allow(actor).to receive(:public_key) {
-        call_count += 1
-        call_count <= 1 ? wrong_key.public_key.to_pem : actor.reload.public_key
-      }
-      allow(actor).to receive(:sync!)
-
-      # Need the real public key on retry - reset the stub
-      real_public_key = actor.class.find(actor.id).public_key
       allow(actor).to receive(:public_key).and_return(wrong_key.public_key.to_pem, real_public_key)
+      allow(actor).to receive(:updated_at).and_return(2.days.ago)
       allow(actor).to receive(:sync!)
 
       result = described_class.verify_request!(request)
       expect(result).to eq(actor)
       expect(actor).to have_received(:sync!)
+    end
+
+    it 'does not retry sync! when actor is fresh' do
+      request = build_signed_request(actor, body)
+      actor_uri = actor.federated_url
+
+      wrong_key = OpenSSL::PKey::RSA.new(2048)
+
+      allow(Federails::Actor).to receive(:find_or_create_by_federation_url)
+        .with(actor_uri).and_return(actor)
+      allow(actor).to receive_messages(public_key: wrong_key.public_key.to_pem, updated_at: 1.minute.ago)
+      allow(actor).to receive(:sync!)
+
+      expect { described_class.verify_request!(request) }
+        .to raise_error(Fediverse::Signature::SignatureVerificationError, /Signature verification failed/)
+      expect(actor).not_to have_received(:sync!)
     end
 
     it 'raises SignatureVerificationError when signature is invalid even after retry' do
@@ -156,7 +173,7 @@ RSpec.describe Fediverse::Signature do
 
       allow(Federails::Actor).to receive(:find_or_create_by_federation_url)
         .with(actor_uri).and_return(actor)
-      allow(actor).to receive(:public_key).and_return(wrong_key.public_key.to_pem)
+      allow(actor).to receive_messages(public_key: wrong_key.public_key.to_pem, updated_at: 2.days.ago)
       allow(actor).to receive(:sync!)
 
       expect { described_class.verify_request!(request) }
@@ -174,6 +191,30 @@ RSpec.describe Fediverse::Signature do
 
       expect(Federails::Actor).to have_received(:find_or_create_by_federation_url)
         .with(actor.federated_url)
+    end
+
+    it 'wraps actor lookup errors as SignatureVerificationError' do
+      request = build_signed_request(actor, body)
+
+      allow(Federails::Actor).to receive(:find_or_create_by_federation_url)
+        .with(actor.federated_url).and_raise(ActiveRecord::RecordNotFound)
+
+      expect { described_class.verify_request!(request) }
+        .to raise_error(Fediverse::Signature::SignatureVerificationError, /Unable to load signed actor/)
+    end
+
+    it 'wraps stale actor refresh errors as SignatureVerificationError' do
+      request = build_signed_request(actor, body)
+      actor_uri = actor.federated_url
+      wrong_key = OpenSSL::PKey::RSA.new(2048)
+
+      allow(Federails::Actor).to receive(:find_or_create_by_federation_url)
+        .with(actor_uri).and_return(actor)
+      allow(actor).to receive_messages(public_key: wrong_key.public_key.to_pem, updated_at: 2.days.ago)
+      allow(actor).to receive(:sync!).and_raise(Faraday::ConnectionFailed.new('boom'))
+
+      expect { described_class.verify_request!(request) }
+        .to raise_error(Fediverse::Signature::SignatureVerificationError, /Unable to refresh signed actor/)
     end
   end
 end

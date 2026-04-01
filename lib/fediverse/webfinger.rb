@@ -126,19 +126,21 @@ module Fediverse
 
         data = data.clone
         id = data.delete('id')
-        Federails::Actor.new federated_url:  id,
-                             username:       data.delete('preferredUsername'),
-                             actor_type:     data.delete('type'),
-                             name:           data.delete('name'),
-                             server:         server_and_port(id),
-                             inbox_url:      data.delete('inbox'),
-                             outbox_url:     data.delete('outbox'),
-                             followers_url:  data.delete('followers'),
-                             followings_url: data.delete('following'),
-                             profile_url:    data.delete('url'),
-                             public_key:     data.delete('publicKey')&.dig('publicKeyPem'),
-                             extensions:     data.except('@context'),
-                             local:          false
+        endpoints = data.delete('endpoints')
+        Federails::Actor.new federated_url:    id,
+                             username:         data.delete('preferredUsername'),
+                             actor_type:       data.delete('type'),
+                             name:             data.delete('name'),
+                             server:           server_and_port(id),
+                             inbox_url:        data.delete('inbox'),
+                             outbox_url:       data.delete('outbox'),
+                             followers_url:    data.delete('followers'),
+                             followings_url:   data.delete('following'),
+                             profile_url:      data.delete('url'),
+                             shared_inbox_url: endpoints&.dig('sharedInbox'),
+                             public_key:       data.delete('publicKey')&.dig('publicKeyPem'),
+                             extensions:       data.except('@context'),
+                             local:            false
       end
 
       # Performs a signed GET request using a local actor for authentication
@@ -160,6 +162,9 @@ module Fediverse
       rescue JSON::ParserError
         Federails.logger.debug { "Invalid JSON response for signed GET #{url}" }
         raise ActiveRecord::RecordNotFound
+      rescue URI::InvalidURIError
+        Federails.logger.debug { "Invalid URI for signed GET #{url}" }
+        raise ActiveRecord::RecordNotFound
       end
 
       # Makes a simple GET request and returns a +Hash+ from the parsed body
@@ -177,6 +182,10 @@ module Fediverse
         raise ActiveRecord::RecordNotFound
       rescue JSON::ParserError
         Federails.logger.debug { "Invalid JSON response for GET #{url}" }
+
+        raise ActiveRecord::RecordNotFound
+      rescue URI::InvalidURIError
+        Federails.logger.debug { "Invalid URI for GET #{url}" }
 
         raise ActiveRecord::RecordNotFound
       end

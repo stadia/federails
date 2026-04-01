@@ -3,7 +3,12 @@ module Federails
     class ActorResource < BaseResource
       attribute :@context do |actor|
         data = actor_data(actor)
-        additional = ['https://w3id.org/security/v1', data.delete(:@context)]
+        toot_context = {
+          'toot'         => 'http://joinmastodon.org/ns#',
+          'featured'     => { '@id' => 'toot:featured', '@type' => '@id' },
+          'featuredTags' => { '@id' => 'toot:featuredTags', '@type' => '@id' },
+        }
+        additional = ['https://w3id.org/security/v1', toot_context, data.delete(:@context)]
         Federails::SerializerSupport.json_ld_context(additional: additional)
       end
 
@@ -16,6 +21,22 @@ module Federails
       attribute :followers, &:followers_url
       attribute :following, &:followings_url
       attribute :url, &:profile_url
+
+      attribute :endpoints do |actor|
+        { sharedInbox: Federails::SerializerSupport.route_helpers.server_shared_inbox_url } if actor.local?
+      end
+
+      attribute :liked do |actor|
+        Federails::SerializerSupport.route_helpers.liked_server_actor_url(actor) if actor.local?
+      end
+
+      attribute :featured do |actor|
+        Federails::SerializerSupport.route_helpers.featured_server_actor_url(actor) if actor.local?
+      end
+
+      attribute :featuredTags do |actor|
+        Federails::SerializerSupport.route_helpers.featured_tags_server_actor_url(actor) if actor.local?
+      end
 
       attribute :publicKey do |actor|
         next unless actor.public_key

@@ -1,0 +1,11 @@
+# Generated from lib/fediverse/inbox/block_handler.rb with RBS::Inline
+
+module Fediverse
+  class Inbox
+    module BlockHandler
+      def self.handle_block: (untyped activity) -> untyped
+
+      def self.handle_undo_block: (untyped activity) -> untyped
+    end
+  end
+end

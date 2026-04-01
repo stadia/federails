@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module Federails
   class ClientController < Federails.configuration.base_client_controller.constantize
     include Pundit::Authorization

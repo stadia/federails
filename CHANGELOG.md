@@ -32,6 +32,11 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ### Added
 
+- Shared inbox endpoint (`POST /federation/inbox`) for server-level activity delivery
+- Actors now advertise `endpoints.sharedInbox` in their ActivityPub document
+- Outgoing delivery prefers remote actor's shared inbox when available
+- New migration: `add_shared_inbox_url_to_federails_actors`
+
 ### Fixed
 
 ## [0.8.0] 2026-03-25

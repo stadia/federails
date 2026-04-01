@@ -44,7 +44,7 @@ module Fediverse
           VCR.use_cassette('fediverse/notifier/get_collection_200') do
             allow(described_class).to receive(:post_to_inbox).and_return(instance_double(Faraday::Response, status: 200, body: ''))
             described_class.post_to_inboxes(fake_activity)
-            expect(described_class).to have_received(:post_to_inbox).with(hash_including(inbox_url: 'https://3dp.chat/users/manyfold/inbox')).once
+            expect(described_class).to have_received(:post_to_inbox).with(hash_including(inbox_url: 'https://3dp.chat/inbox')).once
           end
         end
       end
@@ -132,6 +132,36 @@ module Fediverse
         allow(Federails::Actor).to receive(:find_or_create_by_federation_url).with('https://example.com/nested').and_raise(ActiveRecord::RecordNotFound)
 
         expect(described_class.send(:collection_to_actors, 'https://example.com/collection', max_depth: 1)).to eq([])
+      end
+
+      it 'resolves local followers collections without fetching over http' do
+        FactoryBot.create :following, actor: distant_target_actor, target_actor: local_actor
+
+        allow(Collection).to receive(:fetch)
+
+        actors = described_class.send(:collection_to_actors, "#{local_actor.followers_url}?page=1")
+
+        expect(actors).to contain_exactly(distant_target_actor)
+        expect(Collection).not_to have_received(:fetch)
+      end
+
+      it 'excludes local actors from local followers collections' do
+        second_local_actor = FactoryBot.create(:user).federails_actor
+        FactoryBot.create :following, actor: distant_target_actor, target_actor: local_actor
+        FactoryBot.create :following, actor: second_local_actor, target_actor: local_actor
+
+        actors = described_class.send(:collection_to_actors, "#{local_actor.followers_url}?page=1")
+
+        expect(actors).to contain_exactly(distant_target_actor)
+      end
+
+      it 'returns an empty list when fetching a collection returns an unhandled status' do
+        allow(Collection).to receive(:fetch).and_raise(
+          Federails::Utils::JsonRequest::UnhandledResponseStatus,
+          'Unhandled status code 500 for GET https://example.com/collection'
+        )
+
+        expect(described_class.send(:collection_to_actors, 'https://example.com/collection')).to eq([])
       end
     end
 

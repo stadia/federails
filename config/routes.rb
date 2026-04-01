@@ -35,10 +35,15 @@ Federails::Engine.routes.draw do
   end
 
   scope Federails.configuration.server_routes_path, module: :server, as: :server, defaults: { format: :activitypub } do
+    post 'inbox', to: 'shared_inbox#create', as: :shared_inbox
+
     resources :actors, only: [:show] do
       member do
         get :followers
         get :following
+        get :liked
+        get :featured
+        get :featured_tags
       end
       get :outbox, to: 'activities#outbox'
       post :inbox, to: 'activities#create'

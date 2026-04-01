@@ -104,12 +104,21 @@ module Federails
 
         #: (Hash[Symbol, String]) -> untyped
         def from_local_route(route)
-          config = Federails.data_entity_handled_on route[:publishable_type]
+          config = Federails.data_entity_handled_on(route[:publishable_type]) || fallback_local_config(route[:publishable_type])
           return unless config
 
           config[:class]&.find_by(config[:url_param] => route[:id])
         rescue ActiveRecord::RecordNotFound
           nil
+        end
+
+        def fallback_local_config(route_path_segment)
+          klass_name = route_path_segment.to_s.singularize.classify
+          klass = klass_name.safe_constantize
+          return unless klass
+          return unless klass.respond_to?(:find_by)
+
+          { class: klass, url_param: :id }
         end
 
         #: (String | Hash[String, untyped]) -> untyped

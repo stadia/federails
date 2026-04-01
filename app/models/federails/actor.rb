@@ -37,6 +37,9 @@ module Federails
     has_many :followers, source: :actor, through: :following_followers
     # Actors followed by actor
     has_many :follows, source: :target_actor, through: :following_follows
+
+    has_many :featured_items, dependent: :destroy
+    has_many :featured_tags, dependent: :destroy
     belongs_to :host, class_name: 'Federails::Host', foreign_key: :server, primary_key: :domain, inverse_of: :actors, optional: true
 
     # Explicitly explain serialization for MariaDB
@@ -96,6 +99,14 @@ module Federails
       use_entity_attributes? ? Federails::Engine.routes.url_helpers.following_server_actor_url(self) : attributes['followings_url']
     end
 
+    def shared_inbox_url
+      if use_entity_attributes?
+        Federails::Engine.routes.url_helpers.server_shared_inbox_url
+      else
+        attributes['shared_inbox_url']
+      end
+    end
+
     def profile_url
       return attributes['profile_url'].presence unless use_entity_attributes?
 
@@ -115,6 +126,14 @@ module Federails
 
     def acct_uri
       "acct:#{username}@#{server}"
+    end
+
+    def feature(federated_url)
+      featured_items.find_or_create_by!(federated_url: federated_url)
+    end
+
+    def unfeature(federated_url)
+      featured_items.find_by(federated_url: federated_url)&.destroy!
     end
 
     # Checks if a given actor follows the current actor

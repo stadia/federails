@@ -13,7 +13,7 @@ jobs:
       RAILS_ENV: test
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -22,7 +22,7 @@ jobs:
           bundler-cache: true
 
       - name: Set up test database
-        run: bundle exec rake db:create db:schema:load
+        run: bundle exec rake db:create db:migrate
 
       - name: Run RSpec
         run: bundle exec rspec --format progress --format json --out tmp/rspec_results.json
@@ -58,7 +58,7 @@ jobs:
       BUNDLE_WITHOUT: doc
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
