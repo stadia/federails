@@ -10,14 +10,14 @@ module Fediverse
 
     describe 'shared inbox deduplication' do
       let(:shared_inbox) { 'https://example.com/inbox' }
-      let(:actor1) { FactoryBot.create :distant_actor, shared_inbox_url: shared_inbox }
-      let(:actor2) { FactoryBot.create :distant_actor, shared_inbox_url: shared_inbox }
+      let(:first_shared_inbox_actor) { FactoryBot.create :distant_actor, shared_inbox_url: shared_inbox }
+      let(:second_shared_inbox_actor) { FactoryBot.create :distant_actor, shared_inbox_url: shared_inbox }
 
       let(:fake_activity) do
         FakeActivity.new(
           id: 1,
           actor: local_actor,
-          to: [actor1.federated_url, actor2.federated_url],
+          to: [first_shared_inbox_actor.federated_url, second_shared_inbox_actor.federated_url],
           cc: nil, bto: nil, bcc: nil, audience: nil,
           action: 'Create',
           entity: FakeEntity.new('some_url')
