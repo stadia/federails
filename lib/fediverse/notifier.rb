@@ -14,9 +14,7 @@ module Fediverse
         inboxes = inboxes_for(activity)
         Federails.logger.debug('Nobody to notice') && return if inboxes.none?
 
-        inboxes.each do |url|
-          Federails::NotifyInboxJob.perform_later(activity, url)
-        end
+        ActiveJob.perform_all_later(inboxes.map { |url| Federails::NotifyInboxJob.new(activity, url) })
       end
 
       # Delivers an activity to a single inbox. Called by NotifyInboxJob.
