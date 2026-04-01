@@ -23,3 +23,4 @@ rspec_examples.txt
 .idea
 .gem_rbs_collection
 spec/dummy/log/test.log.0
+.omx

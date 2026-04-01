@@ -23,9 +23,9 @@ module Federails
       end
 
       it 'records a dead letter and does not retry' do
-        expect {
+        expect do
           described_class.perform_now(activity)
-        }.to change(DeadLetter, :count).by(1)
+        end.to change(DeadLetter, :count).by(1)
 
         dl = DeadLetter.last
         expect(dl.activity).to eq activity
