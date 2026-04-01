@@ -1,42 +1,45 @@
+# rbs_inline: enabled
+
+require 'fediverse/request'
+
 module Fediverse
   class Inbox
     module AnnounceHandler
       class << self
         def handle_announce(activity)
-          actor_url = activity['actor']
-          object = activity['object']
+          entity = resolve_target_entity(activity['object'])
+          return true unless entity
 
-          # If object is inline (Hash) with signature, verify it
-          if object.is_a?(Hash) && object['signature']
-            ld_result = Fediverse::LinkedDataSignature.verify(object)
-            if ld_result && !ld_result[:verified]
-              Federails.logger.warn "LD Signature verification failed for Announce inner object: #{ld_result[:error]}"
-            end
-          end
-
-          object_url = object.is_a?(Hash) ? object['id'] : object
-          actor = Federails::Actor.find_or_create_by_federation_url(actor_url)
-          return false unless actor
-
-          entity = Federails::Utils::Object.find_or_initialize(object_url)
-
-          Federails::Activity.create!(
-            action: 'Announce',
-            actor: actor,
-            entity: entity,
-            federated_url: activity['id']
-          )
-          true
+          dispatch_callback(entity, :on_federails_announce_received, activity['actor'])
         end
 
         def handle_undo_announce(activity)
-          object = activity['object']
-          announce_url = object.is_a?(Hash) ? object['id'] : object
-          announce = Federails::Activity.find_by(federated_url: announce_url, action: 'Announce')
-          return false unless announce
+          original_activity = Fediverse::Request.dereference(activity['object'])
+          return false unless original_activity && activity['actor'] == original_activity['actor']
 
-          announce.destroy!
-          true
+          entity = resolve_target_entity(original_activity&.dig('object'))
+          return true unless entity
+
+          dispatch_callback(entity, :on_federails_undo_announce_received, activity['actor'])
+        end
+
+        private
+
+        def dispatch_callback(entity, callback_name, actor)
+          previous_actor = entity.current_federails_activity_actor
+          entity.current_federails_activity_actor = actor
+          entity.run_callbacks(callback_name) { true }
+        ensure
+          entity.current_federails_activity_actor = previous_actor
+        end
+
+        def resolve_target_entity(object)
+          entity = Federails::Utils::Object.find_or_initialize(object)
+          return unless entity.is_a?(Federails::DataEntity) && entity.persisted?
+
+          entity
+        rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid
+          nil
         end
       end
     end

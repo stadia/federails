@@ -1,32 +1,45 @@
+# rbs_inline: enabled
+
+require 'fediverse/request'
+
 module Fediverse
   class Inbox
     module LikeHandler
       class << self
         def handle_like(activity)
-          actor_url = activity['actor']
-          object_url = activity['object'].is_a?(Hash) ? activity['object']['id'] : activity['object']
-          actor = Federails::Actor.find_or_create_by_federation_url(actor_url)
-          return false unless actor
+          entity = resolve_target_entity(activity['object'])
+          return true unless entity
 
-          entity = Federails::Utils::Object.find_or_initialize(object_url)
-
-          Federails::Activity.create!(
-            action: 'Like',
-            actor: actor,
-            entity: entity,
-            federated_url: activity['id']
-          )
-          true
+          dispatch_callback(entity, :on_federails_like_received, activity['actor'])
         end
 
         def handle_undo_like(activity)
-          object = activity['object']
-          like_url = object.is_a?(Hash) ? object['id'] : object
-          like = Federails::Activity.find_by(federated_url: like_url, action: 'Like')
-          return false unless like
+          original_activity = Fediverse::Request.dereference(activity['object'])
+          return false unless original_activity && activity['actor'] == original_activity['actor']
 
-          like.destroy!
-          true
+          entity = resolve_target_entity(original_activity&.dig('object'))
+          return true unless entity
+
+          dispatch_callback(entity, :on_federails_undo_like_received, activity['actor'])
+        end
+
+        private
+
+        def dispatch_callback(entity, callback_name, actor)
+          previous_actor = entity.current_federails_activity_actor
+          entity.current_federails_activity_actor = actor
+          entity.run_callbacks(callback_name) { true }
+        ensure
+          entity.current_federails_activity_actor = previous_actor
+        end
+
+        def resolve_target_entity(object)
+          entity = Federails::Utils::Object.find_or_initialize(object)
+          return unless entity.is_a?(Federails::DataEntity) && entity.persisted?
+
+          entity
+        rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid
+          nil
         end
       end
     end

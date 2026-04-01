@@ -13,6 +13,18 @@ module Federails
         true
       end
 
+      def liked?
+        true
+      end
+
+      def featured?
+        true
+      end
+
+      def featured_tags?
+        true
+      end
+
       class Scope < Scope
         def resolve
           scope.local

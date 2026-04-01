@@ -1,6 +1,9 @@
+# rbs_inline: enabled
+
 module Fediverse
   class Inbox
     module BlockHandler
+      # rubocop:disable Naming/PredicateMethod
       class << self
         def handle_block(activity)
           actor = Federails::Actor.find_or_create_by_federation_url(activity['actor'])
@@ -10,9 +13,9 @@ module Fediverse
 
           Federails::Block.find_or_create_by!(actor: actor, target_actor: target_actor)
 
-          # Destroy followings in both directions
-          Federails::Following.where(actor: actor, target_actor: target_actor).destroy_all
-          Federails::Following.where(actor: target_actor, target_actor: actor).destroy_all
+          Federails::Following.where(actor: actor, target_actor: target_actor)
+                              .or(Federails::Following.where(actor: target_actor, target_actor: actor))
+                              .destroy_all
 
           true
         end
@@ -20,7 +23,9 @@ module Fediverse
         def handle_undo_block(activity)
           object = activity['object']
           actor = Federails::Actor.find_or_create_by_federation_url(activity['actor'])
-          target_url = object.is_a?(Hash) ? (object['object'].is_a?(Hash) ? object['object']['id'] : object['object']) : nil
+          target_url = if object.is_a?(Hash)
+                         object['object'].is_a?(Hash) ? object['object']['id'] : object['object']
+                       end
           return false unless actor && target_url
 
           target_actor = Federails::Actor.find_or_create_by_federation_url(target_url)
@@ -33,6 +38,7 @@ module Fediverse
           true
         end
       end
+      # rubocop:enable Naming/PredicateMethod
     end
   end
 end

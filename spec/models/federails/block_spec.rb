@@ -2,8 +2,8 @@ require 'rails_helper'
 
 module Federails
   RSpec.describe Block, type: :model do
-    let(:actor) { FactoryBot.create(:local_actor) }
-    let(:target_actor) { FactoryBot.create(:local_actor) }
+    let(:actor) { FactoryBot.create :local_actor }
+    let(:target_actor) { FactoryBot.create :local_actor }
 
     it 'creates a valid block' do
       block = described_class.create!(actor: actor, target_actor: target_actor)
