@@ -42,6 +42,8 @@ module Fediverse
           Federails.logger.debug { "Sending activity ##{activity.id} to inbox at #{url}" }
           resp = post_to_inbox(inbox_url: url, message: message, from: activity.actor)
           Federails.logger.debug { "#{resp.status}, #{resp.body}" }
+        rescue Federails::PermanentDeliveryError, Federails::TemporaryDeliveryError => e
+          Federails.logger.warn { "Delivery failed for #{url}: #{e.message}" }
         end
       end
 
@@ -60,6 +62,8 @@ module Fediverse
           Federails.logger.debug { "Forwarding activity to inbox at #{url}" }
           resp = post_to_inbox(inbox_url: url, message: message, from: sender)
           Federails.logger.debug { "#{resp.status}, #{resp.body}" }
+        rescue Federails::PermanentDeliveryError, Federails::TemporaryDeliveryError => e
+          Federails.logger.warn { "Forward delivery failed for #{url}: #{e.message}" }
         end
       end
 
@@ -171,12 +175,18 @@ module Fediverse
             response_code: status, inbox_url: inbox_url
           )
         else
+          retry_after = resp.headers['Retry-After'] if status == 429
           error_message = "Delivery to #{inbox_url} failed: HTTP #{status}"
-          error_message += " (Retry-After: #{resp.headers['Retry-After']})" if status == 429 && resp.headers['Retry-After']
+          error_message += " (Retry-After: #{retry_after})" if retry_after
           raise Federails::TemporaryDeliveryError.new(
-            error_message, response_code: status, inbox_url: inbox_url
+            error_message, response_code: status, inbox_url: inbox_url, retry_after: retry_after&.to_i
           )
         end
+      rescue Faraday::ConnectionFailed, Faraday::TimeoutError, Faraday::SSLError => e
+        raise Federails::TemporaryDeliveryError.new(
+          "Delivery to #{inbox_url} failed: #{e.class} #{e.message}",
+          response_code: nil, inbox_url: inbox_url
+        )
       end
 
       #: (url: String, message: String, from: Federails::Actor?) -> untyped
