@@ -140,5 +140,39 @@ RSpec.describe Fediverse::LinkedDataSignature do
         expect(result[:error]).to eq('Could not resolve signing actor')
       end
     end
+
+    context 'with real JSON-LD normalization' do
+      # Uses VCR cassette for the identity/v1 context (used by hash_options);
+      # the ActivityStreams context is provided locally by json-ld-preloaded.
+      around do |example|
+        VCR.use_cassette('fediverse/linked_data_signature/identity_v1') do
+          example.run
+        end
+      end
+
+      before do
+        allow(described_class).to receive(:normalize).and_call_original
+      end
+
+      it 'verifies a valid signature through the full normalization path' do
+        signed = sign_document(document)
+        allow(Federails::Actor).to receive(:find_or_create_by_federation_url).and_return(actor)
+
+        result = described_class.verify(signed)
+
+        expect(result[:verified]).to be true
+        expect(result[:actor]).to eq(actor)
+      end
+
+      it 'rejects a tampered document through the full normalization path' do
+        signed = sign_document(document)
+        signed['object']['content'] = 'Tampered!'
+        allow(Federails::Actor).to receive(:find_or_create_by_federation_url).and_return(actor)
+
+        result = described_class.verify(signed)
+
+        expect(result[:verified]).to be false
+      end
+    end
   end
 end
