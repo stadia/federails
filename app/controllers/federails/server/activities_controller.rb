@@ -6,6 +6,7 @@ module Federails
   module Server
     class ActivitiesController < Federails::ServerController
       include Federails::Server::RenderCollections
+      include Federails::Server::VerifySignature
 
       before_action :verify_http_signature!, only: :create
       before_action :set_activity, only: [:show]
@@ -41,13 +42,7 @@ module Federails
 
         log_social_activity_payload(payload)
 
-        if Federails::Configuration.verify_signatures && @signed_actor
-          payload_actor_url = payload['actor'].is_a?(String) ? payload['actor'] : payload.dig('actor', 'id')
-          unless @signed_actor.federated_url == payload_actor_url
-            Federails.logger.warn "Signature actor mismatch: signed=#{@signed_actor.federated_url} payload=#{payload_actor_url}"
-            return head :unauthorized
-          end
-        end
+        return head :unauthorized unless actor_match?(payload)
 
         result = Fediverse::Inbox.dispatch_request(payload)
         Federails.logger.info { "[Inbox] dispatch_request result: #{result.inspect} for activity #{payload['id']}" }
@@ -64,15 +59,6 @@ module Federails
       end
 
       private
-
-      def verify_http_signature!
-        return unless Federails::Configuration.verify_signatures
-
-        @signed_actor = Fediverse::Signature.verify_request!(request)
-      rescue Fediverse::Signature::SignatureVerificationError => e
-        Federails.logger.warn "Signature verification failed: #{e.message}"
-        head :unauthorized
-      end
 
       # Use callbacks to share common setup or constraints between actions.
       def set_activity

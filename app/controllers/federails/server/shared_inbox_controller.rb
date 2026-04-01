@@ -3,6 +3,8 @@ require 'fediverse/inbox'
 module Federails
   module Server
     class SharedInboxController < Federails::ServerController
+      include Federails::Server::VerifySignature
+
       skip_after_action :verify_authorized
       before_action :verify_http_signature!
       before_action :validate_content_type!
@@ -28,25 +30,6 @@ module Federails
       end
 
       private
-
-      def verify_http_signature!
-        return unless Federails::Configuration.verify_signatures
-
-        @signed_actor = Fediverse::Signature.verify_request!(request)
-      rescue Fediverse::Signature::SignatureVerificationError => e
-        Federails.logger.warn "Signature verification failed: #{e.message}"
-        head :unauthorized
-      end
-
-      def actor_match?(payload)
-        return true unless Federails::Configuration.verify_signatures && @signed_actor
-
-        payload_actor_url = payload['actor'].is_a?(String) ? payload['actor'] : payload.dig('actor', 'id')
-        return true if @signed_actor.federated_url == payload_actor_url
-
-        Federails.logger.warn "Signature actor mismatch: signed=#{@signed_actor.federated_url} payload=#{payload_actor_url}"
-        false
-      end
 
       def validate_content_type!
         head :unsupported_media_type unless supported_inbox_content_type?
