@@ -22,7 +22,7 @@ jobs:
           bundler-cache: true
 
       - name: Set up test database
-        run: bundle exec rake db:create db:schema:load
+        run: bundle exec rake db:create db:migrate
 
       - name: Run RSpec
         run: bundle exec rspec --format progress --format json --out tmp/rspec_results.json
