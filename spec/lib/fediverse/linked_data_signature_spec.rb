@@ -142,14 +142,10 @@ RSpec.describe Fediverse::LinkedDataSignature do
     end
 
     context 'with real JSON-LD normalization' do
-      # Uses VCR cassette for the identity/v1 context (used by hash_options);
-      # the ActivityStreams context is provided locally by json-ld-preloaded.
-      around do |example|
-        VCR.use_cassette('fediverse/linked_data_signature/identity_v1') do
-          example.run
-        end
-      end
-
+      # Exercises the actual JSON-LD canonicalization path.
+      # Both required contexts are preloaded locally:
+      # - ActivityStreams: by json-ld-preloaded gem
+      # - identity/v1: by config/initializers/json_ld_preload.rb
       before do
         allow(described_class).to receive(:normalize).and_call_original
       end
