@@ -2,9 +2,21 @@ require 'fediverse/notifier'
 
 module Federails
   class NotifyInboxJob < ApplicationJob
-    retry_on Federails::TemporaryDeliveryError, wait: lambda { |executions, exception|
-      exception.respond_to?(:retry_after) && exception.retry_after.to_i.positive? ? exception.retry_after : (executions**3) + 5
-    }, attempts: 6
+    rescue_from Federails::TemporaryDeliveryError do |exception|
+      current_attempt = executions
+
+      if current_attempt < 6
+        wait = if exception.respond_to?(:retry_after) && exception.retry_after.to_i.positive?
+                 exception.retry_after
+               else
+                 (current_attempt**3) + 5
+               end
+
+        retry_job wait: wait, error: exception
+      else
+        raise exception
+      end
+    end
     discard_on Federails::PermanentDeliveryError
 
     def perform(activity, inbox_url = nil)
