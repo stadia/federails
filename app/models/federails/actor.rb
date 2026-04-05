@@ -212,6 +212,10 @@ module Federails
       end
 
       def find_by_federation_url(federated_url)
+        if federated_url.present? && !federated_url.match?(/\Ahttps?:\/\//i) && Fediverse::Webfinger.split_account(federated_url)
+          return find_by_account(federated_url)
+        end
+
         local_route = Utils::Host.local_route federated_url
         return find_param(local_route[:id]) if local_route && local_route[:controller] == 'federails/server/actors' && local_route[:action] == 'show'
 

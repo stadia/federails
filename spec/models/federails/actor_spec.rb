@@ -219,6 +219,18 @@ module Federails
           end.not_to change(described_class, :count)
         end
       end
+
+      it 'treats acct URIs as account lookups' do
+        actor = existing_distant_actor
+
+        allow(described_class).to receive(:find_by_account).with(actor.acct_uri).and_return(actor)
+        allow(Fediverse::Webfinger).to receive(:fetch_actor_url)
+
+        described_class.find_or_create_by_federation_url(actor.acct_uri)
+
+        expect(described_class).to have_received(:find_by_account).with(actor.acct_uri)
+        expect(Fediverse::Webfinger).not_to have_received(:fetch_actor_url)
+      end
     end
 
     describe '#find_or_create_by_object' do
