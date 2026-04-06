@@ -194,5 +194,109 @@ module Fediverse
         expect(Fediverse::Signature.verify(sender: local_actor, request: request)).to be_truthy
       end
     end
+
+    describe '#post_to_inbox' do
+      let(:connection) { instance_double(Faraday::Connection, builder: builder) }
+      let(:builder) { instance_double(Faraday::RackBuilder) }
+      let(:request) { instance_double(Faraday::Request) }
+      let(:headers) { {} }
+      let(:response) { instance_double(Faraday::Response, status: status, body: body, headers: headers) }
+      let(:status) { 400 }
+      let(:body) { 'invalid signature' }
+
+      before do
+        allow(Faraday).to receive(:default_connection).and_return(connection)
+        allow(described_class).to receive(:signed_request).and_return(request)
+        allow(builder).to receive(:build_response).with(connection, request).and_return(response)
+      end
+
+      it 'treats client errors as permanent failures' do
+        expect do
+          described_class.send(:post_to_inbox, inbox_url: distant_target_actor.inbox_url, message: '{}', from: local_actor)
+        end.to raise_error(
+          Federails::PermanentDeliveryError,
+          /HTTP 400 - invalid signature/
+        )
+      end
+
+      context 'when the remote server rate limits' do
+        let(:status) { 429 }
+        let(:headers) { { 'Retry-After' => '120' } }
+        let(:body) { 'slow down' }
+
+        it 'treats the failure as temporary and preserves Retry-After' do
+          expect do
+            described_class.send(:post_to_inbox, inbox_url: distant_target_actor.inbox_url, message: '{}', from: local_actor)
+          end.to raise_error(
+            Federails::TemporaryDeliveryError,
+            /HTTP 429 \(Retry-After: 120\) - slow down/
+          )
+        end
+      end
+
+      context 'when the remote server returns a 5xx error' do
+        let(:status) { 503 }
+        let(:body) { 'maintenance' }
+
+        it 'treats the failure as temporary' do
+          expect do
+            described_class.send(:post_to_inbox, inbox_url: distant_target_actor.inbox_url, message: '{}', from: local_actor)
+          end.to raise_error(
+            Federails::TemporaryDeliveryError,
+            /HTTP 503 - maintenance/
+          )
+        end
+      end
+    end
+
+    describe '.deliver_to_inbox' do
+      let(:fake_entity) { FakeEntity.new('https://example.com/objects/1') }
+      let(:fake_activity) do
+        FakeActivity.new(
+          id:     1,
+          actor:  local_actor,
+          to:     [distant_target_actor.federated_url],
+          action: 'Create',
+          entity: fake_entity
+        )
+      end
+
+      it 'refuses to send a Create activity when the serialized object is missing' do
+        allow(Federails::Server::ActivityResource).to receive(:new)
+          .and_return(instance_double(Federails::Server::ActivityResource, serializable_hash: { id: 'https://example.com/activities/1', type: 'Create', actor: local_actor.federated_url }))
+        allow(described_class).to receive(:post_to_inbox)
+
+        expect do
+          described_class.deliver_to_inbox(fake_activity, distant_target_actor.inbox_url)
+        end.to raise_error(Federails::InvalidDeliveryPayloadError, /missing object/)
+
+        expect(described_class).not_to have_received(:post_to_inbox)
+      end
+
+      it 'refuses to send an Update activity when object.id is missing' do
+        invalid_update = FakeActivity.new(
+          id:     1,
+          actor:  local_actor,
+          to:     [distant_target_actor.federated_url],
+          action: 'Update',
+          entity: fake_entity
+        )
+
+        allow(Federails::Server::ActivityResource).to receive(:new)
+          .and_return(instance_double(Federails::Server::ActivityResource, serializable_hash: {
+                                        id:     'https://example.com/activities/1',
+                                        type:   'Update',
+                                        actor:  local_actor.federated_url,
+                                        object: { type: 'Note', id: nil },
+                                      }))
+        allow(described_class).to receive(:post_to_inbox)
+
+        expect do
+          described_class.deliver_to_inbox(invalid_update, distant_target_actor.inbox_url)
+        end.to raise_error(Federails::InvalidDeliveryPayloadError, /missing object\.id for Update/)
+
+        expect(described_class).not_to have_received(:post_to_inbox)
+      end
+    end
   end
 end

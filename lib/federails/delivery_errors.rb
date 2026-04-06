@@ -10,6 +10,7 @@ module Federails
   end
 
   class PermanentDeliveryError < DeliveryError; end
+  class InvalidDeliveryPayloadError < PermanentDeliveryError; end
 
   class TemporaryDeliveryError < DeliveryError
     attr_reader :retry_after

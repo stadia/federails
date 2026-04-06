@@ -5,6 +5,8 @@ require 'fediverse/signature'
 module Fediverse
   class Notifier
     MAX_COLLECTION_DEPTH = 3 #: Integer
+    ACTIONS_REQUIRING_OBJECT = %w[Accept Add Announce Block Create Delete Flag Follow Like Move Reject Remove Undo Update].freeze
+    PERMANENT_DELIVERY_STATUS_CODES = (400..499).to_a.freeze
 
     class << self
       # Enqueues a separate delivery job for each recipient inbox.
@@ -23,6 +25,7 @@ module Fediverse
       # @param inbox_url [String]
       def deliver_to_inbox(activity, inbox_url)
         message = payload(activity)
+        validate_message!(activity, message)
         Federails.logger.debug { "Sending activity ##{activity.id} to inbox at #{inbox_url}" }
         resp = post_to_inbox(inbox_url: inbox_url, message: message, from: activity.actor)
         Federails.logger.debug { "#{resp.status}, #{resp.body}" }
@@ -150,7 +153,7 @@ module Fediverse
 
       #: (Federails::Activity) -> String
       def payload(activity)
-        json = Federails::Server::ActivityResource.new(activity).serializable_hash
+        json = Federails::Server::ActivityResource.new(activity).serializable_hash.with_indifferent_access
         json.delete(:bto)
         json.delete(:bcc)
         json.to_json
@@ -167,17 +170,16 @@ module Fediverse
         status = resp.status
         return resp if status.between?(200, 299)
 
-        if [404, 410].include?(status)
+        if permanent_delivery_status?(status)
           raise Federails::PermanentDeliveryError.new(
-            "Delivery to #{inbox_url} failed permanently: HTTP #{status}",
+            delivery_error_message(inbox_url: inbox_url, status: status, body: resp.body, retry_after: nil, permanent: true),
             response_code: status, inbox_url: inbox_url
           )
         else
           retry_after = resp.headers['Retry-After'] if status == 429
-          error_message = "Delivery to #{inbox_url} failed: HTTP #{status}"
-          error_message += " (Retry-After: #{retry_after})" if retry_after
           raise Federails::TemporaryDeliveryError.new(
-            error_message, response_code: status, inbox_url: inbox_url, retry_after: retry_after&.to_i
+            delivery_error_message(inbox_url: inbox_url, status: status, body: resp.body, retry_after: retry_after, permanent: false),
+            response_code: status, inbox_url: inbox_url, retry_after: retry_after&.to_i
           )
         end
       rescue Faraday::ConnectionFailed, Faraday::TimeoutError, Faraday::SSLError => e
@@ -212,6 +214,63 @@ module Fediverse
         "SHA-256=#{Base64.strict_encode64(
           OpenSSL::Digest.new('SHA256').digest(message)
         )}"
+      end
+
+      #: (Integer) -> bool
+      def permanent_delivery_status?(status)
+        PERMANENT_DELIVERY_STATUS_CODES.include?(status) && status != 429
+      end
+
+      #: (inbox_url: String, status: Integer, body: untyped, retry_after: String?, permanent: bool) -> String
+      def delivery_error_message(inbox_url:, status:, body:, retry_after:, permanent:)
+        message = "Delivery to #{inbox_url} failed"
+        message += ' permanently' if permanent
+        message += ": HTTP #{status}"
+        message += " (Retry-After: #{retry_after})" if retry_after.present?
+
+        body_excerpt = body.to_s.strip
+        return message if body_excerpt.blank?
+
+        message + " - #{body_excerpt.tr("\n", ' ')[0, 300]}"
+      end
+
+      #: (Federails::Activity, Hash[Symbol, untyped]) -> void
+      def validate_payload!(activity, json)
+        return unless activity.action.in?(ACTIONS_REQUIRING_OBJECT)
+        return unless json[:object].nil? || update_object_id_missing?(json)
+
+        raise Federails::InvalidDeliveryPayloadError.new(
+          invalid_payload_message(activity, json),
+          response_code: nil,
+          inbox_url:     nil
+        )
+      end
+
+      #: (Hash[Symbol, untyped]) -> bool
+      def update_object_id_missing?(json)
+        json[:type] == 'Update' && json[:object].is_a?(Hash) && json[:object][:id].blank?
+      end
+
+      #: (Federails::Activity, Hash[Symbol, untyped]) -> String
+      def invalid_payload_message(activity, json)
+        object_state = if json[:object].nil?
+                         'missing object'
+                       elsif update_object_id_missing?(json)
+                         'missing object.id for Update'
+                       else
+                         'invalid object'
+                       end
+
+        entity_type = activity.respond_to?(:entity_type) ? activity.entity_type : activity.entity&.class&.name
+        entity_id = activity.respond_to?(:entity_id) ? activity.entity_id : activity.entity&.try(:id)
+
+        "Refusing to deliver invalid ActivityPub payload for activity ##{activity.id} " \
+          "(#{activity.action}, entity_type=#{entity_type.inspect}, entity_id=#{entity_id.inspect}): #{object_state}"
+      end
+
+      #: (Federails::Activity, String) -> void
+      def validate_message!(activity, message)
+        validate_payload!(activity, JSON.parse(message).with_indifferent_access)
       end
 
       #: (String) -> Array[Federails::Actor]?

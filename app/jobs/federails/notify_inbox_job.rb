@@ -5,17 +5,15 @@ module Federails
     rescue_from Federails::TemporaryDeliveryError do |exception|
       current_attempt = executions
 
-      if current_attempt < 6
-        wait = if exception.respond_to?(:retry_after) && exception.retry_after.to_i.positive?
-                 exception.retry_after
-               else
-                 (current_attempt**3) + 5
-               end
+      raise exception unless current_attempt < 6
 
-        retry_job wait: wait, error: exception
-      else
-        raise exception
-      end
+      wait = if exception.respond_to?(:retry_after) && exception.retry_after.to_i.positive?
+               exception.retry_after
+             else
+               (current_attempt**3) + 5
+             end
+
+      retry_job wait: wait, error: exception
     end
     discard_on Federails::PermanentDeliveryError
 
