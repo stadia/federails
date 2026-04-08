@@ -255,7 +255,10 @@ module Federails
     #
     # @return [Federails::Activity] the newly-created Announce activity
     def announce!(actor: federails_actor)
-      create_federails_activity('Announce', actor: actor)
+      create_federails_activity('Announce',
+                                actor: actor,
+                                to:    [Fediverse::Collection::PUBLIC],
+                                cc:    [actor.followers_url])
     end
 
     # Likes this entity by creating a new Activity.
@@ -264,7 +267,10 @@ module Federails
     #
     # @return [Federails::Activity] the newly-created Like activity
     def like!(actor:)
-      create_federails_activity('Like', actor: actor)
+      create_federails_activity('Like',
+                                actor: actor,
+                                to:    [Fediverse::Collection::PUBLIC],
+                                cc:    [actor.followers_url])
     end
 
     # Dislikes this entity by creating a new Activity.
@@ -273,7 +279,10 @@ module Federails
     #
     # @return [Federails::Activity] the newly-created Dislike activity
     def dislike!(actor:)
-      create_federails_activity('Dislike', actor: actor)
+      create_federails_activity('Dislike',
+                                actor: actor,
+                                to:    [Fediverse::Collection::PUBLIC],
+                                cc:    [actor.followers_url])
     end
 
     private
@@ -286,11 +295,11 @@ module Federails
       raise 'Cannot determine actor from configuration' unless federails_actor
     end
 
-    def create_federails_activity(action, actor: federails_actor)
+    def create_federails_activity(action, actor: federails_actor, to: nil, cc: nil)
       ensure_federails_configuration!
       return unless local_federails_entity? && send(federails_data_configuration[:should_federate_method])
 
-      Activity.create! actor: actor, action: action, entity: self
+      Activity.create! actor: actor, action: action, entity: self, to: to, cc: cc
     end
 
     def ensure_federails_configuration!

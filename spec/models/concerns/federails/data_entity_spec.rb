@@ -160,7 +160,7 @@ module Federails
     end
 
     describe 'actions' do
-      let(:instance) { Fixtures::Classes::FakeDataModel.create! FactoryBot.attributes_for(:post, user_id: user.id) }
+      let!(:instance) { Fixtures::Classes::FakeDataModel.create! FactoryBot.attributes_for(:post, user_id: user.id) }
 
       describe 'announce' do
         context 'with default values (self-announce)' do
@@ -172,6 +172,16 @@ module Federails
             activity = instance.announce!
             expect(activity.actor).to eq instance.federails_actor
           end
+
+          it 'sends to public collection' do
+            activity = instance.announce!
+            expect(activity.to).to eq [Fediverse::Collection::PUBLIC]
+          end
+
+          it 'ccs to actors follower collection' do
+            activity = instance.announce!
+            expect(activity.cc).to eq [instance.federails_actor.followers_url]
+          end
         end
 
         context 'with a different actor' do
@@ -181,6 +191,16 @@ module Federails
           it 'uses the specified actor' do
             activity = instance.announce! actor: actor
             expect(activity.actor).to eq actor
+          end
+
+          it 'sends to public collection' do
+            activity = instance.announce! actor: actor
+            expect(activity.to).to eq [Fediverse::Collection::PUBLIC]
+          end
+
+          it 'ccs to actors follower collection' do
+            activity = instance.announce! actor: actor
+            expect(activity.cc).to eq [actor.followers_url]
           end
         end
 
@@ -197,6 +217,16 @@ module Federails
               activity = instance.like! actor: actor
               expect(activity.actor).to eq actor
             end
+
+            it 'sends to public collection' do
+              activity = instance.like! actor: actor
+              expect(activity.to).to eq [Fediverse::Collection::PUBLIC]
+            end
+
+            it 'ccs to actors follower collection' do
+              activity = instance.like! actor: actor
+              expect(activity.cc).to eq [actor.followers_url]
+            end
           end
         end
 
@@ -212,6 +242,16 @@ module Federails
             it 'uses the specified actor' do
               activity = instance.dislike! actor: actor
               expect(activity.actor).to eq actor
+            end
+
+            it 'sends to public collection' do
+              activity = instance.dislike! actor: actor
+              expect(activity.to).to eq [Fediverse::Collection::PUBLIC]
+            end
+
+            it 'ccs to actors follower collection' do
+              activity = instance.dislike! actor: actor
+              expect(activity.cc).to eq [actor.followers_url]
             end
           end
         end
