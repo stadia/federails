@@ -66,7 +66,7 @@ module Federails
     end
 
     def destroy_activity
-      Activity.create! actor: actor, action: 'Undo', entity: follow_activity, to: [target_actor.federated_url]
+      follow_activity&.undo!
     end
   end
 end

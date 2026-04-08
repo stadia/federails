@@ -29,6 +29,15 @@ module Federails
     serialize :cc, coder: YAML
     serialize :to, coder: YAML
 
+    # Sends an Undo activity to reverse this one.
+    #
+    # Used for unfollowing, unliking, unboosting, etc.
+    #
+    # @return [Federails::Activity] the new Undo activity
+    def undo!
+      Activity.create! actor: actor, action: 'Undo', entity: self, to: to, cc: cc
+    end
+
     private
 
     # Sets up default public-and-followers addressing unless to and cc are already set
