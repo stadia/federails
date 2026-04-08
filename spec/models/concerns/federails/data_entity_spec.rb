@@ -158,5 +158,64 @@ module Federails
         expect(Fixtures::Classes::FakeDataModel).to have_received(:handle_incoming_fediverse_data).once
       end
     end
+
+    describe 'actions' do
+      let(:instance) { Fixtures::Classes::FakeDataModel.create! FactoryBot.attributes_for(:post, user_id: user.id) }
+
+      describe 'announce' do
+        context 'with default values (self-announce)' do
+          it 'creates an activity' do
+            expect { instance.announce! }.to change(Federails::Activity.where(action: 'Announce'), :count).by 1
+          end
+
+          it 'assigns self as actor' do
+            activity = instance.announce!
+            expect(activity.actor).to eq instance.federails_actor
+          end
+        end
+
+        context 'with a different actor' do
+          let(:another_user) { FactoryBot.create :user }
+          let(:actor) { another_user.federails_actor }
+
+          it 'uses the specified actor' do
+            activity = instance.announce! actor: actor
+            expect(activity.actor).to eq actor
+          end
+        end
+
+        describe 'like' do
+          context 'with a different actor' do
+            let(:another_user) { FactoryBot.create :user }
+            let(:actor) { another_user.federails_actor }
+
+            it 'creates an activity' do
+              expect { instance.like! actor: actor }.to change(Federails::Activity.where(action: 'Like'), :count).by 1
+            end
+
+            it 'uses the specified actor' do
+              activity = instance.like! actor: actor
+              expect(activity.actor).to eq actor
+            end
+          end
+        end
+
+        describe 'dislike' do
+          context 'with a different actor' do
+            let(:another_user) { FactoryBot.create :user }
+            let(:actor) { another_user.federails_actor }
+
+            it 'creates an activity' do
+              expect { instance.dislike! actor: actor }.to change(Federails::Activity.where(action: 'Dislike'), :count).by 1
+            end
+
+            it 'uses the specified actor' do
+              activity = instance.dislike! actor: actor
+              expect(activity.actor).to eq actor
+            end
+          end
+        end
+      end
+    end
   end
 end

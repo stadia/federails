@@ -32,6 +32,8 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ### Added
 
+- Announce (boost/RT), like or dislike `Federails::DataEntity` objects using new `announce!`, `like!` and `dislike!` methods.
+
 ### Fixed
 
 ## [0.8.0] 2026-03-25

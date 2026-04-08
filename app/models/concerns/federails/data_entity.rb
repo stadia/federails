@@ -249,6 +249,33 @@ module Federails
       update! self.class.from_activitypub_object(object)
     end
 
+    # Announces (boosts) this entity by creating a new Activity.
+    #
+    # @param actor [Federails::Actor] The actor doing the announce; defaults to the entity's own actor.
+    #
+    # @return [Federails::Activity] the newly-created Announce activity
+    def announce!(actor: federails_actor)
+      create_federails_activity('Announce', actor: actor)
+    end
+
+    # Likes this entity by creating a new Activity.
+    #
+    # @param actor [Federails::Actor] The actor that is doing the liking.
+    #
+    # @return [Federails::Activity] the newly-created Like activity
+    def like!(actor:)
+      create_federails_activity('Like', actor: actor)
+    end
+
+    # Dislikes this entity by creating a new Activity.
+    #
+    # @param actor [Federails::Actor] The actor that is doing the disliking.
+    #
+    # @return [Federails::Activity] the newly-created Dislike activity
+    def dislike!(actor:)
+      create_federails_activity('Dislike', actor: actor)
+    end
+
     private
 
     def set_federails_actor
@@ -259,11 +286,11 @@ module Federails
       raise 'Cannot determine actor from configuration' unless federails_actor
     end
 
-    def create_federails_activity(action)
+    def create_federails_activity(action, actor: federails_actor)
       ensure_federails_configuration!
       return unless local_federails_entity? && send(federails_data_configuration[:should_federate_method])
 
-      Activity.create! actor: federails_actor, action: action, entity: self
+      Activity.create! actor: actor, action: action, entity: self
     end
 
     def ensure_federails_configuration!
