@@ -13,7 +13,7 @@ AI 에이전트를 위한 프로젝트 룰북입니다.
 
 ## 도구 사용 규칙
 
-- 라이브러리나 런타임 구조를 조사할 때는 가능한 경우 Serena, Rails MCP Server, Context7, Sequential Thinking 같은 제공 도구를 목적에 맞게 사용한다.
+- 라이브러리나 런타임 구조를 조사할 때는 가능한 경우 Rails MCP Server, Context7, Sequential Thinking 같은 제공 도구를 목적에 맞게 사용한다.
 - 제공된 MCP 도구가 더 적합한 작업인데 무조건 파일 전체를 읽거나 비효율적인 방식만 고집하지 않는다.
 - 최신 라이브러리 문서나 예제가 필요하면 Context7을 사용하고, `resolve-library-id` 후 `query-docs` 순서로 진행한다.
 - 복잡한 문제를 단계적으로 풀어야 할 때는 Sequential Thinking을 사용한다.
