@@ -100,6 +100,8 @@ module Federails
 
     extend ActiveSupport::Concern
     include Federails::HandlesDeleteRequests
+    include Federails::Likeable
+    include Federails::Announceable
 
     # Class methods automatically included in the concern.
     module ClassMethods
@@ -247,42 +249,6 @@ module Federails
       object = Fediverse::Request.dereference(federated_url)
 
       update! self.class.from_activitypub_object(object)
-    end
-
-    # Announces (boosts) this entity by creating a new Activity.
-    #
-    # @param actor [Federails::Actor] The actor doing the announce; defaults to the entity's own actor.
-    #
-    # @return [Federails::Activity] the newly-created Announce activity
-    def announce!(actor: federails_actor)
-      create_federails_activity('Announce',
-                                actor: actor,
-                                to:    [Fediverse::Collection::PUBLIC],
-                                cc:    [actor.followers_url])
-    end
-
-    # Likes this entity by creating a new Activity.
-    #
-    # @param actor [Federails::Actor] The actor that is doing the liking.
-    #
-    # @return [Federails::Activity] the newly-created Like activity
-    def like!(actor:)
-      create_federails_activity('Like',
-                                actor: actor,
-                                to:    [Fediverse::Collection::PUBLIC],
-                                cc:    [actor.followers_url])
-    end
-
-    # Dislikes this entity by creating a new Activity.
-    #
-    # @param actor [Federails::Actor] The actor that is doing the disliking.
-    #
-    # @return [Federails::Activity] the newly-created Dislike activity
-    def dislike!(actor:)
-      create_federails_activity('Dislike',
-                                actor: actor,
-                                to:    [Fediverse::Collection::PUBLIC],
-                                cc:    [actor.followers_url])
     end
 
     private
