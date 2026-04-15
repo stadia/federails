@@ -1,8 +1,11 @@
 RSpec.shared_examples 'Announceable' do |klass, attributes|
   let(:user) { FactoryBot.create :user }
-
   let!(:instance) do
-    klass.create! attributes.merge(user_id: user.id)
+    if klass.try(:include?, Federails::DataEntity)
+      klass.create! attributes.merge(user_id: user.id)
+    else
+      FactoryBot.create(klass)
+    end
   end
 
   context 'with default values (self-announce)' do
@@ -12,7 +15,7 @@ RSpec.shared_examples 'Announceable' do |klass, attributes|
 
     it 'assigns self as actor' do
       activity = instance.announce!
-      expect(activity.actor).to eq instance.federails_actor
+      expect(activity.actor).to eq(instance.try(:federails_actor) || instance)
     end
 
     it 'sends to public collection' do
@@ -22,7 +25,7 @@ RSpec.shared_examples 'Announceable' do |klass, attributes|
 
     it 'ccs to actors follower collection' do
       activity = instance.announce!
-      expect(activity.cc).to eq [instance.federails_actor.followers_url]
+      expect(activity.cc).to eq [(instance.try(:federails_actor) || instance).followers_url]
     end
   end
 

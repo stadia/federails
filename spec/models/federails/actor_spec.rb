@@ -17,6 +17,9 @@ module Federails
       FileUtils.rm_f error_cassette_file
     end
 
+    it_behaves_like 'Announceable', :local_actor
+    it_behaves_like 'Likeable', :local_actor
+
     context 'when actors without UUIDs exist' do
       before do
         existing_distant_actor.update_columns(uuid: nil) # rubocop:disable Rails/SkipsModelValidations

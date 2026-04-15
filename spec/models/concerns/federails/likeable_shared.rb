@@ -1,7 +1,11 @@
 RSpec.shared_examples 'Likeable' do |klass, attributes|
   let(:user) { FactoryBot.create :user }
   let!(:instance) do
-    klass.create! attributes.merge(user_id: user.id)
+    if klass.try(:include?, Federails::DataEntity)
+      klass.create! attributes.merge(user_id: user.id)
+    else
+      FactoryBot.create(klass)
+    end
   end
 
   describe 'like' do
