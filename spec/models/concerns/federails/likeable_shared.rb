@@ -1,11 +1,12 @@
-RSpec.shared_examples 'Likeable' do
+RSpec.shared_examples 'Likeable' do |klass, attributes|
   let(:user) { FactoryBot.create :user }
-  let!(:instance) { Fixtures::Classes::FakeDataModel.create! FactoryBot.attributes_for(:post, user_id: user.id) }
+  let!(:instance) do
+    klass.create! attributes.merge(user_id: user.id)
+  end
 
   describe 'like' do
     context 'with a different actor' do
-      let(:another_user) { FactoryBot.create :user }
-      let(:actor) { another_user.federails_actor }
+      let(:actor) { FactoryBot.create :local_actor }
 
       it 'creates an activity' do
         expect { instance.like! actor: actor }.to change(Federails::Activity.where(action: 'Like'), :count).by 1
@@ -30,8 +31,7 @@ RSpec.shared_examples 'Likeable' do
 
   describe 'dislike' do
     context 'with a different actor' do
-      let(:another_user) { FactoryBot.create :user }
-      let(:actor) { another_user.federails_actor }
+      let(:actor) { FactoryBot.create :local_actor }
 
       it 'creates an activity' do
         expect { instance.dislike! actor: actor }.to change(Federails::Activity.where(action: 'Dislike'), :count).by 1

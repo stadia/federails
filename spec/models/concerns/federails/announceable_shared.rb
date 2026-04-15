@@ -1,6 +1,9 @@
-RSpec.shared_examples 'Announceable'
+RSpec.shared_examples 'Announceable' do |klass, attributes|
   let(:user) { FactoryBot.create :user }
-  let!(:instance) { Fixtures::Classes::FakeDataModel.create! FactoryBot.attributes_for(:post, user_id: user.id) }
+
+  let!(:instance) do
+    klass.create! attributes.merge(user_id: user.id)
+  end
 
   context 'with default values (self-announce)' do
     it 'creates an activity' do
@@ -24,8 +27,7 @@ RSpec.shared_examples 'Announceable'
   end
 
   context 'with a different actor' do
-    let(:another_user) { FactoryBot.create :user }
-    let(:actor) { another_user.federails_actor }
+    let(:actor) { FactoryBot.create :local_actor }
 
     it 'uses the specified actor' do
       activity = instance.announce! actor: actor
