@@ -171,6 +171,10 @@ module Federails
       let(:follower) { FactoryBot.create :distant_actor }
       let(:target) { FactoryBot.create :local_actor }
       let(:following) { described_class.create! actor: follower, target_actor: target }
+      let!(:original_follow) do
+        # Create the original Follow activity that would come from the remote server
+        Federails::Activity.create! actor: follower, action: 'Follow', entity: target, to: [target.federated_url]
+      end
       let!(:activity) do
         following.accept!
         Activity.find_by(action: 'Accept')
@@ -184,8 +188,8 @@ module Federails
         expect(activity.actor).to eq target
       end
 
-      it 'creates Accept activity with the original follow as the entity' do
-        expect(activity.entity).to eq following
+      it 'creates Accept activity with the original Follow activity as the entity' do
+        expect(activity.entity).to eq original_follow
       end
 
       it 'is addressed to the follower' do

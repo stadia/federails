@@ -69,6 +69,7 @@ RSpec.describe Federails::Server::ActivityResource do
 
   context 'when rendering an Accept activity' do
     let(:follow) { FactoryBot.create :following, actor: local_actor, target_actor: distant_actor }
+    let(:original_follow) { follow.follow_activity }
     let(:accept) do
       follow.accept!
       Federails::Activity.find_by action: 'Accept'
@@ -84,7 +85,10 @@ RSpec.describe Federails::Server::ActivityResource do
     end
 
     it 'references includes original Follow as object' do
-      expect(json_result['object']).to eq "#{local_actor.federated_url}/followings/#{follow.uuid}"
+      # Accept.object now references the original Follow activity inline for proper ActivityPub interoperability
+      expect(json_result['object']).to be_a(Hash)
+      expect(json_result['object']['type']).to eq 'Follow'
+      expect(json_result['object']['id']).to eq "http://localhost/federation/actors/#{local_actor.uuid}/activities/#{original_follow.uuid}"
     end
 
     it 'is addressed only to the original actor' do
