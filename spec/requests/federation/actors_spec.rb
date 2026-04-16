@@ -17,8 +17,10 @@ RSpec.describe '/federation/actors', type: :request do
   let(:other_user) { FactoryBot.create :user }
 
   before do
-    Federails::Following.create actor: user.federails_actor, target_actor: other_user.federails_actor
-    Federails::Following.create actor: other_user.federails_actor, target_actor: user.federails_actor
+    following1 = Federails::Following.create actor: user.federails_actor, target_actor: other_user.federails_actor
+    following1.accept!
+    following2 = Federails::Following.create actor: other_user.federails_actor, target_actor: user.federails_actor
+    following2.accept!
   end
 
   describe 'GET /show' do
@@ -162,7 +164,8 @@ RSpec.describe '/federation/actors', type: :request do
         let(:third_user) { FactoryBot.create :user }
 
         before do
-          Federails::Following.create actor: third_user.federails_actor, target_actor: user.federails_actor
+          following = Federails::Following.create actor: third_user.federails_actor, target_actor: user.federails_actor
+          following.accept!
           Pagy::OPTIONS[:limit] = 1
         end
 
@@ -244,7 +247,8 @@ RSpec.describe '/federation/actors', type: :request do
         let(:third_user) { FactoryBot.create :user }
 
         before do
-          Federails::Following.create actor: user.federails_actor, target_actor: third_user.federails_actor
+          following = Federails::Following.create actor: user.federails_actor, target_actor: third_user.federails_actor
+          following.accept!
           Pagy::OPTIONS[:limit] = 1
         end
 

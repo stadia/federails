@@ -6,12 +6,14 @@ RSpec.describe Federails::Server::ActorsController, type: :acceptance do
   let(:actor) { FactoryBot.create(:user).federails_actor }
   let(:following) do
     FactoryBot.create_list(:user, 2).each do |user|
-      Federails::Following.create actor: actor, target_actor: user.federails_actor
+      relationship = Federails::Following.create actor: actor, target_actor: user.federails_actor
+      relationship.accept!
     end
   end
   let(:followers) do
     FactoryBot.create_list(:user, 2).each do |user|
-      Federails::Following.create actor: user.federails_actor, target_actor: actor
+      relationship = Federails::Following.create actor: user.federails_actor, target_actor: actor
+      relationship.accept!
     end
   end
 

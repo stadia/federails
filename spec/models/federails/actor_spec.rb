@@ -530,5 +530,73 @@ module Federails
         expect(entity.errors[:entity]).to be_empty
       end
     end
+
+    describe 'accepted relationships' do
+      let(:actor) { FactoryBot.create :local_actor }
+      let(:follower1) { FactoryBot.create :local_actor }
+      let(:follower2) { FactoryBot.create :local_actor }
+      let(:following1) { FactoryBot.create :local_actor }
+      let(:following2) { FactoryBot.create :local_actor }
+      let(:pending_follower) { FactoryBot.create :local_actor }
+      let(:pending_following) { FactoryBot.create :local_actor }
+
+      before do
+        # Create accepted followers
+        accepted_following1 = Federails::Following.create! actor: follower1, target_actor: actor
+        accepted_following1.accept!
+        accepted_following2 = Federails::Following.create! actor: follower2, target_actor: actor
+        accepted_following2.accept!
+
+        # Create pending followers
+        Federails::Following.create! actor: pending_follower, target_actor: actor
+
+        # Create accepted followings
+        accepted_following3 = Federails::Following.create! actor: actor, target_actor: following1
+        accepted_following3.accept!
+        accepted_following4 = Federails::Following.create! actor: actor, target_actor: following2
+        accepted_following4.accept!
+
+        # Create pending followings
+        Federails::Following.create! actor: actor, target_actor: pending_following
+      end
+
+      describe '#accepted_followers' do
+        it 'returns only accepted followers' do
+          expect(actor.accepted_followers.count).to eq 2
+          expect(actor.accepted_followers).to contain_exactly(follower1, follower2)
+        end
+
+        it 'excludes pending followers' do
+          expect(actor.accepted_followers.pluck(:id)).not_to include(
+            Federails::Following.where(target_actor: actor, status: :pending).first.actor_id
+          )
+        end
+      end
+
+      describe '#accepted_follows' do
+        it 'returns only accepted followings' do
+          expect(actor.accepted_follows.count).to eq 2
+          expect(actor.accepted_follows).to contain_exactly(following1, following2)
+        end
+
+        it 'excludes pending followings' do
+          expect(actor.accepted_follows.pluck(:id)).not_to include(
+            Federails::Following.where(actor: actor, status: :pending).first.target_actor_id
+          )
+        end
+      end
+
+      describe '#followers' do
+        it 'returns all followers including pending' do
+          expect(actor.followers.count).to eq 3
+        end
+      end
+
+      describe '#follows' do
+        it 'returns all followings including pending' do
+          expect(actor.follows.count).to eq 3
+        end
+      end
+    end
   end
 end

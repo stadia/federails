@@ -38,6 +38,14 @@ module Federails
     # Actors followed by actor
     has_many :follows, source: :target_actor, through: :following_follows
 
+    # Accepted follow relationships for public collections
+    has_many :accepted_following_followers, -> { accepted }, class_name: 'Federails::Following', foreign_key: :target_actor_id, dependent: :destroy, inverse_of: :target_actor
+    has_many :accepted_following_follows, -> { accepted }, class_name: 'Federails::Following', dependent: :destroy, inverse_of: :actor
+    # Actors following actor (accepted only)
+    has_many :accepted_followers, source: :actor, through: :accepted_following_followers
+    # Actors followed by actor (accepted only)
+    has_many :accepted_follows, source: :target_actor, through: :accepted_following_follows
+
     has_many :featured_items, dependent: :destroy
     has_many :featured_tags, dependent: :destroy
     belongs_to :host, class_name: 'Federails::Host', foreign_key: :server, primary_key: :domain, inverse_of: :actors, optional: true

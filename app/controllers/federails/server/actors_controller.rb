@@ -19,7 +19,7 @@ module Federails
       # GET /federation/actors/:id/followers.json
       def followers
         render_collection(
-          collection: @actor.followers.order(created_at: :desc),
+          collection: @actor.accepted_followers.order(created_at: :desc),
           actor:      @actor,
           url_helper: :followers_server_actor_url
         ) { |items| items.map(&:federated_url) }
@@ -29,7 +29,7 @@ module Federails
       # GET /federation/actors/:id/followers.json
       def following
         render_collection(
-          collection: @actor.follows.order(created_at: :desc),
+          collection: @actor.accepted_follows.order(created_at: :desc),
           actor:      @actor,
           url_helper: :following_server_actor_url
         ) { |items| items.map(&:federated_url) }
