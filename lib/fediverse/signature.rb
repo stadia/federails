@@ -255,7 +255,7 @@ module Fediverse
       def parse_rfc9421_candidates(sig_header, sig_input_header)
         raise SignatureVerificationError, 'Missing Signature-Input header' if sig_input_header.blank?
 
-        sigs = sig_header.scan(/(\w+)=:([A-Za-z0-9+\/=]*):\s*/).to_h
+        sigs = sig_header.scan(%r{(\w+)=:([A-Za-z0-9+/=]*):\s*}).to_h
         raise SignatureVerificationError, 'No valid signatures in Signature header' if sigs.empty?
 
         inputs = split_signature_input(sig_input_header)

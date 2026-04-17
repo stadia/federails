@@ -1,6 +1,17 @@
 require 'rails_helper'
 require 'fediverse/signature'
 
+# Minimal stand-in exposing the request surface Signature.verify_request! uses.
+# Defined at file scope to avoid Lint/ConstantDefinitionInBlock and leaky-constant warnings.
+Rfc9421MockRequest = Struct.new(:body, :headers) do
+  def method = 'POST'
+  def url = 'https://example.com/inbox'
+  def host = 'example.com'
+  def port = 443
+  def scheme = 'https'
+  def standard_port? = true
+end
+
 RSpec.describe Fediverse::Signature do
   let(:actor) { FactoryBot.create(:user).federails_actor }
 
@@ -222,40 +233,30 @@ RSpec.describe Fediverse::Signature do
     let(:body) { '{"type":"Create"}' }
     let(:content_digest) { "sha-256=:#{Base64.strict_encode64(OpenSSL::Digest.new('SHA256').digest(body))}:" }
 
-    # Build a mocked request object exposing the minimum surface the verifier uses.
     def build_rfc9421_request(body_str, signature_header, signature_input_header, content_digest_header: nil)
       headers = {
         'Signature'       => signature_header,
         'Signature-Input' => signature_input_header,
         'Content-Digest'  => content_digest_header,
       }
-      double('request',
-             body:           StringIO.new(body_str),
-             method:         'POST',
-             url:            'https://example.com/inbox',
-             host:           'example.com',
-             port:           443,
-             scheme:         'https',
-             standard_port?: true,
-             headers:        headers)
+      Rfc9421MockRequest.new(StringIO.new(body_str), headers)
     end
 
-    # Sign an RFC 9421 request using the actor's private key for the given components.
-    def sign_rfc9421(signing_actor, components, algorithm: 'rsa-v1_5-sha256', label: 'sig1', body_str:, content_digest_header:)
+    def rfc9421_raw_signature(private_key, base, algorithm)
+      case algorithm
+      when 'rsa-pss-sha512' then private_key.sign_pss('SHA512', base, salt_length: 64, mgf1_hash: 'SHA512')
+      else private_key.sign(OpenSSL::Digest.new('SHA256'), base)
+      end
+    end
+
+    def sign_rfc9421(signing_actor, components, body_str:, content_digest_header:, algorithm: 'rsa-v1_5-sha256', label: 'sig1')
       params = %(("#{components.join('" "')}");keyid="#{signing_actor.key_id}";alg="#{algorithm}";created=#{Time.now.to_i})
       request_like = build_rfc9421_request(body_str, '', '', content_digest_header: content_digest_header)
       base = described_class.send(:rfc9421_signature_base, request_like, components, params)
-
       private_key = OpenSSL::PKey::RSA.new(signing_actor.private_key, Rails.application.credentials.secret_key_base)
-      raw_sig     = case algorithm
-                    when 'rsa-pss-sha512' then private_key.sign_pss('SHA512', base, salt_length: 64, mgf1_hash: 'SHA512')
-                    else private_key.sign(OpenSSL::Digest.new('SHA256'), base)
-                    end
+      raw_sig = rfc9421_raw_signature(private_key, base, algorithm)
 
-      {
-        signature:       "#{label}=:#{Base64.strict_encode64(raw_sig)}:",
-        signature_input: "#{label}=#{params}",
-      }
+      { signature: "#{label}=:#{Base64.strict_encode64(raw_sig)}:", signature_input: "#{label}=#{params}" }
     end
 
     it 'verifies a valid RFC 9421 signature (rsa-v1_5-sha256)' do
@@ -291,7 +292,7 @@ RSpec.describe Fediverse::Signature do
     end
 
     it 'rejects a signature when the body does not match content-digest' do
-      components  = %w[@method @path content-digest]
+      components = %w[@method @path content-digest]
       stale_digest = "sha-256=:#{Base64.strict_encode64(OpenSSL::Digest.new('SHA256').digest('other'))}:"
       signed = sign_rfc9421(actor, components, body_str: body, content_digest_header: stale_digest)
       request = build_rfc9421_request(body, signed[:signature], signed[:signature_input], content_digest_header: stale_digest)
