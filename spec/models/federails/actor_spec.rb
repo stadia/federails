@@ -533,28 +533,28 @@ module Federails
 
     describe 'accepted relationships' do
       let(:actor) { FactoryBot.create :local_actor }
-      let(:follower1) { FactoryBot.create :local_actor }
-      let(:follower2) { FactoryBot.create :local_actor }
-      let(:following1) { FactoryBot.create :local_actor }
-      let(:following2) { FactoryBot.create :local_actor }
+      let(:alice_follower) { FactoryBot.create :local_actor }
+      let(:bob_follower) { FactoryBot.create :local_actor }
+      let(:carol_following) { FactoryBot.create :local_actor }
+      let(:dave_following) { FactoryBot.create :local_actor }
       let(:pending_follower) { FactoryBot.create :local_actor }
       let(:pending_following) { FactoryBot.create :local_actor }
 
       before do
         # Create accepted followers
-        accepted_following1 = Federails::Following.create! actor: follower1, target_actor: actor
-        accepted_following1.accept!
-        accepted_following2 = Federails::Following.create! actor: follower2, target_actor: actor
-        accepted_following2.accept!
+        accepted_inbound_alice = Federails::Following.create! actor: alice_follower, target_actor: actor
+        accepted_inbound_alice.accept!
+        accepted_inbound_bob = Federails::Following.create! actor: bob_follower, target_actor: actor
+        accepted_inbound_bob.accept!
 
         # Create pending followers
         Federails::Following.create! actor: pending_follower, target_actor: actor
 
         # Create accepted followings
-        accepted_following3 = Federails::Following.create! actor: actor, target_actor: following1
-        accepted_following3.accept!
-        accepted_following4 = Federails::Following.create! actor: actor, target_actor: following2
-        accepted_following4.accept!
+        accepted_outbound_carol = Federails::Following.create! actor: actor, target_actor: carol_following
+        accepted_outbound_carol.accept!
+        accepted_outbound_dave = Federails::Following.create! actor: actor, target_actor: dave_following
+        accepted_outbound_dave.accept!
 
         # Create pending followings
         Federails::Following.create! actor: actor, target_actor: pending_following
@@ -563,7 +563,7 @@ module Federails
       describe '#accepted_followers' do
         it 'returns only accepted followers' do
           expect(actor.accepted_followers.count).to eq 2
-          expect(actor.accepted_followers).to contain_exactly(follower1, follower2)
+          expect(actor.accepted_followers).to contain_exactly(alice_follower, bob_follower)
         end
 
         it 'excludes pending followers' do
@@ -576,7 +576,7 @@ module Federails
       describe '#accepted_follows' do
         it 'returns only accepted followings' do
           expect(actor.accepted_follows.count).to eq 2
-          expect(actor.accepted_follows).to contain_exactly(following1, following2)
+          expect(actor.accepted_follows).to contain_exactly(carol_following, dave_following)
         end
 
         it 'excludes pending followings' do
