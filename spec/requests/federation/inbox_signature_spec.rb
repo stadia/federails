@@ -51,6 +51,56 @@ RSpec.describe 'Inbox HTTP Signature Verification', type: :request do
 
       expect(response).to have_http_status(:unauthorized)
     end
+
+    it 'logs failure context including remote_ip and payload actor on signature failure' do
+      allow(Federails.logger).to receive(:warn)
+
+      post federails.server_actor_inbox_path(actor),
+           params:  payload,
+           headers: { 'Content-Type' => 'application/activity+json' }
+
+      expect(response).to have_http_status(:unauthorized)
+      expect(Federails.logger).to have_received(:warn) do |&block|
+        log = block.call
+        expect(log).to match(%r{Signature verification failed.*remote_ip.*https://remote\.example/actor}m)
+      end
+    end
+
+    it 'tolerates a non-JSON body when logging failure context' do
+      allow(Federails.logger).to receive(:warn)
+
+      post federails.server_actor_inbox_path(actor),
+           params:  'not-json-at-all',
+           headers: { 'Content-Type' => 'application/activity+json' }
+
+      expect(response).to have_http_status(:unauthorized)
+      expect(Federails.logger).to have_received(:warn) do |&block|
+        log = block.call
+        expect(log).to include(':actor=>nil')
+      end
+    end
+
+    it 'accepts a valid signed request whose payload actor matches the signed actor' do
+      signing_actor = FactoryBot.create(:user).federails_actor
+      matching_payload = {
+        '@context' => 'https://www.w3.org/ns/activitystreams',
+        'id'       => 'https://remote.example/activity/2',
+        'type'     => 'Follow',
+        'actor'    => signing_actor.federated_url,
+        'object'   => actor.federated_url,
+      }.to_json
+
+      allow(Federails::Actor).to receive(:find_or_create_by_federation_url)
+        .with(signing_actor.federated_url).and_return(signing_actor)
+      allow(Fediverse::Inbox).to receive_messages(dispatch_request: true, maybe_forward: nil)
+
+      post federails.server_actor_inbox_path(actor),
+           params:  matching_payload,
+           headers: signature_headers_for(signing_actor, matching_payload)
+
+      expect(response).to have_http_status(:created)
+      expect(Fediverse::Inbox).to have_received(:dispatch_request)
+    end
   end
 
   context 'when verify_signatures is false' do
