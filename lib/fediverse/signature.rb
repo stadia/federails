@@ -81,7 +81,10 @@ module Fediverse
         headers   = params['headers']
         signature = params['signature']
 
-        raise SignatureVerificationError, 'Malformed Signature header: missing keyId' if key_id.blank?
+        if key_id.blank?
+          Federails.logger.warn { "[Signature] Raw header (missing keyId): #{header.inspect}" }
+          raise SignatureVerificationError, 'Malformed Signature header: missing keyId'
+        end
         raise SignatureVerificationError, 'Malformed Signature header: missing signature' if signature.blank?
         raise SignatureVerificationError, 'Malformed Signature header: missing headers' if headers.blank?
 
