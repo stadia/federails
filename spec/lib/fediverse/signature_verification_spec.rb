@@ -217,4 +217,116 @@ RSpec.describe Fediverse::Signature do
         .to raise_error(Fediverse::Signature::SignatureVerificationError, /Unable to refresh signed actor/)
     end
   end
+
+  describe '.verify_request! with RFC 9421' do
+    let(:body) { '{"type":"Create"}' }
+    let(:content_digest) { "sha-256=:#{Base64.strict_encode64(OpenSSL::Digest.new('SHA256').digest(body))}:" }
+
+    # Build a mocked request object exposing the minimum surface the verifier uses.
+    def build_rfc9421_request(body_str, signature_header, signature_input_header, content_digest_header: nil)
+      headers = {
+        'Signature'       => signature_header,
+        'Signature-Input' => signature_input_header,
+        'Content-Digest'  => content_digest_header,
+      }
+      double('request',
+             body:           StringIO.new(body_str),
+             method:         'POST',
+             url:            'https://example.com/inbox',
+             host:           'example.com',
+             port:           443,
+             scheme:         'https',
+             standard_port?: true,
+             headers:        headers)
+    end
+
+    # Sign an RFC 9421 request using the actor's private key for the given components.
+    def sign_rfc9421(signing_actor, components, algorithm: 'rsa-v1_5-sha256', label: 'sig1', body_str:, content_digest_header:)
+      params = %(("#{components.join('" "')}");keyid="#{signing_actor.key_id}";alg="#{algorithm}";created=#{Time.now.to_i})
+      request_like = build_rfc9421_request(body_str, '', '', content_digest_header: content_digest_header)
+      base = described_class.send(:rfc9421_signature_base, request_like, components, params)
+
+      private_key = OpenSSL::PKey::RSA.new(signing_actor.private_key, Rails.application.credentials.secret_key_base)
+      raw_sig     = case algorithm
+                    when 'rsa-pss-sha512' then private_key.sign_pss('SHA512', base, salt_length: 64, mgf1_hash: 'SHA512')
+                    else private_key.sign(OpenSSL::Digest.new('SHA256'), base)
+                    end
+
+      {
+        signature:       "#{label}=:#{Base64.strict_encode64(raw_sig)}:",
+        signature_input: "#{label}=#{params}",
+      }
+    end
+
+    it 'verifies a valid RFC 9421 signature (rsa-v1_5-sha256)' do
+      components = %w[@method @path @authority content-digest]
+      signed = sign_rfc9421(actor, components, body_str: body, content_digest_header: content_digest)
+      request = build_rfc9421_request(body, signed[:signature], signed[:signature_input], content_digest_header: content_digest)
+
+      allow(Federails::Actor).to receive(:find_or_create_by_federation_url)
+        .with(actor.federated_url).and_return(actor)
+
+      expect(described_class.verify_request!(request)).to eq(actor)
+    end
+
+    it 'verifies a valid RFC 9421 signature (rsa-pss-sha512)' do
+      components = %w[@method @path content-digest]
+      signed = sign_rfc9421(actor, components, algorithm: 'rsa-pss-sha512',
+                                               body_str: body, content_digest_header: content_digest)
+      request = build_rfc9421_request(body, signed[:signature], signed[:signature_input], content_digest_header: content_digest)
+
+      allow(Federails::Actor).to receive(:find_or_create_by_federation_url)
+        .with(actor.federated_url).and_return(actor)
+
+      expect(described_class.verify_request!(request)).to eq(actor)
+    end
+
+    it 'rejects a signature that does not cover body integrity' do
+      components = %w[@method @path]
+      signed = sign_rfc9421(actor, components, body_str: body, content_digest_header: content_digest)
+      request = build_rfc9421_request(body, signed[:signature], signed[:signature_input], content_digest_header: content_digest)
+
+      expect { described_class.verify_request!(request) }
+        .to raise_error(Fediverse::Signature::SignatureVerificationError, /body integrity not covered/)
+    end
+
+    it 'rejects a signature when the body does not match content-digest' do
+      components  = %w[@method @path content-digest]
+      stale_digest = "sha-256=:#{Base64.strict_encode64(OpenSSL::Digest.new('SHA256').digest('other'))}:"
+      signed = sign_rfc9421(actor, components, body_str: body, content_digest_header: stale_digest)
+      request = build_rfc9421_request(body, signed[:signature], signed[:signature_input], content_digest_header: stale_digest)
+
+      expect { described_class.verify_request!(request) }
+        .to raise_error(Fediverse::Signature::SignatureVerificationError, /Content-Digest mismatch/)
+    end
+
+    it 'tries all candidate labels and accepts the second if the first is unverifiable' do
+      components = %w[@method @path content-digest]
+
+      # Label 1: unsupported algorithm over garbage (will fail)
+      bad_params    = %(("@method");keyid="#{actor.key_id}";alg="unsupported-alg";created=1)
+      bad_signature = 'sig1=:aW52YWxpZA==:'
+      bad_input     = "sig1=#{bad_params}"
+
+      # Label 2: valid signature
+      good = sign_rfc9421(actor, components, label: 'sig2',
+                                             body_str: body, content_digest_header: content_digest)
+
+      signature_header       = "#{bad_signature}, #{good[:signature]}"
+      signature_input_header = "#{bad_input}, #{good[:signature_input]}"
+
+      request = build_rfc9421_request(body, signature_header, signature_input_header, content_digest_header: content_digest)
+
+      allow(Federails::Actor).to receive(:find_or_create_by_federation_url)
+        .with(actor.federated_url).and_return(actor)
+
+      expect(described_class.verify_request!(request)).to eq(actor)
+    end
+
+    it 'raises when Signature-Input is missing' do
+      request = build_rfc9421_request(body, 'sig1=:abc=:', nil, content_digest_header: content_digest)
+      expect { described_class.verify_request!(request) }
+        .to raise_error(Fediverse::Signature::SignatureVerificationError, /Missing Signature-Input/)
+    end
+  end
 end
