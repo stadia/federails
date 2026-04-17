@@ -17,6 +17,15 @@ module Federails
       # GET /federation/actors/:id/followers.json
       def following: () -> untyped
 
+      # GET /federation/actors/:id/liked
+      def liked: () -> untyped
+
+      # GET /federation/actors/:id/featured
+      def featured: () -> untyped
+
+      # GET /federation/actors/:id/featured_tags
+      def featured_tags: () -> untyped
+
       private
 
       # Use callbacks to share common setup or constraints between actions.

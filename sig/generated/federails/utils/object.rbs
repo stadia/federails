@@ -56,6 +56,8 @@ module Federails
       # : (Hash[Symbol, String]) -> untyped
       private def self.from_local_route: (Hash[Symbol, String]) -> untyped
 
+      private def self.fallback_local_config: (untyped route_path_segment) -> untyped
+
       # : (String | Hash[String, untyped]) -> untyped
       private def self.from_distant_server: (String | Hash[String, untyped]) -> untyped
     end

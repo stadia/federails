@@ -6,6 +6,10 @@ module Fediverse
       def self.handle_like: (untyped activity) -> untyped
 
       def self.handle_undo_like: (untyped activity) -> untyped
+
+      private def self.dispatch_callback: (untyped entity, untyped callback_name, untyped actor) -> untyped
+
+      private def self.resolve_target_entity: (untyped object) -> untyped
     end
   end
 end

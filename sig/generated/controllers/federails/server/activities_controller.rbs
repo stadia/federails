@@ -5,6 +5,10 @@ module Federails
     class ActivitiesController < Federails::ServerController
       include Federails::Server::RenderCollections
 
+      include Federails::Server::VerifySignature
+
+      include Federails::Server::InboxPayload
+
       # GET /federation/activities
       # GET /federation/actors/1/outbox.json
       def outbox: () -> untyped
@@ -17,21 +21,13 @@ module Federails
 
       private
 
-      def verify_http_signature!: () -> untyped
-
       # Use callbacks to share common setup or constraints between actions.
       def set_activity: () -> untyped
 
       # Only allow a list of trusted parameters through.
       def activity_params: () -> untyped
 
-      def payload_from_params: () -> untyped
-
-      def validate_payload: (untyped hash) -> untyped
-
-      def compact_payload: (untyped payload) -> untyped
-
-      def supported_inbox_content_type?: () -> untyped
+      def log_social_activity_payload: (untyped payload) -> untyped
     end
   end
 end

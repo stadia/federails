@@ -18,17 +18,50 @@ module Fediverse
     # : (sender: Federails::Actor, request: untyped) -> bool
     def self.verify: (sender: Federails::Actor, request: untyped) -> bool
 
-    # Parse an HTTP Signature header into its components
+    # Parse an HTTP Signature header (cavage draft format) into its components
     # : (String) -> { key_id: String, headers: String, signature: String, algorithm: String? }
     def self.parse_signature_header: (String) -> { key_id: String, headers: String, signature: String, algorithm: String? }
 
-    # Verify the Digest header matches the request body
+    # Verify the Digest header matches the request body (cavage draft format)
     # : (untyped) -> void
     def self.verify_digest!: (untyped) -> void
 
-    # Verify an inbound request's HTTP Signature, returning the sending actor
+    # Verify an inbound request's HTTP Signature, returning the sending actor.
+    # Supports both cavage draft and RFC 9421 formats.
     # : (untyped) -> Federails::Actor
     def self.verify_request!: (untyped) -> Federails::Actor
+
+    # RFC 9421 uses label=:bytes: format; cavage uses keyId="..." format
+    private def self.rfc9421_format?: (untyped sig_header) -> untyped
+
+    private def self.verify_cavage_request!: (untyped request) -> untyped
+
+    private def self.verify_rfc9421_request!: (untyped request) -> untyped
+
+    # Verify one RFC 9421 candidate signature. Returns actor on success, nil on
+    # non-fatal failure (so the caller can try the next candidate), raises on
+    # fatal verification failure.
+    private def self.try_verify_rfc9421_candidate: (untyped request, untyped parsed) -> untyped
+
+    # Verify the body digest referenced by the RFC 9421 component list.
+    # Accepts either the legacy Digest header or the RFC 9421 Content-Digest header.
+    private def self.verify_body_digest!: (untyped request, untyped component) -> untyped
+
+    # Parse RFC 9421 Signature + Signature-Input headers, returning one entry per label.
+    # Signature:       sig1=:base64bytes:, sig2=:base64bytes:
+    # Signature-Input: sig1=("@method" "@path");keyid="...";alg="rsa-pss-sha512", sig2=(...)...
+    private def self.parse_rfc9421_candidates: (untyped sig_header, untyped sig_input_header) -> untyped
+
+    # Split a Signature-Input header value into { label => params } pairs.
+    # Entries are separated by "," at the top level (not inside the component list parens).
+    private def self.split_signature_input: (untyped header) -> untyped
+
+    # Build the RFC 9421 signature base string from request and covered components.
+    private def self.rfc9421_signature_base: (untyped request, untyped components, untyped input_params) -> untyped
+
+    # Verify an RFC 9421 signature. Uses digest-output-length salt for PSS
+    # variants, which matches the default used by most signers.
+    private def self.rfc9421_verify: (untyped key, untyped signature, untyped base, untyped algorithm) -> untyped
 
     # : (request: untyped, headers: String) -> String
     private def self.signature_payload: (request: untyped, headers: String) -> String

@@ -4,7 +4,22 @@ module Fediverse
   class Notifier
     MAX_COLLECTION_DEPTH: Integer
 
-    # Posts an activity to its recipients
+    ACTIONS_REQUIRING_OBJECT: untyped
+
+    PERMANENT_DELIVERY_STATUS_CODES: untyped
+
+    # Enqueues a separate delivery job for each recipient inbox.
+    #
+    # @param activity [Federails::Activity]
+    def self.enqueue_deliveries: (untyped activity) -> untyped
+
+    # Delivers an activity to a single inbox. Called by NotifyInboxJob.
+    #
+    # @param activity [Federails::Activity]
+    # @param inbox_url [String]
+    def self.deliver_to_inbox: (untyped activity, untyped inbox_url) -> untyped
+
+    # Posts an activity to its recipients (legacy synchronous delivery).
     #
     # @param activity [Federails::Activity]
     def self.post_to_inboxes: (untyped activity) -> untyped
@@ -40,5 +55,26 @@ module Fediverse
 
     # : (String) -> String
     private def self.digest: (String) -> String
+
+    # : (Integer) -> bool
+    private def self.permanent_delivery_status?: (Integer) -> bool
+
+    # : (inbox_url: String, status: Integer, body: untyped, retry_after: String?, permanent: bool) -> String
+    private def self.delivery_error_message: (inbox_url: String, status: Integer, body: untyped, retry_after: String?, permanent: bool) -> String
+
+    # : (Federails::Activity, Hash[Symbol, untyped]) -> void
+    private def self.validate_payload!: (Federails::Activity, Hash[Symbol, untyped]) -> void
+
+    # : (Hash[Symbol, untyped]) -> bool
+    private def self.update_object_id_missing?: (Hash[Symbol, untyped]) -> bool
+
+    # : (Federails::Activity, Hash[Symbol, untyped]) -> String
+    private def self.invalid_payload_message: (Federails::Activity, Hash[Symbol, untyped]) -> String
+
+    # : (Federails::Activity, String) -> void
+    private def self.validate_message!: (Federails::Activity, String) -> void
+
+    # : (String) -> Array[Federails::Actor]?
+    private def self.actors_for_local_collection: (String) -> Array[Federails::Actor]?
   end
 end
