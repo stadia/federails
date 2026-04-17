@@ -105,16 +105,20 @@ module Federails
 
         raise NoMethodError, "Callback method #{@after_followed} is not defined on #{instance.class.name}" unless instance.respond_to?(@after_followed, true)
 
-        method = instance.class.instance_method(@after_followed)
-        if method.parameters.any? { |type, name| [:keyreq, :key].include?(type) && name == :follow_activity } ||
-           method.parameters.any? { |type, _| type == :keyrest }
-          instance.public_send(@after_followed, follow, follow_activity: follow_activity)
+        # Use instance.class.instance_method (not instance.method) so that
+        # RSpec stubs / other proxies on the singleton class do not alter the
+        # detected parameter signature of the real callback definition.
+        params = instance.class.instance_method(@after_followed).parameters
+        accepts_kwarg = params.any? { |type, name| [:keyreq, :key].include?(type) && name == :follow_activity } ||
+                        params.any? { |type, _| type == :keyrest }
+        if accepts_kwarg
+          instance.send(@after_followed, follow, follow_activity: follow_activity)
         else
           Federails.logger.warn do
             "Callback #{@after_followed} uses legacy single-argument signature. " \
               'Please update to accept follow_activity: keyword argument.'
           end
-          instance.public_send(@after_followed, follow)
+          instance.send(@after_followed, follow)
         end
       end
     end

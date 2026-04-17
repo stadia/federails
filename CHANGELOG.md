@@ -39,7 +39,7 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ### Changed
 
-- `accept!` now requires a `follow_activity:` keyword argument. Pass the originating `Federails::Activity` record;
+- [**BREAKING**] `accept!` now requires a `follow_activity:` keyword argument. Pass the originating `Federails::Activity` record;
   omitting it or passing `nil` explicitly raises `ArgumentError`.
 - `after_followed` callbacks now receive a `follow_activity:` keyword argument alongside the existing `follow`
   positional argument. The legacy single-argument signature is still supported via a deprecation-level log message.

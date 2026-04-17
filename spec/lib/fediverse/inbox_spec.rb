@@ -200,6 +200,28 @@ module Fediverse
         result = legacy_host_class.send(:dispatch_followed_callback, instance, follow, follow_activity: follow_activity)
         expect(result).to eq(follow)
       end
+
+      it 'returns without raising when after_followed is not configured' do
+        host_class = Class.new do
+          extend Federails::ActorEntity::ClassMethods
+        end
+
+        expect do
+          host_class.send(:dispatch_followed_callback, host_class.new, follow, follow_activity: follow_activity)
+        end.not_to raise_error
+      end
+
+      it 'raises NoMethodError when the configured callback is not defined on the instance' do
+        host_class = Class.new do
+          extend Federails::ActorEntity::ClassMethods
+
+          after_followed :missing_callback
+        end
+
+        expect do
+          host_class.send(:dispatch_followed_callback, host_class.new, follow, follow_activity: follow_activity)
+        end.to raise_error(NoMethodError, /missing_callback/)
+      end
     end
 
     describe '#handle_accept_follow_request' do
@@ -223,6 +245,21 @@ module Fediverse
 
         local_following.reload
         expect(local_following).to be_accepted
+      end
+
+      it 'returns without raising when no matching following exists' do
+        non_existent_payload = {
+          'actor'  => distant_actor.federated_url,
+          'object' => 'https://remote.example/activities/non-existent-follow',
+        }
+        following_data = {
+          'type'   => 'Follow',
+          'actor'  => local_actor.federated_url,
+          'object' => distant_actor.federated_url,
+        }
+        allow(Fediverse::Request).to receive(:dereference).and_return(following_data)
+
+        expect { described_class.send(:handle_accept_follow_request, non_existent_payload) }.not_to raise_error
       end
     end
 

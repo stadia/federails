@@ -179,6 +179,14 @@ module Fediverse
         raise 'Follow not accepted by target actor but by someone else' if activity['actor'] != target_actor.federated_url
 
         follow = Federails::Following.find_by actor: actor, target_actor: target_actor
+        unless follow
+          Federails.logger.warn do
+            "Follow not found for #{actor.federated_url} -> #{target_actor.federated_url}. " \
+              "Original activity id: #{activity['object']}"
+          end
+          return
+        end
+
         follow_activity = follow.follow_activity
         unless follow_activity
           Federails.logger.warn do
@@ -335,13 +343,10 @@ module Fediverse
 
       #: (Federails::Activity, Hash[String, untyped]) -> void
       def update_processed_activity!(activity, payload)
-        updates = {
-          to:       payload['to'],
-          cc:       payload['cc'],
-          bto:      payload['bto'],
-          bcc:      payload['bcc'],
-          audience: payload['audience'],
-        }.compact
+        addressing_fields = %w[to cc bto bcc audience]
+        updates = addressing_fields.each_with_object({}) do |field, hash|
+          hash[field.to_sym] = payload[field] if payload.key?(field)
+        end
         activity.update!(updates) if updates.any?
       end
     end
