@@ -10,7 +10,15 @@ module Federails
 
         @signed_actor = Fediverse::Signature.verify_request!(request)
       rescue Fediverse::Signature::SignatureVerificationError => e
-        Federails.logger.warn "Signature verification failed: #{e.message}"
+        Federails.logger.warn do
+          {
+            message:          "Signature verification failed: #{e.message}",
+            remote_ip:        request.remote_ip,
+            signature_input:  request.headers['Signature-Input'],
+            actor:            request.body.tap(&:rewind).read.then { |b| JSON.parse(b)['actor'] rescue nil },
+          }.inspect
+        end
+        request.body.rewind
         head :unauthorized
       end
 
