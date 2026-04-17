@@ -55,11 +55,17 @@ module Federails
     def after_follow
       return unless target_actor&.entity
 
+      fa = follow_activity
+      unless fa
+        Federails.logger.warn { "after_follow: follow_activity not found for Following##{id}, skipping after_followed callback" }
+        return
+      end
+
       target_actor.entity.class.send(
         :dispatch_followed_callback,
         target_actor.entity,
         self,
-        follow_activity: follow_activity
+        follow_activity: fa
       )
     end
 

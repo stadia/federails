@@ -103,7 +103,7 @@ module Fediverse
     end
 
     describe '.dispatch_request for inbound Follow with eager acceptance' do
-      let(:remote_actor) { FactoryBot.create(:distant_actor) }
+      let(:remote_actor) { FactoryBot.create :distant_actor }
       let(:payload) do
         {
           'id'     => 'https://remote.example/activities/follow-1',
@@ -172,6 +172,7 @@ module Fediverse
       it 'passes follow_activity to keyword-capable callbacks' do
         modern_host_class = Class.new do
           extend Federails::ActorEntity::ClassMethods
+
           after_followed :accept_follow
 
           def accept_follow(follow, follow_activity:)
@@ -187,6 +188,7 @@ module Fediverse
       it 'falls back to the legacy one-argument callback shape' do
         legacy_host_class = Class.new do
           extend Federails::ActorEntity::ClassMethods
+
           after_followed :accept_follow
 
           def accept_follow(follow)

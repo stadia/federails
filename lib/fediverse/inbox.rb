@@ -183,7 +183,7 @@ module Fediverse
         unless follow_activity
           Federails.logger.warn do
             "Follow activity not found for #{actor.federated_url} -> #{target_actor.federated_url}. " \
-            "Original activity id: #{activity['object']}"
+              "Original activity id: #{activity['object']}"
           end
           return
         end
@@ -331,10 +331,6 @@ module Fediverse
         return unless target_actor&.entity
 
         target_actor.entity.class.send(:dispatch_followed_callback, target_actor.entity, following, follow_activity: follow_activity)
-      rescue StandardError => e
-        Federails.logger.warn do
-          "Failed to dispatch after_followed callback for #{target_actor.federated_url}: #{e.class} #{e.message}"
-        end
       end
 
       #: (Federails::Activity, Hash[String, untyped]) -> void
@@ -344,7 +340,7 @@ module Fediverse
           cc:       payload['cc'],
           bto:      payload['bto'],
           bcc:      payload['bcc'],
-          audience: payload['audience']
+          audience: payload['audience'],
         }.compact
         activity.update!(updates) if updates.any?
       end

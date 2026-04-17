@@ -103,18 +103,19 @@ module Federails
       def dispatch_followed_callback(instance, follow, follow_activity:)
         return unless @after_followed
 
-        unless instance.respond_to?(@after_followed, true)
-          raise NoMethodError, "Callback method #{@after_followed} is not defined on #{instance.class.name}"
-        end
+        raise NoMethodError, "Callback method #{@after_followed} is not defined on #{instance.class.name}" unless instance.respond_to?(@after_followed, true)
 
-        instance.public_send(@after_followed, follow, follow_activity: follow_activity)
-      rescue ArgumentError => e
-        Federails.logger.debug do
-          "Callback #{@after_followed} raised ArgumentError, trying legacy signature. " \
-          "Error: #{e.message}. " \
-          "Please update callback to accept follow_activity: keyword argument."
+        method = instance.class.instance_method(@after_followed)
+        if method.parameters.any? { |type, name| [:keyreq, :key].include?(type) && name == :follow_activity } ||
+           method.parameters.any? { |type, _| type == :keyrest }
+          instance.public_send(@after_followed, follow, follow_activity: follow_activity)
+        else
+          Federails.logger.warn do
+            "Callback #{@after_followed} uses legacy single-argument signature. " \
+              'Please update to accept follow_activity: keyword argument.'
+          end
+          instance.public_send(@after_followed, follow)
         end
-        instance.public_send(@after_followed, follow)
       end
     end
 
