@@ -39,7 +39,8 @@ module Fediverse
     # Best-effort recording of processed activity for de-duplication.
     # Uses actor as fallback entity when the actual object cannot be resolved.
     # Failures here must not propagate since the activity was already handled successfully.
-    private def self.record_processed_activity: (untyped payload, untyped dispatched_at) -> untyped
+    # : (Hash[String, untyped], ActiveSupport::TimeWithZone) -> void
+    private def self.record_processed_activity: (Hash[String, untyped], ActiveSupport::TimeWithZone) -> void
 
     # Handles Delete activities by finding the local object and triggering its delete callback.
     private def self.dispatch_delete_request: (untyped payload) -> untyped
@@ -49,45 +50,67 @@ module Fediverse
     private def self.get_handlers: (untyped activity_type, untyped object_type) -> untyped
 
     # Creates a Following record from an incoming Follow activity.
-    private def self.handle_create_follow_request: (untyped activity) -> untyped
+    # : (Hash[String, untyped]) -> Federails::Following
+    private def self.handle_create_follow_request: (Hash[String, untyped]) -> Federails::Following
 
     # Marks a pending Following as accepted when the target actor confirms.
-    private def self.handle_accept_follow_request: (untyped activity) -> untyped
+    # : (Hash[String, untyped]) -> Federails::Activity?
+    private def self.handle_accept_follow_request: (Hash[String, untyped]) -> Federails::Activity?
 
     # Destroys a Following record when the follower undoes their Follow.
-    private def self.handle_undo_follow_request: (untyped activity) -> untyped
+    # : (Hash[String, untyped]) -> Federails::Following?
+    private def self.handle_undo_follow_request: (Hash[String, untyped]) -> Federails::Following?
 
     # Destroys a pending Following when the target actor rejects the request.
     # AP Section 7.7: MUST NOT add to Following collection on Reject.
-    private def self.handle_reject_follow_request: (untyped activity) -> untyped
+    # : (Hash[String, untyped]) -> Federails::Following?
+    private def self.handle_reject_follow_request: (Hash[String, untyped]) -> Federails::Following?
 
     # Triggers on_federails_delete_requested callback on the matching local object.
-    private def self.handle_delete_request: (untyped activity) -> untyped
+    # : (Hash[String, untyped]) -> void
+    private def self.handle_delete_request: (Hash[String, untyped]) -> void
 
     # Triggers on_federails_undelete_requested callback when an Undo+Delete is received.
-    private def self.handle_undelete_request: (untyped activity) -> untyped
+    # : (Hash[String, untyped]) -> void
+    private def self.handle_undelete_request: (Hash[String, untyped]) -> void
 
     # Compares host and port of two URLs for same-origin verification (AP Section 7.3).
-    private def self.same_origin?: (untyped actor_url, untyped object_url) -> untyped
+    # : (String?, String?) -> bool
+    private def self.same_origin?: (String?, String?) -> bool
 
     # Returns true if to/cc/audience addresses a collection owned by this server.
-    private def self.references_local_collection?: (untyped payload) -> untyped
+    # : (Hash[String, untyped]) -> bool
+    private def self.references_local_collection?: (Hash[String, untyped]) -> bool
 
     # Returns true if inReplyTo, object, target, or tag references an object owned by this server.
-    private def self.references_local_object?: (untyped payload) -> untyped
+    # : (Hash[String, untyped]) -> bool
+    private def self.references_local_object?: (Hash[String, untyped]) -> bool
 
     # Extracts local collection URLs from to/cc/audience addressing fields.
-    private def self.addressed_local_collections: (untyped payload) -> untyped
+    # : (Hash[String, untyped]) -> Array[String]
+    private def self.addressed_local_collections: (Hash[String, untyped]) -> Array[String]
 
     # Checks if a URL resolves to a local followers collection via route recognition.
     # AP Section 7.1.2: forwarding targets followers collections only, not following.
-    private def self.local_collection_url?: (untyped url) -> untyped
+    # : (String) -> bool
+    private def self.local_collection_url?: (String) -> bool
 
     # Checks if a URL resolves to any local Federails resource via route recognition.
-    private def self.local_object_reference?: (untyped url) -> untyped
+    # : (String) -> bool
+    private def self.local_object_reference?: (String) -> bool
 
     # Resolves the entity (polymorphic object) for a processed activity record.
     # Falls back to actor when the actual object cannot be resolved.
-    private def self.entity_for_processed_activity: (untyped payload, untyped actor) -> untyped
+    # : (Hash[String, untyped], Federails::Actor) -> untyped
+    private def self.entity_for_processed_activity: (Hash[String, untyped], Federails::Actor) -> untyped
+
+    # : (actor: Federails::Actor, target_actor: Federails::Actor, activity: Hash[String, untyped]) -> Federails::Activity?
+    private def self.inbound_follow_activity: (actor: Federails::Actor, target_actor: Federails::Actor, activity: Hash[String, untyped]) -> Federails::Activity?
+
+    # : (Federails::Actor, Federails::Following, Federails::Activity?) -> void
+    private def self.dispatch_followed_callback: (Federails::Actor, Federails::Following, Federails::Activity?) -> void
+
+    # : (Federails::Activity, Hash[String, untyped]) -> void
+    private def self.update_processed_activity!: (Federails::Activity, Hash[String, untyped]) -> void
   end
 end

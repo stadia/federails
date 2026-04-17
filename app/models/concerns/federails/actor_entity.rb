@@ -95,11 +95,17 @@ module Federails
 
       def dispatch_callback(name, instance, *)
         case name
-        when :after_followed
-          instance.send(@after_followed, *) if @after_followed
         when :after_follow_accepted
           instance.send(@after_follow_accepted, *) if @after_follow_accepted
         end
+      end
+
+      def dispatch_followed_callback(instance, follow, follow_activity:)
+        return unless @after_followed
+
+        instance.public_send(@after_followed, follow, follow_activity: follow_activity)
+      rescue ArgumentError
+        instance.public_send(@after_followed, follow)
       end
     end
 

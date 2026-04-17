@@ -71,7 +71,7 @@ RSpec.describe Federails::Server::ActivityResource do
     let(:follow) { FactoryBot.create :following, actor: local_actor, target_actor: distant_actor }
     let(:original_follow) { follow.follow_activity }
     let(:accept) do
-      follow.accept!
+      follow.accept!(follow_activity: original_follow)
       Federails::Activity.find_by action: 'Accept'
     end
     let(:json_result) { render_activity(accept) }

@@ -21,7 +21,9 @@ FactoryBot.define do
     end
 
     trait :accepted do
-      after :create, &:accept!
+      after :create do |following|
+        following.accept!(follow_activity: following.follow_activity)
+      end
     end
   end
 end

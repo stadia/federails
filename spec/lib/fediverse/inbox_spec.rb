@@ -125,10 +125,16 @@ module Fediverse
             value
           end
         end
+      end
 
-        allow_any_instance_of(User).to receive(:accept_follow) do |_instance, follow|
-          follow.accept!
+      around do |example|
+        original_accept_follow = User.instance_method(:accept_follow)
+        User.send(:define_method, :accept_follow) do |follow, follow_activity:|
+          follow.accept!(follow_activity: follow_activity)
         end
+        example.run
+      ensure
+        User.send(:define_method, :accept_follow, original_accept_follow)
       end
 
       it 'records the inbound Follow before accept! tries to reference it' do
@@ -148,6 +154,49 @@ module Fediverse
 
       it 'does not enqueue delivery jobs for the remote Follow activity' do
         expect { described_class.dispatch_request(payload) }.to have_enqueued_job(Federails::NotifyInboxJob).exactly(1).times
+      end
+    end
+
+    describe '.dispatch_followed_callback compatibility' do
+      let(:follow) { Federails::Following.create!(actor: distant_actor, target_actor: local_actor) }
+      let(:follow_activity) do
+        Federails::Activity.create!(
+          actor:         distant_actor,
+          action:        'Follow',
+          entity:        local_actor,
+          federated_url: 'https://remote.example/activities/follow-compat',
+          to:            [local_actor.federated_url]
+        )
+      end
+
+      it 'passes follow_activity to keyword-capable callbacks' do
+        modern_host_class = Class.new do
+          extend Federails::ActorEntity::ClassMethods
+          after_followed :accept_follow
+
+          def accept_follow(follow, follow_activity:)
+            [follow, follow_activity]
+          end
+        end
+
+        instance = modern_host_class.new
+        result = modern_host_class.send(:dispatch_followed_callback, instance, follow, follow_activity: follow_activity)
+        expect(result).to eq([follow, follow_activity])
+      end
+
+      it 'falls back to the legacy one-argument callback shape' do
+        legacy_host_class = Class.new do
+          extend Federails::ActorEntity::ClassMethods
+          after_followed :accept_follow
+
+          def accept_follow(follow)
+            follow
+          end
+        end
+
+        instance = legacy_host_class.new
+        result = legacy_host_class.send(:dispatch_followed_callback, instance, follow, follow_activity: follow_activity)
+        expect(result).to eq(follow)
       end
     end
 

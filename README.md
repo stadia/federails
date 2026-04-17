@@ -40,6 +40,9 @@ It _may_ work on other versions, but we won't provide support.
 - [Common questions](docs/faq.md)
 - [Contributing](CONTRIBUTING.md)
 
+Follow request handling examples, including the current `after_followed` / `follow.accept!(follow_activity: ...)` callback
+shape, are documented in [Usage](docs/usage.md).
+
 ## Extensions
 
 Extensions extends the features of Federails.

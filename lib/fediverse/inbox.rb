@@ -96,12 +96,16 @@ module Fediverse
       # Best-effort recording of processed activity for de-duplication.
       # Uses actor as fallback entity when the actual object cannot be resolved.
       # Failures here must not propagate since the activity was already handled successfully.
+      #: (Hash[String, untyped], ActiveSupport::TimeWithZone) -> void
       def record_processed_activity(payload, dispatched_at)
         federated_url = payload['id']
         return if federated_url.blank?
 
         actor = Federails::Actor.find_or_create_by_object(payload['actor'])
         return unless actor
+
+        existing_activity = Federails::Activity.find_by(federated_url: federated_url)
+        return update_processed_activity!(existing_activity, payload) if existing_activity
 
         recent_activity = Federails::Activity.where(actor: actor, action: payload['type'], federated_url: nil)
                                              .where(created_at: dispatched_at..)
@@ -147,19 +151,17 @@ module Fediverse
       end
 
       # Creates a Following record from an incoming Follow activity.
+      #: (Hash[String, untyped]) -> Federails::Following
       def handle_create_follow_request(activity)
         actor        = Federails::Actor.find_or_create_by_object activity['actor']
         target_actor = Federails::Actor.find_or_create_by_object activity['object']
 
+        follow_activity = inbound_follow_activity(actor: actor, target_actor: target_actor, activity: activity)
         following = Federails::Following.find_or_initialize_by actor: actor, target_actor: target_actor
         if following.new_record?
-          unless actor.local?
-            Federails::Activity.find_or_create_by!(actor: actor, action: 'Follow', entity: target_actor) do |follow_activity|
-              follow_activity.to = [target_actor.federated_url]
-            end
-          end
           following.federated_url = activity['id']
           following.save!
+          dispatch_followed_callback(target_actor, following, follow_activity)
         elsif following.federated_url.blank? && activity['id'].present?
           following.update! federated_url: activity['id']
         end
@@ -168,6 +170,7 @@ module Fediverse
       end
 
       # Marks a pending Following as accepted when the target actor confirms.
+      #: (Hash[String, untyped]) -> Federails::Activity?
       def handle_accept_follow_request(activity)
         original_activity = Request.dereference(activity['object'])
 
@@ -176,10 +179,11 @@ module Fediverse
         raise 'Follow not accepted by target actor but by someone else' if activity['actor'] != target_actor.federated_url
 
         follow = Federails::Following.find_by actor: actor, target_actor: target_actor
-        follow.accept!
+        follow.accept!(follow_activity: follow.follow_activity)
       end
 
       # Destroys a Following record when the follower undoes their Follow.
+      #: (Hash[String, untyped]) -> Federails::Following?
       def handle_undo_follow_request(activity)
         original_activity = activity['object']
 
@@ -192,6 +196,7 @@ module Fediverse
 
       # Destroys a pending Following when the target actor rejects the request.
       # AP Section 7.7: MUST NOT add to Following collection on Reject.
+      #: (Hash[String, untyped]) -> Federails::Following?
       def handle_reject_follow_request(activity)
         original_activity = Request.dereference(activity['object'])
 
@@ -204,6 +209,7 @@ module Fediverse
       end
 
       # Triggers on_federails_delete_requested callback on the matching local object.
+      #: (Hash[String, untyped]) -> void
       def handle_delete_request(activity)
         object = Federails::Utils::Object.find_distant_object_in_all(activity['object'])
         return if object.blank?
@@ -212,6 +218,7 @@ module Fediverse
       end
 
       # Triggers on_federails_undelete_requested callback when an Undo+Delete is received.
+      #: (Hash[String, untyped]) -> void
       def handle_undelete_request(activity)
         delete_activity = Request.dereference(activity['object'])
         object = Federails::Utils::Object.find_distant_object_in_all(delete_activity['object'])
@@ -221,6 +228,7 @@ module Fediverse
       end
 
       # Compares host and port of two URLs for same-origin verification (AP Section 7.3).
+      #: (String?, String?) -> bool
       def same_origin?(actor_url, object_url)
         return false if actor_url.blank? || object_url.blank?
 
@@ -232,11 +240,13 @@ module Fediverse
       end
 
       # Returns true if to/cc/audience addresses a collection owned by this server.
+      #: (Hash[String, untyped]) -> bool
       def references_local_collection?(payload)
         addressed_local_collections(payload).any?
       end
 
       # Returns true if inReplyTo, object, target, or tag references an object owned by this server.
+      #: (Hash[String, untyped]) -> bool
       def references_local_object?(payload)
         object = payload['object'].is_a?(Hash) ? payload['object'] : {}
         refs = [
@@ -251,12 +261,14 @@ module Fediverse
       end
 
       # Extracts local collection URLs from to/cc/audience addressing fields.
+      #: (Hash[String, untyped]) -> Array[String]
       def addressed_local_collections(payload)
         [payload['to'], payload['cc'], payload['audience']].flatten.compact.select { |url| local_collection_url?(url) }
       end
 
       # Checks if a URL resolves to a local followers collection via route recognition.
       # AP Section 7.1.2: forwarding targets followers collections only, not following.
+      #: (String) -> bool
       def local_collection_url?(url)
         route = Federails::Utils::Host.local_route(url)
         route.present? && route[:controller] == 'federails/server/actors' && route[:action] == 'followers'
@@ -265,6 +277,7 @@ module Fediverse
       end
 
       # Checks if a URL resolves to any local Federails resource via route recognition.
+      #: (String) -> bool
       def local_object_reference?(url)
         route = Federails::Utils::Host.local_route(url)
         return false if route.blank?
@@ -276,6 +289,7 @@ module Fediverse
 
       # Resolves the entity (polymorphic object) for a processed activity record.
       # Falls back to actor when the actual object cannot be resolved.
+      #: (Hash[String, untyped], Federails::Actor) -> untyped
       def entity_for_processed_activity(payload, actor)
         object = payload['object']
         return actor if payload['type'] == 'Delete' && object == actor.federated_url
@@ -287,6 +301,39 @@ module Fediverse
         else
           actor
         end
+      end
+
+      #: (actor: Federails::Actor, target_actor: Federails::Actor, activity: Hash[String, untyped]) -> Federails::Activity?
+      def inbound_follow_activity(actor:, target_actor:, activity:)
+        return Federails::Activity.find_by(actor: actor, action: 'Follow', entity: target_actor) if actor.local?
+
+        Federails::Activity.find_or_initialize_by(actor: actor, action: 'Follow', entity: target_actor).tap do |follow_activity|
+          follow_activity.federated_url = activity['id'] if follow_activity.federated_url.blank? && activity['id'].present?
+          follow_activity.to = [target_actor.federated_url]
+          follow_activity.cc = activity['cc']
+          follow_activity.bto = activity['bto']
+          follow_activity.bcc = activity['bcc']
+          follow_activity.audience = activity['audience']
+          follow_activity.save! if follow_activity.new_record? || follow_activity.changed?
+        end
+      end
+
+      #: (Federails::Actor, Federails::Following, Federails::Activity?) -> void
+      def dispatch_followed_callback(target_actor, following, follow_activity)
+        return unless target_actor&.entity
+
+        target_actor.entity.class.send(:dispatch_followed_callback, target_actor.entity, following, follow_activity: follow_activity)
+      end
+
+      #: (Federails::Activity, Hash[String, untyped]) -> void
+      def update_processed_activity!(activity, payload)
+        activity.update!(
+          to:       payload['to'],
+          cc:       payload['cc'],
+          bto:      payload['bto'],
+          bcc:      payload['bcc'],
+          audience: payload['audience']
+        )
       end
     end
 
