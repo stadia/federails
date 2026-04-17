@@ -162,11 +162,27 @@ module Fediverse
           following.federated_url = activity['id']
           following.save!
           dispatch_followed_callback(target_actor, following, follow_activity)
-        elsif following.federated_url.blank? && activity['id'].present?
-          following.update! federated_url: activity['id']
+        else
+          following.update!(federated_url: activity['id']) if following.federated_url.blank? && activity['id'].present?
+          resend_accept_for_duplicate_follow(following, follow_activity) if following.accepted?
         end
 
         following
+      end
+
+      # Re-sends an Accept Activity when a Follow is received for an already-accepted Following
+      # under a new activity id. De-duplication in dispatch_request ensures this path is only
+      # reached for genuinely new inbound Follow activities.
+      #: (Federails::Following, Federails::Activity?) -> void
+      def resend_accept_for_duplicate_follow(following, follow_activity)
+        return unless follow_activity
+
+        Federails::Activity.create!(
+          actor:  following.target_actor,
+          action: 'Accept',
+          entity: follow_activity,
+          to:     [following.actor.federated_url]
+        )
       end
 
       # Marks a pending Following as accepted when the target actor confirms.

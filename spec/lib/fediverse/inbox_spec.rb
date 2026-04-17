@@ -82,6 +82,73 @@ module Fediverse
         end.not_to change(Federails::Following, :count)
       end
 
+      context 'when the Following is already accepted and a new activity id arrives' do
+        let(:inbound_follow) do
+          {
+            'id'     => 'https://remote.example/follows/original',
+            'actor'  => distant_actor.federated_url,
+            'object' => local_actor.federated_url,
+          }
+        end
+        let(:duplicate_follow) do
+          {
+            'id'     => 'https://remote.example/follows/retry',
+            'actor'  => distant_actor.federated_url,
+            'object' => local_actor.federated_url,
+          }
+        end
+
+        before do
+          described_class.send(:handle_create_follow_request, inbound_follow)
+          Federails::Following.find_by!(actor: distant_actor, target_actor: local_actor).update!(status: :accepted)
+        end
+
+        it 'creates a new Accept activity referencing the existing Follow activity' do
+          expect do
+            described_class.send(:handle_create_follow_request, duplicate_follow)
+          end.to change(Federails::Activity.where(action: 'Accept'), :count).by(1)
+
+          follow_activity = Federails::Activity.find_by!(actor: distant_actor, action: 'Follow', entity: local_actor)
+          accept_activity = Federails::Activity.where(action: 'Accept').order(:created_at).last
+          expect(accept_activity.entity).to eq(follow_activity)
+          expect(accept_activity.actor).to eq(local_actor)
+          expect(accept_activity.to).to eq([distant_actor.federated_url])
+        end
+
+        it 'does not create a duplicate Following' do
+          expect do
+            described_class.send(:handle_create_follow_request, duplicate_follow)
+          end.not_to change(Federails::Following, :count)
+        end
+      end
+
+      context 'when a duplicate Follow arrives for a still-pending Following' do
+        let(:inbound_follow) do
+          {
+            'id'     => 'https://remote.example/follows/pending-original',
+            'actor'  => distant_actor.federated_url,
+            'object' => local_actor.federated_url,
+          }
+        end
+        let(:duplicate_follow) do
+          {
+            'id'     => 'https://remote.example/follows/pending-retry',
+            'actor'  => distant_actor.federated_url,
+            'object' => local_actor.federated_url,
+          }
+        end
+
+        before do
+          described_class.send(:handle_create_follow_request, inbound_follow)
+        end
+
+        it 'does not send an Accept' do
+          expect do
+            described_class.send(:handle_create_follow_request, duplicate_follow)
+          end.not_to change(Federails::Activity.where(action: 'Accept'), :count)
+        end
+      end
+
       it 'creates a Follow activity before callbacks can accept the follow' do
         inbound_follow = {
           'id'     => 'https://remote.example/follows/1',
