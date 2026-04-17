@@ -18,7 +18,7 @@ module Federails
       def accept
         respond_to do |format|
           url = federails.client_actor_url @following.actor
-          if @following.accept!
+          if @following.accept!(follow_activity: @following.follow_activity)
             format.html { redirect_to url, notice: I18n.t('controller.followings.accept.success') }
             format.json { render_serialized(Federails::Client::FollowingResource, @following, status: :ok, location: @following) }
           else

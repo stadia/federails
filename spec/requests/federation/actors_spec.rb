@@ -18,9 +18,9 @@ RSpec.describe '/federation/actors', type: :request do
 
   before do
     following1 = Federails::Following.create actor: user.federails_actor, target_actor: other_user.federails_actor
-    following1.accept!
+    following1.accept!(follow_activity: following1.follow_activity)
     following2 = Federails::Following.create actor: other_user.federails_actor, target_actor: user.federails_actor
-    following2.accept!
+    following2.accept!(follow_activity: following2.follow_activity)
   end
 
   describe 'GET /show' do
@@ -165,7 +165,7 @@ RSpec.describe '/federation/actors', type: :request do
 
         before do
           following = Federails::Following.create actor: third_user.federails_actor, target_actor: user.federails_actor
-          following.accept!
+          following.accept!(follow_activity: following.follow_activity)
           Pagy::OPTIONS[:limit] = 1
         end
 
@@ -248,7 +248,7 @@ RSpec.describe '/federation/actors', type: :request do
 
         before do
           following = Federails::Following.create actor: user.federails_actor, target_actor: third_user.federails_actor
-          following.accept!
+          following.accept!(follow_activity: following.follow_activity)
           Pagy::OPTIONS[:limit] = 1
         end
 

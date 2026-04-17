@@ -103,7 +103,7 @@ module Fediverse
     end
 
     describe '.dispatch_request for inbound Follow with eager acceptance' do
-      let(:remote_actor) { FactoryBot.create(:distant_actor) }
+      let(:remote_actor) { FactoryBot.create :distant_actor }
       let(:payload) do
         {
           'id'     => 'https://remote.example/activities/follow-1',
@@ -125,10 +125,16 @@ module Fediverse
             value
           end
         end
+      end
 
-        allow_any_instance_of(User).to receive(:accept_follow) do |_instance, follow|
-          follow.accept!
+      around do |example|
+        original_accept_follow = User.instance_method(:accept_follow)
+        User.send(:define_method, :accept_follow) do |follow, follow_activity:|
+          follow.accept!(follow_activity: follow_activity)
         end
+        example.run
+      ensure
+        User.send(:define_method, :accept_follow, original_accept_follow)
       end
 
       it 'records the inbound Follow before accept! tries to reference it' do
@@ -148,6 +154,73 @@ module Fediverse
 
       it 'does not enqueue delivery jobs for the remote Follow activity' do
         expect { described_class.dispatch_request(payload) }.to have_enqueued_job(Federails::NotifyInboxJob).exactly(1).times
+      end
+    end
+
+    describe '.dispatch_followed_callback compatibility' do
+      let(:follow) { Federails::Following.create!(actor: distant_actor, target_actor: local_actor) }
+      let(:follow_activity) do
+        Federails::Activity.create!(
+          actor:         distant_actor,
+          action:        'Follow',
+          entity:        local_actor,
+          federated_url: 'https://remote.example/activities/follow-compat',
+          to:            [local_actor.federated_url]
+        )
+      end
+
+      it 'passes follow_activity to keyword-capable callbacks' do
+        modern_host_class = Class.new do
+          extend Federails::ActorEntity::ClassMethods
+
+          after_followed :accept_follow
+
+          def accept_follow(follow, follow_activity:)
+            [follow, follow_activity]
+          end
+        end
+
+        instance = modern_host_class.new
+        result = modern_host_class.send(:dispatch_followed_callback, instance, follow, follow_activity: follow_activity)
+        expect(result).to eq([follow, follow_activity])
+      end
+
+      it 'falls back to the legacy one-argument callback shape' do
+        legacy_host_class = Class.new do
+          extend Federails::ActorEntity::ClassMethods
+
+          after_followed :accept_follow
+
+          def accept_follow(follow)
+            follow
+          end
+        end
+
+        instance = legacy_host_class.new
+        result = legacy_host_class.send(:dispatch_followed_callback, instance, follow, follow_activity: follow_activity)
+        expect(result).to eq(follow)
+      end
+
+      it 'returns without raising when after_followed is not configured' do
+        host_class = Class.new do
+          extend Federails::ActorEntity::ClassMethods
+        end
+
+        expect do
+          host_class.send(:dispatch_followed_callback, host_class.new, follow, follow_activity: follow_activity)
+        end.not_to raise_error
+      end
+
+      it 'raises NoMethodError when the configured callback is not defined on the instance' do
+        host_class = Class.new do
+          extend Federails::ActorEntity::ClassMethods
+
+          after_followed :missing_callback
+        end
+
+        expect do
+          host_class.send(:dispatch_followed_callback, host_class.new, follow, follow_activity: follow_activity)
+        end.to raise_error(NoMethodError, /missing_callback/)
       end
     end
 
@@ -172,6 +245,21 @@ module Fediverse
 
         local_following.reload
         expect(local_following).to be_accepted
+      end
+
+      it 'returns without raising when no matching following exists' do
+        non_existent_payload = {
+          'actor'  => distant_actor.federated_url,
+          'object' => 'https://remote.example/activities/non-existent-follow',
+        }
+        following_data = {
+          'type'   => 'Follow',
+          'actor'  => local_actor.federated_url,
+          'object' => distant_actor.federated_url,
+        }
+        allow(Fediverse::Request).to receive(:dereference).and_return(following_data)
+
+        expect { described_class.send(:handle_accept_follow_request, non_existent_payload) }.not_to raise_error
       end
     end
 

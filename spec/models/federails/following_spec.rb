@@ -45,7 +45,7 @@ module Federails
 
         # follow_accepted is set up as our callback method
         allow(follower.entity).to receive(:follow_accepted)
-        following.accept!
+        following.accept!(follow_activity: following.follow_activity)
 
         expect(follower.entity).to have_received(:follow_accepted).with(following).once
       end
@@ -176,7 +176,7 @@ module Federails
         Federails::Activity.create! actor: follower, action: 'Follow', entity: target, to: [target.federated_url]
       end
       let!(:activity) do
-        following.accept!
+        following.accept!(follow_activity: original_follow)
         Activity.find_by(action: 'Accept')
       end
 
@@ -202,6 +202,14 @@ module Federails
 
       it 'queues NotifyInboxJob' do
         expect(NotifyInboxJob).to have_been_enqueued.with(activity)
+      end
+
+      it 'raises when follow_activity is omitted' do
+        expect { following.accept! }.to raise_error(ArgumentError)
+      end
+
+      it 'raises when follow_activity is explicitly nil' do
+        expect { following.accept!(follow_activity: nil) }.to raise_error(ArgumentError)
       end
     end
   end

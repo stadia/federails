@@ -191,6 +191,30 @@ actor.following
 #...
 ```
 
+### Handling incoming follow requests
+
+If your actor entity wants to react to incoming follows, register a callback with `after_followed`:
+
+```rb
+class User < ApplicationRecord
+  include Federails::ActorEntity
+
+  acts_as_federails_actor username_field: :username, name_field: :name, profile_url_method: :user_url
+
+  after_followed :accept_follow
+
+  def accept_follow(follow, follow_activity:)
+    follow.accept!(follow_activity: follow_activity)
+  end
+end
+```
+
+Federails now dispatches `after_followed` after the inbound `Follow` activity has been recorded, so the callback can safely
+reuse the canonical `follow_activity` when creating an `Accept`.
+
+For backward compatibility, legacy one-argument callbacks such as `def accept_follow(follow)` still work, but new code should
+prefer the keyword form so it does not need to rediscover the original `Follow` activity.
+
 ## Data models
 
 To ease the work of publishing data to the Fediverse and saving content from it, Federails provides a concern to include

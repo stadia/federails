@@ -11,8 +11,8 @@ module Federails
     belongs_to :target_actor, class_name: 'Federails::Actor'
     has_many :activities, as: :entity, dependent: :destroy
 
-    after_create :after_follow
     after_create :create_activity, if: :locally_instigated?
+    after_create :after_follow, if: :locally_instigated?
     after_update :after_follow_accepted
     after_destroy :destroy_activity, if: :locally_instigated?
 
@@ -26,9 +26,13 @@ module Federails
       attributes['federated_url'].presence || Federails::Engine.routes.url_helpers.server_actor_following_url(actor_id: actor.to_param, id: to_param)
     end
 
-    def accept!
-      update! status: :accepted
-      Activity.create! actor: target_actor, action: 'Accept', entity: follow_activity, to: [actor.federated_url]
+    def accept!(follow_activity:)
+      raise ArgumentError, 'follow_activity is required' if follow_activity.nil?
+
+      transaction do
+        update! status: :accepted
+        Activity.create! actor: target_actor, action: 'Accept', entity: follow_activity, to: [actor.federated_url]
+      end
     end
 
     def follow_activity
@@ -51,7 +55,18 @@ module Federails
     def after_follow
       return unless target_actor&.entity
 
-      target_actor.entity.class.send(:dispatch_callback, :after_followed, target_actor.entity, self)
+      fa = follow_activity
+      unless fa
+        Federails.logger.warn { "after_follow: follow_activity not found for Following##{id}, skipping after_followed callback" }
+        return
+      end
+
+      target_actor.entity.class.send(
+        :dispatch_followed_callback,
+        target_actor.entity,
+        self,
+        follow_activity: fa
+      )
     end
 
     def after_follow_accepted

@@ -543,18 +543,18 @@ module Federails
       before do
         # Create accepted followers
         accepted_inbound_alice = Federails::Following.create! actor: alice_follower, target_actor: actor
-        accepted_inbound_alice.accept!
+        accepted_inbound_alice.accept!(follow_activity: accepted_inbound_alice.follow_activity)
         accepted_inbound_bob = Federails::Following.create! actor: bob_follower, target_actor: actor
-        accepted_inbound_bob.accept!
+        accepted_inbound_bob.accept!(follow_activity: accepted_inbound_bob.follow_activity)
 
         # Create pending followers
         Federails::Following.create! actor: pending_follower, target_actor: actor
 
         # Create accepted followings
         accepted_outbound_carol = Federails::Following.create! actor: actor, target_actor: carol_following
-        accepted_outbound_carol.accept!
+        accepted_outbound_carol.accept!(follow_activity: accepted_outbound_carol.follow_activity)
         accepted_outbound_dave = Federails::Following.create! actor: actor, target_actor: dave_following
-        accepted_outbound_dave.accept!
+        accepted_outbound_dave.accept!(follow_activity: accepted_outbound_dave.follow_activity)
 
         # Create pending followings
         Federails::Following.create! actor: actor, target_actor: pending_following

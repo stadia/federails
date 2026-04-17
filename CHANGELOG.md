@@ -37,6 +37,17 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 - Outgoing delivery prefers remote actor's shared inbox when available
 - New migration: `add_shared_inbox_url_to_federails_actors`
 
+### Changed
+
+- [**BREAKING**] `accept!` now requires a `follow_activity:` keyword argument. Pass the originating `Federails::Activity` record;
+  omitting it or passing `nil` explicitly raises `ArgumentError`.
+- `after_followed` callbacks now receive a `follow_activity:` keyword argument alongside the existing `follow`
+  positional argument. The legacy single-argument signature is still supported via a deprecation-level log message.
+- **Callback transaction scope**: `after_follow_accepted` callbacks are dispatched by the `after_update` hook, which
+  runs **inside** the `accept!` database transaction. Avoid long-running work, external HTTP calls (outside of
+  ActiveJob), or non-idempotent side-effects inside these callbacks — they hold the transaction open and cannot be
+  rolled back if a subsequent DB step fails.
+
 ### Fixed
 
 ## [0.8.0] 2026-03-25

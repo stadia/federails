@@ -38,7 +38,7 @@ RSpec.describe '/actors', type: :request do
           [
             FactoryBot.create(:following, actor: actor),
             FactoryBot.create(:following, target_actor: actor, actor: FactoryBot.create(:local_actor)),
-          ].map(&:accept!)
+          ].each { |following| following.accept!(follow_activity: following.follow_activity) }
         end
 
         it 'renders a successful response' do
