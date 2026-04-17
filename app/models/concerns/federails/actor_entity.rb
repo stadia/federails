@@ -103,8 +103,17 @@ module Federails
       def dispatch_followed_callback(instance, follow, follow_activity:)
         return unless @after_followed
 
+        unless instance.respond_to?(@after_followed, true)
+          raise NoMethodError, "Callback method #{@after_followed} is not defined on #{instance.class.name}"
+        end
+
         instance.public_send(@after_followed, follow, follow_activity: follow_activity)
-      rescue ArgumentError
+      rescue ArgumentError => e
+        Federails.logger.debug do
+          "Callback #{@after_followed} raised ArgumentError, trying legacy signature. " \
+          "Error: #{e.message}. " \
+          "Please update callback to accept follow_activity: keyword argument."
+        end
         instance.public_send(@after_followed, follow)
       end
     end

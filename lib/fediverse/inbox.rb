@@ -323,6 +323,10 @@ module Fediverse
         return unless target_actor&.entity
 
         target_actor.entity.class.send(:dispatch_followed_callback, target_actor.entity, following, follow_activity: follow_activity)
+      rescue StandardError => e
+        Federails.logger.warn do
+          "Failed to dispatch after_followed callback for #{target_actor.federated_url}: #{e.class} #{e.message}"
+        end
       end
 
       #: (Federails::Activity, Hash[String, untyped]) -> void

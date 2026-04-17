@@ -207,6 +207,10 @@ module Federails
       it 'raises when follow_activity is omitted' do
         expect { following.accept! }.to raise_error(ArgumentError)
       end
+
+      it 'raises when follow_activity is explicitly nil' do
+        expect { following.accept!(follow_activity: nil) }.to raise_error(ArgumentError)
+      end
     end
   end
 end
