@@ -179,7 +179,15 @@ module Fediverse
         raise 'Follow not accepted by target actor but by someone else' if activity['actor'] != target_actor.federated_url
 
         follow = Federails::Following.find_by actor: actor, target_actor: target_actor
-        follow.accept!(follow_activity: follow.follow_activity)
+        follow_activity = follow.follow_activity
+        unless follow_activity
+          Federails.logger.warn do
+            "Follow activity not found for #{actor.federated_url} -> #{target_actor.federated_url}. " \
+            "Original activity id: #{activity['object']}"
+          end
+          return
+        end
+        follow.accept!(follow_activity: follow_activity)
       end
 
       # Destroys a Following record when the follower undoes their Follow.
@@ -331,13 +339,14 @@ module Fediverse
 
       #: (Federails::Activity, Hash[String, untyped]) -> void
       def update_processed_activity!(activity, payload)
-        activity.update!(
+        updates = {
           to:       payload['to'],
           cc:       payload['cc'],
           bto:      payload['bto'],
           bcc:      payload['bcc'],
           audience: payload['audience']
-        )
+        }.compact
+        activity.update!(updates) if updates.any?
       end
     end
 
