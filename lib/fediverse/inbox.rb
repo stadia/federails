@@ -317,7 +317,7 @@ module Fediverse
 
         Federails::Activity.find_or_initialize_by(actor: actor, action: 'Follow', entity: target_actor).tap do |follow_activity|
           follow_activity.federated_url = activity['id'] if follow_activity.federated_url.blank? && activity['id'].present?
-          follow_activity.to = [target_actor.federated_url]
+          follow_activity.to = activity['to'] || [target_actor.federated_url]
           follow_activity.cc = activity['cc']
           follow_activity.bto = activity['bto']
           follow_activity.bcc = activity['bcc']
