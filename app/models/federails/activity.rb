@@ -20,7 +20,7 @@ module Federails
       where(actor_id: Following.accepted.where(actor: actor).select(:target_actor_id))
     }
 
-    after_create_commit :post_to_inboxes
+    after_create_commit :post_to_inboxes, if: :deliverable?
 
     before_validation :set_default_addressing, on: :create
 
@@ -47,6 +47,10 @@ module Federails
 
     def post_to_inboxes
       NotifyInboxJob.perform_later(self)
+    end
+
+    def deliverable?
+      actor.local?
     end
   end
 end

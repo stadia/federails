@@ -153,6 +153,11 @@ module Fediverse
 
         following = Federails::Following.find_or_initialize_by actor: actor, target_actor: target_actor
         if following.new_record?
+          unless actor.local?
+            Federails::Activity.find_or_create_by!(actor: actor, action: 'Follow', entity: target_actor) do |follow_activity|
+              follow_activity.to = [target_actor.federated_url]
+            end
+          end
           following.federated_url = activity['id']
           following.save!
         elsif following.federated_url.blank? && activity['id'].present?

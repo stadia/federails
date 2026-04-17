@@ -81,6 +81,74 @@ module Fediverse
           described_class.send(:handle_create_follow_request, distant_following)
         end.not_to change(Federails::Following, :count)
       end
+
+      it 'creates a Follow activity before callbacks can accept the follow' do
+        inbound_follow = {
+          'id'     => 'https://remote.example/follows/1',
+          'actor'  => distant_actor.federated_url,
+          'object' => local_actor.federated_url,
+        }
+
+        expect do
+          described_class.send(:handle_create_follow_request, inbound_follow)
+        end.to change(Federails::Activity.where(action: 'Follow'), :count).by(1)
+
+        follow_activity = Federails::Activity.find_by!(
+          actor:  distant_actor,
+          action: 'Follow',
+          entity: local_actor
+        )
+        expect(follow_activity.to).to eq([local_actor.federated_url])
+      end
+    end
+
+    describe '.dispatch_request for inbound Follow with eager acceptance' do
+      let(:remote_actor) { FactoryBot.create(:distant_actor) }
+      let(:payload) do
+        {
+          'id'     => 'https://remote.example/activities/follow-1',
+          'type'   => 'Follow',
+          'actor'  => remote_actor.federated_url,
+          'object' => local_actor.federated_url,
+          'to'     => [local_actor.federated_url],
+        }
+      end
+
+      before do
+        allow(Fediverse::Request).to receive(:dereference) do |value|
+          case value
+          when payload['object']
+            { 'id' => local_actor.federated_url, 'type' => 'Person' }
+          when payload['actor']
+            { 'id' => remote_actor.federated_url, 'type' => 'Person' }
+          else
+            value
+          end
+        end
+
+        allow_any_instance_of(User).to receive(:accept_follow) do |_instance, follow|
+          follow.accept!
+        end
+      end
+
+      it 'records the inbound Follow before accept! tries to reference it' do
+        expect { described_class.dispatch_request(payload) }.not_to raise_error
+
+        follow_activity = Federails::Activity.find_by!(
+          actor:         remote_actor,
+          action:        'Follow',
+          entity:        local_actor,
+          federated_url: payload['id']
+        )
+        accept_activity = Federails::Activity.find_by!(action: 'Accept', actor: local_actor)
+
+        expect(accept_activity.entity).to eq(follow_activity)
+        expect(accept_activity.to).to eq([remote_actor.federated_url])
+      end
+
+      it 'does not enqueue delivery jobs for the remote Follow activity' do
+        expect { described_class.dispatch_request(payload) }.to have_enqueued_job(Federails::NotifyInboxJob).exactly(1).times
+      end
     end
 
     describe '#handle_accept_follow_request' do
