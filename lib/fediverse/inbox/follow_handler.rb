@@ -33,6 +33,10 @@ module Fediverse
         # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
         def handle_accept_follow_request(activity)
           original_activity = Request.dereference(activity['object'])
+          unless original_activity
+            Federails.logger.warn { "Follow activity could not be dereferenced: #{activity['object']}" }
+            return
+          end
 
           actor = Federails::Actor.find_or_create_by_object(original_activity['actor'])
           target_actor = Federails::Actor.find_or_create_by_object(original_activity['object'])
@@ -64,6 +68,8 @@ module Fediverse
         #: (Hash[String, untyped]) -> Federails::Following?
         def handle_undo_follow_request(activity)
           original_activity = activity['object']
+          original_activity = Request.dereference(original_activity) if original_activity.is_a?(String)
+          return unless original_activity
 
           actor = Federails::Actor.find_or_create_by_object(original_activity['actor'])
           target_actor = Federails::Actor.find_or_create_by_object(original_activity['object'])
@@ -77,6 +83,10 @@ module Fediverse
         #: (Hash[String, untyped]) -> Federails::Following?
         def handle_reject_follow_request(activity)
           original_activity = Request.dereference(activity['object'])
+          unless original_activity
+            Federails.logger.warn { "Follow activity could not be dereferenced for reject: #{activity['object']}" }
+            return
+          end
 
           actor = Federails::Actor.find_or_create_by_object(original_activity['actor'])
           target_actor = Federails::Actor.find_or_create_by_object(original_activity['object'])

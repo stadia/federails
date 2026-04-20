@@ -152,7 +152,12 @@ module Fediverse
           end
           example.run
         ensure
-          User.send(:define_method, :accept_follow, original_accept_follow)
+          begin
+            User.send(:define_method, :accept_follow, original_accept_follow)
+          rescue StandardError => e
+            Federails.logger.error { "Failed to restore User#accept_follow in spec: #{e.message}" }
+            raise
+          end
         end
 
         it 'records the inbound Follow before accept! tries to reference it' do
@@ -279,6 +284,12 @@ module Fediverse
 
           expect { described_class.handle_accept_follow_request(non_existent_payload) }.not_to raise_error
         end
+
+        it 'returns without raising when the original follow activity cannot be dereferenced' do
+          allow(Fediverse::Request).to receive(:dereference).and_return(nil)
+
+          expect { described_class.handle_accept_follow_request(payload.merge('object' => 'https://remote.example/missing')) }.not_to raise_error
+        end
       end
 
       describe '#handle_undo_follow_request' do
@@ -318,6 +329,25 @@ module Fediverse
             end.to change(Federails::Following, :count).by(-1)
           end
         end
+
+        context 'when object is a follow URL string' do
+          let(:payload) do
+            {
+              'object' => 'https://remote.example/activities/follow-undo',
+            }
+          end
+          let(:local_following) { Federails::Following.create(actor: local_actor, target_actor: distant_actor) }
+
+          before do
+            allow(Fediverse::Request).to receive(:dereference).with(payload['object']).and_return(following)
+          end
+
+          it 'dereferences the original activity before destroying the following' do
+            expect do
+              described_class.handle_undo_follow_request(payload)
+            end.to change(Federails::Following, :count).by(-1)
+          end
+        end
       end
 
       describe '#handle_reject_follow_request' do
@@ -352,6 +382,12 @@ module Fediverse
           expect do
             described_class.handle_reject_follow_request(payload)
           end.not_to raise_error
+        end
+
+        it 'returns without raising when the original follow activity cannot be dereferenced' do
+          allow(Fediverse::Request).to receive(:dereference).with(payload['object']).and_return(nil)
+
+          expect { described_class.handle_reject_follow_request(payload) }.not_to raise_error
         end
 
         it 'does not destroy an accepted following' do

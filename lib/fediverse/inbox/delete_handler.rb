@@ -10,8 +10,8 @@ module Fediverse
         # Handles the Delete case where the target object may already be gone remotely.
         #: (Hash[String, untyped]) -> untyped
         def dispatch_delete_request(payload)
-          payload['object'] = payload['object']['id'] unless payload['object'].is_a?(String)
-          object = Federails::Utils::Object.find_distant_object_in_all(payload['object'])
+          object_ref = payload['object'].is_a?(String) ? payload['object'] : payload['object']['id']
+          object = Federails::Utils::Object.find_distant_object_in_all(object_ref)
           return if object.blank?
 
           object.run_callbacks(:on_federails_delete_requested)
@@ -30,6 +30,8 @@ module Fediverse
         #: (Hash[String, untyped]) -> void
         def handle_undelete_request(activity)
           delete_activity = Request.dereference(activity['object'])
+          return if delete_activity.blank?
+
           object = Federails::Utils::Object.find_distant_object_in_all(delete_activity['object'])
           return if object.blank?
 

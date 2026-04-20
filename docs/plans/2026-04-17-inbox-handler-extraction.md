@@ -222,7 +222,7 @@ Fediverse::Inbox.register_handler 'Undo', 'Follow', Fediverse::Inbox::FollowHand
 - [ ] **Step 4: Inbox에서 follow 관련 코드 제거**
 
 `lib/fediverse/inbox.rb`:
-1. 상단에 `require 'fediverse/inbox/follow_handler'` 추가 (block_handler require 바로 밑)
+1. 파일 하단에 `require 'fediverse/inbox/follow_handler'` 추가 (`register_handler` 정의 이후 로드되도록)
 2. `handle_create_follow_request`, `resend_accept_for_duplicate_follow`, `handle_accept_follow_request`, `handle_undo_follow_request`, `handle_reject_follow_request`, `inbound_follow_activity`, `dispatch_followed_callback` 메서드 전체 삭제
 3. 파일 하단 `register_handler` 호출 변경:
    - `register_handler 'Follow', '*', self, :handle_create_follow_request` 삭제
@@ -360,7 +360,7 @@ Fediverse::Inbox.register_handler 'Undo', 'Delete', Fediverse::Inbox::DeleteHand
 - [ ] **Step 4: Inbox에서 delete 관련 코드 제거 및 위임**
 
 `lib/fediverse/inbox.rb`:
-1. 상단 `require 'fediverse/inbox/follow_handler'` 다음에 `require 'fediverse/inbox/delete_handler'` 추가
+1. 파일 하단 `require 'fediverse/inbox/follow_handler'` 다음에 `require 'fediverse/inbox/delete_handler'` 추가 (`register_handler` 정의 이후 로드되도록)
 2. `dispatch_request` 내부:
    ```ruby
    if payload['type'] == 'Delete'

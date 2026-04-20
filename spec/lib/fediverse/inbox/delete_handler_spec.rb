@@ -102,6 +102,18 @@ module Fediverse
             expect(Federails::Utils::Actor).to have_received(:untombstone!).once
           end
         end
+
+        it 'returns without raising when the delete activity cannot be dereferenced' do
+          payload = {
+            'type'   => 'Undo',
+            'actor'  => distant_actor.federated_url,
+            'object' => 'https://example.com/activities/missing-delete',
+          }
+
+          allow(Fediverse::Request).to receive(:dereference).with(payload['object']).and_return(nil)
+
+          expect { described_class.handle_undelete_request(payload) }.not_to raise_error
+        end
       end
     end
   end
