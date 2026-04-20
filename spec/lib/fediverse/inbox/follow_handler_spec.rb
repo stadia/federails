@@ -25,6 +25,28 @@ module Fediverse
           end.to change(Federails::Following, :count).by(1)
         end
 
+        it 'does not dispatch the followed callback twice for a local actor follow' do
+          local_target = FactoryBot.create(:user).federails_actor
+          local_follow = {
+            'id'     => 'http://example.com/local_follow_request',
+            'actor'  => local_actor.federated_url,
+            'object' => local_target.federated_url,
+          }
+
+          callback_invocations = 0
+          original_accept_follow = User.instance_method(:accept_follow)
+          User.send(:define_method, :accept_follow) do |follow, follow_activity:|
+            callback_invocations += 1
+            follow.accept!(follow_activity: follow_activity)
+          end
+
+          described_class.handle_create_follow_request(local_follow)
+
+          expect(callback_invocations).to eq(1)
+        ensure
+          User.send(:define_method, :accept_follow, original_accept_follow)
+        end
+
         it 'treats duplicate follow requests as idempotent' do
           described_class.handle_create_follow_request(distant_following)
 

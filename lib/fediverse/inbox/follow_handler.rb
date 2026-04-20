@@ -18,8 +18,12 @@ module Fediverse
           if following.new_record?
             following.federated_url = activity['id']
             following.save!
+            follow_activity ||= following.follow_activity
+            return following if actor.local?
+
             dispatch_followed_callback(target_actor, following, follow_activity)
           else
+            follow_activity ||= following.follow_activity
             following.update!(federated_url: activity['id']) if following.federated_url.blank? && activity['id'].present?
             resend_accept_for_duplicate_follow(following, follow_activity) if following.accepted?
           end
