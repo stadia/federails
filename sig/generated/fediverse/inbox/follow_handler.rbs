@@ -5,10 +5,12 @@ module Fediverse
     module FollowHandler
       # Creates a Following record from an incoming Follow activity.
       # : (Hash[String, untyped]) -> Federails::Following
+      # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
       def self.handle_create_follow_request: (Hash[String, untyped]) -> Federails::Following
 
       # Marks a pending Following as accepted when the target actor confirms.
       # : (Hash[String, untyped]) -> Federails::Activity?
+      # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
       def self.handle_accept_follow_request: (Hash[String, untyped]) -> Federails::Activity?
 
       # Destroys a Following record when the follower undoes their Follow.
@@ -27,6 +29,7 @@ module Fediverse
       private def self.resend_accept_for_duplicate_follow: (Federails::Following, Federails::Activity?) -> void
 
       # : (actor: Federails::Actor, target_actor: Federails::Actor, activity: Hash[String, untyped]) -> Federails::Activity?
+      #  rubocop:disable Metrics/AbcSize
       private def self.inbound_follow_activity: (actor: Federails::Actor, target_actor: Federails::Actor, activity: Hash[String, untyped]) -> Federails::Activity?
 
       # : (Federails::Actor, Federails::Following, Federails::Activity?) -> void
