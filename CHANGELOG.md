@@ -47,6 +47,8 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
   runs **inside** the `accept!` database transaction. Avoid long-running work, external HTTP calls (outside of
   ActiveJob), or non-idempotent side-effects inside these callbacks — they hold the transaction open and cannot be
   rolled back if a subsequent DB step fails.
+- Extracted Follow/Accept/Reject/Undo-Follow inbox handling into `Fediverse::Inbox::FollowHandler` and
+  Delete/Undo-Delete handling into `Fediverse::Inbox::DeleteHandler`; registry-based dispatch behavior stays unchanged.
 
 ### Fixed
 

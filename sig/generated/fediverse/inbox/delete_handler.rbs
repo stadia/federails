@@ -1,0 +1,20 @@
+# Generated from lib/fediverse/inbox/delete_handler.rb with RBS::Inline
+
+module Fediverse
+  class Inbox
+    module DeleteHandler
+      # Early-dispatch path invoked from Inbox.dispatch_request before dereferencing.
+      # Handles the Delete case where the target object may already be gone remotely.
+      # : (Hash[String, untyped]) -> untyped
+      def self.dispatch_delete_request: (Hash[String, untyped]) -> untyped
+
+      # Triggers on_federails_delete_requested callback on the matching local object.
+      # : (Hash[String, untyped]) -> void
+      def self.handle_delete_request: (Hash[String, untyped]) -> void
+
+      # Triggers on_federails_undelete_requested callback when an Undo+Delete is received.
+      # : (Hash[String, untyped]) -> void
+      def self.handle_undelete_request: (Hash[String, untyped]) -> void
+    end
+  end
+end
