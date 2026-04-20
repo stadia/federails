@@ -169,6 +169,25 @@ RSpec.describe Federails::Server::ActivityResource do
     end
   end
 
+  context 'when rendering an Update activity for an actor' do
+    let(:entity) { Fixtures::Classes::FakeUserModel.create!(email: 'before@example.com') }
+    let(:activity) do
+      entity.update!(email: 'after@example.com')
+      Federails::Activity.where(action: 'Update').order(:id).last
+    end
+    let(:json_result) { render_activity(activity) }
+
+    it 'embeds the updated actor object' do
+      aggregate_failures do
+        expect(json_result['object']).to be_a(Hash)
+        expect(json_result.dig('object', 'id')).to eq(entity.federails_actor.federated_url)
+        expect(json_result.dig('object', 'type')).to eq(entity.federails_actor.actor_type)
+        expect(json_result.dig('object', 'preferredUsername')).to eq(entity.federails_actor.username)
+        expect(json_result.dig('object', 'name')).to eq('after@example.com')
+      end
+    end
+  end
+
   context 'when rendering an activity with audience, bto, and bcc' do
     let!(:activity) do
       FactoryBot.create(

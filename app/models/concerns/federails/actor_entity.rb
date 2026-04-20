@@ -131,6 +131,7 @@ module Federails
 
         Federails.actor_entity(self)[:auto_create_actors]
       }
+      after_update :create_federails_update_activity
       before_destroy :tombstone_federails_actor!
     end
 
@@ -170,6 +171,13 @@ module Federails
 
     def create_federails_actor
       Federails::Actor.create_with(local: create_federails_actor_as_local?).find_or_create_by!(entity: self)
+    end
+
+    def create_federails_update_activity
+      return unless federails_actor&.local?
+      return if federails_actor.tombstoned?
+
+      Federails::Activity.create!(actor: federails_actor, action: 'Update', entity: federails_actor)
     end
 
     def tombstone_federails_actor!

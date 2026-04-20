@@ -51,6 +51,33 @@ module Federails
         end
       end
 
+      describe 'after_update: create_federails_activity' do
+        context 'with a local actor' do
+          let(:instance) { Fixtures::Classes::FakeUserModel.create! email: Faker::Internet.unique.email }
+
+          it 'creates an update activity for the actor' do
+            expect { instance.update!(email: Faker::Internet.unique.email) }
+              .to change(Federails::Activity.where(action: 'Update'), :count).by(1)
+
+            activity = Federails::Activity.order(:id).last
+
+            aggregate_failures do
+              expect(activity.actor).to eq(instance.federails_actor)
+              expect(activity.entity).to eq(instance.federails_actor)
+            end
+          end
+        end
+
+        context 'without an associated actor' do
+          let(:instance) { Fixtures::Classes::FakeUserModelWithoutAutoCreation.create! email: Faker::Internet.unique.email }
+
+          it 'does not create an update activity' do
+            expect { instance.update!(email: Faker::Internet.unique.email) }
+              .not_to change(Federails::Activity.where(action: 'Update'), :count)
+          end
+        end
+      end
+
       describe '.before_destroy' do
         context 'when ActorEntity has an associated actor' do
           let(:instance) { Fixtures::Classes::FakeUserModel.create! email: Faker::Internet.unique.email }
