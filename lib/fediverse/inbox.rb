@@ -42,7 +42,7 @@ module Fediverse
         dispatched_at = Time.current
 
         if payload['type'] == 'Delete'
-          result = dispatch_delete_request(payload)
+          result = DeleteHandler.dispatch_delete_request(payload)
           record_processed_activity(payload, dispatched_at) if result
           return result
         end
@@ -132,15 +132,6 @@ module Fediverse
         Federails.logger.warn { "Failed to record processed activity #{federated_url}: #{e.message}" }
       end
 
-      # Handles Delete activities by finding the local object and triggering its delete callback.
-      def dispatch_delete_request(payload)
-        payload['object'] = payload['object']['id'] unless payload['object'].is_a? String
-        object = Federails::Utils::Object.find_distant_object_in_all payload['object']
-        return if object.blank?
-
-        object.run_callbacks :on_federails_delete_requested
-      end
-
       # Returns merged handlers matching the given activity and object types,
       # including wildcard ('*') registrations.
       def get_handlers(activity_type, object_type)
@@ -148,115 +139,6 @@ module Fediverse
           .merge(@@handlers.dig(activity_type, '*') || {})
           .merge(@@handlers.dig('*', '*') || {})
           .merge(@@handlers.dig('*', object_type) || {})
-      end
-
-      # Creates a Following record from an incoming Follow activity.
-      #: (Hash[String, untyped]) -> Federails::Following
-      def handle_create_follow_request(activity)
-        actor        = Federails::Actor.find_or_create_by_object activity['actor']
-        target_actor = Federails::Actor.find_or_create_by_object activity['object']
-
-        follow_activity = inbound_follow_activity(actor: actor, target_actor: target_actor, activity: activity)
-        following = Federails::Following.find_or_initialize_by actor: actor, target_actor: target_actor
-        if following.new_record?
-          following.federated_url = activity['id']
-          following.save!
-          dispatch_followed_callback(target_actor, following, follow_activity)
-        else
-          following.update!(federated_url: activity['id']) if following.federated_url.blank? && activity['id'].present?
-          resend_accept_for_duplicate_follow(following, follow_activity) if following.accepted?
-        end
-
-        following
-      end
-
-      # Re-sends an Accept Activity when a Follow is received for an already-accepted Following
-      # under a new activity id. De-duplication in dispatch_request ensures this path is only
-      # reached for genuinely new inbound Follow activities.
-      #: (Federails::Following, Federails::Activity?) -> void
-      def resend_accept_for_duplicate_follow(following, follow_activity)
-        return unless follow_activity
-
-        Federails::Activity.create!(
-          actor:  following.target_actor,
-          action: 'Accept',
-          entity: follow_activity,
-          to:     [following.actor.federated_url]
-        )
-      end
-
-      # Marks a pending Following as accepted when the target actor confirms.
-      #: (Hash[String, untyped]) -> Federails::Activity?
-      def handle_accept_follow_request(activity)
-        original_activity = Request.dereference(activity['object'])
-
-        actor        = Federails::Actor.find_or_create_by_object original_activity['actor']
-        target_actor = Federails::Actor.find_or_create_by_object original_activity['object']
-        raise 'Follow not accepted by target actor but by someone else' if activity['actor'] != target_actor.federated_url
-
-        follow = Federails::Following.find_by actor: actor, target_actor: target_actor
-        unless follow
-          Federails.logger.warn do
-            "Follow not found for #{actor.federated_url} -> #{target_actor.federated_url}. " \
-              "Original activity id: #{activity['object']}"
-          end
-          return
-        end
-
-        follow_activity = follow.follow_activity
-        unless follow_activity
-          Federails.logger.warn do
-            "Follow activity not found for #{actor.federated_url} -> #{target_actor.federated_url}. " \
-              "Original activity id: #{activity['object']}"
-          end
-          return
-        end
-        follow.accept!(follow_activity: follow_activity)
-      end
-
-      # Destroys a Following record when the follower undoes their Follow.
-      #: (Hash[String, untyped]) -> Federails::Following?
-      def handle_undo_follow_request(activity)
-        original_activity = activity['object']
-
-        actor        = Federails::Actor.find_or_create_by_object original_activity['actor']
-        target_actor = Federails::Actor.find_or_create_by_object original_activity['object']
-
-        follow = Federails::Following.find_by actor: actor, target_actor: target_actor
-        follow&.destroy
-      end
-
-      # Destroys a pending Following when the target actor rejects the request.
-      # AP Section 7.7: MUST NOT add to Following collection on Reject.
-      #: (Hash[String, untyped]) -> Federails::Following?
-      def handle_reject_follow_request(activity)
-        original_activity = Request.dereference(activity['object'])
-
-        actor = Federails::Actor.find_or_create_by_object(original_activity['actor'])
-        target_actor = Federails::Actor.find_or_create_by_object(original_activity['object'])
-        raise 'Follow not rejected by target actor but by someone else' if activity['actor'] != target_actor.federated_url
-
-        follow = Federails::Following.pending.find_by(actor: actor, target_actor: target_actor)
-        follow&.destroy
-      end
-
-      # Triggers on_federails_delete_requested callback on the matching local object.
-      #: (Hash[String, untyped]) -> void
-      def handle_delete_request(activity)
-        object = Federails::Utils::Object.find_distant_object_in_all(activity['object'])
-        return if object.blank?
-
-        object.run_callbacks :on_federails_delete_requested
-      end
-
-      # Triggers on_federails_undelete_requested callback when an Undo+Delete is received.
-      #: (Hash[String, untyped]) -> void
-      def handle_undelete_request(activity)
-        delete_activity = Request.dereference(activity['object'])
-        object = Federails::Utils::Object.find_distant_object_in_all(delete_activity['object'])
-        return if object.blank?
-
-        object.run_callbacks :on_federails_undelete_requested
       end
 
       # Compares host and port of two URLs for same-origin verification (AP Section 7.3).
@@ -335,28 +217,6 @@ module Fediverse
         end
       end
 
-      #: (actor: Federails::Actor, target_actor: Federails::Actor, activity: Hash[String, untyped]) -> Federails::Activity?
-      def inbound_follow_activity(actor:, target_actor:, activity:)
-        return Federails::Activity.find_by(actor: actor, action: 'Follow', entity: target_actor) if actor.local?
-
-        Federails::Activity.find_or_initialize_by(actor: actor, action: 'Follow', entity: target_actor).tap do |follow_activity|
-          follow_activity.federated_url = activity['id'] if follow_activity.federated_url.blank? && activity['id'].present?
-          follow_activity.to = activity['to'] || [target_actor.federated_url]
-          follow_activity.cc = activity['cc']
-          follow_activity.bto = activity['bto']
-          follow_activity.bcc = activity['bcc']
-          follow_activity.audience = activity['audience']
-          follow_activity.save! if follow_activity.new_record? || follow_activity.changed?
-        end
-      end
-
-      #: (Federails::Actor, Federails::Following, Federails::Activity?) -> void
-      def dispatch_followed_callback(target_actor, following, follow_activity)
-        return unless target_actor&.entity
-
-        target_actor.entity.class.send(:dispatch_followed_callback, target_actor.entity, following, follow_activity: follow_activity)
-      end
-
       #: (Federails::Activity, Hash[String, untyped]) -> void
       def update_processed_activity!(activity, payload)
         addressing_fields = %w[to cc bto bcc audience]
@@ -367,12 +227,6 @@ module Fediverse
       end
     end
 
-    register_handler 'Follow', '*', self, :handle_create_follow_request
-    register_handler 'Accept', 'Follow', self, :handle_accept_follow_request
-    register_handler 'Reject', 'Follow', self, :handle_reject_follow_request
-    register_handler 'Undo', 'Follow', self, :handle_undo_follow_request
-    register_handler 'Delete', '*', self, :handle_delete_request
-    register_handler 'Undo', 'Delete', self, :handle_undelete_request
     register_handler 'Like', '*', Fediverse::Inbox::LikeHandler, :handle_like
     register_handler 'Undo', 'Like', Fediverse::Inbox::LikeHandler, :handle_undo_like
     register_handler 'Announce', '*', Fediverse::Inbox::AnnounceHandler, :handle_announce
@@ -381,3 +235,6 @@ module Fediverse
     register_handler 'Undo', 'Block', Fediverse::Inbox::BlockHandler, :handle_undo_block
   end
 end
+
+require 'fediverse/inbox/follow_handler'
+require 'fediverse/inbox/delete_handler'

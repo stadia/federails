@@ -42,37 +42,9 @@ module Fediverse
     # : (Hash[String, untyped], ActiveSupport::TimeWithZone) -> void
     private def self.record_processed_activity: (Hash[String, untyped], ActiveSupport::TimeWithZone) -> void
 
-    # Handles Delete activities by finding the local object and triggering its delete callback.
-    private def self.dispatch_delete_request: (untyped payload) -> untyped
-
     # Returns merged handlers matching the given activity and object types,
     # including wildcard ('*') registrations.
     private def self.get_handlers: (untyped activity_type, untyped object_type) -> untyped
-
-    # Creates a Following record from an incoming Follow activity.
-    # : (Hash[String, untyped]) -> Federails::Following
-    private def self.handle_create_follow_request: (Hash[String, untyped]) -> Federails::Following
-
-    # Marks a pending Following as accepted when the target actor confirms.
-    # : (Hash[String, untyped]) -> Federails::Activity?
-    private def self.handle_accept_follow_request: (Hash[String, untyped]) -> Federails::Activity?
-
-    # Destroys a Following record when the follower undoes their Follow.
-    # : (Hash[String, untyped]) -> Federails::Following?
-    private def self.handle_undo_follow_request: (Hash[String, untyped]) -> Federails::Following?
-
-    # Destroys a pending Following when the target actor rejects the request.
-    # AP Section 7.7: MUST NOT add to Following collection on Reject.
-    # : (Hash[String, untyped]) -> Federails::Following?
-    private def self.handle_reject_follow_request: (Hash[String, untyped]) -> Federails::Following?
-
-    # Triggers on_federails_delete_requested callback on the matching local object.
-    # : (Hash[String, untyped]) -> void
-    private def self.handle_delete_request: (Hash[String, untyped]) -> void
-
-    # Triggers on_federails_undelete_requested callback when an Undo+Delete is received.
-    # : (Hash[String, untyped]) -> void
-    private def self.handle_undelete_request: (Hash[String, untyped]) -> void
 
     # Compares host and port of two URLs for same-origin verification (AP Section 7.3).
     # : (String?, String?) -> bool
@@ -103,12 +75,6 @@ module Fediverse
     # Falls back to actor when the actual object cannot be resolved.
     # : (Hash[String, untyped], Federails::Actor) -> untyped
     private def self.entity_for_processed_activity: (Hash[String, untyped], Federails::Actor) -> untyped
-
-    # : (actor: Federails::Actor, target_actor: Federails::Actor, activity: Hash[String, untyped]) -> Federails::Activity?
-    private def self.inbound_follow_activity: (actor: Federails::Actor, target_actor: Federails::Actor, activity: Hash[String, untyped]) -> Federails::Activity?
-
-    # : (Federails::Actor, Federails::Following, Federails::Activity?) -> void
-    private def self.dispatch_followed_callback: (Federails::Actor, Federails::Following, Federails::Activity?) -> void
 
     # : (Federails::Activity, Hash[String, untyped]) -> void
     private def self.update_processed_activity!: (Federails::Activity, Hash[String, untyped]) -> void

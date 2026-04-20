@@ -1,0 +1,36 @@
+# Generated from lib/fediverse/inbox/follow_handler.rb with RBS::Inline
+
+module Fediverse
+  class Inbox
+    module FollowHandler
+      # Creates a Following record from an incoming Follow activity.
+      # : (Hash[String, untyped]) -> Federails::Following
+      def self.handle_create_follow_request: (Hash[String, untyped]) -> Federails::Following
+
+      # Marks a pending Following as accepted when the target actor confirms.
+      # : (Hash[String, untyped]) -> Federails::Activity?
+      def self.handle_accept_follow_request: (Hash[String, untyped]) -> Federails::Activity?
+
+      # Destroys a Following record when the follower undoes their Follow.
+      # : (Hash[String, untyped]) -> Federails::Following?
+      def self.handle_undo_follow_request: (Hash[String, untyped]) -> Federails::Following?
+
+      # Destroys a pending Following when the target actor rejects the request.
+      # AP Section 7.7: MUST NOT add to Following collection on Reject.
+      # : (Hash[String, untyped]) -> Federails::Following?
+      def self.handle_reject_follow_request: (Hash[String, untyped]) -> Federails::Following?
+
+      # Re-sends an Accept Activity when a Follow is received for an already-accepted Following
+      # under a new activity id. De-duplication in dispatch_request ensures this path is only
+      # reached for genuinely new inbound Follow activities.
+      # : (Federails::Following, Federails::Activity?) -> void
+      private def self.resend_accept_for_duplicate_follow: (Federails::Following, Federails::Activity?) -> void
+
+      # : (actor: Federails::Actor, target_actor: Federails::Actor, activity: Hash[String, untyped]) -> Federails::Activity?
+      private def self.inbound_follow_activity: (actor: Federails::Actor, target_actor: Federails::Actor, activity: Hash[String, untyped]) -> Federails::Activity?
+
+      # : (Federails::Actor, Federails::Following, Federails::Activity?) -> void
+      private def self.dispatch_followed_callback: (Federails::Actor, Federails::Following, Federails::Activity?) -> void
+    end
+  end
+end
