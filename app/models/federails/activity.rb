@@ -28,6 +28,8 @@ module Federails
 
     serialize :cc, coder: YAML
     serialize :to, coder: YAML
+    serialize :result, coder: YAML
+    serialize :instrument, coder: YAML
 
     # Sends an Undo activity to reverse this one.
     #

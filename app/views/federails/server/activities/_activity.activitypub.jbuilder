@@ -13,6 +13,8 @@ if addressing
     }.compact
   )
 end
+json.result activity.result if activity.result
+json.result activity.instrument if activity.instrument
 
 if activity.entity.is_a? Federails::Activity
   json.object { json.partial!('federails/server/activities/activity', activity: activity.entity, context: false, addressing: false) }

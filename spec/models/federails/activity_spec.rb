@@ -22,7 +22,7 @@ module Federails
       end
     end
 
-    [:to, :cc].each do |attr|
+    [:to, :cc, :instrument, :result].each do |attr|
       describe "serializing #{attr} field" do
         let(:addresses) { ['https://example.com/@abc123', 'https://example.social/@def456'] }
         let(:activity) { described_class.create!(:actor => alice, :entity => bob, :action => 'Create', attr => addresses) }
