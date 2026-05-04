@@ -45,8 +45,11 @@ module Federails
     #   that the original author of a replied-to post is always addressed.
     #: () -> void
     def set_default_addressing
+      # Default to public collection when to is not explicitly set.
       self.to = [Fediverse::Collection::PUBLIC] if to.blank?
 
+      # After the line above, to is guaranteed non-empty because we either
+      # kept the existing value or defaulted to [PUBLIC].
       default_cc = []
 
       # Followers are only relevant for public activities
@@ -58,7 +61,9 @@ module Federails
       # Reply recipients are always included so remote authors receive the reply
       default_cc.concat(Array(entity.try(:federation_reply_recipients)))
 
-      self.cc = (Array(cc) + default_cc).compact.uniq.presence
+      # Only modify cc when we have something to add. This preserves explicit
+      # empty arrays ([]) and avoids unexpectedly nil-ing them out.
+      self.cc = (Array(cc) + default_cc).compact.uniq.presence if default_cc.any?
     end
 
     #: () -> void
