@@ -1,0 +1,36 @@
+# Generated from app/models/federails/activity.rb with RBS::Inline
+
+module Federails
+  # Activities can be compared to a log of what happened in the Fediverse.
+  #
+  # Activities from local actors ends in the actors _outboxes_.
+  # Activities form distant actors comes from the actor's _inbox_.
+  # We try to only keep activities _from_ local actors, and external activities _targetting_ local actors.
+  #
+  # See also:
+  #   - https://www.w3.org/TR/activitypub/#outbox
+  #   - https://www.w3.org/TR/activitypub/#inbox
+  class Activity < ApplicationRecord
+    include Federails::HasUuid
+
+    private
+
+    # Ensures sensible default addressing is always present.
+    #
+    # - +to+ defaults to the public collection when not explicitly set.
+    # - For public activities (to includes the public collection),
+    #   the actor's followers URL and the entity's followers URL (when local)
+    #   are always merged into +cc+.
+    # - Reply recipients from the entity (+federation_reply_recipients+) are
+    #   always merged into +cc+, regardless of activity type.  This ensures
+    #   that the original author of a replied-to post is always addressed.
+    # : () -> void
+    def set_default_addressing: () -> void
+
+    # : () -> void
+    def post_to_inboxes: () -> void
+
+    # : () -> bool
+    def deliverable?: () -> bool
+  end
+end

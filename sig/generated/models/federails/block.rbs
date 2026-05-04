@@ -1,0 +1,6 @@
+# Generated from app/models/federails/block.rb with RBS::Inline
+
+module Federails
+  class Block < ApplicationRecord
+  end
+end

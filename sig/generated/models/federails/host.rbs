@@ -1,0 +1,19 @@
+# Generated from app/models/federails/host.rb with RBS::Inline
+
+module Federails
+  class Host < ApplicationRecord
+    # : () -> bool
+    def same_app?: () -> bool
+
+    # : () -> bool
+    def same_app_and_version?: () -> bool
+
+    # Update from remote data
+    # : () -> bool
+    def sync!: () -> bool
+
+    # Creates or update a Host
+    # : (String, ?min_update_interval: Integer | ActiveSupport::Duration) -> Federails::Host?
+    def self.create_or_update: (String, ?min_update_interval: Integer | ActiveSupport::Duration) -> Federails::Host?
+  end
+end

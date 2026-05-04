@@ -1,4 +1,4 @@
-# rbs_inline: enabled
+# Generated from app/models/concerns/federails/has_uuid.rb with RBS::Inline
 
 module Federails
   # Model concern providing UUIDs as model parameter (instead of IDs).
@@ -28,38 +28,18 @@ module Federails
   module HasUuid
     extend ActiveSupport::Concern
 
-    included do
-      before_validation :generate_uuid
-      validates :uuid, presence: true, uniqueness: true
+    # : (String) -> untyped
+    def self.find_param: (String) -> untyped
 
-      #: (String) -> untyped
-      def self.find_param(param)
-        find_by!(uuid: param)
-      end
-    end
+    # : () -> String
+    def to_param: () -> String
 
-    #: () -> String
-    def to_param
-      uuid
-    end
-
-    #: () -> String
-    def uuid
-      # Override UUID accessor to provide lazy initialization of UUIDs for old data
-      if self[:uuid].blank?
-        generate_uuid
-        save!
-      end
-      self[:uuid]
-    end
+    # : () -> String
+    def uuid: () -> String
 
     private
 
-    #: () -> void
-    def generate_uuid
-      return if self[:uuid].present?
-
-      (self.uuid = SecureRandom.uuid) while self[:uuid].blank? || self.class.exists?(uuid: self[:uuid])
-    end
+    # : () -> void
+    def generate_uuid: () -> void
   end
 end

@@ -1,0 +1,6 @@
+# Generated from app/models/federails/featured_tag.rb with RBS::Inline
+
+module Federails
+  class FeaturedTag < ApplicationRecord
+  end
+end

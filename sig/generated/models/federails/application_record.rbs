@@ -1,0 +1,6 @@
+# Generated from app/models/federails/application_record.rb with RBS::Inline
+
+module Federails
+  class ApplicationRecord < ActiveRecord::Base
+  end
+end

@@ -1,0 +1,37 @@
+# Generated from app/models/federails/following.rb with RBS::Inline
+
+module Federails
+  # Stores following data between actors
+  class Following < ApplicationRecord
+    include Federails::HasUuid
+
+    # : () -> String
+    def federated_url: () -> String
+
+    # : (follow_activity: Federails::Activity) -> void
+    def accept!: (follow_activity: Federails::Activity) -> void
+
+    # : () -> Federails::Activity?
+    def follow_activity: () -> Federails::Activity?
+
+    # : (String, actor: Federails::Actor) -> Federails::Following
+    def self.new_from_account: (String, actor: Federails::Actor) -> Federails::Following
+
+    private
+
+    # : () -> bool
+    def locally_instigated?: () -> bool
+
+    # : () -> void
+    def after_follow: () -> void
+
+    # : () -> void
+    def after_follow_accepted: () -> void
+
+    # : () -> Federails::Activity
+    def create_activity: () -> Federails::Activity
+
+    # : () -> Federails::Activity
+    def destroy_activity: () -> Federails::Activity
+  end
+end

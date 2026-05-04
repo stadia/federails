@@ -1,0 +1,30 @@
+# Generated from app/models/concerns/federails/handles_social_activities.rb with RBS::Inline
+
+module Federails
+  # Model concern providing hooks for social activities handled on DataEntity models.
+  module HandlesSocialActivities
+    extend ActiveSupport::Concern
+
+    # Class methods automatically included in the concern.
+    module ClassMethods
+      # : (?Symbol?, **untyped) ?{ (untyped) -> void } -> untyped
+      def on_federails_like_received: (?Symbol?, **untyped) ?{ (untyped) -> void } -> untyped
+
+      # : (?Symbol?, **untyped) ?{ (untyped) -> void } -> untyped
+      def on_federails_undo_like_received: (?Symbol?, **untyped) ?{ (untyped) -> void } -> untyped
+
+      # : (?Symbol?, **untyped) ?{ (untyped) -> void } -> untyped
+      def on_federails_announce_received: (?Symbol?, **untyped) ?{ (untyped) -> void } -> untyped
+
+      # : (?Symbol?, **untyped) ?{ (untyped) -> void } -> untyped
+      def on_federails_undo_announce_received: (?Symbol?, **untyped) ?{ (untyped) -> void } -> untyped
+
+      private
+
+      # : (Symbol, ?Symbol?, **untyped) ?{ (untyped) -> void } -> untyped
+      def register_social_callback: (Symbol, ?Symbol?, **untyped) ?{ (untyped) -> void } -> untyped
+    end
+
+    attr_accessor current_federails_activity_actor: untyped
+  end
+end

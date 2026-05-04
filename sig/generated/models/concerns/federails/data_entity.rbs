@@ -1,6 +1,4 @@
-# rbs_inline: enabled
-
-require 'fediverse/inbox'
+# Generated from app/models/concerns/federails/data_entity.rb with RBS::Inline
 
 module Federails
   # Model concern to include in models for which data is pushed to the Fediverse and comes from the Fediverse.
@@ -98,10 +96,13 @@ module Federails
   # end
   # ```
   module DataEntity
-    class TombstonedError < StandardError; end
+    class TombstonedError < StandardError
+    end
 
     extend ActiveSupport::Concern
+
     include Federails::HandlesDeleteRequests
+
     include Federails::HandlesSocialActivities
 
     # Class methods automatically included in the concern.
@@ -127,109 +128,32 @@ module Federails
       #
       # @example
       #   acts_as_federails_data handles: 'Note', with: :note_handler, route_path_segment: :articles, actor_entity_method: :user
-      def acts_as_federails_data(
-        handles:,
-        with: :handle_incoming_fediverse_data,
-        route_path_segment: nil,
-        actor_entity_method: nil,
-        url_param: :id,
-        filter_method: nil,
-        should_federate_method: :default_should_federate?,
-        soft_deleted_method: nil,
-        soft_delete_date_method: nil
-      )
-        route_path_segment ||= name.pluralize.underscore
-
-        Federails::Configuration.register_data_type self,
-                                                    route_path_segment:      route_path_segment,
-                                                    actor_entity_method:     actor_entity_method,
-                                                    url_param:               url_param,
-                                                    handles:                 handles,
-                                                    with:                    with,
-                                                    filter_method:           filter_method,
-                                                    should_federate_method:  should_federate_method,
-                                                    soft_deleted_method:     soft_deleted_method,
-                                                    soft_delete_date_method: soft_delete_date_method
-
-        # NOTE: Delete activities cannot be handled like this as we can't be sure to have the object's type
-        Fediverse::Inbox.register_handler 'Create', handles, self, with
-        Fediverse::Inbox.register_handler 'Update', handles, self, with
-      end
+      def acts_as_federails_data: (handles: untyped, ?with: untyped, ?route_path_segment: untyped, ?actor_entity_method: untyped, ?url_param: untyped, ?filter_method: untyped, ?should_federate_method: untyped, ?soft_deleted_method: untyped, ?soft_delete_date_method: untyped) -> untyped
 
       # Instantiates a new instance from an ActivityPub object
-      #: (Hash) -> self
-      def new_from_activitypub_object(activitypub_object)
-        new from_activitypub_object(activitypub_object)
-      end
+      # : (Hash) -> self
+      def new_from_activitypub_object: (Hash) -> self
 
       # Creates or updates entity based on the ActivityPub activity
-      #: (Hash | String) -> self
-      def handle_incoming_fediverse_data(activity_hash_or_id)
-        activity = Fediverse::Request.dereference(activity_hash_or_id)
-        object = Fediverse::Request.dereference(activity['object'])
+      # : (Hash | String) -> self
+      def handle_incoming_fediverse_data: (Hash | String) -> self
 
-        entity = Federails::Utils::Object.find_or_create!(object)
-
-        if activity['type'] == 'Update'
-          entity.assign_attributes entity.class.from_activitypub_object(object)
-
-          # Use timestamps from attributes
-          entity.save! touch: false
-        end
-
-        entity
-      end
-
-      #: (**untyped) -> untyped
-      def find_untombstoned_by!(**params)
-        configuration = Federails.data_entity_configuration(self)
-        entity = find_by!(**params)
-
-        raise Federails::DataEntity::TombstonedError if configuration[:soft_deleted_method] && entity.send(configuration[:soft_deleted_method])
-
-        entity
-      end
-    end
-
-    included do
-      belongs_to :federails_actor, class_name: 'Federails::Actor'
-
-      scope :local_federails_entities, -> { where federated_url: nil }
-      scope :distant_federails_entities, -> { where.not(federated_url: nil) }
-
-      before_validation :set_federails_actor
-      after_create -> { create_federails_activity 'Create' }
-      after_update -> { create_federails_activity 'Update' }, unless: :federails_tombstoned?
-      after_destroy -> { create_federails_activity 'Delete' }
+      # : (**untyped) -> untyped
+      def find_untombstoned_by!: (**untyped) -> untyped
     end
 
     # Computed value for the federated URL
-    def federated_url #: String?
-      return nil unless send(federails_data_configuration[:should_federate_method])
-      return attributes['federated_url'] if attributes['federated_url'].present?
-
-      path_segment = Federails.data_entity_configuration(self)[:route_path_segment]
-      url_param = Federails.data_entity_configuration(self)[:url_param]
-      Federails::Engine.routes.url_helpers.server_published_url(publishable_type: path_segment, id: send(url_param))
-    end
+    def federated_url: () -> String?
 
     # Check whether the entity was created locally or comes from the Fediverse
-    def local_federails_entity? #: bool
-      attributes['federated_url'].blank?
-    end
+    def local_federails_entity?: () -> bool
 
-    def federails_tombstoned? #: bool
-      federails_data_configuration[:soft_deleted_method] ? send(federails_data_configuration[:soft_deleted_method]) : false
-    end
+    def federails_tombstoned?: () -> bool
 
-    def federails_tombstoned_at #: DateTime?
-      federails_data_configuration[:soft_delete_date_method] ? send(federails_data_configuration[:soft_delete_date_method]) : nil
-    end
+    def federails_tombstoned_at: () -> DateTime?
 
-    #: () -> Hash[Symbol, untyped]
-    def federails_data_configuration
-      Federails.data_entity_configuration(self)
-    end
+    # : () -> Hash[Symbol, untyped]
+    def federails_data_configuration: () -> Hash[Symbol, untyped]
 
     # Returns additional reply recipients that should be included in the
     # addressing when federating this entity. Override in models that represent
@@ -239,49 +163,23 @@ module Federails
     # @note The returned URLs are inserted directly into the +cc+ field and
     #   delivered via NotifyInboxJob. Ensure values come from trusted sources
     #   to prevent open federation or SSRF vectors.
-    def federation_reply_recipients #: Array[String]
-      []
-    end
+    def federation_reply_recipients: () -> Array[String]
 
-    #: () -> bool
-    def federails_sync!
-      if local_federails_entity?
-        Federails.logger.info { "Ignored attempt to sync a local #{self.class.name}" }
-        return false
-      end
-
-      object = Fediverse::Request.dereference(federated_url)
-
-      update! self.class.from_activitypub_object(object)
-    end
+    # : () -> bool
+    def federails_sync!: () -> bool
 
     private
 
-    #: () -> Federails::Actor?
-    def set_federails_actor
-      return federails_actor if federails_actor.present?
+    # : () -> Federails::Actor?
+    def set_federails_actor: () -> Federails::Actor?
 
-      self.federails_actor = send(federails_data_configuration[:actor_entity_method])&.federails_actor if federails_data_configuration[:actor_entity_method]
+    # : (String) -> Federails::Activity?
+    def create_federails_activity: (String) -> Federails::Activity?
 
-      raise 'Cannot determine actor from configuration' unless federails_actor
-    end
+    # : () -> void
+    def ensure_federails_configuration!: () -> void
 
-    #: (String) -> Federails::Activity?
-    def create_federails_activity(action)
-      ensure_federails_configuration!
-      return unless local_federails_entity? && send(federails_data_configuration[:should_federate_method])
-
-      Activity.create! actor: federails_actor, action: action, entity: self
-    end
-
-    #: () -> void
-    def ensure_federails_configuration!
-      raise("Entity not configured for #{self.class.name}. Did you use \"acts_as_federails_data\"?") unless Federails.data_entity? self
-    end
-
-    #: () -> bool
-    def default_should_federate?
-      true
-    end
+    # : () -> bool
+    def default_should_federate?: () -> bool
   end
 end

@@ -181,6 +181,7 @@ module Federails
       false
     end
 
+    #: () -> Hash[Symbol, untyped]
     def entity_configuration
       raise("Entity not configured for #{entity_type}. Did you use \"acts_as_federails_actor\"?") unless Federails.actor_entity? entity_type
 
@@ -190,6 +191,7 @@ module Federails
     # Synchronizes actor with distant data
     #
     # @raise [ActiveRecord::RecordNotFound] when distant data was not found
+    #: () -> bool
     def sync!
       if local?
         Federails.logger.info 'Ignored attempt to sync a local actor'
@@ -202,14 +204,17 @@ module Federails
       update! new_attributes
     end
 
+    #: () -> bool
     def tombstoned?
       tombstoned_at.present?
     end
 
+    #: () -> Federails::Actor
     def tombstone!
       Federails::Utils::Actor.tombstone! self
     end
 
+    #: () -> void
     def untombstone!
       Federails::Utils::Actor.untombstone! self
     end
@@ -219,6 +224,7 @@ module Federails
       #
       # @param account [String] Account URI (username@host)
       # @return [Federails::Actor, nil]
+      #: (String) -> Federails::Actor
       def find_by_account(account)
         parts = Fediverse::Webfinger.split_account account
         if parts.nil? || parts[:username].blank?
@@ -236,6 +242,7 @@ module Federails
         actor
       end
 
+      #: (String?) -> Federails::Actor?
       def find_by_federation_url(federated_url)
         return find_by_account(federated_url) if federated_url.present? && !federated_url.match?(%r{\Ahttps?://}i) && Fediverse::Webfinger.split_account(federated_url)
 
@@ -248,6 +255,7 @@ module Federails
         Fediverse::Webfinger.fetch_actor_url(federated_url)
       end
 
+      #: (String?) -> Federails::Actor
       def find_by_federation_url!(federated_url)
         find_by_federation_url(federated_url).tap do |actor|
           raise Federails::Actor::TombstonedError if actor.tombstoned?
@@ -255,6 +263,7 @@ module Federails
         end
       end
 
+      #: (String) -> Federails::Actor
       def find_or_create_by_account(account)
         actor = find_by_account account
         # Create/update distant actors
@@ -263,6 +272,7 @@ module Federails
         actor
       end
 
+      #: (String?) -> Federails::Actor
       def find_or_create_by_federation_url(url)
         actor = find_by_federation_url url
         # Create/update distant actors
@@ -272,6 +282,7 @@ module Federails
       end
 
       # Find or create actor from a given actor hash or actor id (actor's URL)
+      #: (String | Hash[String, untyped]) -> Federails::Actor
       def find_or_create_by_object(object)
         case object
         when String
@@ -283,6 +294,7 @@ module Federails
         end
       end
 
+      #: (String) -> Federails::Actor?
       def find_local_by_username(username)
         actor = nil
         Federails::Configuration.actor_types.each_value do |entity|
@@ -296,6 +308,7 @@ module Federails
         Federails::Actor.local.tombstoned.find_by username: username
       end
 
+      #: (String) -> Federails::Actor
       def find_local_by_username!(username)
         find_local_by_username(username).tap do |actor|
           raise ActiveRecord::RecordNotFound if actor.nil?
@@ -303,28 +316,33 @@ module Federails
       end
     end
 
+    #: () -> String?
     def public_key
       ensure_key_pair_exists!
       self[:public_key]
     end
 
+    #: () -> String?
     def private_key
       ensure_key_pair_exists!
       self[:private_key]
     end
 
+    #: () -> String
     def key_id
       "#{federated_url}#main-key"
     end
 
     private
 
+    #: () -> void
     def ensure_key_pair_exists!
       return if self[:private_key].present? || !local?
 
       update!(generate_key_pair)
     end
 
+    #: () -> Hash[Symbol, String]
     def generate_key_pair
       rsa_key = OpenSSL::PKey::RSA.new 2048
       cipher  = OpenSSL::Cipher.new('AES-128-CBC')
@@ -338,6 +356,7 @@ module Federails
       }
     end
 
+    #: () -> bool
     def use_entity_attributes?
       local? && !tombstoned? && entity.present?
     end

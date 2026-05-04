@@ -1,0 +1,144 @@
+# Generated from app/models/federails/actor.rb with RBS::Inline
+
+module Federails
+  # Model storing _distant_ actors and links to local ones.
+  #
+  # To make a model act as an actor, use the `Federails::ActorEntity` concern
+  #
+  # See also:
+  #  - https://www.w3.org/TR/activitypub/#actor-objects
+  class Actor < ApplicationRecord
+    class TombstonedError < StandardError
+    end
+
+    include Federails::HasUuid
+
+    include Federails::HandlesDeleteRequests
+
+    # : () -> bool
+    def distant?: () -> bool
+
+    # : () -> String?
+    def federated_url: () -> String?
+
+    # : () -> String?
+    def username: () -> String?
+
+    # : () -> String?
+    def name: () -> String?
+
+    # : () -> String?
+    def server: () -> String?
+
+    # : () -> String?
+    def actor_type: () -> String?
+
+    # : () -> String?
+    def inbox_url: () -> String?
+
+    # : () -> String?
+    def outbox_url: () -> String?
+
+    # : () -> String?
+    def followers_url: () -> String?
+
+    # : () -> String?
+    def followings_url: () -> String?
+
+    # : () -> String?
+    def shared_inbox_url: () -> String?
+
+    # : () -> String?
+    def profile_url: () -> String?
+
+    # : (?prefix: String) -> String
+    def at_address: (?prefix: String) -> String
+
+    # : () -> String
+    def short_at_address: () -> String
+
+    # : () -> String
+    def acct_uri: () -> String
+
+    # : (String) -> Federails::FeaturedItem
+    def feature: (String) -> Federails::FeaturedItem
+
+    # : (String) -> Federails::FeaturedItem?
+    def unfeature: (String) -> Federails::FeaturedItem?
+
+    # Checks if a given actor follows the current actor
+    # : (Federails::Actor) -> (Federails::Following | false)
+    def follows?: (Federails::Actor) -> (Federails::Following | false)
+
+    # Checks if current actor is followed by the given actor
+    # : (Federails::Actor) -> (Federails::Following | false)
+    def followed_by?: (Federails::Actor) -> (Federails::Following | false)
+
+    # : () -> Hash[Symbol, untyped]
+    def entity_configuration: () -> Hash[Symbol, untyped]
+
+    # Synchronizes actor with distant data
+    #
+    # @raise [ActiveRecord::RecordNotFound] when distant data was not found
+    # : () -> bool
+    def sync!: () -> bool
+
+    # : () -> bool
+    def tombstoned?: () -> bool
+
+    # : () -> Federails::Actor
+    def tombstone!: () -> Federails::Actor
+
+    # : () -> void
+    def untombstone!: () -> void
+
+    # Searches for an actor from account URI
+    #
+    # @param account [String] Account URI (username@host)
+    # @return [Federails::Actor, nil]
+    # : (String) -> Federails::Actor
+    def self.find_by_account: (String) -> Federails::Actor
+
+    # : (String?) -> Federails::Actor?
+    def self.find_by_federation_url: (String?) -> Federails::Actor?
+
+    # : (String?) -> Federails::Actor
+    def self.find_by_federation_url!: (String?) -> Federails::Actor
+
+    # : (String) -> Federails::Actor
+    def self.find_or_create_by_account: (String) -> Federails::Actor
+
+    # : (String?) -> Federails::Actor
+    def self.find_or_create_by_federation_url: (String?) -> Federails::Actor
+
+    # Find or create actor from a given actor hash or actor id (actor's URL)
+    # : (String | Hash[String, untyped]) -> Federails::Actor
+    def self.find_or_create_by_object: (String | Hash[String, untyped]) -> Federails::Actor
+
+    # : (String) -> Federails::Actor?
+    def self.find_local_by_username: (String) -> Federails::Actor?
+
+    # : (String) -> Federails::Actor
+    def self.find_local_by_username!: (String) -> Federails::Actor
+
+    # : () -> String?
+    def public_key: () -> String?
+
+    # : () -> String?
+    def private_key: () -> String?
+
+    # : () -> String
+    def key_id: () -> String
+
+    private
+
+    # : () -> void
+    def ensure_key_pair_exists!: () -> void
+
+    # : () -> Hash[Symbol, String]
+    def generate_key_pair: () -> Hash[Symbol, String]
+
+    # : () -> bool
+    def use_entity_attributes?: () -> bool
+  end
+end

@@ -1,4 +1,4 @@
-# rbs_inline: enabled
+# Generated from app/models/concerns/federails/actor_entity.rb with RBS::Inline
 
 module Federails
   # Concern to include in models that acts as actors.
@@ -40,25 +40,8 @@ module Federails
       #
       # @example
       #   acts_as_federails_actor username_field: :username, name_field: :display_name, profile_url_method: :url_for, actor_type: 'Person'
-      #: (name_field: Symbol, username_field: Symbol, ?profile_url_method: Symbol?, ?actor_type: String, ?user_count_method: Symbol?, ?auto_create_actors: bool) -> void
-      def acts_as_federails_actor(
-        name_field:,
-        username_field:,
-        profile_url_method: nil,
-        actor_type: 'Person',
-        user_count_method: nil,
-        auto_create_actors: true
-      )
-        Federails::Configuration.register_actor_class(
-          self,
-          username_field:     username_field,
-          name_field:         name_field,
-          profile_url_method: profile_url_method,
-          actor_type:         actor_type,
-          user_count_method:  user_count_method,
-          auto_create_actors: auto_create_actors
-        )
-      end
+      # : (name_field: Symbol, username_field: Symbol, ?profile_url_method: Symbol?, ?actor_type: String, ?user_count_method: Symbol?, ?auto_create_actors: bool) -> void
+      def acts_as_federails_actor: (name_field: Symbol, username_field: Symbol, ?profile_url_method: Symbol?, ?actor_type: String, ?user_count_method: Symbol?, ?auto_create_actors: bool) -> void
 
       # Define a method that will be called after the entity receives a follow request.
       # The follow request will be passed as an argument to the method.
@@ -67,10 +50,8 @@ module Federails
       #
       # @example
       #   after_followed :accept_follow
-      #: (Symbol) -> Symbol
-      def after_followed(method_name)
-        @after_followed = method_name
-      end
+      # : (Symbol) -> Symbol
+      def after_followed: (Symbol) -> Symbol
 
       # Define a method that will be called after a follow request made by the entity is accepted
       # The accepted follow request will be passed as an argument to the method.
@@ -79,10 +60,8 @@ module Federails
       #
       # @example
       #   after_follow_accepted :follow_accepted
-      #: (Symbol) -> Symbol
-      def after_follow_accepted(method_name)
-        @after_follow_accepted = method_name
-      end
+      # : (Symbol) -> Symbol
+      def after_follow_accepted: (Symbol) -> Symbol
 
       # Define a method that will be called after an activity has been received
       #
@@ -92,55 +71,16 @@ module Federails
       #
       # @example
       #   after_activity_received 'Create', 'Note', :create_note
-      #: (String, String, Symbol) -> void
-      def after_activity_received(activity_type, object_type, method_name)
-        Fediverse::Inbox.register_handler(activity_type, object_type, self, method_name)
-      end
+      # : (String, String, Symbol) -> void
+      def after_activity_received: (String, String, Symbol) -> void
 
       private
 
-      #: (Symbol, untyped, *untyped) -> void
-      def dispatch_callback(name, instance, *)
-        case name
-        when :after_follow_accepted
-          instance.send(@after_follow_accepted, *) if @after_follow_accepted
-        end
-      end
+      # : (Symbol, untyped, *untyped) -> void
+      def dispatch_callback: (Symbol, untyped, *untyped) -> void
 
-      #: (untyped, Federails::Following, follow_activity: Federails::Activity) -> void
-      def dispatch_followed_callback(instance, follow, follow_activity:)
-        return unless @after_followed
-
-        raise NoMethodError, "Callback method #{@after_followed} is not defined on #{instance.class.name}" unless instance.respond_to?(@after_followed, true)
-
-        # Use instance.class.instance_method (not instance.method) so that
-        # RSpec stubs / other proxies on the singleton class do not alter the
-        # detected parameter signature of the real callback definition.
-        params = instance.class.instance_method(@after_followed).parameters
-        accepts_kwarg = params.any? { |type, name| [:keyreq, :key].include?(type) && name == :follow_activity } ||
-                        params.any? { |type, _| type == :keyrest }
-        if accepts_kwarg
-          instance.send(@after_followed, follow, follow_activity: follow_activity)
-        else
-          Federails.logger.warn do
-            "Callback #{@after_followed} uses legacy single-argument signature. " \
-              'Please update to accept follow_activity: keyword argument.'
-          end
-          instance.send(@after_followed, follow)
-        end
-      end
-    end
-
-    included do
-      has_one :federails_actor, class_name: 'Federails::Actor', as: :entity, dependent: false
-
-      after_create :create_federails_actor, if: lambda {
-        raise("Entity not configured for #{self.class.name}. Did you use \"acts_as_federails_actor\"?") unless Federails.actor_entity? self
-
-        Federails.actor_entity(self)[:auto_create_actors]
-      }
-      after_update :create_federails_update_activity
-      before_destroy :tombstone_federails_actor!
+      # : (untyped, Federails::Following, follow_activity: Federails::Activity) -> void
+      def dispatch_followed_callback: (untyped, Federails::Following, follow_activity: Federails::Activity) -> void
     end
 
     # Add custom data to actor responses.
@@ -164,42 +104,27 @@ module Federails
     #       ]
     #     }
     #   end
-    #: () -> Hash[Symbol | String, untyped]
-    def to_activitypub_object
-      {}
-    end
+    # : () -> Hash[Symbol | String, untyped]
+    def to_activitypub_object: () -> Hash[Symbol | String, untyped]
 
     private
 
     # Result is used to determine if an actor related to this entity should be created as local actor or not
     #
     # Override it in your models if you need distant actors to be related to another entity.
-    #: () -> bool
-    def create_federails_actor_as_local?
-      true
-    end
+    # : () -> bool
+    def create_federails_actor_as_local?: () -> bool
 
-    #: () -> Federails::Actor
-    def create_federails_actor
-      Federails::Actor.create_with(local: create_federails_actor_as_local?).find_or_create_by!(entity: self)
-    end
+    # : () -> Federails::Actor
+    def create_federails_actor: () -> Federails::Actor
 
-    #: () -> Federails::Activity?
-    def create_federails_update_activity
-      return unless federails_actor&.local?
-      return if federails_actor.tombstoned?
+    # : () -> Federails::Activity?
+    def create_federails_update_activity: () -> Federails::Activity?
 
-      Federails::Activity.create!(actor: federails_actor, action: 'Update', entity: federails_actor)
-    end
+    # : () -> Federails::Actor?
+    def tombstone_federails_actor!: () -> Federails::Actor?
 
-    #: () -> Federails::Actor?
-    def tombstone_federails_actor!
-      federails_actor.presence&.tombstone!
-    end
-
-    #: () -> void
-    def untombstone_federails_actor!
-      federails_actor.presence&.untombstone!
-    end
+    # : () -> void
+    def untombstone_federails_actor!: () -> void
   end
 end
