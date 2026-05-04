@@ -247,10 +247,6 @@ module Federails
       []
     end
 
-    def federation_reply_recipients
-      []
-    end
-
     def federails_sync!
       if local_federails_entity?
         Federails.logger.info { "Ignored attempt to sync a local #{self.class.name}" }
