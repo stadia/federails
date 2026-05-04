@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module Federails
   class Block < ApplicationRecord
     belongs_to :actor

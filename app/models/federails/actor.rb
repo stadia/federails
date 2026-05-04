@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 require 'federails/utils/host'
 require 'federails/utils/actor'
 require 'fediverse/webfinger'
@@ -63,50 +65,61 @@ module Federails
     on_federails_delete_requested -> { tombstone! }
     on_federails_undelete_requested -> { untombstone! }
 
+    #: () -> bool
     def distant?
       !local?
     end
 
+    #: () -> String?
     def federated_url
       use_entity_attributes? ? Federails::Engine.routes.url_helpers.server_actor_url(self) : attributes['federated_url'].presence
     end
 
+    #: () -> String?
     def username
       return attributes['username'] unless use_entity_attributes?
 
       entity.send(entity_configuration[:username_field]).to_s
     end
 
+    #: () -> String?
     def name
       value = (entity.send(entity_configuration[:name_field]).to_s if use_entity_attributes?)
 
       value || attributes['name'] || username
     end
 
+    #: () -> String?
     def server
       use_entity_attributes? ? Utils::Host.localhost : attributes['server']
     end
 
+    #: () -> String?
     def actor_type
       use_entity_attributes? ? entity_configuration[:actor_type] : attributes['actor_type']
     end
 
+    #: () -> String?
     def inbox_url
       use_entity_attributes? ? Federails::Engine.routes.url_helpers.server_actor_inbox_url(self) : attributes['inbox_url']
     end
 
+    #: () -> String?
     def outbox_url
       use_entity_attributes? ? Federails::Engine.routes.url_helpers.server_actor_outbox_url(self) : attributes['outbox_url']
     end
 
+    #: () -> String?
     def followers_url
       use_entity_attributes? ? Federails::Engine.routes.url_helpers.followers_server_actor_url(self) : attributes['followers_url']
     end
 
+    #: () -> String?
     def followings_url
       use_entity_attributes? ? Federails::Engine.routes.url_helpers.following_server_actor_url(self) : attributes['followings_url']
     end
 
+    #: () -> String?
     def shared_inbox_url
       if use_entity_attributes?
         Federails::Engine.routes.url_helpers.server_shared_inbox_url
@@ -115,6 +128,7 @@ module Federails
       end
     end
 
+    #: () -> String?
     def profile_url
       return attributes['profile_url'].presence unless use_entity_attributes?
 
@@ -124,29 +138,33 @@ module Federails
       Rails.application.routes.url_helpers.send method, [entity]
     end
 
+    #: (?prefix: String) -> String
     def at_address(prefix: '@')
       "#{prefix}#{username}@#{server}"
     end
 
+    #: () -> String
     def short_at_address
       use_entity_attributes? ? "@#{username}" : at_address
     end
 
+    #: () -> String
     def acct_uri
       "acct:#{username}@#{server}"
     end
 
+    #: (String) -> Federails::FeaturedItem
     def feature(federated_url)
       featured_items.find_or_create_by!(federated_url: federated_url)
     end
 
+    #: (String) -> Federails::FeaturedItem?
     def unfeature(federated_url)
       featured_items.find_by(federated_url: federated_url)&.destroy!
     end
 
     # Checks if a given actor follows the current actor
-    #
-    # @return [Federails::Following, false]
+    #: (Federails::Actor) -> (Federails::Following | bool)
     def follows?(actor)
       list = following_follows.where target_actor: actor
       return list.first if list.one?
@@ -155,8 +173,7 @@ module Federails
     end
 
     # Checks if current actor is followed by the given actor
-    #
-    # @return [Federails::Following, false]
+    #: (Federails::Actor) -> (Federails::Following | bool)
     def followed_by?(actor)
       list = following_followers.where actor: actor
       return list.first if list.one?
