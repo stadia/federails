@@ -58,8 +58,17 @@ module Federails
         default_cc << entity.try(:followers_url) if entity.try(:local?)
       end
 
-      # Reply recipients are always included so remote authors receive the reply
-      default_cc.concat(Array(entity.try(:federation_reply_recipients)))
+      # Reply recipients are always included so remote authors receive the reply.
+      # Only well-formed HTTP(S) URLs are accepted to mitigate open-federation
+      # and SSRF risks.
+      reply_recipients = Array(entity.try(:federation_reply_recipients)).filter_map do |url|
+        uri = URI.parse(url)
+        (uri.is_a?(URI::HTTP) && uri.host.present?) ? url : nil
+      rescue URI::InvalidURIError
+        Federails.logger.warn { "Invalid federation_reply_recipients URL: #{url.inspect}" }
+        nil
+      end
+      default_cc.concat(reply_recipients)
 
       # Only modify cc when we have something to add. This preserves explicit
       # empty arrays ([]) and avoids unexpectedly nil-ing them out.

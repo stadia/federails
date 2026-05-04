@@ -44,6 +44,26 @@ module Federails
         activity = described_class.create(actor: alice, entity: entity, action: 'Create')
         expect(activity.cc.count(alice.followers_url)).to eq 1
       end
+
+      it 'filters out invalid or non-HTTP URLs from federation_reply_recipients' do
+        entity = Fixtures::Classes::FakeDataModel.create!(
+          title:   'A reply',
+          content: 'reply content',
+          user_id: FactoryBot.create(:user).id
+        )
+        allow(entity).to receive(:federation_reply_recipients).and_return([
+          'https://remote.example/users/original',
+          'not-a-valid-url',
+          'javascript:alert(1)',
+          ''
+        ])
+
+        activity = described_class.create(actor: alice, entity: entity, action: 'Create')
+        expect(activity.cc).to include('https://remote.example/users/original')
+        expect(activity.cc).not_to include('not-a-valid-url')
+        expect(activity.cc).not_to include('javascript:alert(1)')
+        expect(activity.cc).not_to include('')
+      end
     end
 
     describe 'serializing to field' do

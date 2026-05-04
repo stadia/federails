@@ -42,15 +42,6 @@ module Fediverse
     end
 
     it 'includes bto/bcc recipients in delivery targets' do
-      # set_default_addressing now merges actor.followers_url into cc.
-      # Stub its resolution so it falls through to the local collection
-      # resolver instead of making an HTTP request.
-      allow(Federails::Actor).to receive(:find_or_create_by_federation_url).and_call_original
-      allow(Federails::Actor).to receive(:find_or_create_by_federation_url)
-        .with(activity.actor.followers_url)
-        .and_raise(ActiveRecord::RecordNotFound)
-
-      # bto/bcc recipients should be included in inboxes_for
       inboxes = described_class.send(:inboxes_for, activity)
       # The bto/bcc URLs are non-existent actors, so they may fail to resolve,
       # but the important thing is that the method attempts to include them
