@@ -1,7 +1,7 @@
 module Federails
   module Server
     class ActivityResource < BaseResource
-      URI_ONLY_OBJECT_ACTIONS = %w[Like Announce].freeze
+      URI_ONLY_OBJECT_ACTIONS = %w[Follow Like Announce].freeze
 
       attribute :@context do |_activity|
         Federails::SerializerSupport.json_ld_context if include_context?
@@ -41,13 +41,15 @@ module Federails
       end
 
       def serialize_object(entity, action: nil)
+        # For Follow, Like, Announce, etc. return only the object's URI
+        return entity.federated_url if action.in?(URI_ONLY_OBJECT_ACTIONS) && entity.respond_to?(:federated_url)
+
         case entity
         when Federails::Activity
           self.class.new(entity, params: { context: false, addressing: false }).serializable_hash
         when Federails::Actor
           Federails::Server::ActorResource.new(entity).serializable_hash.except(:@context)
         else
-          return entity.federated_url if action.in?(URI_ONLY_OBJECT_ACTIONS) && entity.respond_to?(:federated_url)
           return entity.to_activitypub_object if entity.respond_to?(:to_activitypub_object)
           return entity.federated_url if entity.respond_to?(:federated_url)
 

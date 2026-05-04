@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module Federails
   # Activities can be compared to a log of what happened in the Fediverse.
   #
@@ -32,24 +34,39 @@ module Federails
 
     private
 
-    # Sets up default public-and-followers addressing unless to and cc are already set
+    # Ensures sensible default addressing is always present.
     #
-    # This retains compatibility with previous behaviour
+    # - +to+ defaults to the public collection when not explicitly set.
+    # - For public activities (to includes the public collection),
+    #   the actor's followers URL and the entity's followers URL (when local)
+    #   are always merged into +cc+.
+    # - Reply recipients from the entity (+federation_reply_recipients+) are
+    #   always merged into +cc+, regardless of activity type.  This ensures
+    #   that the original author of a replied-to post is always addressed.
+    #: () -> void
     def set_default_addressing
-      return if to.present? || cc.present? || bto.present? || bcc.present? || audience.present?
+      self.to = [Fediverse::Collection::PUBLIC] if to.blank?
 
-      self.to = [Fediverse::Collection::PUBLIC]
-      self.cc = [
-        actor.followers_url,
-        (entity.try(:followers_url) if entity.try(:local?)),
-        *Array(entity.try(:federation_reply_recipients)),
-      ].compact.uniq
+      default_cc = []
+
+      # Followers are only relevant for public activities
+      if Array(to).include?(Fediverse::Collection::PUBLIC)
+        default_cc << actor.followers_url
+        default_cc << entity.try(:followers_url) if entity.try(:local?)
+      end
+
+      # Reply recipients are always included so remote authors receive the reply
+      default_cc.concat(Array(entity.try(:federation_reply_recipients)))
+
+      self.cc = (Array(cc) + default_cc).compact.uniq.presence
     end
 
+    #: () -> void
     def post_to_inboxes
       NotifyInboxJob.perform_later(self)
     end
 
+    #: () -> bool
     def deliverable?
       actor.local?
     end
