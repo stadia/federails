@@ -164,7 +164,7 @@ module Federails
     end
 
     # Checks if a given actor follows the current actor
-    #: (Federails::Actor) -> (Federails::Following | bool)
+    #: (Federails::Actor) -> (Federails::Following | false)
     def follows?(actor)
       list = following_follows.where target_actor: actor
       return list.first if list.one?
@@ -173,7 +173,7 @@ module Federails
     end
 
     # Checks if current actor is followed by the given actor
-    #: (Federails::Actor) -> (Federails::Following | bool)
+    #: (Federails::Actor) -> (Federails::Following | false)
     def followed_by?(actor)
       list = following_followers.where actor: actor
       return list.first if list.one?

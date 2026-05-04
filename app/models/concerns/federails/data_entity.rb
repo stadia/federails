@@ -155,7 +155,7 @@ module Federails
       end
 
       # Instantiates a new instance from an ActivityPub object
-      #: (Hash activitypub_object) -> self
+      #: (Hash) -> self
       def new_from_activitypub_object(activitypub_object)
         new from_activitypub_object(activitypub_object)
       end
@@ -231,6 +231,10 @@ module Federails
     # addressing when federating this entity. Override in models that represent
     # replies (e.g., comments on remote posts) to ensure the original author
     # receives the reply.
+    #
+    # @note The returned URLs are inserted directly into the +cc+ field and
+    #   delivered via NotifyInboxJob. Ensure values come from trusted sources
+    #   to prevent open federation or SSRF vectors.
     def federation_reply_recipients #: Array[String]
       []
     end

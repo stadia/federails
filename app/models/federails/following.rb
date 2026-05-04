@@ -29,7 +29,7 @@ module Federails
       attributes['federated_url'].presence || Federails::Engine.routes.url_helpers.server_actor_following_url(actor_id: actor.to_param, id: to_param)
     end
 
-    #: (follow_activity: Federails::Activity?) -> void
+    #: (follow_activity: Federails::Activity) -> void
     def accept!(follow_activity:)
       raise ArgumentError, 'follow_activity is required' if follow_activity.nil?
 
