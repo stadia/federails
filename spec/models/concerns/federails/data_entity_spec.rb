@@ -159,6 +159,15 @@ module Federails
       end
     end
 
+    describe '#federation_reply_recipients' do
+      let(:actor) { FactoryBot.create :local_actor }
+      let!(:entity) { Fixtures::Classes::FakeDataModel.create! federails_actor: actor, title: 'abc', content: 'def' }
+
+      it 'returns an empty array by default' do
+        expect(entity.federation_reply_recipients).to eq []
+      end
+    end
+
     describe 'social activity hooks' do
       it 'defines callback registration methods' do
         expect(Fixtures::Classes::FakeDataModel).to respond_to(:on_federails_like_received)

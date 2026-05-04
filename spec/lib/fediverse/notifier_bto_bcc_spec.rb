@@ -42,7 +42,6 @@ module Fediverse
     end
 
     it 'includes bto/bcc recipients in delivery targets' do
-      # bto/bcc recipients should be included in inboxes_for
       inboxes = described_class.send(:inboxes_for, activity)
       # The bto/bcc URLs are non-existent actors, so they may fail to resolve,
       # but the important thing is that the method attempts to include them

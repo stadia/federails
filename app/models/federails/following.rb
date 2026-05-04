@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module Federails
   # Stores following data between actors
   class Following < ApplicationRecord
@@ -22,10 +24,12 @@ module Federails
 
     scope :with_actor, ->(actor) { where(actor_id: actor.id).or(where(target_actor_id: actor.id)) }
 
+    #: () -> String
     def federated_url
       attributes['federated_url'].presence || Federails::Engine.routes.url_helpers.server_actor_following_url(actor_id: actor.to_param, id: to_param)
     end
 
+    #: (follow_activity: Federails::Activity) -> void
     def accept!(follow_activity:)
       raise ArgumentError, 'follow_activity is required' if follow_activity.nil?
 
@@ -35,11 +39,13 @@ module Federails
       end
     end
 
+    #: () -> Federails::Activity?
     def follow_activity
       Activity.find_by actor: actor, action: 'Follow', entity: target_actor
     end
 
     class << self
+      #: (String, actor: Federails::Actor) -> Federails::Following
       def new_from_account(account, actor:)
         target_actor = Actor.find_or_create_by_account account
         new actor: actor, target_actor: target_actor
@@ -48,10 +54,12 @@ module Federails
 
     private
 
+    #: () -> bool
     def locally_instigated?
       actor.local?
     end
 
+    #: () -> void
     def after_follow
       return unless target_actor&.entity
 
@@ -69,6 +77,7 @@ module Federails
       )
     end
 
+    #: () -> void
     def after_follow_accepted
       return unless status_previously_changed? && status == 'accepted'
       return unless actor&.entity
@@ -76,10 +85,12 @@ module Federails
       actor.entity.class.send(:dispatch_callback, :after_follow_accepted, actor.entity, self)
     end
 
+    #: () -> Federails::Activity
     def create_activity
       Activity.create! actor: actor, action: 'Follow', entity: target_actor, to: [target_actor.federated_url]
     end
 
+    #: () -> Federails::Activity
     def destroy_activity
       Activity.create! actor: actor, action: 'Undo', entity: follow_activity, to: [target_actor.federated_url]
     end
