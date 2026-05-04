@@ -155,19 +155,13 @@ module Federails
       end
 
       # Instantiates a new instance from an ActivityPub object
-      #
-      # @param activitypub_object [Hash]
-      #
-      # @return [self]
+      #: (Hash activitypub_object) -> self
       def new_from_activitypub_object(activitypub_object)
         new from_activitypub_object(activitypub_object)
       end
 
       # Creates or updates entity based on the ActivityPub activity
-      #
-      # @param activity_hash_or_id [Hash, String] Dereferenced activity hash or ID
-      #
-      # @return [self]
+      #: (Hash | String) -> self
       def handle_incoming_fediverse_data(activity_hash_or_id)
         activity = Fediverse::Request.dereference(activity_hash_or_id)
         object = Fediverse::Request.dereference(activity['object'])
@@ -207,9 +201,7 @@ module Federails
     end
 
     # Computed value for the federated URL
-    #
-    # @return [String]
-    def federated_url
+    def federated_url #: String?
       return nil unless send(federails_data_configuration[:should_federate_method])
       return attributes['federated_url'] if attributes['federated_url'].present?
 
@@ -219,17 +211,15 @@ module Federails
     end
 
     # Check whether the entity was created locally or comes from the Fediverse
-    #
-    # @return [Boolean]
-    def local_federails_entity?
+    def local_federails_entity? #: bool
       attributes['federated_url'].blank?
     end
 
-    def federails_tombstoned?
+    def federails_tombstoned? #: bool
       federails_data_configuration[:soft_deleted_method] ? send(federails_data_configuration[:soft_deleted_method]) : false
     end
 
-    def federails_tombstoned_at
+    def federails_tombstoned_at #: DateTime?
       federails_data_configuration[:soft_delete_date_method] ? send(federails_data_configuration[:soft_delete_date_method]) : nil
     end
 
@@ -241,9 +231,7 @@ module Federails
     # addressing when federating this entity. Override in models that represent
     # replies (e.g., comments on remote posts) to ensure the original author
     # receives the reply.
-    #
-    # @return [Array<String>] list of ActivityPub actor URLs to include in cc
-    def federation_reply_recipients
+    def federation_reply_recipients #: Array[String]
       []
     end
 
