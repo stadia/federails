@@ -20,6 +20,30 @@ module Federails
         activity = described_class.create(actor: alice, entity: bob, action: 'Create')
         expect(activity.cc).to include bob.followers_url
       end
+
+      it 'includes federation_reply_recipients from the entity' do
+        entity = Fixtures::Classes::FakeDataModel.create!(
+          title: 'A reply',
+          content: 'reply content',
+          user_id: FactoryBot.create(:user).id
+        )
+        allow(entity).to receive(:federation_reply_recipients).and_return(['https://remote.example/users/original'])
+
+        activity = described_class.create(actor: alice, entity: entity, action: 'Create')
+        expect(activity.cc).to include('https://remote.example/users/original')
+      end
+
+      it 'deduplicates recipients when followers_url overlaps with reply recipients' do
+        entity = Fixtures::Classes::FakeDataModel.create!(
+          title: 'A reply',
+          content: 'reply content',
+          user_id: FactoryBot.create(:user).id
+        )
+        allow(entity).to receive(:federation_reply_recipients).and_return([alice.followers_url])
+
+        activity = described_class.create(actor: alice, entity: entity, action: 'Create')
+        expect(activity.cc.count(alice.followers_url)).to eq 1
+      end
     end
 
     [:to, :cc].each do |attr|

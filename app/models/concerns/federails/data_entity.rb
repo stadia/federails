@@ -237,6 +237,20 @@ module Federails
       Federails.data_entity_configuration(self)
     end
 
+    # Returns additional reply recipients that should be included in the
+    # addressing when federating this entity. Override in models that represent
+    # replies (e.g., comments on remote posts) to ensure the original author
+    # receives the reply.
+    #
+    # @return [Array<String>] list of ActivityPub actor URLs to include in cc
+    def federation_reply_recipients
+      []
+    end
+
+    def federation_reply_recipients
+      []
+    end
+
     def federails_sync!
       if local_federails_entity?
         Federails.logger.info { "Ignored attempt to sync a local #{self.class.name}" }

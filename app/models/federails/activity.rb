@@ -42,6 +42,7 @@ module Federails
       self.cc = [
         actor.followers_url,
         (entity.try(:followers_url) if entity.try(:local?)),
+        *Array(entity.try(:federation_reply_recipients)),
       ].compact.uniq
     end
 
