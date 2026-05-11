@@ -57,7 +57,7 @@ RSpec.describe '/well-known', type: :request do
     context 'when checking content' do
       let(:result) do
         get federails.webfinger_url, params: { resource: "acct:#{user.id}@localhost" }, headers: { accept: accept }
-        JSON.parse response.body # rubocop:disable Rails/ResponseParsedBody
+        response.parsed_body
       end
 
       it 'specifies subject' do

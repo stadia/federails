@@ -29,19 +29,19 @@ RSpec.describe '/federation/actors', type: :request do
 
     it 'includes standard activitypub context' do
       get federails.server_actor_url(user.federails_actor), headers: { accept: Mime[:activitypub] }
-      json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+      json = response.parsed_body
       expect(json['@context']).to include('https://www.w3.org/ns/activitystreams')
     end
 
     it 'includes w3c security context' do
       get federails.server_actor_url(user.federails_actor), headers: { accept: Mime[:activitypub] }
-      json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+      json = response.parsed_body
       expect(json['@context']).to include('https://w3id.org/security/v1')
     end
 
     it 'includes additional context from actor' do # rubocop:todo RSpec/ExampleLength
       get federails.server_actor_url(user.federails_actor), headers: { accept: Mime[:activitypub] }
-      json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+      json = response.parsed_body
       expect(json['@context']).to include(
         {
           'attributionDomains' => {
@@ -73,7 +73,7 @@ RSpec.describe '/federation/actors', type: :request do
       it 'responds with the Tombstone object' do
         get federails.server_actor_url(user.federails_actor), headers: { accept: Mime[:activitypub] }
 
-        hash = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
+        hash = response.parsed_body
 
         aggregate_failures do
           expect(hash.keys).to include '@context', 'type', 'id', 'deleted', 'formerType'
