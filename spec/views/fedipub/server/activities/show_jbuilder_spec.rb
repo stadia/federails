@@ -131,4 +131,29 @@ RSpec.describe 'fedipub/server/activities/show', type: :view do
       expect(json_result['cc']).to include "http://localhost/federation/actors/#{local_actor.uuid}/followers"
     end
   end
+
+  context 'when rendering an activity with result and instrument' do
+    let!(:activity) do
+      FactoryBot.create(
+        :activity,
+        :create,
+        entity:     local_actor,
+        result:     ['https://example.com/results/1'],
+        instrument: ['https://example.com/instruments/1']
+      )
+    end
+    let(:json_result) do
+      assign(:activity, activity)
+      render
+      JSON.parse(rendered)
+    end
+
+    it 'includes result in the serialized activity' do
+      expect(json_result['result']).to eq(['https://example.com/results/1'])
+    end
+
+    it 'includes instrument in the serialized activity' do
+      expect(json_result['instrument']).to eq(['https://example.com/instruments/1'])
+    end
+  end
 end

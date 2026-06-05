@@ -14,7 +14,7 @@ if addressing
   )
 end
 json.result activity.result if activity.result
-json.result activity.instrument if activity.instrument
+json.instrument activity.instrument if activity.instrument
 
 if activity.entity.is_a? Fedipub::Activity
   json.object { json.partial!('fedipub/server/activities/activity', activity: activity.entity, context: false, addressing: false) }
