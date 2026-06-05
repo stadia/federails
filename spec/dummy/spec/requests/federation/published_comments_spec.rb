@@ -12,13 +12,13 @@ RSpec.describe '/federation/published', type: :request do
 
     it 'includes standard JSON-LD context' do
       get federails.server_published_url(publishable_type: 'comments', id: comment.id)
-      json = JSON.parse(response.body)
+      json = response.parsed_body
       expect(json['@context']).to include('https://www.w3.org/ns/activitystreams')
     end
 
     it 'includes additional JSON-LD context' do
       get federails.server_published_url(publishable_type: 'comments', id: comment.id)
-      json = JSON.parse(response.body)
+      json = response.parsed_body
       expect(json['@context']).to include('https://purl.archive.org/miscellany')
       expect(json['@context']).to include({ 'Hashtag' => 'as:Hashtag' })
     end

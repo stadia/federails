@@ -76,6 +76,18 @@ module Federails
       end
     end
 
+    [:result, :instrument].each do |attr|
+      describe "serializing #{attr} field" do
+        let(:addresses) { ['https://example.com/@abc123', 'https://example.social/@def456'] }
+        let(:activity) { described_class.create!(actor: alice, entity: bob, action: 'Create', attr => addresses) }
+
+        it "preserves explicitly set #{attr} addresses" do
+          a = described_class.find(activity.id)
+          expect(a.public_send(attr)).to eq addresses
+        end
+      end
+    end
+
     describe 'serializing cc field' do
       let(:addresses) { ['https://example.com/@abc123', 'https://example.social/@def456'] }
       let(:activity) { described_class.create!(actor: alice, entity: bob, action: 'Create', cc: addresses) }

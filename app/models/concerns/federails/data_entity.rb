@@ -103,6 +103,8 @@ module Federails
     extend ActiveSupport::Concern
     include Federails::HandlesDeleteRequests
     include Federails::HandlesSocialActivities
+    include Federails::Likeable
+    include Federails::Announceable
 
     # Class methods automatically included in the concern.
     module ClassMethods
@@ -266,12 +268,11 @@ module Federails
       raise 'Cannot determine actor from configuration' unless federails_actor
     end
 
-    #: (String) -> Federails::Activity?
-    def create_federails_activity(action)
+    def create_federails_activity(action, actor: federails_actor, to: nil, cc: nil)
       ensure_federails_configuration!
       return unless local_federails_entity? && send(federails_data_configuration[:should_federate_method])
 
-      Activity.create! actor: federails_actor, action: action, entity: self
+      Activity.create! actor: actor, action: action, entity: self, to: to, cc: cc
     end
 
     #: () -> void

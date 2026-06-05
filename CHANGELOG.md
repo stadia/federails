@@ -36,6 +36,9 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 - Actors now advertise `endpoints.sharedInbox` in their ActivityPub document
 - Outgoing delivery prefers remote actor's shared inbox when available
 - New migration: `add_shared_inbox_url_to_federails_actors`
+- Announce (boost/RT), like or dislike `Federails::DataEntity` and `Federails::Actor` objects using new `announce!`, `like!` and `dislike!` methods.
+- Reverse any `Federails::Activity` by calling `undo!` to create an Undo activity addressed in the same way.
+- Set `result` and `instrument` fields for outgoing `Federails::Activity` objects.
 
 ### Changed
 

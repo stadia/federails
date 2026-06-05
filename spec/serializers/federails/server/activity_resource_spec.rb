@@ -213,4 +213,25 @@ RSpec.describe Federails::Server::ActivityResource do
       expect(json_result).not_to have_key('bcc')
     end
   end
+
+  context 'when rendering an activity with result and instrument' do
+    let!(:activity) do
+      FactoryBot.create(
+        :activity,
+        :create,
+        entity:     local_actor,
+        result:     ['https://example.com/results/1'],
+        instrument: ['https://example.com/instruments/1']
+      )
+    end
+    let(:json_result) { render_activity(activity) }
+
+    it 'includes result in the serialized activity' do
+      expect(json_result['result']).to eq(['https://example.com/results/1'])
+    end
+
+    it 'includes instrument in the serialized activity' do
+      expect(json_result['instrument']).to eq(['https://example.com/instruments/1'])
+    end
+  end
 end

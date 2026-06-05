@@ -4,6 +4,9 @@ module Federails
   RSpec.describe DataEntity do
     let(:user) { FactoryBot.create :user }
 
+    it_behaves_like 'Announceable', Fixtures::Classes::FakeDataModel, FactoryBot.attributes_for(:post)
+    it_behaves_like 'Likeable', Fixtures::Classes::FakeDataModel, FactoryBot.attributes_for(:post)
+
     describe '#federated_url' do
       let(:instance) { Fixtures::Classes::FakeDataModel.create! federails_actor: user.federails_actor, title: 'abc', content: 'def' }
 

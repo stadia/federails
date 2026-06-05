@@ -71,7 +71,7 @@ module Federails
             delete_activity = Activity.find_by actor: actor, action: 'Delete', entity: actor
             return unless delete_activity
 
-            Activity.create! actor: actor, action: 'Undo', entity: delete_activity
+            delete_activity.undo!
           end
         end
 

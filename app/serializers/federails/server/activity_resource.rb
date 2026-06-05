@@ -28,6 +28,9 @@ module Federails
         activity.try(:audience) if include_addressing?
       end
 
+      attribute :result, &:result
+      attribute :instrument, &:instrument
+
       attribute :object do |activity|
         serialize_object(activity.entity, action: activity.action)
       end

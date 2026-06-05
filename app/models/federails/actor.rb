@@ -16,6 +16,8 @@ module Federails
 
     include Federails::HasUuid
     include Federails::HandlesDeleteRequests
+    include Federails::Likeable
+    include Federails::Announceable
 
     validates :federated_url, presence: { unless: :entity }, uniqueness: { unless: :local? }
     validates :username, presence: { unless: :local? }
@@ -359,6 +361,12 @@ module Federails
     #: () -> bool
     def use_entity_attributes?
       local? && !tombstoned? && entity.present?
+    end
+
+    def create_federails_activity(action, actor: self, to: nil, cc: nil)
+      return unless local
+
+      Activity.create! actor: actor, action: action, entity: self, to: to, cc: cc
     end
   end
 end

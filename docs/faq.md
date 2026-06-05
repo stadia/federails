@@ -29,3 +29,10 @@ nav_order: 30
     end
   end
   ```
+- **I use FactoryBot, how can I use the Federails factories in my specs?**
+
+  You can include the Federails factories this way in your spec helper:
+  ```rb
+  FactoryBot.definition_file_paths << Federails::Engine.root.join('spec', 'factories')
+  FactoryBot.reload # May be optional given your setup
+  ```

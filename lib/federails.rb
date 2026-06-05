@@ -26,9 +26,6 @@ module Federails
   mattr_reader :configuration
   @@configuration = Configuration
 
-  # Make factories available
-  config.factory_bot.definition_file_paths += [File.expand_path('spec/factories', __dir__)] if defined?(FactoryBotRails)
-
   class << self
     #: () { (Federails::Configuration) -> void } -> void
     def configure
