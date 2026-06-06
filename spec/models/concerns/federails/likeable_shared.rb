@@ -32,6 +32,29 @@ RSpec.shared_examples 'Likeable' do |klass, attributes|
         expect(activity.cc).to include(instance.followers_url) if instance.respond_to?(:followers_url)
       end
     end
+
+    if klass.try(:include?, Federails::DataEntity)
+      context 'when the entity originated from the Fediverse' do
+        let(:actor) { FactoryBot.create :local_actor }
+        let(:remote_actor) { FactoryBot.create :distant_actor }
+        let!(:remote_instance) do
+          klass.create! attributes.merge(
+            federails_actor: remote_actor,
+            federated_url:   "https://remote.example/notes/#{SecureRandom.uuid}"
+          )
+        end
+
+        it 'still creates an outbound Like activity targeting the remote entity' do
+          expect { remote_instance.like! actor: actor }
+            .to change(Federails::Activity.where(action: 'Like'), :count).by 1
+        end
+
+        it 'does not create an activity when the liking actor is not local' do
+          expect { remote_instance.like! actor: remote_actor }
+            .not_to change(Federails::Activity.where(action: 'Like'), :count)
+        end
+      end
+    end
   end
 
   describe 'dislike' do

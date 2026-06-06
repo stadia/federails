@@ -268,11 +268,28 @@ module Federails
       raise 'Cannot determine actor from configuration' unless federails_actor
     end
 
+    # Lifecycle activities (Create/Update/Delete) are auto-fired by callbacks on
+    # the entity itself, so their deliverability depends on the entity's
+    # locality. Social activities (Like/Dislike/Announce/Undo/...) are
+    # initiated by the actor and may target a remote entity we received from
+    # the Fediverse — those must be gated by the actor's locality instead.
+    LIFECYCLE_FEDERAILS_ACTIONS = %w[Create Update Delete].freeze
+    private_constant :LIFECYCLE_FEDERAILS_ACTIONS
+
     def create_federails_activity(action, actor: federails_actor, to: nil, cc: nil)
       ensure_federails_configuration!
-      return unless local_federails_entity? && send(federails_data_configuration[:should_federate_method])
+      return unless federails_activity_deliverable?(action, actor)
 
       Activity.create! actor: actor, action: action, entity: self, to: to, cc: cc
+    end
+
+    #: (String, Federails::Actor?) -> bool
+    def federails_activity_deliverable?(action, actor)
+      if LIFECYCLE_FEDERAILS_ACTIONS.include?(action)
+        local_federails_entity? && send(federails_data_configuration[:should_federate_method])
+      else
+        actor&.local? || false
+      end
     end
 
     #: () -> void
