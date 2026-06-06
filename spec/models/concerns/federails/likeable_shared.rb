@@ -34,6 +34,19 @@ RSpec.shared_examples 'Likeable' do |klass, attributes|
     end
 
     if klass.try(:include?, Federails::DataEntity)
+      context 'when the entity has no publishable federation URL' do
+        let(:actor) { FactoryBot.create :local_actor }
+
+        before do
+          allow(instance).to receive(:federated_url).and_return(nil)
+        end
+
+        it 'does not create an outbound Like activity' do
+          expect { instance.like! actor: actor }
+            .not_to change(Federails::Activity.where(action: 'Like'), :count)
+        end
+      end
+
       context 'when the entity originated from the Fediverse' do
         let(:actor) { FactoryBot.create :local_actor }
         let(:remote_actor) { FactoryBot.create :distant_actor }

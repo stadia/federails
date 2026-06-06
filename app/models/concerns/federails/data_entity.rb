@@ -288,7 +288,7 @@ module Federails
       if LIFECYCLE_FEDERAILS_ACTIONS.include?(action)
         local_federails_entity? && send(federails_data_configuration[:should_federate_method])
       else
-        actor&.local? || false
+        actor&.local? && federated_url.present?
       end
     end
 
