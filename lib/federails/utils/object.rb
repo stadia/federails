@@ -75,7 +75,15 @@ module Federails
           entity = find_or_initialize! object_or_id
           return entity if entity.persisted?
 
-          entity.save!(touch: false)
+          begin
+            entity.save!(touch: false)
+          rescue ActiveRecord::RecordNotUnique
+            existing_entity = entity.class.find_by federated_url: entity[:federated_url]
+            raise unless existing_entity
+
+            return existing_entity
+          end
+
           entity
         end
 

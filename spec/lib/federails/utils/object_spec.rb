@@ -113,6 +113,29 @@ module Federails
             expect { described_class.find_or_create! url }.to raise_error ActiveRecord::RecordNotFound
           end
         end
+
+        context 'when another request creates the entity concurrently' do
+          let(:url) { 'https://example.com/notes/1' }
+          let(:entity_class) { Fixtures::Classes::FakeArticleDataModel }
+          let(:entity) { entity_class.new federated_url: url }
+          let(:persisted_entity) { entity_class.new id: 123, federated_url: url }
+
+          it 'returns the concurrently created entity' do
+            allow(described_class).to receive(:find_or_initialize!).with(url).and_return(entity)
+            allow(entity).to receive(:save!).with(touch: false).and_raise(ActiveRecord::RecordNotUnique)
+            allow(entity_class).to receive(:find_by).with(federated_url: url).and_return(persisted_entity)
+
+            expect(described_class.find_or_create!(url)).to eq persisted_entity
+          end
+
+          it 'reraises when the federated URL still does not exist' do
+            allow(described_class).to receive(:find_or_initialize!).with(url).and_return(entity)
+            allow(entity).to receive(:save!).with(touch: false).and_raise(ActiveRecord::RecordNotUnique)
+            allow(entity_class).to receive(:find_by).with(federated_url: url).and_return(nil)
+
+            expect { described_class.find_or_create!(url) }.to raise_error ActiveRecord::RecordNotUnique
+          end
+        end
       end
 
       describe '.find_distant_object_in_all' do
