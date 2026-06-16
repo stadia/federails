@@ -37,13 +37,27 @@ module Federails
         entry = find_or_initialize_by domain: domain
         return if min_update_interval && entry.persisted? && (entry.updated_at + min_update_interval) > Time.current
 
+        new_record = entry.new_record?
         entry.sync!
-
         entry
+      rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotUnique
+        recover_from_domain_race(domain, new_record)
       rescue Fediverse::NodeInfo::NoActivityPubError
         Federails.logger.info { "#{domain} does not provide ActivityPub service" }
       rescue Federails::Utils::JsonRequest::UnhandledResponseStatus, Faraday::SSLError => e
         Federails.logger.info { "Error connecting to #{domain}: '#{e.message}'" }
+      end
+
+      private
+
+      # Recover from a concurrent insert of the same domain by returning the host
+      # created by the competing job. Re-raise when it is not this race: the entry
+      # was not a fresh insert, or no host with that domain exists.
+      #: (String, bool) -> Federails::Host
+      def recover_from_domain_race(domain, new_record)
+        raise unless new_record
+
+        find_by(domain: domain) || raise
       end
     end
   end
