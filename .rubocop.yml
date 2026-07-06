@@ -4,6 +4,7 @@ plugins:
   - rubocop-performance
   - rubocop-rails
   - rubocop-rake
+  - rubocop-rbs_inline
   - rubocop-rspec
   - rubocop-rspec_rails
   - rubocop-factory_bot
