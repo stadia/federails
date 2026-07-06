@@ -24,11 +24,11 @@ module Federails
   module ActorEntity
     extend ActiveSupport::Concern
 
+    # Parameter kinds that can receive the `follow_activity` keyword argument.
+    FOLLOW_ACTIVITY_KWARG_TYPES = [:keyreq, :key].freeze
+
     # Class methods automatically included in the concern.
     module ClassMethods
-      # Parameter kinds that can receive the `follow_activity` keyword argument.
-      FOLLOW_ACTIVITY_KWARG_TYPES = [:keyreq, :key].freeze
-
       # Configures the mapping between entity and actor
       #
       # @param username_field [Symbol] The method or attribute name that returns the preferred username for ActivityPub
