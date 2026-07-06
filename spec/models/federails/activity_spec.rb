@@ -51,12 +51,13 @@ module Federails
           content: 'reply content',
           user_id: FactoryBot.create(:user).id
         )
-        allow(entity).to receive(:federation_reply_recipients).and_return([
+        recipients = [
           'https://remote.example/users/original',
           'not-a-valid-url',
           'javascript:alert(1)',
-          ''
-        ])
+          '',
+        ]
+        allow(entity).to receive(:federation_reply_recipients).and_return(recipients)
 
         activity = described_class.create(actor: alice, entity: entity, action: 'Create')
         expect(activity.cc).to include('https://remote.example/users/original')
