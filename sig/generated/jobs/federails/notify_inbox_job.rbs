@@ -1,0 +1,7 @@
+# Generated from app/jobs/federails/notify_inbox_job.rb with RBS::Inline
+
+module Federails
+  class NotifyInboxJob < ApplicationJob
+    def perform: (untyped activity, ?untyped inbox_url) -> untyped
+  end
+end

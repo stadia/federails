@@ -1,0 +1,8 @@
+# Generated from app/jobs/federails/fetch_nodeinfo_job.rb with RBS::Inline
+
+module Federails
+  class FetchNodeinfoJob < ApplicationJob
+    # @param domain [String] Domain to create/update
+    def perform: (untyped domain) -> untyped
+  end
+end

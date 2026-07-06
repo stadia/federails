@@ -1,0 +1,8 @@
+# Generated from app/policies/federails/server/following_policy.rb with RBS::Inline
+
+module Federails
+  module Server
+    class FollowingPolicy < Federails::FederailsPolicy
+    end
+  end
+end

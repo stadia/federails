@@ -1,0 +1,19 @@
+# Generated from app/controllers/concerns/federails/server/verify_signature.rb with RBS::Inline
+
+module Federails
+  module Server
+    module VerifySignature
+      extend ActiveSupport::Concern
+
+      private
+
+      def verify_http_signature!: () -> untyped
+
+      def log_signature_failure: (untyped error) -> untyped
+
+      def extract_payload_actor: () -> untyped
+
+      def actor_match?: (untyped payload) -> untyped
+    end
+  end
+end

@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module Fediverse
   module LinkedDataSignature
     class << self

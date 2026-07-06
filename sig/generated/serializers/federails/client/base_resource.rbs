@@ -1,0 +1,9 @@
+# Generated from app/serializers/federails/client/base_resource.rb with RBS::Inline
+
+module Federails
+  module Client
+    class BaseResource
+      include Alba::Resource
+    end
+  end
+end

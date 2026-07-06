@@ -105,6 +105,10 @@ module Federails
 
     include Federails::HandlesSocialActivities
 
+    include Federails::Likeable
+
+    include Federails::Announceable
+
     # Class methods automatically included in the concern.
     module ClassMethods
       # Configures the mapping between entity and Fediverse
@@ -173,8 +177,17 @@ module Federails
     # : () -> Federails::Actor?
     def set_federails_actor: () -> Federails::Actor?
 
-    # : (String) -> Federails::Activity?
-    def create_federails_activity: (String) -> Federails::Activity?
+    # Lifecycle activities (Create/Update/Delete) are auto-fired by callbacks on
+    # the entity itself, so their deliverability depends on the entity's
+    # locality. Social activities (Like/Dislike/Announce/Undo/...) are
+    # initiated by the actor and may target a remote entity we received from
+    # the Fediverse — those must be gated by the actor's locality instead.
+    LIFECYCLE_FEDERAILS_ACTIONS: untyped
+
+    def create_federails_activity: (untyped action, ?actor: untyped, ?to: untyped, ?cc: untyped) -> untyped
+
+    # : (String, Federails::Actor?) -> bool
+    def federails_activity_deliverable?: (String, Federails::Actor?) -> bool
 
     # : () -> void
     def ensure_federails_configuration!: () -> void

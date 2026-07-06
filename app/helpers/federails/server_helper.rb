@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 require 'federails/utils/context'
 
 module Federails

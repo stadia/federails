@@ -13,6 +13,13 @@ module Federails
   class Activity < ApplicationRecord
     include Federails::HasUuid
 
+    # Sends an Undo activity to reverse this one.
+    #
+    # Used for unfollowing, unliking, unboosting, etc.
+    #
+    # @return [Federails::Activity] the new Undo activity
+    def undo!: () -> untyped
+
     private
 
     # Ensures sensible default addressing is always present.

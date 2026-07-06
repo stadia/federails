@@ -1,0 +1,8 @@
+# Generated from app/serializers/federails/client/actor_resource.rb with RBS::Inline
+
+module Federails
+  module Client
+    class ActorResource < BaseResource
+    end
+  end
+end

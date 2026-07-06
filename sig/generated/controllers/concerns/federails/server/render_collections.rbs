@@ -1,0 +1,19 @@
+# Generated from app/controllers/concerns/federails/server/render_collections.rb with RBS::Inline
+
+module Federails
+  module Server
+    module RenderCollections
+      extend ActiveSupport::Concern
+
+      private
+
+      def render_collection: (actor: untyped, collection: untyped, url_helper: untyped) ?{ (?) -> untyped } -> untyped
+
+      def collection_summary_payload: (actor: untyped, pagy: untyped, url_helper: untyped) -> untyped
+
+      def collection_page_payload: (actor: untyped, pagy: untyped, paged: untyped, url_helper: untyped) -> untyped
+
+      def url_for_collection: (untyped url_helper, untyped actor, **untyped params) -> untyped
+    end
+  end
+end

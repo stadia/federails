@@ -1,0 +1,9 @@
+# Generated from app/policies/federails/client/activity_policy.rb with RBS::Inline
+
+module Federails
+  module Client
+    class ActivityPolicy < Federails::FederailsPolicy
+      def feed?: () -> untyped
+    end
+  end
+end

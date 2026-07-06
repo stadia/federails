@@ -1,0 +1,13 @@
+# Generated from app/policies/federails/server/publishable_policy.rb with RBS::Inline
+
+module Federails
+  module Server
+    class PublishablePolicy < Federails::FederailsPolicy
+      def show?: () -> untyped
+
+      class Scope < Scope
+        def resolve: () -> untyped
+      end
+    end
+  end
+end

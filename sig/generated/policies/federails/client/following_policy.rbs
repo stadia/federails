@@ -1,0 +1,23 @@
+# Generated from app/policies/federails/client/following_policy.rb with RBS::Inline
+
+module Federails
+  module Client
+    class FollowingPolicy < Federails::FederailsPolicy
+      def show?: () -> untyped
+
+      def destroy?: () -> untyped
+
+      def accept?: () -> untyped
+
+      def follow?: () -> untyped
+
+      class Scope < Scope
+        def resolve: () -> untyped
+      end
+
+      private
+
+      def in_following?: () -> untyped
+    end
+  end
+end

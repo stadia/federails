@@ -1,0 +1,9 @@
+# Generated from app/policies/federails/server/activity_policy.rb with RBS::Inline
+
+module Federails
+  module Server
+    class ActivityPolicy < Federails::FederailsPolicy
+      def outbox?: () -> untyped
+    end
+  end
+end

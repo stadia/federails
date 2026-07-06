@@ -1,0 +1,19 @@
+# Generated from app/controllers/concerns/federails/server/inbox_payload.rb with RBS::Inline
+
+module Federails
+  module Server
+    module InboxPayload
+      extend ActiveSupport::Concern
+
+      private
+
+      def payload_from_params: () -> untyped
+
+      def validate_payload: (untyped hash) -> untyped
+
+      def compact_payload: (untyped payload) -> untyped
+
+      def supported_inbox_content_type?: () -> untyped
+    end
+  end
+end

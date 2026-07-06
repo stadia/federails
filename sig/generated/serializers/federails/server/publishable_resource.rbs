@@ -1,0 +1,11 @@
+# Generated from app/serializers/federails/server/publishable_resource.rb with RBS::Inline
+
+module Federails
+  module Server
+    class PublishableResource < BaseResource
+      def serializable_hash: () -> untyped
+
+      def publishable_data: (untyped publishable) -> untyped
+    end
+  end
+end

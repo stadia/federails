@@ -1,0 +1,21 @@
+# Generated from app/serializers/federails/server/web_finger_resource.rb with RBS::Inline
+
+module Federails
+  module Server
+    class WebFingerPayload < Struct[untyped]
+      attr_accessor subject(): untyped
+
+      attr_accessor self_href(): untyped
+
+      attr_accessor profile_href(): untyped
+
+      attr_accessor remote_follow_url(): untyped
+
+      def self.new: (?untyped subject, ?untyped self_href, ?untyped profile_href, ?untyped remote_follow_url) -> instance
+                  | (?subject: untyped, ?self_href: untyped, ?profile_href: untyped, ?remote_follow_url: untyped) -> instance
+    end
+
+    class WebFingerResource < BaseResource
+    end
+  end
+end

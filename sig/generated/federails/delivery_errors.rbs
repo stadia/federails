@@ -1,0 +1,23 @@
+# Generated from lib/federails/delivery_errors.rb with RBS::Inline
+
+module Federails
+  class DeliveryError < StandardError
+    attr_reader response_code: untyped
+
+    attr_reader inbox_url: untyped
+
+    def initialize: (untyped message, ?response_code: untyped, ?inbox_url: untyped) -> untyped
+  end
+
+  class PermanentDeliveryError < DeliveryError
+  end
+
+  class InvalidDeliveryPayloadError < PermanentDeliveryError
+  end
+
+  class TemporaryDeliveryError < DeliveryError
+    attr_reader retry_after: untyped
+
+    def initialize: (untyped message, ?response_code: untyped, ?inbox_url: untyped, ?retry_after: untyped) -> untyped
+  end
+end

@@ -1,0 +1,32 @@
+# Generated from app/serializers/federails/server/ordered_collection_resource.rb with RBS::Inline
+
+module Federails
+  module Server
+    class OrderedCollectionPayload
+      def initialize: (untyped attributes) -> untyped
+
+      def id: () -> untyped
+
+      def type: () -> untyped
+
+      def totalItems: () -> untyped
+
+      def first: () -> untyped
+
+      def last: () -> untyped
+
+      def prev: () -> untyped
+
+      def next: () -> untyped
+
+      def partOf: () -> untyped
+
+      def orderedItems: () -> untyped
+
+      def context: () -> untyped
+    end
+
+    class OrderedCollectionResource < BaseResource
+    end
+  end
+end

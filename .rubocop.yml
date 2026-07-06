@@ -210,7 +210,5 @@ Layout/LeadingCommentSpace:
 # file, and ivar would add 800+ offenses; we only lint existing annotations.
 Style/RbsInline/MissingTypeAnnotation:
   Enabled: false
-Style/RbsInline/RequireRbsInlineComment:
-  Enabled: false
 Style/RbsInline/UntypedInstanceVariable:
   Enabled: false

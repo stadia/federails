@@ -1,0 +1,9 @@
+# Generated from app/serializers/federails/serializer_support.rb with RBS::Inline
+
+module Federails
+  module SerializerSupport
+    def self?.json_ld_context: (?additional: untyped) -> untyped
+
+    def self?.route_helpers: () -> untyped
+  end
+end

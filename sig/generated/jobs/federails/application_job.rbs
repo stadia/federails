@@ -1,0 +1,6 @@
+# Generated from app/jobs/federails/application_job.rb with RBS::Inline
+
+module Federails
+  class ApplicationJob < ActiveJob::Base
+  end
+end

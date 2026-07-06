@@ -1,0 +1,29 @@
+# Generated from app/serializers/federails/server/nodeinfo_resource.rb with RBS::Inline
+
+module Federails
+  module Server
+    class NodeinfoPayload < Struct[untyped]
+      attr_accessor software_name(): untyped
+
+      attr_accessor software_version(): untyped
+
+      attr_accessor open_registrations(): untyped
+
+      attr_accessor has_user_counts(): untyped
+
+      attr_accessor total(): untyped
+
+      attr_accessor active_month(): untyped
+
+      attr_accessor active_halfyear(): untyped
+
+      attr_accessor metadata(): untyped
+
+      def self.new: (?untyped software_name, ?untyped software_version, ?untyped open_registrations, ?untyped has_user_counts, ?untyped total, ?untyped active_month, ?untyped active_halfyear, ?untyped metadata) -> instance
+                  | (?software_name: untyped, ?software_version: untyped, ?open_registrations: untyped, ?has_user_counts: untyped, ?total: untyped, ?active_month: untyped, ?active_halfyear: untyped, ?metadata: untyped) -> instance
+    end
+
+    class NodeinfoResource < BaseResource
+    end
+  end
+end

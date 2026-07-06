@@ -15,5 +15,11 @@ module Federails
     # Creates or update a Host
     # : (String, ?min_update_interval: Integer | ActiveSupport::Duration) -> Federails::Host?
     def self.create_or_update: (String, ?min_update_interval: Integer | ActiveSupport::Duration) -> Federails::Host?
+
+    # Recover from a concurrent insert of the same domain by returning the host
+    # created by the competing job. Re-raise when it is not this race: the entry
+    # was not a fresh insert, or no host with that domain exists.
+    # : (String, bool) -> Federails::Host
+    private def self.recover_from_domain_race: (String, bool) -> Federails::Host
   end
 end

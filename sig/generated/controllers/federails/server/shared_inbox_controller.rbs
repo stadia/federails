@@ -1,0 +1,18 @@
+# Generated from app/controllers/federails/server/shared_inbox_controller.rb with RBS::Inline
+
+module Federails
+  module Server
+    class SharedInboxController < Federails::ServerController
+      include Federails::Server::VerifySignature
+
+      include Federails::Server::InboxPayload
+
+      # POST /federation/inbox
+      def create: () -> untyped
+
+      private
+
+      def validate_content_type!: () -> untyped
+    end
+  end
+end

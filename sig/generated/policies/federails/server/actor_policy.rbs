@@ -1,0 +1,23 @@
+# Generated from app/policies/federails/server/actor_policy.rb with RBS::Inline
+
+module Federails
+  module Server
+    class ActorPolicy < Federails::FederailsPolicy
+      def show?: () -> untyped
+
+      def following?: () -> untyped
+
+      def followers?: () -> untyped
+
+      def liked?: () -> untyped
+
+      def featured?: () -> untyped
+
+      def featured_tags?: () -> untyped
+
+      class Scope < Scope
+        def resolve: () -> untyped
+      end
+    end
+  end
+end

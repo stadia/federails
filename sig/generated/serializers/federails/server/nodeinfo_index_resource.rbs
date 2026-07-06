@@ -1,0 +1,15 @@
+# Generated from app/serializers/federails/server/nodeinfo_index_resource.rb with RBS::Inline
+
+module Federails
+  module Server
+    class NodeinfoIndexPayload < Struct[untyped]
+      attr_accessor href(): untyped
+
+      def self.new: (?untyped href) -> instance
+                  | (?href: untyped) -> instance
+    end
+
+    class NodeinfoIndexResource < BaseResource
+    end
+  end
+end

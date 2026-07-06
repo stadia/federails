@@ -1,0 +1,38 @@
+# Generated from app/controllers/federails/client/followings_controller.rb with RBS::Inline
+
+module Federails
+  module Client
+    class FollowingsController < Federails::ClientController
+      # GET /app/followings/new?uri={uri}
+      def new: () -> untyped
+
+      # PUT /app/followings/:id/accept
+      # PUT /app/followings/:id/accept.json
+      def accept: () -> untyped
+
+      # POST /app/followings
+      # POST /app/followings.json
+      def create: () -> untyped
+
+      # POST /app/followings/follow
+      # POST /app/followings/follow.json
+      def follow: () -> untyped
+
+      # DELETE /app/followings/1
+      # DELETE /app/followings/1.json
+      def destroy: () -> untyped
+
+      private
+
+      # Use callbacks to share common setup or constraints between actions.
+      def set_following: () -> untyped
+
+      # Only allow a list of trusted parameters through.
+      def following_params: () -> untyped
+
+      def following_account_params: () -> untyped
+
+      def save_and_render: () -> untyped
+    end
+  end
+end

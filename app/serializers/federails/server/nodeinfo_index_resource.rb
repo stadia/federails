@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module Federails
   module Server
     NodeinfoIndexPayload = Struct.new(:href) unless const_defined?(:NodeinfoIndexPayload)

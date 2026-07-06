@@ -1,0 +1,19 @@
+# Generated from app/controllers/federails/client/activities_controller.rb with RBS::Inline
+
+module Federails
+  module Client
+    class ActivitiesController < Federails::ClientController
+      # GET /app/activities
+      # GET /app/activities.json
+      def index: () -> untyped
+
+      # GET /app/feed
+      # GET /app/feed.json
+      def feed: () -> untyped
+
+      private
+
+      def authorize_action!: () -> untyped
+    end
+  end
+end

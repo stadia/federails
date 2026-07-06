@@ -1,0 +1,25 @@
+# Generated from lib/fediverse/linked_data_signature.rb with RBS::Inline
+
+module Fediverse
+  module LinkedDataSignature
+    def self.verify: (untyped document) -> untyped
+
+    private def self.resolve_actor: (untyped signature) -> untyped
+
+    # Retries with a refreshed key if the first verification fails and the actor is stale.
+    # This prevents unnecessary network requests on every failed verification (e.g., tampered signatures).
+    private def self.verify_with_retry: (untyped actor, untyped signature_value, untyped to_verify) -> untyped
+
+    # Excludes 'type', 'id', and 'signatureValue' from signature options per LD Signatures spec.
+    # Note: excluding 'type' is also required for Misskey/Calckey compatibility.
+    private def self.build_verification_string: (untyped document, untyped signature) -> untyped
+
+    private def self.check_signature: (untyped actor, untyped signature_value, untyped to_verify) -> untyped
+
+    private def self.hash_options: (untyped options) -> untyped
+
+    private def self.hash_document: (untyped document) -> untyped
+
+    private def self.normalize: (untyped document) -> untyped
+  end
+end

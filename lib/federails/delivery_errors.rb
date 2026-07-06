@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module Federails
   class DeliveryError < StandardError
     attr_reader :response_code, :inbox_url

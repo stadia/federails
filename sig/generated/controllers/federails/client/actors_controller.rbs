@@ -1,0 +1,28 @@
+# Generated from app/controllers/federails/client/actors_controller.rb with RBS::Inline
+
+module Federails
+  module Client
+    class ActorsController < Federails::ClientController
+      # GET /app/actors
+      # GET /app/actors.json
+      def index: () -> untyped
+
+      # GET /app/actors/1
+      # GET /app/actors/1.json
+      def show: () -> untyped
+
+      # GET /app/actors/lookup
+      # GET /app/actors/lookup.json
+      def lookup: () -> untyped
+
+      private
+
+      # Use callbacks to share common setup or constraints between actions.
+      def set_actor: () -> untyped
+
+      def account_param: () -> untyped
+
+      def render_show: () -> untyped
+    end
+  end
+end

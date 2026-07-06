@@ -1,0 +1,9 @@
+# Generated from lib/federails/utils/response_codes.rb with RBS::Inline
+
+module Federails
+  module Utils
+    module ResponseCodes
+      UNPROCESSABLE_CONTENT: untyped
+    end
+  end
+end

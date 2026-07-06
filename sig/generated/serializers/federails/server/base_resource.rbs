@@ -1,0 +1,17 @@
+# Generated from app/serializers/federails/server/base_resource.rb with RBS::Inline
+
+module Federails
+  module Server
+    class BaseResource
+      include Alba::Resource
+
+      # rubocop:disable Naming/PredicateMethod
+      # ActivityPub responses omit absent fields instead of rendering explicit nulls.
+      def select: (untyped _key, untyped value) -> untyped
+
+      private
+
+      def normalize_activitypub_hash: (untyped data) -> untyped
+    end
+  end
+end

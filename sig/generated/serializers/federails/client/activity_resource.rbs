@@ -1,0 +1,8 @@
+# Generated from app/serializers/federails/client/activity_resource.rb with RBS::Inline
+
+module Federails
+  module Client
+    class ActivityResource < BaseResource
+    end
+  end
+end

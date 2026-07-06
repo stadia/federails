@@ -1,0 +1,15 @@
+# Generated from app/serializers/federails/server/activity_resource.rb with RBS::Inline
+
+module Federails
+  module Server
+    class ActivityResource < BaseResource
+      URI_ONLY_OBJECT_ACTIONS: untyped
+
+      def include_context?: () -> untyped
+
+      def include_addressing?: () -> untyped
+
+      def serialize_object: (untyped entity, ?action: untyped) -> untyped
+    end
+  end
+end

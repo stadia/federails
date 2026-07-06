@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 require 'fediverse/notifier'
 
 module Federails

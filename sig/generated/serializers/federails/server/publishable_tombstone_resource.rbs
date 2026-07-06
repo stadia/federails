@@ -1,0 +1,8 @@
+# Generated from app/serializers/federails/server/publishable_tombstone_resource.rb with RBS::Inline
+
+module Federails
+  module Server
+    class PublishableTombstoneResource < BaseResource
+    end
+  end
+end

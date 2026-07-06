@@ -1,0 +1,13 @@
+# Generated from app/policies/federails/client/actor_policy.rb with RBS::Inline
+
+module Federails
+  module Client
+    class ActorPolicy < Federails::FederailsPolicy
+      def lookup?: () -> untyped
+
+      class Scope < Scope
+        def resolve: () -> untyped
+      end
+    end
+  end
+end

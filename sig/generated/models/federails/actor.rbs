@@ -15,6 +15,10 @@ module Federails
 
     include Federails::HandlesDeleteRequests
 
+    include Federails::Likeable
+
+    include Federails::Announceable
+
     # : () -> bool
     def distant?: () -> bool
 
@@ -140,5 +144,7 @@ module Federails
 
     # : () -> bool
     def use_entity_attributes?: () -> bool
+
+    def create_federails_activity: (untyped action, ?actor: untyped, ?to: untyped, ?cc: untyped) -> untyped
   end
 end

@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module Federails
   class ApplicationJob < ActiveJob::Base
     queue_as { Configuration.job_queue.to_sym }
