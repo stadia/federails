@@ -74,7 +74,7 @@ module Federails
       # and SSRF risks.
       reply_recipients = Array(entity.try(:federation_reply_recipients)).filter_map do |url|
         uri = URI.parse(url)
-        (uri.is_a?(URI::HTTP) && uri.host.present?) ? url : nil
+        uri.is_a?(URI::HTTP) && uri.host.present? ? url : nil
       rescue URI::InvalidURIError
         Federails.logger.warn { "Invalid federation_reply_recipients URL: #{url.inspect}" }
         nil
