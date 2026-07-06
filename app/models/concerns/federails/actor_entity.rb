@@ -26,6 +26,9 @@ module Federails
 
     # Class methods automatically included in the concern.
     module ClassMethods
+      # Parameter kinds that can receive the `follow_activity` keyword argument.
+      FOLLOW_ACTIVITY_KWARG_TYPES = [:keyreq, :key].freeze
+
       # Configures the mapping between entity and actor
       #
       # @param username_field [Symbol] The method or attribute name that returns the preferred username for ActivityPub
@@ -117,7 +120,7 @@ module Federails
         # RSpec stubs / other proxies on the singleton class do not alter the
         # detected parameter signature of the real callback definition.
         params = instance.class.instance_method(@after_followed).parameters
-        accepts_kwarg = params.any? { |type, name| [:keyreq, :key].include?(type) && name == :follow_activity } ||
+        accepts_kwarg = params.any? { |type, name| FOLLOW_ACTIVITY_KWARG_TYPES.include?(type) && name == :follow_activity } ||
                         params.any? { |type, _| type == :keyrest }
         if accepts_kwarg
           instance.send(@after_followed, follow, follow_activity: follow_activity)

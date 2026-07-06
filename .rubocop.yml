@@ -160,6 +160,10 @@ RSpec/MultipleMemoizedHelpers:
     # Migrations
     - spec/migrations/*_spec.rb
     - spec/dummy/spec/migrations/*_spec.rb
+    # Relationship/delivery scenarios that legitimately need many actors and
+    # response fixtures to exercise all the branches.
+    - spec/models/federails/actor_spec.rb
+    - spec/lib/fediverse/notifier_spec.rb
 
 RSpec/NestedGroups:
   Max: 4
