@@ -204,11 +204,3 @@ Style/TrailingCommaInHashLiteral:
 
 Layout/LeadingCommentSpace:
   Enabled: false
-
-# rubocop-rbs_inline: keep the annotation *validity* cops (enabled by default)
-# but disable the coverage-enforcing ones. Requiring inline RBS on every method,
-# file, and ivar would add 800+ offenses; we only lint existing annotations.
-Style/RbsInline/MissingTypeAnnotation:
-  Enabled: false
-Style/RbsInline/UntypedInstanceVariable:
-  Enabled: false
