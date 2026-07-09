@@ -43,6 +43,20 @@ module Federails
       Activity.create! actor: actor, action: 'Undo', entity: self, to: to, cc: cc
     end
 
+    # Reads the polymorphic entity, tolerating a stored +entity_type+ that no
+    # longer maps to a loaded class (e.g. a model that was renamed or removed).
+    #
+    # Without this guard, loading such an activity raises
+    # +NameError: uninitialized constant <Type>+, which takes down an entire
+    # outbox/collection page instead of skipping the single dangling record.
+    #
+    #: () -> untyped
+    def entity
+      return if entity_type.present? && entity_type.safe_constantize.nil?
+
+      super
+    end
+
     private
 
     # Ensures sensible default addressing is always present.

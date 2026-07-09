@@ -159,5 +159,22 @@ module Federails
         expect(activity.cc).to include(alice.followers_url)
       end
     end
+
+    describe '#entity' do
+      it 'returns the associated record for a resolvable entity_type' do
+        activity = described_class.create!(actor: alice, entity: bob, action: 'Create')
+
+        expect(activity.reload.entity).to eq bob
+      end
+
+      it 'returns nil instead of raising when entity_type no longer maps to a class' do
+        activity = described_class.create!(actor: alice, entity: bob, action: 'Create')
+        # Simulate a dangling record left by a renamed/removed model class.
+        activity.update_columns(entity_type: 'NoLongerAModel') # rubocop:disable Rails/SkipsModelValidations
+
+        expect { activity.reload.entity }.not_to raise_error
+        expect(activity.entity).to be_nil
+      end
+    end
   end
 end
