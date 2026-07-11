@@ -90,6 +90,35 @@ module Federails
               end
             end
 
+            context 'when attributedTo is an array' do
+              before do
+                allow(Fediverse::Request).to receive(:dereference).with(url).and_return({ 'id' => url, 'type' => 'CustomNote', 'attributedTo' => [distant_actor.federated_url], 'content' => 'the content' })
+                allow(Federails::Actor).to receive(:find_by_federation_url).with(distant_actor.federated_url).and_return(distant_actor)
+              end
+
+              it 'resolves the actor from the first entry instead of raising' do
+                result = described_class.find_or_initialize url
+
+                aggregate_failures do
+                  expect(result).to be_a Fixtures::Classes::FakeArticleDataModel
+                  expect(result.federails_actor).to eq distant_actor
+                end
+              end
+            end
+
+            context 'when attributedTo is an array of linked objects' do
+              before do
+                allow(Fediverse::Request).to receive(:dereference).with(url).and_return({ 'id' => url, 'type' => 'CustomNote', 'attributedTo' => [{ 'id' => distant_actor.federated_url, 'type' => 'Person' }], 'content' => 'the content' })
+                allow(Federails::Actor).to receive(:find_by_federation_url).with(distant_actor.federated_url).and_return(distant_actor)
+              end
+
+              it 'resolves the actor from the object id' do
+                result = described_class.find_or_initialize url
+
+                expect(result.federails_actor).to eq distant_actor
+              end
+            end
+
             context 'when it does not exists remotely' do
               before do
                 allow(Fediverse::Request).to receive(:dereference).with(url).and_return(nil)

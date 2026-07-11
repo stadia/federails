@@ -143,9 +143,20 @@ module Federails
           entity = handler[:class].new_from_activitypub_object(hash)
           return unless entity
 
-          entity.federails_actor = Federails::Actor.find_by_federation_url hash['attributedTo'] if entity && !entity.federails_actor
+          entity.federails_actor = Federails::Actor.find_by_federation_url attributed_to_url(hash['attributedTo']) if entity && !entity.federails_actor
 
           entity
+        end
+
+        # `attributedTo` may be a String, a linked object with an `id`, or an
+        # Array of either — all valid per ActivityStreams. find_by_federation_url
+        # expects a String, so normalize to the first URL. Passing the raw Array
+        # would raise `NoMethodError: undefined method 'match?' for an Array`.
+        #: (untyped) -> String?
+        def attributed_to_url(attributed_to)
+          Array.wrap(attributed_to).filter_map do |value|
+            value.is_a?(Hash) ? value['id'] : value
+          end.first
         end
       end
     end
