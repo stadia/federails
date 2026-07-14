@@ -44,7 +44,7 @@ module Federails
         recover_from_domain_race(domain, new_record)
       rescue Fediverse::NodeInfo::NoActivityPubError
         Federails.logger.info { "#{domain} does not provide ActivityPub service" }
-      rescue Federails::Utils::JsonRequest::UnhandledResponseStatus, Faraday::SSLError => e
+      rescue Federails::Utils::JsonRequest::UnhandledResponseStatus, Faraday::SSLError, Faraday::ConnectionFailed, Faraday::TimeoutError => e
         Federails.logger.info { "Error connecting to #{domain}: '#{e.message}'" }
       end
 

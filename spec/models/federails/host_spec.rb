@@ -39,6 +39,22 @@ RSpec.describe Federails::Host do
       end
     end
 
+    context 'when the host is unreachable' do
+      # A remote host that never completes the TCP/TLS handshake surfaces as a
+      # Faraday::ConnectionFailed (wrapping Net::OpenTimeout); a stalled response
+      # surfaces as Faraday::TimeoutError. Neither should abort a batch update of
+      # every known host, so create_or_update swallows and logs them.
+      [Faraday::ConnectionFailed, Faraday::TimeoutError].each do |error_class|
+        it "swallows #{error_class} so a batch update is not aborted" do
+          fresh = described_class.new domain: domain
+          allow(described_class).to receive(:find_or_initialize_by).with(domain: domain).and_return(fresh)
+          allow(fresh).to receive(:sync!).and_raise(error_class.new('timeout'))
+
+          expect { described_class.create_or_update(domain) }.not_to raise_error
+        end
+      end
+    end
+
     context 'when host already exists' do
       let!(:host) { described_class.create domain: domain }
 
