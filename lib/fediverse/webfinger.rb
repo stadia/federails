@@ -104,17 +104,17 @@ module Fediverse
         data = data.clone
         id = data.delete('id')
         Fedipub::Actor.new federated_url:  id,
-                             username:       data.delete('preferredUsername'),
-                             actor_type:     data.delete('type'),
-                             name:           data.delete('name'),
-                             server:         server_and_port(id),
-                             inbox_url:      data.delete('inbox'),
-                             outbox_url:     data.delete('outbox'),
-                             followers_url:  data.delete('followers'),
-                             followings_url: data.delete('following'),
-                             profile_url:    data.delete('url'),
-                             public_key:     data.delete('publicKey')&.dig('publicKeyPem'),
-                             extensions:     data.except('@context')
+                           username:       data.delete('preferredUsername'),
+                           actor_type:     data.delete('type'),
+                           name:           data.delete('name'),
+                           server:         server_and_port(id),
+                           inbox_url:      data.delete('inbox'),
+                           outbox_url:     data.delete('outbox'),
+                           followers_url:  data.delete('followers'),
+                           followings_url: data.delete('following'),
+                           profile_url:    data.delete('url'),
+                           public_key:     data.delete('publicKey')&.dig('publicKeyPem'),
+                           extensions:     data.except('@context')
       end
 
       # Makes a simple GET request and returns a +Hash+ from the parsed body

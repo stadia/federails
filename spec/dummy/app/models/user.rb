@@ -2,9 +2,9 @@ class User < ApplicationRecord
   include Fedipub::ActorEntity
 
   acts_as_fedipub_actor username_field:     :id,
-                          name_field:         :email,
-                          profile_url_method: :user_url,
-                          user_count_method:  :user_count
+                        name_field:         :email,
+                        profile_url_method: :user_url,
+                        user_count_method:  :user_count
 
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable

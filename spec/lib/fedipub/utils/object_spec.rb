@@ -125,9 +125,9 @@ module Fedipub
           [
             FactoryBot.create(:distant_actor),
             Fixtures::Classes::FakeArticleDataModel.create!(
-              title:           'The right one',
-              content:         'Hello world',
-              federated_url:   'https://some_example.com/posts/10',
+              title:         'The right one',
+              content:       'Hello world',
+              federated_url: 'https://some_example.com/posts/10',
               fedipub_actor: FactoryBot.create(:distant_actor)
             ),
           ]

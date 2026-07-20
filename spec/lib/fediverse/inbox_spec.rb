@@ -151,10 +151,10 @@ module Fediverse
       context 'with a DataEntity' do
         let(:entity) do
           Fixtures::Classes::FakeArticleDataModel.create! fedipub_actor_id: distant_actor.id,
-                                                          federated_url:      'https://example.com/data/1',
-                                                          title:              'A title',
-                                                          content:            'the content',
-                                                          deleted_at:         Time.current
+                                                          federated_url:    'https://example.com/data/1',
+                                                          title:            'A title',
+                                                          content:          'the content',
+                                                          deleted_at:       Time.current
         end
 
         let!(:payload) do

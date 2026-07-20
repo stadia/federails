@@ -7,11 +7,11 @@ module Fixtures
       include Fedipub::HandlesDeleteRequests
 
       acts_as_fedipub_data handles:                 'CustomNote',
-                             actor_entity_method:     :user,
-                             route_path_segment:      :articles,
-                             filter_method:           :handle_incoming_note?,
-                             soft_deleted_method:     :deleted?,
-                             soft_delete_date_method: :deleted_at
+                           actor_entity_method:     :user,
+                           route_path_segment:      :articles,
+                           filter_method:           :handle_incoming_note?,
+                           soft_deleted_method:     :deleted?,
+                           soft_delete_date_method: :deleted_at
 
       belongs_to :user, optional: true
 
@@ -31,8 +31,8 @@ module Fixtures
 
       def to_activitypub_object
         Fedipub::DataTransformer::Note.to_federation self,
-                                                       content: content,
-                                                       name:    title
+                                                     content: content,
+                                                     name:    title
       end
 
       # Prevent posts starting with 'Draft:" to be published

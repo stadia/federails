@@ -3,9 +3,9 @@ class Post < ApplicationRecord
   include FederatedAndSoftDeletable
 
   acts_as_fedipub_data handles:                 'Note',
-                         actor_entity_method:     :user,
-                         soft_deleted_method:     :soft_deleted?,
-                         soft_delete_date_method: :deleted_at?
+                       actor_entity_method:     :user,
+                       soft_deleted_method:     :soft_deleted?,
+                       soft_delete_date_method: :deleted_at?
 
   validates :title, presence: true, allow_blank: false
   validates :content, presence: true, allow_blank: false
@@ -15,8 +15,8 @@ class Post < ApplicationRecord
 
   def to_activitypub_object
     Fedipub::DataTransformer::Note.to_federation self,
-                                                   name:    title,
-                                                   content: content
+                                                 name:    title,
+                                                 content: content
   end
 
   def self.handle_federated_object?(hash)
@@ -26,8 +26,8 @@ class Post < ApplicationRecord
 
   def self.from_activitypub_object(hash)
     Fedipub::Utils::Object.timestamp_attributes(hash)
-                            .merge federated_url: hash['id'],
-                                   title:         hash['published'] || 'A post',
-                                   content:       hash['content']
+                          .merge federated_url: hash['id'],
+                                 title:         hash['published'] || 'A post',
+                                 content:       hash['content']
   end
 end
