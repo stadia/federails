@@ -2,6 +2,10 @@
 
 Fedipub is an engine that brings ActivityPub to Ruby on Rails application.
 
+> [!note]
+> This project was know as _Federails_ (and the `federails` gem and extensions) and has been
+> renamed recently to Fedipub.
+
 ## Community
 
 You can join the [matrix chat room](https://matrix.to/#/#fedipub:matrix.org) to chat with humans.
