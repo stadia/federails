@@ -29,12 +29,12 @@ It creates an initializer and a configuration file:
 - `config/initializers/fedipub.rb`
 - `config/fedipub.yml`
 
-By default, Federails is configured using `config_from` method, that loads the appropriate YAML file, but you may want
+By default, Fedipub is configured using `config_from` method, that loads the appropriate YAML file, but you may want
 to configure it differently:
 
 ```rb
 # config/initializers/fedipub.rb
-Federails.configure do |config|
+Fedipub.configure do |config|
   config.host = 'localhost'
   # ...
 end
@@ -54,11 +54,11 @@ Review the changes and apply them.
 ## Routes
 
 Mount the engine on `/`: routes to `/.well-known/*` and `/nodeinfo/*` must be at the root of the site.
-Federails routes are then available under the configured path (`routes_path`):
+Fedipub routes are then available under the configured path (`routes_path`):
 
 ```rb
 # config/routes.rb
-mount Federails::Engine => '/'
+mount Fedipub::Engine => '/'
 ```
 
 With `routes_path = 'federation'`, routes will be:
@@ -83,7 +83,7 @@ With `routes_path = 'federation'`, routes will be:
 Some routes can be disabled in configuration if you don't want to expose particular features:
 
 ```rb
-Federails.configure do |config|
+Fedipub.configure do |config|
   # Disable routing for .well-known and nodeinfo
   config.enable_discovery = false
 
@@ -91,9 +91,9 @@ Federails.configure do |config|
   config.client_routes_path = nil
 end
 ```
-## Federails client
+## Fedipub client
 
-To get started, you can use the Federails client: routes and views to list actors, follow them, list activities, etc...
+To get started, you can use the Fedipub client: routes and views to list actors, follow them, list activities, etc...
 
 To enable the routes, set the `config.client_routes_path` to something so they can be mounted in your application.
 
@@ -115,7 +115,7 @@ rails generate fedipub:copy_client_views
 
 To disable the client, set `client_routes_path` to `nil`.
 
-Disabling the client will break some of the Federails features, as Federails _needs_ some of the client routes to
+Disabling the client will break some of the Fedipub features, as Fedipub _needs_ some of the client routes to
 generate URLS. You will need provide the routes yourself:
 
 #### Remote following
@@ -126,7 +126,7 @@ user interface, you can set the path like this, assuming that `new_follow_url` i
 query parameter template will be automatically appended, you don't need to specify that.
 
 ```rb
-Federails.configure do |config|
+Fedipub.configure do |config|
   config.remote_follow_url_method = :new_follow_url
 end
 ```
@@ -134,7 +134,7 @@ end
 This _GET_ route _should_ render a page allowing to follow the actor passed as `uri` parameter.
 
 In the client (`app/controllers/fedipub/client/followings_controller.rb#new`), we use a page that allows signed-in
-actor to find another actor and follow it. In the Federails client implementation, we fetch the actor, save it locally
+actor to find another actor and follow it. In the Fedipub client implementation, we fetch the actor, save it locally
 and redirect to a page that displays it, with the "Follow" button, but you can do whatever you want, as long as the user
 has ability to follow the actor in the end.
 
@@ -151,21 +151,21 @@ bundle exec rails fedipub:install:migrations
 
 In the ActivityPub world, we refer to _actors_ to represent the thing that publishes or subscribe to _other actors_.
 
-Federails provides a concern to include in your "user" model or whatever will publish data:
+Fedipub provides a concern to include in your "user" model or whatever will publish data:
 
 ```rb
 # app/models/user.rb
 
 class User < ApplicationRecord
   # Include the concern here:
-  include Federails::ActorEntity
+  include Fedipub::ActorEntity
 
   # Configure field names
   acts_as_fedipub_actor username_field: :username, name_field: :name, profile_url_method: :user_url
 end
 ```
 
-This concern automatically create a `Federails::Actor` after a user creation, as well as the `actor` reference. When adding it to
+This concern automatically create a `Fedipub::Actor` after a user creation, as well as the `actor` reference. When adding it to
 an existing model with existing data, you will need to generate the corresponding actors yourself in a migration.
 
 Usage example:
@@ -182,13 +182,13 @@ actor.following
 
 ## Data models
 
-To ease the work of publishing data to the Fediverse and saving content from it, Federails provides a concern to include
+To ease the work of publishing data to the Fediverse and saving content from it, Fedipub provides a concern to include
 in the data models:
 
 
 ```rb
 class Note < ApplicationRecord
-  include Federails::DataEntity
+  include Fedipub::DataEntity
   
   acts_as_fedipub_data
 
@@ -196,7 +196,7 @@ class Note < ApplicationRecord
 end
 ```
 
-For options, pre-requisites, etc..., refer to the documentation of `Federails::DataEntity.acts_as_fedipub_data`.
+For options, pre-requisites, etc..., refer to the documentation of `Fedipub::DataEntity.acts_as_fedipub_data`.
 
 You can check the "Examples" for implementation samples 
 
@@ -221,7 +221,7 @@ You also will need to call `create_fedipub_activity 'Delete'` in your soft-delet
 ```rb
 # Assume soft-deletion is made by filling `deleted_at` attribute
 class Note < ApplicationRecord
-  include Federails::DataEntity
+  include Fedipub::DataEntity
 
   acts_as_fedipub_data handles: 'Note',
                          #...
@@ -243,9 +243,9 @@ class Note < ApplicationRecord
 end
 ```
 
-## Using the Federails client
+## Using the Fedipub client
 
-Federails comes with a client, enabled by default, that provides basic views to display and interact with Federails data,
+Fedipub comes with a client, enabled by default, that provides basic views to display and interact with Fedipub data,
 accessible on `/app` by default (changeable with the configuration option `client_routes_path`)
 
 If it's a good starting point, it might be disabled once you made your own integration by setting `client_routes_path`

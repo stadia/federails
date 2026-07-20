@@ -23,7 +23,7 @@ module Fediverse
       #
       # @return [Boolean]
       def local_user?(hash)
-        hash[:username] && (hash[:domain].nil? || (hash[:domain] == Federails::Utils::Host.localhost))
+        hash[:username] && (hash[:domain].nil? || (hash[:domain] == Fedipub::Utils::Host.localhost))
       end
 
       # Fetches a distant actor
@@ -31,7 +31,7 @@ module Fediverse
       # @param username [String]
       # @param domain [String]
       #
-      # @return [Federails::Actor, nil] Federails actor or nothing when not found
+      # @return [Fedipub::Actor, nil] Fedipub actor or nothing when not found
       def fetch_actor(username, domain)
         fetch_actor_url webfinger(username, domain)
       end
@@ -40,7 +40,7 @@ module Fediverse
       #
       # @param url [String] Actor's federation URL
       #
-      # @return [Federails::Actor, nil] Federails actor or nothing when not found
+      # @return [Fedipub::Actor, nil] Fedipub actor or nothing when not found
       def fetch_actor_url(url)
         webfinger_to_actor get_json url
       end
@@ -82,7 +82,7 @@ module Fediverse
       # Makes a webfinger request for a given username/domain
       # @return [Hash] Webfinger response's content
       def webfinger_response(username, domain)
-        scheme = Federails.configuration.force_ssl ? 'https' : 'http'
+        scheme = Fedipub.configuration.force_ssl ? 'https' : 'http'
         get_json "#{scheme}://#{domain}/.well-known/webfinger", resource: "acct:#{username}@#{domain}"
       end
 
@@ -97,13 +97,13 @@ module Fediverse
         end
       end
 
-      # Builds a +Federails::Actor+ from a Webfinger response
+      # Builds a +Fedipub::Actor+ from a Webfinger response
       # @param data [Hash] Webfinger response
-      # @return [Federails::Actor]
+      # @return [Fedipub::Actor]
       def webfinger_to_actor(data) # rubocop:disable Metrics/MethodLength
         data = data.clone
         id = data.delete('id')
-        Federails::Actor.new federated_url:  id,
+        Fedipub::Actor.new federated_url:  id,
                              username:       data.delete('preferredUsername'),
                              actor_type:     data.delete('type'),
                              name:           data.delete('name'),
@@ -121,8 +121,8 @@ module Fediverse
       # @return [Hash]
       # @raise [ActiveRecord::RecordNotFound] when the response is invalid
       def get_json(url, params = {})
-        Federails::Utils::JsonRequest.get_json(url, params: params, follow_redirects: true, headers: { accept: 'application/json' })
-      rescue Federails::Utils::JsonRequest::UnhandledResponseStatus => e
+        Fedipub::Utils::JsonRequest.get_json(url, params: params, follow_redirects: true, headers: { accept: 'application/json' })
+      rescue Fedipub::Utils::JsonRequest::UnhandledResponseStatus => e
         Rails.logger.debug { e.message }
 
         raise ActiveRecord::RecordNotFound

@@ -5,7 +5,7 @@ RSpec.describe 'fedipub/server/activities/show', type: :view do
   let(:distant_actor) { FactoryBot.create :distant_actor }
 
   # enable ServerHelper methods for tests
-  helper Federails::ServerHelper
+  helper Fedipub::ServerHelper
 
   context 'when rendering a Follow activity' do
     let(:follow) { FactoryBot.create :following, actor: local_actor, target_actor: distant_actor }
@@ -44,7 +44,7 @@ RSpec.describe 'fedipub/server/activities/show', type: :view do
     let(:follow) { FactoryBot.create :following, actor: local_actor, target_actor: distant_actor }
     let(:undo) do
       follow.destroy
-      Federails::Activity.find_by action: 'Undo'
+      Fedipub::Activity.find_by action: 'Undo'
     end
     let(:json_result) do
       assign(:activity, undo)
@@ -78,7 +78,7 @@ RSpec.describe 'fedipub/server/activities/show', type: :view do
     let(:follow) { FactoryBot.create :following, actor: local_actor, target_actor: distant_actor }
     let(:accept) do
       follow.accept!
-      Federails::Activity.find_by action: 'Accept'
+      Fedipub::Activity.find_by action: 'Accept'
     end
     let(:json_result) do
       assign(:activity, accept)

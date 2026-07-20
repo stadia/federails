@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe Federails::Server::WebFingerController, type: :acceptance do
+RSpec.describe Fedipub::Server::WebFingerController, type: :acceptance do
   resource 'Webfinger', 'Webfinger endpoints'
   let(:headers) { { accept: 'application/jrd+json' } }
 

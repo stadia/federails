@@ -1,4 +1,4 @@
-class CreateFederailsActivities < ActiveRecord::Migration[7.0]
+class CreateFedipubActivities < ActiveRecord::Migration[7.0]
   def change
     create_table :fedipub_activities do |t|
       t.references :entity, polymorphic: true, null: false

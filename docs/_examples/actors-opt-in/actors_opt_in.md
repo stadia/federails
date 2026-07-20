@@ -11,7 +11,7 @@ Let's say we have some users and only the community managers can be actors.
 # app/models/users.rb
 
 class User < ApplicationRecord
-  include Federails::ActorEntity
+  include Fedipub::ActorEntity
 
   acts_as_fedipub_actor username_field: :username,
                           #...other configuration

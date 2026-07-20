@@ -1,7 +1,7 @@
-module Federails
+module Fedipub
   # rubocop:disable Style/ClassVars
 
-  # Stores the Federails configuration in a _singleton_.
+  # Stores the Fedipub configuration in a _singleton_.
   module Configuration
     # Application name, used in well-known and nodeinfo endpoints
     mattr_accessor :app_name
@@ -47,11 +47,11 @@ module Federails
     mattr_accessor :app_layout
     @@app_layout = nil
 
-    # Route path for the federation URLs (to "Federails::Server::*" controllers)
+    # Route path for the federation URLs (to "Fedipub::Server::*" controllers)
     mattr_accessor :server_routes_path
     @@server_routes_path = :federation
 
-    # Route path for the webapp URLs (to "Federails::Client::*" controllers)
+    # Route path for the webapp URLs (to "Fedipub::Client::*" controllers)
     mattr_accessor :client_routes_path
     @@client_routes_path = :app
 
@@ -70,7 +70,7 @@ module Federails
     # The route should lead to a page displaying the remote actor and a button to follow it.
     # Remote actor is specified in the `uri` query parameter.
     #
-    # Its value defaults to a route of the Federails client, so your application will break
+    # Its value defaults to a route of the Fedipub client, so your application will break
     # if you don't use the client routes and don't override this value.
     #
     # @param value [String] Route method name as used in links
@@ -81,12 +81,12 @@ module Federails
 
     def self.site_host=(value)
       @@site_host = value
-      Federails::Engine.routes.default_url_options[:host] = value
+      Fedipub::Engine.routes.default_url_options[:host] = value
     end
 
     def self.site_port=(value)
       @@site_port = value
-      Federails::Engine.routes.default_url_options[:port] = value
+      Fedipub::Engine.routes.default_url_options[:port] = value
     end
 
     # Default amount of seconds to consider that a remote entity could be updated
@@ -99,7 +99,7 @@ module Federails
     mattr_accessor :job_queue
     @@job_queue = :default
 
-    # List of actor types (classes using Federails::ActorEntity)
+    # List of actor types (classes using Fedipub::ActorEntity)
     mattr_reader :actor_types
     @@actor_types = {}
 
@@ -107,7 +107,7 @@ module Federails
       @@actor_types[klass.name] = config.merge(class: klass)
     end
 
-    # List of data types (classes using Federails::DataEntity)
+    # List of data types (classes using Fedipub::DataEntity)
     mattr_reader :data_types
     @@data_types = {}
 

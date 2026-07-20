@@ -1,5 +1,5 @@
 class User < ApplicationRecord
-  include Federails::ActorEntity
+  include Fedipub::ActorEntity
 
   acts_as_fedipub_actor username_field:     :id,
                           name_field:         :email,

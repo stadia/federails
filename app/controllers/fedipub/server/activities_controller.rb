@@ -1,19 +1,19 @@
 require 'fediverse/inbox'
 
-module Federails
+module Fedipub
   module Server
-    class ActivitiesController < Federails::ServerController
-      include Federails::Server::RenderCollections
+    class ActivitiesController < Fedipub::ServerController
+      include Fedipub::Server::RenderCollections
 
       before_action :set_activity, only: [:show]
 
       # GET /federation/activities
       # GET /federation/actors/1/outbox.json
       def outbox
-        authorize Federails::Activity, policy_class: Federails::Server::ActivityPolicy
+        authorize Fedipub::Activity, policy_class: Fedipub::Server::ActivityPolicy
 
         actor            = Actor.find_param(params[:actor_id])
-        activities       = policy_scope(Federails::Activity, policy_scope_class: Federails::Server::ActivityPolicy::Scope).where(actor: actor).order(created_at: :desc)
+        activities       = policy_scope(Fedipub::Activity, policy_scope_class: Fedipub::Server::ActivityPolicy::Scope).where(actor: actor).order(created_at: :desc)
 
         render_collection(
           collection: activities.page(params[:page]),
@@ -32,12 +32,12 @@ module Federails
         skip_authorization
 
         payload = payload_from_params
-        return head Federails::Utils::ResponseCodes::UNPROCESSABLE_CONTENT unless payload
+        return head Fedipub::Utils::ResponseCodes::UNPROCESSABLE_CONTENT unless payload
 
         if Fediverse::Inbox.dispatch_request(payload)
           head :created
         else
-          head Federails::Utils::ResponseCodes::UNPROCESSABLE_CONTENT
+          head Fedipub::Utils::ResponseCodes::UNPROCESSABLE_CONTENT
         end
       end
 
@@ -46,7 +46,7 @@ module Federails
       # Use callbacks to share common setup or constraints between actions.
       def set_activity
         @activity = Actor.find_param(params[:actor_id]).activities.find_param(params[:id])
-        authorize @activity, policy_class: Federails::Server::ActivityPolicy
+        authorize @activity, policy_class: Fedipub::Server::ActivityPolicy
       end
 
       # Only allow a list of trusted parameters through.

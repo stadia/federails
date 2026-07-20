@@ -1,15 +1,15 @@
-module Federails
+module Fedipub
   class ServerController < ::ActionController::Base # rubocop:disable Rails/ApplicationController
     include Pundit::Authorization
 
     after_action :verify_authorized
 
     protect_from_forgery with: :null_session
-    helper Federails::ServerHelper
+    helper Fedipub::ServerHelper
 
     rescue_from ActiveRecord::RecordNotFound, with: :error_not_found
-    rescue_from Federails::Actor::TombstonedError,
-                Federails::DataEntity::TombstonedError,
+    rescue_from Fedipub::Actor::TombstonedError,
+                Fedipub::DataEntity::TombstonedError,
                 with: :error_gone
 
     private

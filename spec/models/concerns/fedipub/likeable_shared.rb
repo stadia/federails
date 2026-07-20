@@ -1,7 +1,7 @@
 RSpec.shared_examples 'Likeable' do |klass, attributes|
   let(:user) { FactoryBot.create :user }
   let!(:instance) do
-    if klass.try(:include?, Federails::DataEntity)
+    if klass.try(:include?, Fedipub::DataEntity)
       klass.create! attributes.merge(user_id: user.id)
     else
       FactoryBot.create(klass)
@@ -13,7 +13,7 @@ RSpec.shared_examples 'Likeable' do |klass, attributes|
       let(:actor) { FactoryBot.create :local_actor }
 
       it 'creates an activity' do
-        expect { instance.like! actor: actor }.to change(Federails::Activity.where(action: 'Like'), :count).by 1
+        expect { instance.like! actor: actor }.to change(Fedipub::Activity.where(action: 'Like'), :count).by 1
       end
 
       it 'uses the specified actor' do
@@ -38,7 +38,7 @@ RSpec.shared_examples 'Likeable' do |klass, attributes|
       let(:actor) { FactoryBot.create :local_actor }
 
       it 'creates an activity' do
-        expect { instance.dislike! actor: actor }.to change(Federails::Activity.where(action: 'Dislike'), :count).by 1
+        expect { instance.dislike! actor: actor }.to change(Fedipub::Activity.where(action: 'Dislike'), :count).by 1
       end
 
       it 'uses the specified actor' do

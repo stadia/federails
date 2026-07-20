@@ -1,12 +1,12 @@
-module Federails
+module Fedipub
   module Likeable
     extend ActiveSupport::Concern
 
     # Likes this entity by creating a new Activity.
     #
-    # @param actor [Federails::Actor] The actor that is doing the liking.
+    # @param actor [Fedipub::Actor] The actor that is doing the liking.
     #
-    # @return [Federails::Activity] the newly-created Like activity
+    # @return [Fedipub::Activity] the newly-created Like activity
     def like!(actor:)
       create_fedipub_activity('Like',
                                 actor: actor,
@@ -16,9 +16,9 @@ module Federails
 
     # Dislikes this entity by creating a new Activity.
     #
-    # @param actor [Federails::Actor] The actor that is doing the disliking.
+    # @param actor [Fedipub::Actor] The actor that is doing the disliking.
     #
-    # @return [Federails::Activity] the newly-created Dislike activity
+    # @return [Fedipub::Activity] the newly-created Dislike activity
     def dislike!(actor:)
       create_fedipub_activity('Dislike',
                                 actor: actor,

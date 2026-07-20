@@ -46,7 +46,7 @@ RSpec.describe Comment, type: :model do
       allow(Fediverse::Request).to receive(:dereference).with(a_kind_of(Hash)).and_call_original
       allow(Fediverse::Request).to receive(:dereference).with(note_hash['id']).and_return(note_hash).once
       allow(Fediverse::Request).to receive(:dereference).with(parent_hash['id']).and_return(parent_hash).twice
-      allow(Federails::Actor).to receive(:find_by_federation_url).with(distant_actor.federated_url).and_return(distant_actor).twice
+      allow(Fedipub::Actor).to receive(:find_by_federation_url).with(distant_actor.federated_url).and_return(distant_actor).twice
     end
 
     context 'with a "Create" type' do
@@ -58,14 +58,14 @@ RSpec.describe Comment, type: :model do
       end
 
       it 'does not create a new actor' do
-        expect { described_class.handle_incoming_fediverse_data(activity_hash) }.not_to change(Federails::Actor, :count)
+        expect { described_class.handle_incoming_fediverse_data(activity_hash) }.not_to change(Fedipub::Actor, :count)
       end
 
       context 'when actor does not exist' do
         let(:distant_actor) { FactoryBot.build :distant_actor }
 
         it 'creates the actor' do
-          expect { described_class.handle_incoming_fediverse_data(activity_hash) }.to change(Federails::Actor, :count).by 1
+          expect { described_class.handle_incoming_fediverse_data(activity_hash) }.to change(Fedipub::Actor, :count).by 1
         end
       end
     end
@@ -89,7 +89,7 @@ RSpec.describe Comment, type: :model do
         end
 
         it 'does not create a new actor' do
-          expect { described_class.handle_incoming_fediverse_data(activity_hash) }.not_to change(Federails::Actor, :count)
+          expect { described_class.handle_incoming_fediverse_data(activity_hash) }.not_to change(Fedipub::Actor, :count)
         end
       end
 
@@ -104,7 +104,7 @@ RSpec.describe Comment, type: :model do
 
         context 'when the actor exists' do # rubocop:disable RSpec/NestedGroups
           it 'does not create a new actor' do
-            expect { described_class.handle_incoming_fediverse_data(activity_hash) }.not_to change(Federails::Actor, :count)
+            expect { described_class.handle_incoming_fediverse_data(activity_hash) }.not_to change(Fedipub::Actor, :count)
           end
         end
 
@@ -112,7 +112,7 @@ RSpec.describe Comment, type: :model do
           let(:distant_actor) { FactoryBot.build :distant_actor }
 
           it 'creates the actor' do
-            expect { described_class.handle_incoming_fediverse_data(activity_hash) }.to change(Federails::Actor, :count).by 1
+            expect { described_class.handle_incoming_fediverse_data(activity_hash) }.to change(Fedipub::Actor, :count).by 1
           end
         end
       end
@@ -120,18 +120,18 @@ RSpec.describe Comment, type: :model do
   end
   # rubocop:enable RSpec/MultipleMemoizedHelpers
 
-  describe 'Federails integration' do
+  describe 'Fedipub integration' do
     describe 'when creating a comment' do
       it 'creates a "create" a activity' do
-        expect { FactoryBot.create :comment }.to change { Federails::Activity.where(action: 'Create', entity_type: 'Comment').count }.by(1)
+        expect { FactoryBot.create :comment }.to change { Fedipub::Activity.where(action: 'Create', entity_type: 'Comment').count }.by(1)
       end
     end
 
     describe 'when updating a comment' do
       it 'creates an "update" activity' do
         expect { instance.update! content: 'New content' }
-          .to change { Federails::Activity.where(action: 'Update').count }.by(1)
-          .and change { Federails::Activity.where(action: 'Create').count }.by(0) # rubocop:disable RSpec/ChangeByZero
+          .to change { Fedipub::Activity.where(action: 'Update').count }.by(1)
+          .and change { Fedipub::Activity.where(action: 'Create').count }.by(0) # rubocop:disable RSpec/ChangeByZero
       end
     end
   end

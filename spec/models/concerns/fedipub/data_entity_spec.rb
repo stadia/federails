@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-module Federails
+module Fedipub
   RSpec.describe DataEntity do
     let(:user) { FactoryBot.create :user }
 
@@ -22,14 +22,14 @@ module Federails
 
       context 'when absent' do
         it 'generates a value from the configured route' do
-          expect(instance.federated_url).to eq Federails::Engine.routes.url_helpers.server_published_url(publishable_type: 'fake_data', id: instance.id)
+          expect(instance.federated_url).to eq Fedipub::Engine.routes.url_helpers.server_published_url(publishable_type: 'fake_data', id: instance.id)
         end
       end
     end
 
     describe '#acts_as_fedipub_data' do
-      it 'sets the class configuration in the Federails configuration' do
-        expect(Federails::Configuration.data_types).to have_key 'Fixtures::Classes::FakeDataModel'
+      it 'sets the class configuration in the Fedipub configuration' do
+        expect(Fedipub::Configuration.data_types).to have_key 'Fixtures::Classes::FakeDataModel'
       end
     end
 
@@ -42,7 +42,7 @@ module Federails
         it 'raises an error' do
           entity.update! deleted_at: Time.current
 
-          expect { Fixtures::Classes::FakeArticleDataModel.find_untombstoned_by! id: entity.id }.to raise_error Federails::DataEntity::TombstonedError
+          expect { Fixtures::Classes::FakeArticleDataModel.find_untombstoned_by! id: entity.id }.to raise_error Fedipub::DataEntity::TombstonedError
         end
       end
 
@@ -116,7 +116,7 @@ module Federails
           let(:instance) { Fixtures::Classes::FakeDataModel.new FactoryBot.attributes_for(:post, user_id: user.id) }
 
           it 'creates an activity' do
-            expect { instance.save! }.to change(Federails::Activity.where(action: 'Create'), :count).by 1
+            expect { instance.save! }.to change(Fedipub::Activity.where(action: 'Create'), :count).by 1
           end
         end
       end
@@ -126,7 +126,7 @@ module Federails
           let(:instance) { Fixtures::Classes::FakeDataModel.create! FactoryBot.attributes_for(:post, user_id: user.id) }
 
           it 'creates an activity' do
-            expect { instance.update! title: 'New title' }.to change(Federails::Activity.where(action: 'Update'), :count).by 1
+            expect { instance.update! title: 'New title' }.to change(Fedipub::Activity.where(action: 'Update'), :count).by 1
           end
         end
       end
@@ -136,7 +136,7 @@ module Federails
           let(:instance) { Fixtures::Classes::FakeDataModel.create! FactoryBot.attributes_for(:post, user_id: user.id) }
 
           it 'creates an activity' do
-            expect { instance.destroy! }.to change(Federails::Activity.where(action: 'Delete'), :count).by 1
+            expect { instance.destroy! }.to change(Fedipub::Activity.where(action: 'Delete'), :count).by 1
           end
         end
       end

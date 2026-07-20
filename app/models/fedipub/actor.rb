@@ -2,20 +2,20 @@ require 'fedipub/utils/host'
 require 'fedipub/utils/actor'
 require 'fediverse/webfinger'
 
-module Federails
+module Fedipub
   # Model storing _distant_ actors and links to local ones.
   #
-  # To make a model act as an actor, use the `Federails::ActorEntity` concern
+  # To make a model act as an actor, use the `Fedipub::ActorEntity` concern
   #
   # See also:
   #  - https://www.w3.org/TR/activitypub/#actor-objects
   class Actor < ApplicationRecord # rubocop:disable Metrics/ClassLength
     class TombstonedError < StandardError; end
 
-    include Federails::HasUuid
-    include Federails::HandlesDeleteRequests
-    include Federails::Likeable
-    include Federails::Announceable
+    include Fedipub::HasUuid
+    include Fedipub::HandlesDeleteRequests
+    include Fedipub::Likeable
+    include Fedipub::Announceable
 
     validates :federated_url, presence: { unless: :entity }, uniqueness: { unless: :local? }
     validates :username, presence: { unless: :local? }
@@ -32,14 +32,14 @@ module Federails
     belongs_to :entity, polymorphic: true, optional: true
     # FIXME: Handle this with something like undelete
     has_many :activities, dependent: :destroy
-    has_many :activities_as_entity, class_name: 'Federails::Activity', as: :entity, dependent: :destroy
-    has_many :following_followers, class_name: 'Federails::Following', foreign_key: :target_actor_id, dependent: :destroy, inverse_of: :target_actor
-    has_many :following_follows, class_name: 'Federails::Following', dependent: :destroy, inverse_of: :actor
+    has_many :activities_as_entity, class_name: 'Fedipub::Activity', as: :entity, dependent: :destroy
+    has_many :following_followers, class_name: 'Fedipub::Following', foreign_key: :target_actor_id, dependent: :destroy, inverse_of: :target_actor
+    has_many :following_follows, class_name: 'Fedipub::Following', dependent: :destroy, inverse_of: :actor
     # Actors following actor
     has_many :followers, source: :actor, through: :following_followers
     # Actors followed by actor
     has_many :follows, source: :target_actor, through: :following_follows
-    belongs_to :host, class_name: 'Federails::Host', foreign_key: :server, primary_key: :domain, inverse_of: :actors, optional: true
+    belongs_to :host, class_name: 'Fedipub::Host', foreign_key: :server, primary_key: :domain, inverse_of: :actors, optional: true
 
     # Explicitly explain serialization for MariaDB
     attribute :extensions, :json
@@ -59,7 +59,7 @@ module Federails
     end
 
     def federated_url
-      use_entity_attributes? ? Federails::Engine.routes.url_helpers.server_actor_url(self) : attributes['federated_url'].presence
+      use_entity_attributes? ? Fedipub::Engine.routes.url_helpers.server_actor_url(self) : attributes['federated_url'].presence
     end
 
     def username
@@ -83,26 +83,26 @@ module Federails
     end
 
     def inbox_url
-      use_entity_attributes? ? Federails::Engine.routes.url_helpers.server_actor_inbox_url(self) : attributes['inbox_url']
+      use_entity_attributes? ? Fedipub::Engine.routes.url_helpers.server_actor_inbox_url(self) : attributes['inbox_url']
     end
 
     def outbox_url
-      use_entity_attributes? ? Federails::Engine.routes.url_helpers.server_actor_outbox_url(self) : attributes['outbox_url']
+      use_entity_attributes? ? Fedipub::Engine.routes.url_helpers.server_actor_outbox_url(self) : attributes['outbox_url']
     end
 
     def followers_url
-      use_entity_attributes? ? Federails::Engine.routes.url_helpers.followers_server_actor_url(self) : attributes['followers_url']
+      use_entity_attributes? ? Fedipub::Engine.routes.url_helpers.followers_server_actor_url(self) : attributes['followers_url']
     end
 
     def followings_url
-      use_entity_attributes? ? Federails::Engine.routes.url_helpers.following_server_actor_url(self) : attributes['followings_url']
+      use_entity_attributes? ? Fedipub::Engine.routes.url_helpers.following_server_actor_url(self) : attributes['followings_url']
     end
 
     def profile_url
       return attributes['profile_url'].presence unless use_entity_attributes?
 
       method = entity_configuration[:profile_url_method]
-      return Federails::Engine.routes.url_helpers.server_actor_url self unless method
+      return Fedipub::Engine.routes.url_helpers.server_actor_url self unless method
 
       Rails.application.routes.url_helpers.send method, [entity]
     end
@@ -121,7 +121,7 @@ module Federails
 
     # Checks if a given actor follows the current actor
     #
-    # @return [Federails::Following, false]
+    # @return [Fedipub::Following, false]
     def follows?(actor)
       list = following_follows.where target_actor: actor
       return list.first if list.one?
@@ -131,7 +131,7 @@ module Federails
 
     # Checks if current actor is followed by the given actor
     #
-    # @return [Federails::Following, false]
+    # @return [Fedipub::Following, false]
     def followed_by?(actor)
       list = following_followers.where actor: actor
       return list.first if list.one?
@@ -140,9 +140,9 @@ module Federails
     end
 
     def entity_configuration
-      raise("Entity not configured for #{entity_type}. Did you use \"acts_as_fedipub_actor\"?") unless Federails.actor_entity? entity_type
+      raise("Entity not configured for #{entity_type}. Did you use \"acts_as_fedipub_actor\"?") unless Fedipub.actor_entity? entity_type
 
-      Federails.actor_entity entity_type
+      Fedipub.actor_entity entity_type
     end
 
     # Synchronizes actor with distant data
@@ -165,18 +165,18 @@ module Federails
     end
 
     def tombstone!
-      Federails::Utils::Actor.tombstone! self
+      Fedipub::Utils::Actor.tombstone! self
     end
 
     def untombstone!
-      Federails::Utils::Actor.untombstone! self
+      Fedipub::Utils::Actor.untombstone! self
     end
 
     class << self
       # Searches for an actor from account URI
       #
       # @param account [String] Account URI (username@host)
-      # @return [Federails::Actor, nil]
+      # @return [Fedipub::Actor, nil]
       def find_by_account(account)
         parts = Fediverse::Webfinger.split_account account
 
@@ -202,7 +202,7 @@ module Federails
 
       def find_by_federation_url!(federated_url)
         find_by_federation_url(federated_url).tap do |actor|
-          raise Federails::Actor::TombstonedError if actor.tombstoned?
+          raise Fedipub::Actor::TombstonedError if actor.tombstoned?
           raise ActiveRecord::RecordNotFound if actor.nil?
         end
       end
@@ -237,7 +237,7 @@ module Federails
 
       def find_local_by_username(username)
         actor = nil
-        Federails::Configuration.actor_types.each_value do |entity|
+        Fedipub::Configuration.actor_types.each_value do |entity|
           break if actor.present?
 
           actor = entity[:class].find_by(entity[:username_field] => username)&.fedipub_actor
@@ -245,7 +245,7 @@ module Federails
         return actor if actor
 
         # Last hope: Search for tombstoned actors
-        Federails::Actor.local.tombstoned.find_by username: username
+        Fedipub::Actor.local.tombstoned.find_by username: username
       end
 
       def find_local_by_username!(username)

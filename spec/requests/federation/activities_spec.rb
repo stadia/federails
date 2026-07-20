@@ -40,7 +40,7 @@ RSpec.describe '/federation/activities', type: :request do
       FactoryBot.create :following, :to_distant
     end
 
-    let(:activity) { Federails::Activity.last }
+    let(:activity) { Fedipub::Activity.last }
 
     it 'renders a successful response' do
       get fedipub.server_actor_activity_url(activity.actor.to_param, activity.to_param), headers: { accept: Mime[:activitypub] }

@@ -1,5 +1,5 @@
-module Federails
-  class FederailsPolicy
+module Fedipub
+  class FedipubPolicy
     attr_reader :user, :record
 
     def initialize(user, record)
@@ -57,7 +57,7 @@ module Federails
     end
 
     def user_with_actor?
-      @user && Federails.actor_entity?(@user) && !!@user.fedipub_actor
+      @user && Fedipub.actor_entity?(@user) && !!@user.fedipub_actor
     end
   end
 end

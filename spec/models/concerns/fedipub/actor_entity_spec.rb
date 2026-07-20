@@ -1,12 +1,12 @@
 require 'rails_helper'
 
-module Federails
+module Fedipub
   RSpec.describe ActorEntity do
     describe '#acts_as_fedipub_actor' do
-      it 'sets the class configuration in the Federails configuration' do
+      it 'sets the class configuration in the Fedipub configuration' do
         aggregate_failures do
-          expect(Federails::Configuration.actor_types).to have_key 'Fixtures::Classes::FakeUserModel'
-          expect(Federails::Configuration.actor_types).to have_key 'Fixtures::Classes::FakeUserModelWithoutAutoCreation'
+          expect(Fedipub::Configuration.actor_types).to have_key 'Fixtures::Classes::FakeUserModel'
+          expect(Fedipub::Configuration.actor_types).to have_key 'Fixtures::Classes::FakeUserModelWithoutAutoCreation'
         end
       end
 
@@ -24,7 +24,7 @@ module Federails
           let(:instance) { Fixtures::Classes::FakeUserModel.new email: Faker::Internet.unique.email }
 
           it 'creates an actor' do
-            expect { instance.save! }.to change(Federails::Actor, :count).by 1
+            expect { instance.save! }.to change(Fedipub::Actor, :count).by 1
           end
         end
 
@@ -33,7 +33,7 @@ module Federails
           let(:instance) { Fixtures::Classes::FakeUserModelWithoutAutoCreation.new email: Faker::Internet.unique.email, fedipub_actor: actor }
 
           it 'does not create an actor' do
-            expect { instance.save! }.not_to change(Federails::Actor, :count)
+            expect { instance.save! }.not_to change(Fedipub::Actor, :count)
           end
 
           it 'associates existing actor' do
@@ -46,7 +46,7 @@ module Federails
           let(:instance) { Fixtures::Classes::FakeUserModelWithoutAutoCreation.new email: Faker::Internet.unique.email }
 
           it 'does not create an actor' do
-            expect { instance.save! }.not_to change(Federails::Actor, :count)
+            expect { instance.save! }.not_to change(Fedipub::Actor, :count)
           end
         end
       end

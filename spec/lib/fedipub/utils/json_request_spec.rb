@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe Federails::Utils::JsonRequest do
+RSpec.describe Fedipub::Utils::JsonRequest do
   describe '.get_json' do
     context 'when status code is unexpected' do
       it 'raises an error' do

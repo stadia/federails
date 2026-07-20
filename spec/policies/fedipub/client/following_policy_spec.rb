@@ -2,11 +2,11 @@ require 'rails_helper'
 require 'pundit/rspec'
 
 # rubocop:disable RSpec/MultipleMemoizedHelpers
-RSpec.describe Federails::Client::FollowingPolicy, type: :policy do
+RSpec.describe Fedipub::Client::FollowingPolicy, type: :policy do
   let(:user) { FactoryBot.create :user }
   let(:signed_in_user) { FactoryBot.create :user }
   let(:unrelated_user) { FactoryBot.create :user }
-  let(:scope) { Federails::Client::FollowingPolicy::Scope.new(signed_in_user, Federails::Following).resolve }
+  let(:scope) { Fedipub::Client::FollowingPolicy::Scope.new(signed_in_user, Fedipub::Following).resolve }
   let(:following) { FactoryBot.create :following, actor: user.fedipub_actor, target_actor: signed_in_user.fedipub_actor }
 
   permissions '.scope' do
@@ -20,7 +20,7 @@ RSpec.describe Federails::Client::FollowingPolicy, type: :policy do
   end
 
   permissions :create?, :follow? do
-    let(:policy_subject) { Federails::Following }
+    let(:policy_subject) { Fedipub::Following }
 
     it_behaves_like 'an action for authenticated users only'
   end

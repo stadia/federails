@@ -1,6 +1,6 @@
-module Federails
+module Fedipub
   module Server
-    class NodeinfoController < Federails::ServerController
+    class NodeinfoController < Fedipub::ServerController
       def index
         skip_authorization
 
@@ -12,7 +12,7 @@ module Federails
 
         @total = @active_halfyear = @active_month = 0
         @has_user_counts = false
-        Federails::Configuration.actor_types.each_value do |config|
+        Fedipub::Configuration.actor_types.each_value do |config|
           next unless (method = config[:user_count_method]&.to_sym)
 
           @has_user_counts = true

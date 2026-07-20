@@ -1,8 +1,8 @@
 ---
-title: Federails
+title: Fedipub
 #email: your-email@example.com
 description: >-
-  Federails is an engine that brings ActivityPub to Ruby on Rails application.
+  Fedipub is an engine that brings ActivityPub to Ruby on Rails application.
 baseurl: "/fedipub" # the subpath of your site, e.g. /blog
 url: "https://experimentslabs.gitlab.io/"
 

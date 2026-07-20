@@ -1,4 +1,4 @@
-module Federails
+module Fedipub
   module Server
     module RenderCollections
       extend ActiveSupport::Concern

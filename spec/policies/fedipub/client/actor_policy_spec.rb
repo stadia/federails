@@ -1,10 +1,10 @@
 require 'rails_helper'
 require 'pundit/rspec'
 
-RSpec.describe Federails::Client::ActorPolicy, type: :policy do
+RSpec.describe Fedipub::Client::ActorPolicy, type: :policy do
   let(:signed_in_user) { FactoryBot.create :user }
   let(:other_actor) { FactoryBot.create(:user).fedipub_actor }
-  let(:scope) { Federails::Client::ActorPolicy::Scope.new(nil, Federails::Actor).resolve }
+  let(:scope) { Fedipub::Client::ActorPolicy::Scope.new(nil, Fedipub::Actor).resolve }
 
   permissions '.scope' do
     it 'returns all the actors' do
@@ -17,7 +17,7 @@ RSpec.describe Federails::Client::ActorPolicy, type: :policy do
   end
 
   permissions :index? do
-    let(:policy_subject) { Federails::Actor }
+    let(:policy_subject) { Fedipub::Actor }
 
     it_behaves_like 'an action for everyone'
   end

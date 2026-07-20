@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-module Federails
+module Fedipub
   module Server
     RSpec.describe FollowingsController, type: :routing do
       describe 'routing' do

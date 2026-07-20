@@ -1,16 +1,16 @@
 require 'rails_helper'
 require 'fedipub/utils/actor'
 
-RSpec.describe Federails::Utils::Actor do
+RSpec.describe Fedipub::Utils::Actor do
   describe '.tombstone!' do
     context 'with a local actor' do
       let(:actor) { FactoryBot.create :local_actor }
 
       it 'hardcodes all the previously computed values' do
-        nils = Federails::Utils::Actor::COMPUTED_ATTRIBUTES.to_h { |k| [k.to_s, nil] }
-        computed = Federails::Utils::Actor::COMPUTED_ATTRIBUTES.to_h { |k| [k.to_s, actor.send(k)] }
+        nils = Fedipub::Utils::Actor::COMPUTED_ATTRIBUTES.to_h { |k| [k.to_s, nil] }
+        computed = Fedipub::Utils::Actor::COMPUTED_ATTRIBUTES.to_h { |k| [k.to_s, actor.send(k)] }
 
-        expect { described_class.tombstone!(actor) }.to change { actor.attributes.slice(*Federails::Utils::Actor::COMPUTED_ATTRIBUTES.map(&:to_s)) }.from(nils).to computed
+        expect { described_class.tombstone!(actor) }.to change { actor.attributes.slice(*Fedipub::Utils::Actor::COMPUTED_ATTRIBUTES.map(&:to_s)) }.from(nils).to computed
       end
 
       it 'does not nullify the entity if still existing' do
@@ -24,7 +24,7 @@ RSpec.describe Federails::Utils::Actor do
       end
 
       it 'creates a Delete activity' do
-        expect { described_class.tombstone!(actor) }.to change(Federails::Activity.where(action: 'Delete'), :count).by 1
+        expect { described_class.tombstone!(actor) }.to change(Fedipub::Activity.where(action: 'Delete'), :count).by 1
       end
     end
 
@@ -32,7 +32,7 @@ RSpec.describe Federails::Utils::Actor do
       let(:actor) { FactoryBot.create :distant_actor }
 
       it 'does not change computed values' do
-        expect { described_class.tombstone!(actor) }.not_to(change { actor.attributes.slice(*Federails::Utils::Actor::COMPUTED_ATTRIBUTES.map(&:to_s)) })
+        expect { described_class.tombstone!(actor) }.not_to(change { actor.attributes.slice(*Fedipub::Utils::Actor::COMPUTED_ATTRIBUTES.map(&:to_s)) })
       end
 
       it 'marks the actor as tombstoned' do
@@ -41,7 +41,7 @@ RSpec.describe Federails::Utils::Actor do
       end
 
       it 'does not create a Delete activity' do
-        expect { described_class.tombstone!(actor) }.not_to change(Federails::Activity.where(action: 'Delete'), :count)
+        expect { described_class.tombstone!(actor) }.not_to change(Fedipub::Activity.where(action: 'Delete'), :count)
       end
     end
   end
@@ -68,10 +68,10 @@ RSpec.describe Federails::Utils::Actor do
 
       context 'when actor entity still exists' do
         it 'sets all computable values to nil' do
-          nils = Federails::Utils::Actor::COMPUTED_ATTRIBUTES.to_h { |k| [k.to_s, nil] }
-          computed = Federails::Utils::Actor::COMPUTED_ATTRIBUTES.to_h { |k| [k.to_s, actor.send(k)] }
+          nils = Fedipub::Utils::Actor::COMPUTED_ATTRIBUTES.to_h { |k| [k.to_s, nil] }
+          computed = Fedipub::Utils::Actor::COMPUTED_ATTRIBUTES.to_h { |k| [k.to_s, actor.send(k)] }
 
-          expect { described_class.untombstone!(actor) }.to change { actor.attributes.slice(*Federails::Utils::Actor::COMPUTED_ATTRIBUTES.map(&:to_s)) }.from(computed).to nils
+          expect { described_class.untombstone!(actor) }.to change { actor.attributes.slice(*Fedipub::Utils::Actor::COMPUTED_ATTRIBUTES.map(&:to_s)) }.from(computed).to nils
         end
 
         it 'removes the tombstoned flag from actor' do
@@ -80,7 +80,7 @@ RSpec.describe Federails::Utils::Actor do
         end
 
         it 'creates an Undo activity' do
-          expect { described_class.untombstone!(actor) }.to change(Federails::Activity.where(action: 'Undo'), :count).by 1
+          expect { described_class.untombstone!(actor) }.to change(Fedipub::Activity.where(action: 'Undo'), :count).by 1
         end
       end
     end
@@ -93,7 +93,7 @@ RSpec.describe Federails::Utils::Actor do
       end
 
       it 'does not change computed values' do
-        expect { described_class.untombstone!(actor) }.not_to(change { actor.attributes.slice(*Federails::Utils::Actor::COMPUTED_ATTRIBUTES.map(&:to_s)) })
+        expect { described_class.untombstone!(actor) }.not_to(change { actor.attributes.slice(*Fedipub::Utils::Actor::COMPUTED_ATTRIBUTES.map(&:to_s)) })
       end
 
       it 'syncs the actor' do
@@ -109,7 +109,7 @@ RSpec.describe Federails::Utils::Actor do
       end
 
       it 'does not create a Delete activity' do
-        expect { described_class.untombstone!(actor) }.not_to change(Federails::Activity.where(action: 'Delete'), :count)
+        expect { described_class.untombstone!(actor) }.not_to change(Fedipub::Activity.where(action: 'Delete'), :count)
       end
     end
   end

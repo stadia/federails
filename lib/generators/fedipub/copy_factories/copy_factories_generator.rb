@@ -1,4 +1,4 @@
-module Federails
+module Fedipub
   class CopyFactoriesGenerator < Rails::Generators::Base
     SOURCE_DIRECTORY = File.expand_path('../../../../spec/factories/fedipub', __dir__)
     FACTORY_DEFINITION_REGEX = /(FactoryBot.define do\n\s+factory) :(\w+),/

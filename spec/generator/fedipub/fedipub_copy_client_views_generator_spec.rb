@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe 'Federails::CopyClientViews', type: :generator do
+RSpec.describe 'Fedipub::CopyClientViews', type: :generator do
   it 'copies all the client views' do # rubocop:disable RSpec/ExampleLength
     output = `bundle exec rails generate fedipub:copy_client_views --pretend --skip`
              .split("\n")

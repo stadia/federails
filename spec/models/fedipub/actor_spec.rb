@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-module Federails
+module Fedipub
   # rubocop:disable RSpec/MultipleMemoizedHelpers
   RSpec.describe Actor, type: :model do
     let(:distant_actor_attributes) { FactoryBot.build(:distant_actor).attributes }
@@ -100,13 +100,13 @@ module Federails
       describe 'after_create' do
         context 'with a local actor' do
           it 'does not fetch domain information' do
-            expect { FactoryBot.create :local_actor }.not_to have_enqueued_job(Federails::FetchNodeinfoJob)
+            expect { FactoryBot.create :local_actor }.not_to have_enqueued_job(Fedipub::FetchNodeinfoJob)
           end
         end
 
         context 'with a remote actor' do
           it 'fetches the domain information' do
-            expect { FactoryBot.create :distant_actor }.to have_enqueued_job(Federails::FetchNodeinfoJob)
+            expect { FactoryBot.create :distant_actor }.to have_enqueued_job(Fedipub::FetchNodeinfoJob)
           end
         end
       end
@@ -274,16 +274,16 @@ module Federails
       context 'with a local entity' do
         context 'without a profile_url_method defined' do
           around do |example|
-            old_url_method = Federails.actor_entity(User)[:profile_url_method]
-            Federails.actor_entity(User)[:profile_url_method] = nil
+            old_url_method = Fedipub.actor_entity(User)[:profile_url_method]
+            Fedipub.actor_entity(User)[:profile_url_method] = nil
 
             example.run
 
-            Federails.actor_entity(User)[:profile_url_method] = old_url_method
+            Fedipub.actor_entity(User)[:profile_url_method] = old_url_method
           end
 
           it "returns the actor's url" do
-            expected_url = Federails::Engine.routes.url_helpers.server_actor_url(existing_local_actor)
+            expected_url = Fedipub::Engine.routes.url_helpers.server_actor_url(existing_local_actor)
             expect(existing_local_actor.profile_url).to eq expected_url
           end
         end
@@ -319,7 +319,7 @@ module Federails
         let(:entity) { described_class.create! distant_actor_attributes }
 
         it 'does not create an activity' do
-          expect { entity.tombstone! }.not_to change(Federails::Activity, :count)
+          expect { entity.tombstone! }.not_to change(Fedipub::Activity, :count)
         end
 
         it 'makes the actor tombstoned' do
@@ -339,7 +339,7 @@ module Federails
         let(:entity) { FactoryBot.create(:user).fedipub_actor }
 
         it 'creates an activity' do
-          expect { entity.tombstone! }.to change(Federails::Activity, :count).by 1
+          expect { entity.tombstone! }.to change(Fedipub::Activity, :count).by 1
         end
 
         it 'makes the actor tombstoned' do
@@ -365,7 +365,7 @@ module Federails
         end
 
         it 'does not create an activity' do
-          expect { entity.untombstone! }.not_to change(Federails::Activity, :count)
+          expect { entity.untombstone! }.not_to change(Fedipub::Activity, :count)
         end
 
         it 'removes the tombstoned flag' do
@@ -395,7 +395,7 @@ module Federails
         end
 
         it 'creates an activity' do
-          expect { entity.untombstone! }.to change(Federails::Activity, :count).by 1
+          expect { entity.untombstone! }.to change(Fedipub::Activity, :count).by 1
         end
 
         it 'removes the tombstoned flag' do
@@ -445,11 +445,11 @@ module Federails
 
       context 'when current actor follows given actor' do
         before do
-          Federails::Following.create! actor: actor, target_actor: existing_distant_actor
+          Fedipub::Following.create! actor: actor, target_actor: existing_distant_actor
         end
 
         it 'returns the Following' do
-          expect(actor.follows?(existing_distant_actor)).to be_a Federails::Following
+          expect(actor.follows?(existing_distant_actor)).to be_a Fedipub::Following
         end
       end
 
@@ -465,11 +465,11 @@ module Federails
 
       context 'when given actor follows current actor' do
         before do
-          Federails::Following.create! actor: existing_distant_actor, target_actor: actor
+          Fedipub::Following.create! actor: existing_distant_actor, target_actor: actor
         end
 
         it 'returns the Following' do
-          expect(actor.followed_by?(existing_distant_actor)).to be_a Federails::Following
+          expect(actor.followed_by?(existing_distant_actor)).to be_a Fedipub::Following
         end
       end
 

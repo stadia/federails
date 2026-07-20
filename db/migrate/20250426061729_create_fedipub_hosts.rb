@@ -1,4 +1,4 @@
-class CreateFederailsHosts < ActiveRecord::Migration[7.2]
+class CreateFedipubHosts < ActiveRecord::Migration[7.2]
   def change
     create_table :fedipub_hosts do |t|
       t.string :domain, null: false, default: nil

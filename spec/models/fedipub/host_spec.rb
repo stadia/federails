@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe Federails::Host do
+RSpec.describe Fedipub::Host do
   describe '#create_or_update' do
     let(:domain) { 'mamot.fr' }
 

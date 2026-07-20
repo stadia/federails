@@ -17,8 +17,8 @@ RSpec.describe '/federation/actors', type: :request do
   let(:other_user) { FactoryBot.create :user }
 
   before do
-    Federails::Following.create actor: user.fedipub_actor, target_actor: other_user.fedipub_actor
-    Federails::Following.create actor: other_user.fedipub_actor, target_actor: user.fedipub_actor
+    Fedipub::Following.create actor: user.fedipub_actor, target_actor: other_user.fedipub_actor
+    Fedipub::Following.create actor: other_user.fedipub_actor, target_actor: user.fedipub_actor
   end
 
   describe 'GET /show' do

@@ -1,6 +1,6 @@
-module Federails
+module Fedipub
   module Server
-    class ActivityPolicy < Federails::FederailsPolicy
+    class ActivityPolicy < Fedipub::FedipubPolicy
       def outbox?
         true
       end

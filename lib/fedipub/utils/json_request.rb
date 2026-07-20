@@ -1,7 +1,7 @@
 require 'faraday'
 require 'faraday/follow_redirects'
 
-module Federails
+module Fedipub
   module Utils
     # Simple wrapper to make requests expecting JSON
     module JsonRequest

@@ -5,7 +5,7 @@
     - actor (target actor)
 %>
 <p>
-  <% if Federails::Client::FollowingPolicy.new(user, Federails::Following).create? %>
+  <% if Fedipub::Client::FollowingPolicy.new(user, Fedipub::Following).create? %>
     <% follow = user.fedipub_actor.follows? actor %>
     <% if actor.entity == user %>
       <button type="button" role="button" disabled="disabled">That's you</button>

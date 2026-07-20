@@ -1,4 +1,4 @@
-module Federails
+module Fedipub
   module Utils
     module Context
       class << self

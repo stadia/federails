@@ -1,31 +1,31 @@
 require 'rails_helper'
 require 'fedipub/utils/host'
 
-RSpec.describe Federails::Utils::Host do
+RSpec.describe Fedipub::Utils::Host do
   describe '#localhost' do
     # Backup Rails configuration
     before do
-      @old_site_host = Federails.configuration.site_host
-      @old_site_port = Federails.configuration.site_port
+      @old_site_host = Fedipub.configuration.site_host
+      @old_site_port = Fedipub.configuration.site_port
     end
 
     # Restore Rails configuration
     after do
-      Federails.configuration.site_host = @old_site_host # rubocop:disable RSpec/InstanceVariable
-      Federails.configuration.site_port = @old_site_port # rubocop:disable RSpec/InstanceVariable
+      Fedipub.configuration.site_host = @old_site_host # rubocop:disable RSpec/InstanceVariable
+      Fedipub.configuration.site_port = @old_site_port # rubocop:disable RSpec/InstanceVariable
     end
 
     it 'returns local host and port' do
-      Federails.configuration.site_host = 'http://localhost'
-      Federails.configuration.site_port = 3000
+      Fedipub.configuration.site_host = 'http://localhost'
+      Fedipub.configuration.site_port = 3000
 
       expect(described_class.localhost).to eq 'localhost:3000'
     end
 
     context 'when a common port is declared' do
       it 'returns host only' do
-        Federails.configuration.site_host = 'http://example.com'
-        Federails.configuration.site_port = 80
+        Fedipub.configuration.site_host = 'http://example.com'
+        Fedipub.configuration.site_port = 80
 
         expect(described_class.localhost).to eq 'example.com'
       end
@@ -33,8 +33,8 @@ RSpec.describe Federails::Utils::Host do
 
     context 'when no port is declared' do
       it 'returns host only' do
-        Federails.configuration.site_host = 'http://example.com'
-        Federails.configuration.site_port = nil
+        Fedipub.configuration.site_host = 'http://example.com'
+        Fedipub.configuration.site_port = nil
 
         expect(described_class.localhost).to eq 'example.com'
       end

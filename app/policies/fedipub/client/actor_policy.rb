@@ -1,6 +1,6 @@
-module Federails
+module Fedipub
   module Client
-    class ActorPolicy < Federails::FederailsPolicy
+    class ActorPolicy < Fedipub::FedipubPolicy
       def lookup?
         true
       end

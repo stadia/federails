@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe Federails::Server::PublishedController, type: :acceptance do
+RSpec.describe Fedipub::Server::PublishedController, type: :acceptance do
   resource 'Federation/Publishable', "Display ActivityPub representations of application's published DataEntity"
 
   let(:headers) { { accept: 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"' } }

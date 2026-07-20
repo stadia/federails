@@ -30,7 +30,7 @@ RSpec.describe 'POST federation/actors/:actor_id/inbox with a Note to become a C
       context 'when actors already exist' do
         before do
           VCR.use_cassette 'dummy/fediverse/request/get_comment_actors_200' do
-            actor_urls.each { |url| Federails::Actor.find_or_create_by_federation_url url }
+            actor_urls.each { |url| Fedipub::Actor.find_or_create_by_federation_url url }
           end
         end
 
@@ -43,7 +43,7 @@ RSpec.describe 'POST federation/actors/:actor_id/inbox with a Note to become a C
 
         it 'does not create a new actor' do
           VCR.use_cassette 'dummy/fediverse/request/get_note_comment_200' do
-            expect { make_request }.not_to change(Federails::Actor, :count)
+            expect { make_request }.not_to change(Fedipub::Actor, :count)
           end
         end
       end
@@ -56,7 +56,7 @@ RSpec.describe 'POST federation/actors/:actor_id/inbox with a Note to become a C
         end
 
         it 'creates the distant actors' do
-          expect { make_request }.to change { Federails::Actor.distant.count }.by 2
+          expect { make_request }.to change { Fedipub::Actor.distant.count }.by 2
         end
 
         it 'creates a Comment' do
@@ -92,7 +92,7 @@ RSpec.describe 'POST federation/actors/:actor_id/inbox with a Note to become a C
         it 'creates all the comments, post and actors' do
           expect { make_request }.to change(Comment, :count).by(2)
                                  .and change(Post, :count).by(1)
-                                 .and change(Federails::Actor, :count).by(2)
+                                 .and change(Fedipub::Actor, :count).by(2)
         end
       end
     end

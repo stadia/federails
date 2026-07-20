@@ -1,5 +1,5 @@
 FactoryBot.define do
-  factory :distant_actor, class: 'Federails::Actor' do
+  factory :distant_actor, class: 'Fedipub::Actor' do
     entity { nil }
     actor_type { 'Person' }
     federated_url { "https://example.com/actors/#{rand(1...10_000)}" }

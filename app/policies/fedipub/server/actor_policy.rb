@@ -1,6 +1,6 @@
-module Federails
+module Fedipub
   module Server
-    class ActorPolicy < Federails::FederailsPolicy
+    class ActorPolicy < Fedipub::FedipubPolicy
       def show?
         @record.local?
       end

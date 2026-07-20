@@ -1,10 +1,10 @@
 module Fixtures
   module Classes
-    # Model configured as a FederailsDataEntity. It handles Note object from the federation.
+    # Model configured as a FedipubDataEntity. It handles Note object from the federation.
     class FakeArticleDataModel < ApplicationRecord
       self.table_name = 'posts'
-      include Federails::DataEntity
-      include Federails::HandlesDeleteRequests
+      include Fedipub::DataEntity
+      include Fedipub::HandlesDeleteRequests
 
       acts_as_fedipub_data handles:                 'CustomNote',
                              actor_entity_method:     :user,
@@ -30,7 +30,7 @@ module Fixtures
       end
 
       def to_activitypub_object
-        Federails::DataTransformer::Note.to_federation self,
+        Fedipub::DataTransformer::Note.to_federation self,
                                                        content: content,
                                                        name:    title
       end

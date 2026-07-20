@@ -1,6 +1,6 @@
 require 'fedipub/utils/context'
 
-module Federails
+module Fedipub
   module DataTransformer
     module Note
       # Renders a Note. The entity is used to determine actor and generic fields data
@@ -13,7 +13,7 @@ module Federails
       # @return [Hash]
       #
       # @example
-      #   Federails::DataTransformer::Note.to_federation(comment, content: comment.content, custom: { 'inReplyTo' => comment.parent.federated_url })
+      #   Fedipub::DataTransformer::Note.to_federation(comment, content: comment.content, custom: { 'inReplyTo' => comment.parent.federated_url })
       #
       # See:
       #   - https://www.w3.org/TR/activitystreams-vocabulary/#dfn-object

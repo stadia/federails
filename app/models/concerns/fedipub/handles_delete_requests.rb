@@ -1,4 +1,4 @@
-module Federails
+module Fedipub
   # Model concern providing hooks for on_fedipub_delete_requested callback
   #
   # ```rb
@@ -10,7 +10,7 @@ module Federails
   #
   # ```rb
   # class MyModel < ApplicationRecord
-  #   include Federails::HandlesDeleteRequests
+  #   include Fedipub::HandlesDeleteRequests
   #
   #   on_fedipub_delete_requested -> { delete! }
   # end

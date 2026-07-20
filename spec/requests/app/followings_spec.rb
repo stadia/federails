@@ -61,7 +61,7 @@ RSpec.describe '/followings', type: :request do
         it 'creates a new Following' do
           expect do
             post fedipub.client_followings_url, params: { following: valid_attributes }
-          end.to change(Federails::Following, :count).by(1)
+          end.to change(Fedipub::Following, :count).by(1)
         end
 
         it 'redirects to the actors profile' do
@@ -74,7 +74,7 @@ RSpec.describe '/followings', type: :request do
         it 'does not create a new Following' do
           expect do
             post fedipub.client_followings_url, params: { following: invalid_attributes }
-          end.not_to change(Federails::Following, :count)
+          end.not_to change(Fedipub::Following, :count)
         end
 
         it 'redirects to the actors profile' do
@@ -100,7 +100,7 @@ RSpec.describe '/followings', type: :request do
         it 'creates the following' do
           expect do
             post fedipub.follow_client_followings_url(account: target_actor.username)
-          end.to change(Federails::Following, :count).by 1
+          end.to change(Fedipub::Following, :count).by 1
         end
 
         it 'redirects to the actor' do
@@ -113,7 +113,7 @@ RSpec.describe '/followings', type: :request do
         it 'does not create a new Following' do
           expect do
             post fedipub.follow_client_followings_url(account: 'non_existing_account')
-          end.not_to change(Federails::Following, :count)
+          end.not_to change(Fedipub::Following, :count)
         end
 
         it 'redirects to the actors list' do
@@ -174,7 +174,7 @@ RSpec.describe '/followings', type: :request do
         following
         expect do
           delete fedipub.client_following_url(following)
-        end.to change(Federails::Following, :count).by(-1)
+        end.to change(Fedipub::Following, :count).by(-1)
       end
 
       it 'redirects to the actors profile' do

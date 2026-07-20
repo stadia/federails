@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-module Federails
+module Fedipub
   module Client
     RSpec.describe FollowingsController, type: :routing do
       describe 'routing' do
@@ -23,13 +23,13 @@ module Federails
 
       context 'when client routes are disabled' do
         before do
-          @old_state = Federails.configuration.client_routes_path
-          Federails.configuration.client_routes_path = nil
+          @old_state = Fedipub.configuration.client_routes_path
+          Fedipub.configuration.client_routes_path = nil
           Rails.application.reload_routes!
         end
 
         after do
-          Federails.configuration.client_routes_path = @old_state
+          Fedipub.configuration.client_routes_path = @old_state
           Rails.application.reload_routes!
         end
 

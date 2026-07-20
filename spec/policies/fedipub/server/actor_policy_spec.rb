@@ -1,8 +1,8 @@
 require 'rails_helper'
 
-RSpec.describe Federails::Server::ActorPolicy, type: :policy do
+RSpec.describe Fedipub::Server::ActorPolicy, type: :policy do
   let(:signed_in_user) { FactoryBot.create :user }
-  let(:scope) { Federails::Server::ActorPolicy::Scope.new(nil, Federails::Actor).resolve }
+  let(:scope) { Fedipub::Server::ActorPolicy::Scope.new(nil, Fedipub::Actor).resolve }
 
   permissions '.scope' do
     it 'returns all the users' do

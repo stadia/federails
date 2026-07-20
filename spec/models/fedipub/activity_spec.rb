@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-module Federails
+module Fedipub
   RSpec.describe Activity, type: :model do
     let(:alice) { FactoryBot.create :local_actor }
     let(:bob) { FactoryBot.create :local_actor }

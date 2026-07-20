@@ -1,4 +1,4 @@
-module Federails
+module Fedipub
   class CopyClientViewsGenerator < Rails::Generators::Base
     source_root File.expand_path('../../../../app/views', __dir__)
 

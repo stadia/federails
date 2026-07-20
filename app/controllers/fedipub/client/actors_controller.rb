@@ -1,14 +1,14 @@
-module Federails
+module Fedipub
   module Client
-    class ActorsController < Federails::ClientController
+    class ActorsController < Fedipub::ClientController
       before_action :set_actor, only: [:show]
 
       # GET /app/actors
       # GET /app/actors.json
       def index
-        authorize Federails::Actor, policy_class: Federails::Client::ActorPolicy
+        authorize Fedipub::Actor, policy_class: Fedipub::Client::ActorPolicy
 
-        @actors = policy_scope(Federails::Actor, policy_scope_class: Federails::Client::ActorPolicy::Scope).all
+        @actors = policy_scope(Fedipub::Actor, policy_scope_class: Fedipub::Client::ActorPolicy::Scope).all
         @actors = @actors.local if params[:local_only]
       end
 
@@ -21,8 +21,8 @@ module Federails
       # GET /app/actors/lookup
       # GET /app/actors/lookup.json
       def lookup
-        @actor = Federails::Actor.find_by_account account_param
-        authorize @actor, policy_class: Federails::Client::ActorPolicy
+        @actor = Fedipub::Actor.find_by_account account_param
+        authorize @actor, policy_class: Fedipub::Client::ActorPolicy
         render_show
       end
 
@@ -30,8 +30,8 @@ module Federails
 
       # Use callbacks to share common setup or constraints between actions.
       def set_actor
-        @actor = Federails::Actor.find_param(params[:id])
-        authorize @actor, policy_class: Federails::Client::ActorPolicy
+        @actor = Fedipub::Actor.find_param(params[:id])
+        authorize @actor, policy_class: Fedipub::Client::ActorPolicy
       end
 
       def account_param

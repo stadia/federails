@@ -1,6 +1,6 @@
-module Federails
+module Fedipub
   module Client
-    class FollowingsController < Federails::ClientController
+    class FollowingsController < Fedipub::ClientController
       before_action :authenticate_user!
       before_action :skip_authorization, only: [:new, :create]
       before_action :set_following, only: [:accept, :destroy]
@@ -23,7 +23,7 @@ module Federails
             format.json { render :show, status: :ok, location: @following }
           else
             format.html { redirect_to url, alert: I18n.t('controller.followings.accept.error') }
-            format.json { render json: @following.errors, status: Federails::Utils::ResponseCodes::UNPROCESSABLE_CONTENT }
+            format.json { render json: @following.errors, status: Fedipub::Utils::ResponseCodes::UNPROCESSABLE_CONTENT }
           end
         end
       end
@@ -33,7 +33,7 @@ module Federails
       def create
         @following = Following.new(following_params)
         @following.actor = current_user.fedipub_actor
-        authorize @following, policy_class: Federails::Client::FollowingPolicy
+        authorize @following, policy_class: Fedipub::Client::FollowingPolicy
 
         save_and_render
       end
@@ -41,7 +41,7 @@ module Federails
       # POST /app/followings/follow
       # POST /app/followings/follow.json
       def follow
-        authorize Federails::Following, policy_class: Federails::Client::FollowingPolicy
+        authorize Fedipub::Following, policy_class: Fedipub::Client::FollowingPolicy
 
         begin
           @following = Following.new_from_account following_account_params, actor: current_user.fedipub_actor
@@ -49,7 +49,7 @@ module Federails
           # Renders a 422 instead of a 404
           respond_to do |format|
             format.html { redirect_to fedipub.client_actors_url, alert: I18n.t('controller.followings.follow.error') }
-            format.json { render json: { target_actor: ['does not exist'] }, status: Federails::Utils::ResponseCodes::UNPROCESSABLE_CONTENT }
+            format.json { render json: { target_actor: ['does not exist'] }, status: Fedipub::Utils::ResponseCodes::UNPROCESSABLE_CONTENT }
           end
 
           return
@@ -73,7 +73,7 @@ module Federails
       # Use callbacks to share common setup or constraints between actions.
       def set_following
         @following = Following.find_param(params[:id])
-        authorize @following, policy_class: Federails::Client::FollowingPolicy
+        authorize @following, policy_class: Fedipub::Client::FollowingPolicy
       end
 
       # Only allow a list of trusted parameters through.
@@ -94,7 +94,7 @@ module Federails
             format.json { render :show, status: :created, location: @following }
           else
             format.html { redirect_to url, alert: I18n.t('controller.followings.save_and_render.error') }
-            format.json { render json: @following.errors, status: Federails::Utils::ResponseCodes::UNPROCESSABLE_CONTENT }
+            format.json { render json: @following.errors, status: Fedipub::Utils::ResponseCodes::UNPROCESSABLE_CONTENT }
           end
         end
       end

@@ -1,4 +1,4 @@
-module Federails
+module Fedipub
   # Model concern providing UUIDs as model parameter (instead of IDs).
   #
   #
@@ -13,7 +13,7 @@ module Federails
   #
   # ```rb
   # class MyModel < ApplicationRecord
-  #   include Federails::HasUuid
+  #   include Fedipub::HasUuid
   # end
   #
   # # And now:

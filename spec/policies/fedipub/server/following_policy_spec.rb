@@ -1,9 +1,9 @@
 require 'rails_helper'
 
-RSpec.describe Federails::Server::FollowingPolicy, type: :policy do
+RSpec.describe Fedipub::Server::FollowingPolicy, type: :policy do
   let(:user) { FactoryBot.create :user }
   let(:signed_in_user) { FactoryBot.create :user }
-  let(:scope) { Federails::Server::FollowingPolicy::Scope.new(nil, Federails::Following).resolve }
+  let(:scope) { Fedipub::Server::FollowingPolicy::Scope.new(nil, Fedipub::Following).resolve }
   let(:following) { FactoryBot.create :following, actor: signed_in_user.fedipub_actor, target_actor: user.fedipub_actor }
 
   permissions '.scope' do

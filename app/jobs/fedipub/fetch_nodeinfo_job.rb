@@ -1,10 +1,10 @@
 require 'fediverse/notifier'
 
-module Federails
+module Fedipub
   class FetchNodeinfoJob < ApplicationJob
     # @param domain [String] Domain to create/update
     def perform(domain)
-      Federails::Host.create_or_update domain, min_update_interval: Federails::Configuration.remote_entities_cache_duration
+      Fedipub::Host.create_or_update domain, min_update_interval: Fedipub::Configuration.remote_entities_cache_duration
     end
   end
 end

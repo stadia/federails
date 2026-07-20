@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe Federails::Server::NodeinfoController, type: :acceptance do
+RSpec.describe Fedipub::Server::NodeinfoController, type: :acceptance do
   resource 'Nodeinfo', 'Node info endpoints'
   let(:headers) { { accept: 'application/json; profile="http://nodeinfo.diaspora.software/ns/schema/2.0#"' } }
 

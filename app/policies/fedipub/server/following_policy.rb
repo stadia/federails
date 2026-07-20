@@ -1,6 +1,6 @@
-module Federails
+module Fedipub
   module Server
-    class FollowingPolicy < Federails::FederailsPolicy
+    class FollowingPolicy < Fedipub::FedipubPolicy
     end
   end
 end

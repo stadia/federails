@@ -18,7 +18,7 @@ module Fediverse
       private
 
       def get(id)
-        json = Federails::Utils::JsonRequest.get_json(id)
+        json = Fedipub::Utils::JsonRequest.get_json(id)
 
         JSON::LD::API.compact json, json['@context']
       rescue JSON::ParserError

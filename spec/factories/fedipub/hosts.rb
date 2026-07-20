@@ -1,5 +1,5 @@
 FactoryBot.define do
-  factory :host, class: 'Federails::Host' do
+  factory :host, class: 'Fedipub::Host' do
     domain { Faker::Internet.domain_name }
 
     trait :handles_activitypub do

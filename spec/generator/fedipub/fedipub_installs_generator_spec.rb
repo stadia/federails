@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe 'Federails::Install', type: :generator do
+RSpec.describe 'Fedipub::Install', type: :generator do
   it 'copies all the client views' do # rubocop:disable RSpec/ExampleLength
     output = `bundle exec rails generate fedipub:install --pretend --skip`
              .split("\n")

@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe Federails::Server::FollowingsController, type: :acceptance do
+RSpec.describe Fedipub::Server::FollowingsController, type: :acceptance do
   resource 'Federation/Followings', 'Followings management'
 
   let(:headers) { { accept: 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"' } }

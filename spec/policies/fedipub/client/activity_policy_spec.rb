@@ -1,9 +1,9 @@
 require 'rails_helper'
 require 'pundit/rspec'
 
-RSpec.describe Federails::Client::ActivityPolicy, type: :policy do
+RSpec.describe Fedipub::Client::ActivityPolicy, type: :policy do
   let(:signed_in_user) { FactoryBot.create :user }
-  let(:scope) { Federails::Client::ActivityPolicy::Scope.new(nil, Federails::Activity).resolve }
+  let(:scope) { Fedipub::Client::ActivityPolicy::Scope.new(nil, Fedipub::Activity).resolve }
 
   permissions '.scope' do
     it 'returns all the activities' do
@@ -14,13 +14,13 @@ RSpec.describe Federails::Client::ActivityPolicy, type: :policy do
   end
 
   permissions :index? do
-    let(:policy_subject) { Federails::Activity }
+    let(:policy_subject) { Fedipub::Activity }
 
     it_behaves_like 'an action for everyone'
   end
 
   permissions :feed? do
-    let(:policy_subject) { Federails::Activity }
+    let(:policy_subject) { Fedipub::Activity }
 
     it_behaves_like 'an action for federable instances only'
   end

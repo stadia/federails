@@ -1,4 +1,4 @@
-module Federails
+module Fedipub
   module Utils
     class Actor
       # List of the attributes computed for local actors
@@ -15,8 +15,8 @@ module Federails
       ].freeze
 
       class << self
-        # @param actor [Federails::Actor]
-        # @return [Federails::Actor]
+        # @param actor [Fedipub::Actor]
+        # @return [Fedipub::Actor]
         def tombstone!(actor)
           if actor.local?
             tombstone_local_actor actor
@@ -38,7 +38,7 @@ module Federails
         private
 
         def tombstone_local_actor(actor)
-          Federails::Actor.transaction do
+          Fedipub::Actor.transaction do
             hash = {
               tombstoned_at: Time.current,
               entity:        actor.entity || nil,
@@ -56,7 +56,7 @@ module Federails
           return unless actor.tombstoned?
           raise 'Cannot restore a local actor without an entity' if actor.entity.blank?
 
-          Federails::Actor.transaction do
+          Fedipub::Actor.transaction do
             # Reset hardcoded attributes depending on the actor's entity
             hash = { tombstoned_at: nil }
             COMPUTED_ATTRIBUTES.each { |attribute| hash[attribute] = nil }

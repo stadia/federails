@@ -1,9 +1,9 @@
 require 'rails_helper'
 
-RSpec.describe Federails::Server::PublishablePolicy, type: :policy do
+RSpec.describe Fedipub::Server::PublishablePolicy, type: :policy do
   let(:signed_in_user) { FactoryBot.create :user }
   let(:published) { Fixtures::Classes::FakeArticleDataModel.create title: 'The title', content: 'Some content', user: FactoryBot.create(:user) }
-  let(:scope) { Federails::Server::PublishablePolicy::Scope.new(nil, published).resolve }
+  let(:scope) { Fedipub::Server::PublishablePolicy::Scope.new(nil, published).resolve }
 
   permissions '.scope' do
     it 'is not implemented' do

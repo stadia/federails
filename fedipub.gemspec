@@ -3,7 +3,7 @@ require_relative 'lib/fedipub/version'
 Gem::Specification.new do |spec|
   spec.required_ruby_version = '>= 3.1.2'
   spec.name        = 'fedipub'
-  spec.version     = Federails::VERSION
+  spec.version     = Fedipub::VERSION
   spec.authors     = ['Manuel Tancoigne']
   spec.email       = ['manu@experimentslabs.com']
   spec.homepage    = 'https://experimentslabs.com'

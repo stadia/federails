@@ -1,4 +1,4 @@
-module Federails
+module Fedipub
   module Utils
     class Host
       class << self
@@ -7,8 +7,8 @@ module Federails
         ##
         # @return [String] Host and port of the current instance
         def localhost
-          uri = URI.parse Federails.configuration.site_host
-          host_and_port (uri.host || 'localhost'), Federails.configuration.site_port
+          uri = URI.parse Fedipub.configuration.site_host
+          host_and_port (uri.host || 'localhost'), Fedipub.configuration.site_port
         end
 
         ##

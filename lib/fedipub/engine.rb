@@ -1,6 +1,6 @@
-module Federails
+module Fedipub
   class Engine < ::Rails::Engine
-    isolate_namespace Federails
+    isolate_namespace Fedipub
 
     config.generators do |g|
       g.test_framework :rspec

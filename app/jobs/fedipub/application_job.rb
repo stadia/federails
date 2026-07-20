@@ -1,4 +1,4 @@
-module Federails
+module Fedipub
   class ApplicationJob < ActiveJob::Base
     queue_as { Configuration.job_queue.to_sym }
 

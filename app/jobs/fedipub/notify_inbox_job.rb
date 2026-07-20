@@ -1,6 +1,6 @@
 require 'fediverse/notifier'
 
-module Federails
+module Fedipub
   class NotifyInboxJob < ApplicationJob
     def perform(activity)
       activity.reload

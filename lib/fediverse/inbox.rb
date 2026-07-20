@@ -6,7 +6,7 @@ module Fediverse
     class << self
       # Registers a handler for incoming data
       #
-      # Unless a specific type is not implemented in Federails, you should leave the 'Delete' activity to Federails:
+      # Unless a specific type is not implemented in Fedipub, you should leave the 'Delete' activity to Fedipub:
       # it will dispatch a `on_fedipub_delete_requested` event on the right objects.
       #
       # @param activity_type [String] Target activity type ('Create', 'Follow', 'Like', ...)
@@ -43,7 +43,7 @@ module Fediverse
 
       def dispatch_delete_request(payload)
         payload['object'] = payload['object']['id'] unless payload['object'].is_a? String
-        object = Federails::Utils::Object.find_distant_object_in_all payload['object']
+        object = Fedipub::Utils::Object.find_distant_object_in_all payload['object']
         return if object.blank?
 
         object.run_callbacks :on_fedipub_delete_requested
@@ -57,35 +57,35 @@ module Fediverse
       end
 
       def handle_create_follow_request(activity)
-        actor        = Federails::Actor.find_or_create_by_object activity['actor']
-        target_actor = Federails::Actor.find_or_create_by_object activity['object']
+        actor        = Fedipub::Actor.find_or_create_by_object activity['actor']
+        target_actor = Fedipub::Actor.find_or_create_by_object activity['object']
 
-        Federails::Following.create! actor: actor, target_actor: target_actor, federated_url: activity['id']
+        Fedipub::Following.create! actor: actor, target_actor: target_actor, federated_url: activity['id']
       end
 
       def handle_accept_follow_request(activity)
         original_activity = Request.dereference(activity['object'])
 
-        actor        = Federails::Actor.find_or_create_by_object original_activity['actor']
-        target_actor = Federails::Actor.find_or_create_by_object original_activity['object']
+        actor        = Fedipub::Actor.find_or_create_by_object original_activity['actor']
+        target_actor = Fedipub::Actor.find_or_create_by_object original_activity['object']
         raise 'Follow not accepted by target actor but by someone else' if activity['actor'] != target_actor.federated_url
 
-        follow = Federails::Following.find_by actor: actor, target_actor: target_actor
+        follow = Fedipub::Following.find_by actor: actor, target_actor: target_actor
         follow.accept!
       end
 
       def handle_undo_follow_request(activity)
         original_activity = activity['object']
 
-        actor        = Federails::Actor.find_or_create_by_object original_activity['actor']
-        target_actor = Federails::Actor.find_or_create_by_object original_activity['object']
+        actor        = Fedipub::Actor.find_or_create_by_object original_activity['actor']
+        target_actor = Fedipub::Actor.find_or_create_by_object original_activity['object']
 
-        follow = Federails::Following.find_by actor: actor, target_actor: target_actor
+        follow = Fedipub::Following.find_by actor: actor, target_actor: target_actor
         follow&.destroy
       end
 
       def handle_delete_request(activity)
-        object = Federails::Utils::Object.find_distant_object_in_all(activity['object'])
+        object = Fedipub::Utils::Object.find_distant_object_in_all(activity['object'])
         return if object.blank?
 
         object.run_callbacks :on_fedipub_delete_requested
@@ -94,7 +94,7 @@ module Fediverse
       def handle_undelete_request(activity)
         # Get to original object
         delete_activity = Request.dereference(activity['object'])
-        object = Federails::Utils::Object.find_distant_object_in_all(delete_activity['object'])
+        object = Fedipub::Utils::Object.find_distant_object_in_all(delete_activity['object'])
         return if object.blank?
 
         object.run_callbacks :on_fedipub_undelete_requested

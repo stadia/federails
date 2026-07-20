@@ -36,7 +36,7 @@ end
 # app/models/message.rb
 
 class Message < ApplicationRecord
-  include Federails::DataEntity
+  include Fedipub::DataEntity
   acts_as_fedipub_data handles: 'Note',
                          actor_entity_method: :user
 
@@ -49,7 +49,7 @@ class Message < ApplicationRecord
   # Transforms the instance to a valid ActivityPub object   
   # @return [Hash]
   def to_activitypub_object
-    Federails::DataTransformer::Note.to_federation self,
+    Fedipub::DataTransformer::Note.to_federation self,
                                                    content:   content,
                                                    inReplyTo: parent?.federated_url
   end
@@ -61,13 +61,13 @@ class Message < ApplicationRecord
   # @return [Hash] Valid Hash 
   def self.from_activitypub_object(hash)
     # Gets the timestamps values with a helper
-    attrs = Federails::Utils::Object.timestamp_attributes(hash)
+    attrs = Fedipub::Utils::Object.timestamp_attributes(hash)
                                     # Complete attributes
                                     .merge federated_url: hash['id'],
                                            content:       hash['content']
 
     # Find the parent if message is an answer
-    parent = Federails::Utils::Object.find_or_create! hash['inReplyTo'] if hash['inReplyTo'].present? 
+    parent = Fedipub::Utils::Object.find_or_create! hash['inReplyTo'] if hash['inReplyTo'].present? 
     attrs[:parent] = parent if parent
 
     attrs

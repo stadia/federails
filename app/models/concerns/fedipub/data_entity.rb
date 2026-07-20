@@ -1,6 +1,6 @@
 require 'fediverse/inbox'
 
-module Federails
+module Fedipub
   # Model concern to include in models for which data is pushed to the Fediverse and comes from the Fediverse.
   #
   # Once included, an activity will automatically be created upon
@@ -32,7 +32,7 @@ module Federails
   #
   # ```rb
   # class Post < ApplicationRecord
-  #   include Federails::DataEntity
+  #   include Fedipub::DataEntity
   #   acts_as_fedipub_data options
   #
   #   # This will be called when a Delete activity comes for the entry. As we don't know how you want to handle it,
@@ -44,7 +44,7 @@ module Federails
   #   on_fedipub_undelete_requested :do_something_else
   #
   #   def to_activitypub_object
-  #     Federails::DataTransformer::Note.to_federation self,
+  #     Fedipub::DataTransformer::Note.to_federation self,
   #                                                    content: content,
   #                                                    name:    title
   #   end
@@ -60,7 +60,7 @@ module Federails
   # ```
   #
   # **If your model has a mechanism for soft deletion:**
-  # - you can specify some methods names to handle it in Federails responses:
+  # - you can specify some methods names to handle it in Fedipub responses:
   # - you will need to send the delete activity yourself
   #
   # ```rb
@@ -99,9 +99,9 @@ module Federails
     class TombstonedError < StandardError; end
 
     extend ActiveSupport::Concern
-    include Federails::HandlesDeleteRequests
-    include Federails::Likeable
-    include Federails::Announceable
+    include Fedipub::HandlesDeleteRequests
+    include Fedipub::Likeable
+    include Fedipub::Announceable
 
     # Class methods automatically included in the concern.
     module ClassMethods
@@ -109,7 +109,7 @@ module Federails
       #
       # @param actor_entity_method [Symbol] Method returning an object responding to 'fedipub_actor', for local content
       # @param url_param [Symbol] Column name of the object ID that should be used in URLs. Defaults to +:id+
-      # @param route_path_segment [Symbol] Segment used in Federails routes to display the ActivityPub representation.
+      # @param route_path_segment [Symbol] Segment used in Fedipub routes to display the ActivityPub representation.
       #   Defaults to the pluralized, underscored class name
       # @param handles [String] Type of ActivityPub object handled by this entity type
       # @param with [Symbol] Self class method that will handle incoming objects. Defaults to +:handle_incoming_fediverse_data+
@@ -140,7 +140,7 @@ module Federails
       )
         route_path_segment ||= name.pluralize.underscore
 
-        Federails::Configuration.register_data_type self,
+        Fedipub::Configuration.register_data_type self,
                                                     route_path_segment:      route_path_segment,
                                                     actor_entity_method:     actor_entity_method,
                                                     url_param:               url_param,
@@ -175,7 +175,7 @@ module Federails
         activity = Fediverse::Request.dereference(activity_hash_or_id)
         object = Fediverse::Request.dereference(activity['object'])
 
-        entity = Federails::Utils::Object.find_or_create!(object)
+        entity = Fedipub::Utils::Object.find_or_create!(object)
 
         if activity['type'] == 'Update'
           entity.assign_attributes from_activitypub_object(object)
@@ -188,17 +188,17 @@ module Federails
       end
 
       def find_untombstoned_by!(**params)
-        configuration = Federails.data_entity_configuration(self)
+        configuration = Fedipub.data_entity_configuration(self)
         entity = find_by!(**params)
 
-        raise Federails::DataEntity::TombstonedError if configuration[:soft_deleted_method] && entity.send(configuration[:soft_deleted_method])
+        raise Fedipub::DataEntity::TombstonedError if configuration[:soft_deleted_method] && entity.send(configuration[:soft_deleted_method])
 
         entity
       end
     end
 
     included do
-      belongs_to :fedipub_actor, class_name: 'Federails::Actor'
+      belongs_to :fedipub_actor, class_name: 'Fedipub::Actor'
 
       scope :local_fedipub_entities, -> { where federated_url: nil }
       scope :distant_fedipub_entities, -> { where.not(federated_url: nil) }
@@ -216,9 +216,9 @@ module Federails
       return nil unless send(fedipub_data_configuration[:should_federate_method])
       return attributes['federated_url'] if attributes['federated_url'].present?
 
-      path_segment = Federails.data_entity_configuration(self)[:route_path_segment]
-      url_param = Federails.data_entity_configuration(self)[:url_param]
-      Federails::Engine.routes.url_helpers.server_published_url(publishable_type: path_segment, id: send(url_param))
+      path_segment = Fedipub.data_entity_configuration(self)[:route_path_segment]
+      url_param = Fedipub.data_entity_configuration(self)[:url_param]
+      Fedipub::Engine.routes.url_helpers.server_published_url(publishable_type: path_segment, id: send(url_param))
     end
 
     # Check whether the entity was created locally or comes from the Fediverse
@@ -237,7 +237,7 @@ module Federails
     end
 
     def fedipub_data_configuration
-      Federails.data_entity_configuration(self)
+      Fedipub.data_entity_configuration(self)
     end
 
     def fedipub_sync!
@@ -269,7 +269,7 @@ module Federails
     end
 
     def ensure_fedipub_configuration!
-      raise("Entity not configured for #{self.class.name}. Did you use \"acts_as_fedipub_data\"?") unless Federails.data_entity? self
+      raise("Entity not configured for #{self.class.name}. Did you use \"acts_as_fedipub_data\"?") unless Fedipub.data_entity? self
     end
 
     def default_should_federate?

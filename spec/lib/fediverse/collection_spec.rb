@@ -57,7 +57,7 @@ module Fediverse
 
       it 'raises unhandled response error' do
         VCR.use_cassette 'fediverse/collection/get_followers_404' do
-          expect { described_class.fetch(url) }.to raise_error(Federails::Utils::JsonRequest::UnhandledResponseStatus)
+          expect { described_class.fetch(url) }.to raise_error(Fedipub::Utils::JsonRequest::UnhandledResponseStatus)
         end
       end
     end

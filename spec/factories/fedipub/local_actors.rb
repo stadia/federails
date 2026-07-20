@@ -1,5 +1,5 @@
 FactoryBot.define do
-  factory :local_actor, class: 'Federails::Actor' do
+  factory :local_actor, class: 'Fedipub::Actor' do
     initialize_with do
       # Create an "actor entity" and pick the actor from here
       #

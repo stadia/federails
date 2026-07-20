@@ -25,11 +25,11 @@ RSpec.describe '/nodeinfo', type: :request do
     end
 
     it 'does not include user data if no method is set' do
-      prev = Federails::Configuration.actor_types.dig('User', :user_count_method)
-      Federails::Configuration.actor_types['User'][:user_count_method] = nil
+      prev = Fedipub::Configuration.actor_types.dig('User', :user_count_method)
+      Fedipub::Configuration.actor_types['User'][:user_count_method] = nil
       get fedipub.show_node_info_url
       expect(response.parsed_body).not_to have_key :users
-      Federails::Configuration.actor_types['User'][:user_count_method] = prev
+      Fedipub::Configuration.actor_types['User'][:user_count_method] = prev
     end
 
     context 'with some users' do
@@ -61,39 +61,39 @@ RSpec.describe '/nodeinfo', type: :request do
     end
 
     it 'shows open registrations if set' do # rubocop:todo RSpec/ExampleLength
-      prev = Federails::Configuration.open_registrations
-      Federails::Configuration.open_registrations = true
+      prev = Fedipub::Configuration.open_registrations
+      Fedipub::Configuration.open_registrations = true
       get fedipub.show_node_info_url
       expect(response.parsed_body['openRegistrations']).to be true
     ensure
-      Federails::Configuration.open_registrations = prev
+      Fedipub::Configuration.open_registrations = prev
     end
 
     it 'gets open registrations from a proc' do # rubocop:todo RSpec/ExampleLength
-      prev = Federails::Configuration.open_registrations
-      Federails::Configuration.open_registrations = -> { true }
+      prev = Fedipub::Configuration.open_registrations
+      Fedipub::Configuration.open_registrations = -> { true }
       get fedipub.show_node_info_url
       expect(response.parsed_body['openRegistrations']).to be true
     ensure
-      Federails::Configuration.open_registrations = prev
+      Fedipub::Configuration.open_registrations = prev
     end
 
     it 'includes extra nodeinfo metadata from a hash' do # rubocop:todo RSpec/ExampleLength
-      prev = Federails::Configuration.nodeinfo_metadata
-      Federails::Configuration.nodeinfo_metadata = { 'faspBaseUrl' => 'https://fedi.example.com/fasp' }
+      prev = Fedipub::Configuration.nodeinfo_metadata
+      Fedipub::Configuration.nodeinfo_metadata = { 'faspBaseUrl' => 'https://fedi.example.com/fasp' }
       get fedipub.show_node_info_url
       expect(response.parsed_body.dig('metadata', 'faspBaseUrl')).to eq 'https://fedi.example.com/fasp'
     ensure
-      Federails::Configuration.nodeinfo_metadata = prev
+      Fedipub::Configuration.nodeinfo_metadata = prev
     end
 
     it 'includes extra nodeinfo metadata from a proc' do # rubocop:todo RSpec/ExampleLength
-      prev = Federails::Configuration.nodeinfo_metadata
-      Federails::Configuration.nodeinfo_metadata = -> { { 'faspBaseUrl' => 'https://fedi.example.com/fasp' } }
+      prev = Fedipub::Configuration.nodeinfo_metadata
+      Fedipub::Configuration.nodeinfo_metadata = -> { { 'faspBaseUrl' => 'https://fedi.example.com/fasp' } }
       get fedipub.show_node_info_url
       expect(response.parsed_body.dig('metadata', 'faspBaseUrl')).to eq 'https://fedi.example.com/fasp'
     ensure
-      Federails::Configuration.nodeinfo_metadata = prev
+      Fedipub::Configuration.nodeinfo_metadata = prev
     end
   end
 end

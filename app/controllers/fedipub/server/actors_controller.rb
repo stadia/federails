@@ -1,7 +1,7 @@
-module Federails
+module Fedipub
   module Server
-    class ActorsController < Federails::ServerController
-      include Federails::Server::RenderCollections
+    class ActorsController < Fedipub::ServerController
+      include Fedipub::Server::RenderCollections
 
       before_action :set_actor, only: [:show, :followers, :following]
 
@@ -43,7 +43,7 @@ module Federails
       # Use callbacks to share common setup or constraints between actions.
       def set_actor
         @actor = Actor.find_param(params[:id])
-        authorize @actor, policy_class: Federails::Server::ActorPolicy
+        authorize @actor, policy_class: Fedipub::Server::ActorPolicy
       end
     end
   end

@@ -5,7 +5,7 @@ Rails.application.routes.draw do
   resources :posts
   resources :comments, except: [:index, :show, :new]
 
-  mount Federails::Engine => '/'
+  mount Fedipub::Engine => '/'
 
   get '/', to: 'home#home'
 end

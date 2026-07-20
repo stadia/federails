@@ -2,7 +2,7 @@ context = true unless context == false
 addressing = true unless addressing == false
 set_json_ld_context(json) if context
 
-json.id Federails::Engine.routes.url_helpers.server_actor_activity_url activity.actor, activity
+json.id Fedipub::Engine.routes.url_helpers.server_actor_activity_url activity.actor, activity
 json.type activity.action
 json.actor activity.actor.federated_url
 if addressing
@@ -16,7 +16,7 @@ end
 json.result activity.result if activity.result
 json.result activity.instrument if activity.instrument
 
-if activity.entity.is_a? Federails::Activity
+if activity.entity.is_a? Fedipub::Activity
   json.object { json.partial!('fedipub/server/activities/activity', activity: activity.entity, context: false, addressing: false) }
 elsif activity.entity.respond_to? :to_activitypub_object
   json.object activity.entity.to_activitypub_object

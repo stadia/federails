@@ -27,16 +27,16 @@ FactoryBot.use_parent_strategy = false
 # directory. Alternatively, in the individual `*_spec.rb` files, manually
 # require only the support files necessary.
 
-Dir[Federails::Engine.root.join('spec', 'support', '**', '*.rb')].each { |f| require f }
-Dir[Federails::Engine.root.join('spec', 'fixtures', 'classes', '*.rb')].each { |f| require f }
-# Load all models so they are properly registered as Federails data entities
-Dir[Federails::Engine.root.join('spec', 'dummy', 'app', 'models', '*.rb')].each { |f| require f }
+Dir[Fedipub::Engine.root.join('spec', 'support', '**', '*.rb')].each { |f| require f }
+Dir[Fedipub::Engine.root.join('spec', 'fixtures', 'classes', '*.rb')].each { |f| require f }
+# Load all models so they are properly registered as Fedipub data entities
+Dir[Fedipub::Engine.root.join('spec', 'dummy', 'app', 'models', '*.rb')].each { |f| require f }
 
 # Checks for pending migrations and applies them before tests are run.
 # Specify all migration paths
 ActiveRecord::Migrator.migrations_paths = [
   Rails.root.join('db', 'migrate'),
-  Federails::Engine.root.join('db', 'migrate'),
+  Fedipub::Engine.root.join('db', 'migrate'),
 ]
 # Check for migration status
 begin

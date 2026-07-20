@@ -1,5 +1,5 @@
-Federails::Engine.routes.draw do
-  if Federails.configuration.enable_discovery
+Fedipub::Engine.routes.draw do
+  if Fedipub.configuration.enable_discovery
     scope path: '/' do
       get '/.well-known/webfinger', to: 'server/web_finger#find', as: :webfinger
       get '/.well-known/host-meta', to: 'server/web_finger#host_meta', as: :host_meta
@@ -8,8 +8,8 @@ Federails::Engine.routes.draw do
     end
   end
 
-  if Federails.configuration.client_routes_path
-    scope Federails.configuration.client_routes_path, module: :client, as: :client do
+  if Fedipub.configuration.client_routes_path
+    scope Fedipub.configuration.client_routes_path, module: :client, as: :client do
       resources :activities, only: [:index] do
         collection do
           get :feed, to: 'activities#feed'
@@ -34,7 +34,7 @@ Federails::Engine.routes.draw do
     end
   end
 
-  scope Federails.configuration.server_routes_path, module: :server, as: :server, defaults: { format: :activitypub } do
+  scope Fedipub.configuration.server_routes_path, module: :server, as: :server, defaults: { format: :activitypub } do
     resources :actors, only: [:show] do
       member do
         get :followers

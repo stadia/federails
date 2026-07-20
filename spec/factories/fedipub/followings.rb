@@ -1,5 +1,5 @@
 FactoryBot.define do
-  factory :following, class: 'Federails::Following' do
+  factory :following, class: 'Fedipub::Following' do
     # Default trait
     to_distant
 

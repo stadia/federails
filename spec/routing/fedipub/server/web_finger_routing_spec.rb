@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-module Federails
+module Fedipub
   module Server
     RSpec.describe WebFingerController, type: :routing do
       let(:find_url) { { url: '/.well-known/webfinger?resource=someone@here.com', target: ['fedipub/server/web_finger#find', { resource: 'someone@here.com' }] } }
@@ -18,13 +18,13 @@ module Federails
 
       context 'when discovery is disabled' do
         before do
-          @old_state = Federails.configuration.enable_discovery
-          Federails.configuration.enable_discovery = false
+          @old_state = Fedipub.configuration.enable_discovery
+          Fedipub.configuration.enable_discovery = false
           Rails.application.reload_routes!
         end
 
         after do
-          Federails.configuration.enable_discovery = @old_state
+          Fedipub.configuration.enable_discovery = @old_state
           Rails.application.reload_routes!
         end
 

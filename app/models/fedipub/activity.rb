@@ -1,4 +1,4 @@
-module Federails
+module Fedipub
   # Activities can be compared to a log of what happened in the Fediverse.
   #
   # Activities from local actors ends in the actors _outboxes_.
@@ -9,7 +9,7 @@ module Federails
   #   - https://www.w3.org/TR/activitypub/#outbox
   #   - https://www.w3.org/TR/activitypub/#inbox
   class Activity < ApplicationRecord
-    include Federails::HasUuid
+    include Fedipub::HasUuid
 
     belongs_to :entity, polymorphic: true
     belongs_to :actor
@@ -35,7 +35,7 @@ module Federails
     #
     # Used for unfollowing, unliking, unboosting, etc.
     #
-    # @return [Federails::Activity] the new Undo activity
+    # @return [Fedipub::Activity] the new Undo activity
     def undo!
       Activity.create! actor: actor, action: 'Undo', entity: self, to: to, cc: cc
     end

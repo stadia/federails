@@ -1,6 +1,6 @@
-module Federails
+module Fedipub
   module Client
-    class FollowingPolicy < Federails::FederailsPolicy
+    class FollowingPolicy < Fedipub::FedipubPolicy
       def show?
         in_following?
       end

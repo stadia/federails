@@ -1,9 +1,9 @@
 require 'fedipub/utils/context'
 
-module Federails
+module Fedipub
   module ServerHelper
     def remote_follow_url
-      method_name = Federails.configuration.remote_follow_url_method.to_s
+      method_name = Fedipub.configuration.remote_follow_url_method.to_s
       if method_name.starts_with? 'fedipub.'
         send(method_name.gsub('fedipub.', ''))
       else
@@ -12,7 +12,7 @@ module Federails
     end
 
     def set_json_ld_context(json, additional: nil)
-      json.set! '@context', Federails::Utils::Context.generate(additional: additional)
+      json.set! '@context', Fedipub::Utils::Context.generate(additional: additional)
     end
   end
 end

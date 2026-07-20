@@ -4,7 +4,7 @@ module Fixtures
   module Classes
     class FakeDataModel < ApplicationRecord
       self.table_name = 'posts'
-      include Federails::DataEntity
+      include Fedipub::DataEntity
 
       acts_as_fedipub_data handles:             'TestThing',
                              actor_entity_method: :user,
@@ -13,7 +13,7 @@ module Fixtures
       belongs_to :user, optional: true
 
       def to_activitypub_object
-        Federails::DataTransformer::Note.to_federation self,
+        Fedipub::DataTransformer::Note.to_federation self,
                                                        name:    title,
                                                        content: content
       end

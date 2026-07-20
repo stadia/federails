@@ -5,7 +5,7 @@ module Fediverse
     class << self
       # Posts an activity to its recipients
       #
-      # @param activity [Federails::Activity]
+      # @param activity [Fedipub::Activity]
       def post_to_inboxes(activity)
         # Get the list of actors we need to send the activity to
         inboxes = inboxes_for(activity)
@@ -23,12 +23,12 @@ module Fediverse
 
       # Determines the list of inboxes that the activity should be delivered to
       #
-      # @return [Array<Federails::Actor>]
+      # @return [Array<Fedipub::Actor>]
       def inboxes_for(activity)
         return [] unless activity.actor.local?
 
         [activity.to, activity.cc].flatten.compact.reject { |x| x == Fediverse::Collection::PUBLIC }.map do |url|
-          actor = Federails::Actor.find_or_create_by_federation_url(url)
+          actor = Fedipub::Actor.find_or_create_by_federation_url(url)
           [actor.inbox_url]
         rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid
           collection_to_actors(url).map(&:inbox_url)
@@ -38,7 +38,7 @@ module Fediverse
       def collection_to_actors(url)
         collection = Collection.fetch(url)
         collection.filter_map do |actor_url|
-          Federails::Actor.find_or_create_by_federation_url(actor_url)
+          Fedipub::Actor.find_or_create_by_federation_url(actor_url)
         rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid
           nil
         end
@@ -47,7 +47,7 @@ module Fediverse
       end
 
       def payload(activity)
-        Federails::ServerController.renderer.new.render(
+        Fedipub::ServerController.renderer.new.render(
           template: 'fedipub/server/activities/show',
           assigns:  { activity: activity },
           format:   :json

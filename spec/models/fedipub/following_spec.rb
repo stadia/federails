@@ -1,7 +1,7 @@
 require 'rails_helper'
 require 'fediverse/notifier'
 
-module Federails
+module Fedipub
   RSpec.describe Following, type: :model do
     describe 'hooks' do
       describe 'on_fedipub_delete_requested' do

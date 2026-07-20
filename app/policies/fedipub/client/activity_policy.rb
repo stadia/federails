@@ -1,6 +1,6 @@
-module Federails
+module Fedipub
   module Client
-    class ActivityPolicy < Federails::FederailsPolicy
+    class ActivityPolicy < Fedipub::FedipubPolicy
       def feed?
         user_with_actor?
       end

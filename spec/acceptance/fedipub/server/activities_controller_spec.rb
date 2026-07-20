@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe Federails::Server::ActivitiesController, type: :acceptance do
+RSpec.describe Fedipub::Server::ActivitiesController, type: :acceptance do
   resource 'Federation/Activities', 'Activities management'
   let(:headers) { { accept: 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"' } }
   let(:actor) { FactoryBot.create(:user).fedipub_actor }

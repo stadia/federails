@@ -13,7 +13,7 @@
 
   <div class="field">
     <%= f.label :target_actor %>
-    <%= f.collection_select :target_actor_id, Federails::Actor.all, :id, :name %>
+    <%= f.collection_select :target_actor_id, Fedipub::Actor.all, :id, :name %>
   </div>
 
   <div class="actions">

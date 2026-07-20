@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe Federails do
+RSpec.describe Fedipub do
   describe '#data_entity_handlers_for' do
     it 'returns a list of configuration Hash' do
       result = described_class.data_entity_handlers_for 'CustomNote'

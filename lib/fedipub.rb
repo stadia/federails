@@ -14,7 +14,7 @@ require 'fediverse'
 # rubocop:disable Style/ClassVars
 
 # This module includes classes and methods related to Ruby on Rails: engine configuration, models, controllers, etc.
-module Federails
+module Fedipub
   DEFAULT_DATA_FILTER_METHOD = :handle_federated_object?
 
   mattr_reader :configuration
@@ -75,7 +75,7 @@ module Federails
     # @example
     #   data_entity_handlers_for 'Note'
     def data_entity_handlers_for(type)
-      Federails::Configuration.data_types.select { |_, v| v[:handles] == type }.map(&:last)
+      Fedipub::Configuration.data_types.select { |_, v| v[:handles] == type }.map(&:last)
     end
 
     # Finds the configured handler for a given ActivityPub object
@@ -102,7 +102,7 @@ module Federails
     #   data_entity_handled_on :articles
     def data_entity_handled_on(route_path_segment)
       route_path_segment = route_path_segment.to_sym
-      Federails::Configuration.data_types.find { |_, v| v[:route_path_segment] == route_path_segment }&.last
+      Fedipub::Configuration.data_types.find { |_, v| v[:route_path_segment] == route_path_segment }&.last
     end
 
     # @return [Hash] The configuration for the given data entity

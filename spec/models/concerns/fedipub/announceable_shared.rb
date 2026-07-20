@@ -1,7 +1,7 @@
 RSpec.shared_examples 'Announceable' do |klass, attributes|
   let(:user) { FactoryBot.create :user }
   let!(:instance) do
-    if klass.try(:include?, Federails::DataEntity)
+    if klass.try(:include?, Fedipub::DataEntity)
       klass.create! attributes.merge(user_id: user.id)
     else
       FactoryBot.create(klass)
@@ -10,7 +10,7 @@ RSpec.shared_examples 'Announceable' do |klass, attributes|
 
   context 'with default values (self-announce)' do
     it 'creates an activity' do
-      expect { instance.announce! }.to change(Federails::Activity.where(action: 'Announce'), :count).by 1
+      expect { instance.announce! }.to change(Fedipub::Activity.where(action: 'Announce'), :count).by 1
     end
 
     it 'assigns self as actor' do

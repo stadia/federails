@@ -1,18 +1,18 @@
 require 'fediverse/webfinger'
 
-module Federails
+module Fedipub
   module Server
-    class WebFingerController < Federails::ServerController
+    class WebFingerController < Fedipub::ServerController
       def find
         skip_authorization
 
         resource = params.require(:resource)
         case resource
         when %r{^https?://.+}
-          @user = Federails::Actor.find_by_federation_url!(resource).entity # rubocop:disable Rails/DynamicFindBy
+          @user = Fedipub::Actor.find_by_federation_url!(resource).entity # rubocop:disable Rails/DynamicFindBy
         when /^acct:.+/
-          actor = Federails::Actor.find_local_by_username(username)
-          raise Federails::Actor::TombstonedError if actor&.tombstoned?
+          actor = Fedipub::Actor.find_local_by_username(username)
+          raise Fedipub::Actor::TombstonedError if actor&.tombstoned?
 
           @user = actor&.entity
         end

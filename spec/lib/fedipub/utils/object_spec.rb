@@ -2,7 +2,7 @@ require 'rails_helper'
 
 require 'fedipub/utils/object'
 
-module Federails
+module Fedipub
   module Utils
     RSpec.describe Object do
       describe '.find_or_initialize' do
@@ -56,7 +56,7 @@ module Federails
             context 'when it exists remotely' do
               before do
                 allow(Fediverse::Request).to receive(:dereference).with(url).and_return({ 'id' => url, 'type' => 'CustomNote', 'attributedTo' => distant_actor.federated_url, 'content' => 'the content' })
-                allow(Federails::Actor).to receive(:find_by_federation_url).with(distant_actor.federated_url).and_return(distant_actor)
+                allow(Fedipub::Actor).to receive(:find_by_federation_url).with(distant_actor.federated_url).and_return(distant_actor)
               end
 
               it 'returns the initialized entity' do
@@ -73,7 +73,7 @@ module Federails
                   result = described_class.find_or_initialize(url)
 
                   aggregate_failures do
-                    expect(result.fedipub_actor).to be_a Federails::Actor
+                    expect(result.fedipub_actor).to be_a Fedipub::Actor
                     expect(result.fedipub_actor).not_to be_persisted
                   end
                 end
@@ -85,7 +85,7 @@ module Federails
                 end
 
                 it 'does not create a new actor' do
-                  expect { described_class.find_or_initialize(url) }.not_to change(Federails::Actor, :count)
+                  expect { described_class.find_or_initialize(url) }.not_to change(Fedipub::Actor, :count)
                 end
               end
             end

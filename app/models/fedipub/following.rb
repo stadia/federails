@@ -1,14 +1,14 @@
-module Federails
+module Fedipub
   # Stores following data between actors
   class Following < ApplicationRecord
-    include Federails::HasUuid
+    include Fedipub::HasUuid
 
     enum :status, pending: 0, accepted: 1
 
     validates :target_actor_id, uniqueness: { scope: [:actor_id, :target_actor_id] }
 
     belongs_to :actor
-    belongs_to :target_actor, class_name: 'Federails::Actor'
+    belongs_to :target_actor, class_name: 'Fedipub::Actor'
     has_many :activities, as: :entity, dependent: :destroy
 
     after_create :after_follow
@@ -23,7 +23,7 @@ module Federails
     scope :with_actor, ->(actor) { where(actor_id: actor.id).or(where(target_actor_id: actor.id)) }
 
     def federated_url
-      attributes['federated_url'].presence || Federails::Engine.routes.url_helpers.server_actor_following_url(actor_id: actor.to_param, id: to_param)
+      attributes['federated_url'].presence || Fedipub::Engine.routes.url_helpers.server_actor_following_url(actor_id: actor.to_param, id: to_param)
     end
 
     def accept!

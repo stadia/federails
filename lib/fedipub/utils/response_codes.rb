@@ -1,4 +1,4 @@
-module Federails
+module Fedipub
   module Utils
     module ResponseCodes
       UNPROCESSABLE_CONTENT = if Gem::Version.new(Rack::RELEASE) < Gem::Version.new('3.1')

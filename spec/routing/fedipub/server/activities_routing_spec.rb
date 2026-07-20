@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-module Federails
+module Fedipub
   module Server
     RSpec.describe ActivitiesController, type: :routing do
       describe 'routing' do

@@ -1,7 +1,7 @@
 require 'rails_helper'
 require 'fedipub/maintenance/actors_updater'
 
-RSpec.describe Federails::Maintenance::ActorsUpdater do
+RSpec.describe Fedipub::Maintenance::ActorsUpdater do
   let(:actor_url) { 'https://mamot.fr/users/mtancoigne' }
   let!(:distant_actor) do
     actor = nil
@@ -45,7 +45,7 @@ RSpec.describe Federails::Maintenance::ActorsUpdater do
         expect(described_class.send(:actors_list, distant_actor.federated_url)).to eq [distant_actor]
         expect(described_class.send(:actors_list, [distant_actor.federated_url])).to eq [distant_actor]
         expect(described_class.send(:actors_list, [distant_actor])).to eq [distant_actor]
-        expect(described_class.send(:actors_list, Federails::Actor.distant)).to eq [distant_actor]
+        expect(described_class.send(:actors_list, Fedipub::Actor.distant)).to eq [distant_actor]
       end
     end
   end

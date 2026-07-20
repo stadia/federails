@@ -1,6 +1,6 @@
-module Federails
+module Fedipub
   module Server
-    class FollowingsController < Federails::ServerController
+    class FollowingsController < Fedipub::ServerController
       before_action :set_following, only: [:show]
 
       # GET /federation/actors/1/followings/1.json
@@ -12,7 +12,7 @@ module Federails
       def set_following
         actor = Actor.find_param(params[:actor_id])
         @following = Following.find_by!(actor: actor, uuid: params[:id])
-        authorize @following, policy_class: Federails::Server::FollowingPolicy
+        authorize @following, policy_class: Fedipub::Server::FollowingPolicy
       end
     end
   end
