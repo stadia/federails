@@ -4,7 +4,7 @@ Fedipub is an engine that brings ActivityPub to Ruby on Rails application.
 
 ## Community
 
-You can join the [matrix chat room](https://matrix.to/#/#federails:matrix.org) to chat with humans.
+You can join the [matrix chat room](https://matrix.to/#/#fedipub:matrix.org) to chat with humans.
 
 Open issues or feature requests on the [issue tracker](https://gitlab.com/fedipub/fedipub/-/issues)
 
