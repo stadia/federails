@@ -8,11 +8,11 @@ desired one, do these steps (in the order you see fit)
 - Update the gem to the desired version.
 - Copy and apply new migrations 
   ```sh
-  bundle exec rails federails:install:migrations
+  bundle exec rails fedipub:install:migrations
   ```
 - Re-copy client views if you use them, and adapt them.
   ```sh
-  rails generate federails:copy_client_views
+  rails generate fedipub:copy_client_views
   ```
 - Follow directions of the migration guide, for every version intermediate version 
 

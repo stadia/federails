@@ -32,9 +32,9 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ### Added
 
-- Announce (boost/RT), like or dislike `Federails::DataEntity` and `Federails::Actor` objects using new `announce!`, `like!` and `dislike!` methods.
-- Reverse any `Federails::Activity` by calling `undo!` to create an Undo activity addressed in the same way.
-- Set `results` and `instrument` fields for outgoing `Federails::Activity` objects.
+- Announce (boost/RT), like or dislike `Fedipub::DataEntity` and `Fedipub::Actor` objects using new `announce!`, `like!` and `dislike!` methods.
+- Reverse any `Fedipub::Activity` by calling `undo!` to create an Undo activity addressed in the same way.
+- Set `results` and `instrument` fields for outgoing `Fedipub::Activity` objects.
 
 ### Fixed
 
