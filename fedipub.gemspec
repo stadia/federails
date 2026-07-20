@@ -13,8 +13,8 @@ Gem::Specification.new do |spec|
 
   spec.metadata['rubygems_mfa_required'] = 'true'
   spec.metadata['homepage_uri'] = spec.homepage
-  spec.metadata['source_code_uri'] = 'https://gitlab.com/experimentslabs/fedipub/'
-  spec.metadata['changelog_uri'] = 'https://gitlab.com/experimentslabs/fedipub/-/blob/main/CHANGELOG.md'
+  spec.metadata['source_code_uri'] = 'https://gitlab.com/fedipub/fedipub/'
+  spec.metadata['changelog_uri'] = 'https://gitlab.com/fedipub/fedipub/-/blob/main/CHANGELOG.md'
 
   spec.files = Dir.chdir(File.expand_path(__dir__)) do
     Dir['{app,config,db,lib}/**/*', 'LICENSE', 'Rakefile', 'README.md']

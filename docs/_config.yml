@@ -4,7 +4,7 @@ title: Fedipub
 description: >-
   Fedipub is an engine that brings ActivityPub to Ruby on Rails application.
 baseurl: "/fedipub" # the subpath of your site, e.g. /blog
-url: "https://experimentslabs.gitlab.io/"
+url: "https://fedipub.gitlab.io/"
 
 # Build settings
 theme: just-the-docs
@@ -80,6 +80,6 @@ aux_links:
   Community chat:
     - https://matrix.to/#/#fedipub:matrix.org
   Code repository/issues:
-    - https://gitlab.com/experimentslabs/fedipub
+    - https://gitlab.com/fedipub/fedipub
 # Makes Aux links open in a new tab. Default is false
 aux_links_new_tab: true
