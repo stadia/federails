@@ -94,7 +94,7 @@ module Federails
         def local_route(url)
           route = Utils::Host.local_route(url)
 
-          return nil unless route && route[:controller] == 'federails/server/published' && route[:action] == 'show'
+          return nil unless route && route[:controller] == 'fedipub/server/published' && route[:action] == 'show'
 
           route
         end
@@ -121,7 +121,7 @@ module Federails
           entity = handler[:class].new_from_activitypub_object(hash)
           return unless entity
 
-          entity.federails_actor = Federails::Actor.find_by_federation_url hash['attributedTo'] if entity && !entity.federails_actor
+          entity.fedipub_actor = Federails::Actor.find_by_federation_url hash['attributedTo'] if entity && !entity.fedipub_actor
 
           entity
         end

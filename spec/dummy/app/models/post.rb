@@ -2,7 +2,7 @@ class Post < ApplicationRecord
   include Federails::DataEntity
   include FederatedAndSoftDeletable
 
-  acts_as_federails_data handles:                 'Note',
+  acts_as_fedipub_data handles:                 'Note',
                          actor_entity_method:     :user,
                          soft_deleted_method:     :soft_deleted?,
                          soft_delete_date_method: :deleted_at?

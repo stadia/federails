@@ -1,4 +1,4 @@
-require_relative '../../lib/federails/version'
+require_relative '../../lib/fedipub/version'
 
 module Jekyll
   class ProjectVersion < Generator

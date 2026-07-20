@@ -18,12 +18,12 @@ module Federails
   #
   #  Table needs at least:
   #  - `t.string :federated_url, null: true, default: nil`
-  #  - `t.references :federails_actor, foreign_key: true, null: true, default: nil
+  #  - `t.references :fedipub_actor, foreign_key: true, null: true, default: nil
   #
   # Model must have the following attributes:
   # ```rb
   # add_column :posts, :federated_url, :string, null: true, default: nil
-  # add_reference :posts, :federails_actor, foreign_key: true, null: true, default: nil
+  # add_reference :posts, :fedipub_actor, foreign_key: true, null: true, default: nil
   # ```
   #
   # ## Usage
@@ -33,15 +33,15 @@ module Federails
   # ```rb
   # class Post < ApplicationRecord
   #   include Federails::DataEntity
-  #   acts_as_federails_data options
+  #   acts_as_fedipub_data options
   #
   #   # This will be called when a Delete activity comes for the entry. As we don't know how you want to handle it,
   #   # you'll have to implement the behavior yourself.
-  #   on_federails_delete_requested :do_something
+  #   on_fedipub_delete_requested :do_something
   #
   #   # This will be called when a Undo activity comes for the entry. The easiest way to handle this case is to re-fetch
   #   # the entity
-  #   on_federails_undelete_requested :do_something_else
+  #   on_fedipub_undelete_requested :do_something_else
   #
   #   def to_activitypub_object
   #     Federails::DataTransformer::Note.to_federation self,
@@ -64,34 +64,34 @@ module Federails
   # - you will need to send the delete activity yourself
   #
   # ```rb
-  # acts_as_federails_data handles: 'Note',
+  # acts_as_fedipub_data handles: 'Note',
   #                        ...,
   #                        soft_deleted_method: :deleted?
   #                        soft_delete_date_method: :deleted_at
   #
-  # on_federails_delete_requested :soft_delete!
-  # on_federails_undelete_requested :restore_remote_entity!
+  # on_fedipub_delete_requested :soft_delete!
+  # on_fedipub_undelete_requested :restore_remote_entity!
   #
   # # Method you use to soft-delete entities
   # def soft_delete!
   #   update deleted_at: time.current
   #
-  #   send_federails_activity 'Delete' unless local_federails_entity?
+  #   send_fedipub_activity 'Delete' unless local_fedipub_entity?
   # end
   #
   # # Method you use to restore soft-deleted entities
   # def restore!
   #   update deleted_at: nil
   #
-  #   if local_federails_entity?
+  #   if local_fedipub_entity?
   #     delete_activity =  Activity.find_by action: 'Delete', entity: self
-  #     send_federails_activity 'Undo', entity: delete_activity, actor: federails_actor if delete_activity.present?
+  #     send_fedipub_activity 'Undo', entity: delete_activity, actor: fedipub_actor if delete_activity.present?
   #   end
   # end
   #
   # def restore_remote_entity!
   #   self.deleted_at: nil
-  #   federails_sync!
+  #   fedipub_sync!
   #   save!
   # end
   # ```
@@ -107,7 +107,7 @@ module Federails
     module ClassMethods
       # Configures the mapping between entity and Fediverse
       #
-      # @param actor_entity_method [Symbol] Method returning an object responding to 'federails_actor', for local content
+      # @param actor_entity_method [Symbol] Method returning an object responding to 'fedipub_actor', for local content
       # @param url_param [Symbol] Column name of the object ID that should be used in URLs. Defaults to +:id+
       # @param route_path_segment [Symbol] Segment used in Federails routes to display the ActivityPub representation.
       #   Defaults to the pluralized, underscored class name
@@ -125,9 +125,9 @@ module Federails
       # @param soft_delete_date_method [Symbol, nil] Method to get the date of the soft-deletion
       #
       # @example
-      #   acts_as_federails_data handles: 'Note', with: :note_handler, route_path_segment: :articles, actor_entity_method: :user
+      #   acts_as_fedipub_data handles: 'Note', with: :note_handler, route_path_segment: :articles, actor_entity_method: :user
       # rubocop:disable Metrics/ParameterLists, Metrics/MethodLength
-      def acts_as_federails_data(
+      def acts_as_fedipub_data(
         handles:,
         with: :handle_incoming_fediverse_data,
         route_path_segment: nil,
@@ -198,22 +198,22 @@ module Federails
     end
 
     included do
-      belongs_to :federails_actor, class_name: 'Federails::Actor'
+      belongs_to :fedipub_actor, class_name: 'Federails::Actor'
 
-      scope :local_federails_entities, -> { where federated_url: nil }
-      scope :distant_federails_entities, -> { where.not(federated_url: nil) }
+      scope :local_fedipub_entities, -> { where federated_url: nil }
+      scope :distant_fedipub_entities, -> { where.not(federated_url: nil) }
 
-      before_validation :set_federails_actor
-      after_create -> { create_federails_activity 'Create' }
-      after_update -> { create_federails_activity 'Update' }, unless: :federails_tombstoned?
-      after_destroy -> { create_federails_activity 'Delete' }
+      before_validation :set_fedipub_actor
+      after_create -> { create_fedipub_activity 'Create' }
+      after_update -> { create_fedipub_activity 'Update' }, unless: :fedipub_tombstoned?
+      after_destroy -> { create_fedipub_activity 'Delete' }
     end
 
     # Computed value for the federated URL
     #
     # @return [String]
     def federated_url
-      return nil unless send(federails_data_configuration[:should_federate_method])
+      return nil unless send(fedipub_data_configuration[:should_federate_method])
       return attributes['federated_url'] if attributes['federated_url'].present?
 
       path_segment = Federails.data_entity_configuration(self)[:route_path_segment]
@@ -224,24 +224,24 @@ module Federails
     # Check whether the entity was created locally or comes from the Fediverse
     #
     # @return [Boolean]
-    def local_federails_entity?
+    def local_fedipub_entity?
       attributes['federated_url'].blank?
     end
 
-    def federails_tombstoned?
-      federails_data_configuration[:soft_deleted_method] ? send(federails_data_configuration[:soft_deleted_method]) : false
+    def fedipub_tombstoned?
+      fedipub_data_configuration[:soft_deleted_method] ? send(fedipub_data_configuration[:soft_deleted_method]) : false
     end
 
-    def federails_tombstoned_at
-      federails_data_configuration[:soft_delete_date_method] ? send(federails_data_configuration[:soft_delete_date_method]) : nil
+    def fedipub_tombstoned_at
+      fedipub_data_configuration[:soft_delete_date_method] ? send(fedipub_data_configuration[:soft_delete_date_method]) : nil
     end
 
-    def federails_data_configuration
+    def fedipub_data_configuration
       Federails.data_entity_configuration(self)
     end
 
-    def federails_sync!
-      if local_federails_entity?
+    def fedipub_sync!
+      if local_fedipub_entity?
         Rails.logger.info { "Ignored attempt to sync a local #{self.class.name}" }
         return false
       end
@@ -253,23 +253,23 @@ module Federails
 
     private
 
-    def set_federails_actor
-      return federails_actor if federails_actor.present?
+    def set_fedipub_actor
+      return fedipub_actor if fedipub_actor.present?
 
-      self.federails_actor = send(federails_data_configuration[:actor_entity_method])&.federails_actor if federails_data_configuration[:actor_entity_method]
+      self.fedipub_actor = send(fedipub_data_configuration[:actor_entity_method])&.fedipub_actor if fedipub_data_configuration[:actor_entity_method]
 
-      raise 'Cannot determine actor from configuration' unless federails_actor
+      raise 'Cannot determine actor from configuration' unless fedipub_actor
     end
 
-    def create_federails_activity(action, actor: federails_actor, to: nil, cc: nil)
-      ensure_federails_configuration!
-      return unless local_federails_entity? && send(federails_data_configuration[:should_federate_method])
+    def create_fedipub_activity(action, actor: fedipub_actor, to: nil, cc: nil)
+      ensure_fedipub_configuration!
+      return unless local_fedipub_entity? && send(fedipub_data_configuration[:should_federate_method])
 
       Activity.create! actor: actor, action: action, entity: self, to: to, cc: cc
     end
 
-    def ensure_federails_configuration!
-      raise("Entity not configured for #{self.class.name}. Did you use \"acts_as_federails_data\"?") unless Federails.data_entity? self
+    def ensure_fedipub_configuration!
+      raise("Entity not configured for #{self.class.name}. Did you use \"acts_as_fedipub_data\"?") unless Federails.data_entity? self
     end
 
     def default_should_federate?

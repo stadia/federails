@@ -23,13 +23,13 @@ RSpec.describe '/federation/activities', type: :request do
     end
 
     it 'renders a successful response' do
-      get federails.server_actor_outbox_url(local_actor), headers: { accept: Mime[:activitypub] }
+      get fedipub.server_actor_outbox_url(local_actor), headers: { accept: Mime[:activitypub] }
       expect(response).to be_successful
     end
 
     ACTIVITYPUB_CONTENT_TYPES.each do |accept|
       it "responds with LD in response to a #{accept} request" do
-        get federails.server_actor_outbox_url(local_actor), headers: { accept: accept }
+        get fedipub.server_actor_outbox_url(local_actor), headers: { accept: accept }
         expect(response.content_type).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"; charset=utf-8'
       end
     end
@@ -43,13 +43,13 @@ RSpec.describe '/federation/activities', type: :request do
     let(:activity) { Federails::Activity.last }
 
     it 'renders a successful response' do
-      get federails.server_actor_activity_url(activity.actor.to_param, activity.to_param), headers: { accept: Mime[:activitypub] }
+      get fedipub.server_actor_activity_url(activity.actor.to_param, activity.to_param), headers: { accept: Mime[:activitypub] }
       expect(response).to be_successful
     end
 
     ACTIVITYPUB_CONTENT_TYPES.each do |accept|
       it "responds with LD in response to a #{accept} request" do
-        get federails.server_actor_activity_url(activity.actor.to_param, activity.to_param), headers: { accept: accept }
+        get fedipub.server_actor_activity_url(activity.actor.to_param, activity.to_param), headers: { accept: accept }
         expect(response.content_type).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"; charset=utf-8'
       end
     end

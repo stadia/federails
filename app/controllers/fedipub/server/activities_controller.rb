@@ -20,7 +20,7 @@ module Federails
           actor:      actor,
           url_helper: :server_actor_outbox_url
         ) do |builder, items|
-          builder.array! items, partial: 'federails/server/activities/activity', as: :activity, context: false
+          builder.array! items, partial: 'fedipub/server/activities/activity', as: :activity, context: false
         end
       end
 

@@ -1,4 +1,4 @@
-namespace :federails do
+namespace :fedipub do
   desc 'Re-fetches every remote actors to update database'
   task sync_actors: :environment do
     Federails::Maintenance::ActorUpdater.run do |actor, status|

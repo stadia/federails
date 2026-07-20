@@ -75,7 +75,7 @@ RSpec.describe Comment, type: :model do
       let(:distant_actor) { FactoryBot.create :distant_actor }
 
       context 'when Comment already exists' do
-        let!(:comment) { FactoryBot.create :comment, :distant, federated_url: note_hash['id'], federails_actor: distant_actor }
+        let!(:comment) { FactoryBot.create :comment, :distant, federated_url: note_hash['id'], fedipub_actor: distant_actor }
 
         it 'updates the Comment' do
           described_class.handle_incoming_fediverse_data(activity_hash)

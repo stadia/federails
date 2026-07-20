@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe 'federails/server/activities/show', type: :view do
+RSpec.describe 'fedipub/server/activities/show', type: :view do
   let(:local_actor) { FactoryBot.create :local_actor }
   let(:distant_actor) { FactoryBot.create :distant_actor }
 

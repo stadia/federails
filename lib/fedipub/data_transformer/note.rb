@@ -1,4 +1,4 @@
-require 'federails/utils/context'
+require 'fedipub/utils/context'
 
 module Federails
   module DataTransformer
@@ -27,7 +27,7 @@ module Federails
                      'type'         => 'Note',
                      'name'         => name,
                      'content'      => content,
-                     'attributedTo' => entity.federails_actor.federated_url,
+                     'attributedTo' => entity.fedipub_actor.federated_url,
                      'published'    => entity.created_at,
                      'updated'      => entity.updated_at
       end

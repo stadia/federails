@@ -3,8 +3,8 @@ require 'rails_helper'
 module Federails
   module Server
     RSpec.describe WebFingerController, type: :routing do
-      let(:find_url) { { url: '/.well-known/webfinger?resource=someone@here.com', target: ['federails/server/web_finger#find', { resource: 'someone@here.com' }] } }
-      let(:host_meta_url) { { url: '/.well-known/host-meta', target: ['federails/server/web_finger#host_meta'] } }
+      let(:find_url) { { url: '/.well-known/webfinger?resource=someone@here.com', target: ['fedipub/server/web_finger#find', { resource: 'someone@here.com' }] } }
+      let(:host_meta_url) { { url: '/.well-known/host-meta', target: ['fedipub/server/web_finger#host_meta'] } }
 
       describe 'routing' do
         it 'routes to #find' do

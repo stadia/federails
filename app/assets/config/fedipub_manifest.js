@@ -1,1 +1,1 @@
-//= link_directory ../stylesheets/federails .css
+//= link_directory ../stylesheets/fedipub .css

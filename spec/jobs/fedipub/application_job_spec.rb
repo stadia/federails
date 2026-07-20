@@ -6,8 +6,8 @@ RSpec.describe Federails::ApplicationJob do
   end
 
   it 'supports different queue names' do
-    Federails.configuration.job_queue = :federails
-    expect { described_class.perform_later }.to have_enqueued_job(described_class).on_queue(:federails)
+    Federails.configuration.job_queue = :fedipub
+    expect { described_class.perform_later }.to have_enqueued_job(described_class).on_queue(:fedipub)
     Federails.configuration.job_queue = :default
   end
 end

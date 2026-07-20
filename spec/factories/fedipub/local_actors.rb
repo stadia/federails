@@ -5,7 +5,7 @@ FactoryBot.define do
       #
       # If the actor creation is conditional, make sure to adapt the actor entity creation accordingly
       create(:user) # <- Adapt the "actor entity" for your app
-        .federails_actor
+        .fedipub_actor
     end
   end
 end

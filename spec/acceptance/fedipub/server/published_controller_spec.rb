@@ -41,7 +41,7 @@ RSpec.describe Federails::Server::PublishedController, type: :acceptance do
 
     for_code 410, with_content_type: Mime[:activitypub] do |url|
       distant_actor = FactoryBot.create :distant_actor
-      publishable = Fixtures::Classes::FakeArticleDataModel.create! federails_actor: distant_actor, title: 'The title', content: 'The content', deleted_at: Time.current
+      publishable = Fixtures::Classes::FakeArticleDataModel.create! fedipub_actor: distant_actor, title: 'The title', content: 'The content', deleted_at: Time.current
 
       test_response_of url, path_params: { publishable_type: 'articles', id: publishable.id }, headers: headers
     end

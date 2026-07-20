@@ -6,7 +6,7 @@ module Fediverse
   FakeActivity = Struct.new :id, :actor, :recipients, :action, :entity, :to, :cc, :result, :instrument, keyword_init: true
 
   RSpec.describe Notifier do
-    let(:local_actor) { FactoryBot.create(:user).federails_actor }
+    let(:local_actor) { FactoryBot.create(:user).fedipub_actor }
     let(:distant_target_actor) { FactoryBot.create :distant_actor }
 
     describe 'delivery' do

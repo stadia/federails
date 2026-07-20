@@ -8,7 +8,7 @@ module Federails
     #
     # @return [Federails::Activity] the newly-created Like activity
     def like!(actor:)
-      create_federails_activity('Like',
+      create_fedipub_activity('Like',
                                 actor: actor,
                                 to:    [Fediverse::Collection::PUBLIC],
                                 cc:    [actor.followers_url])
@@ -20,7 +20,7 @@ module Federails
     #
     # @return [Federails::Activity] the newly-created Dislike activity
     def dislike!(actor:)
-      create_federails_activity('Dislike',
+      create_fedipub_activity('Dislike',
                                 actor: actor,
                                 to:    [Fediverse::Collection::PUBLIC],
                                 cc:    [actor.followers_url])

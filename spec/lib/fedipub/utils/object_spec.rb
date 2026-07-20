@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-require 'federails/utils/object'
+require 'fedipub/utils/object'
 
 module Federails
   module Utils
@@ -31,7 +31,7 @@ module Federails
 
         context 'when object is a distant entity' do
           let(:distant_actor) { FactoryBot.build :distant_actor }
-          let(:entity) { Fixtures::Classes::FakeDataModel.build federails_actor_id: distant_actor.id, federated_url: 'https://example.com/data/1', title: 'A title', content: 'the content' }
+          let(:entity) { Fixtures::Classes::FakeDataModel.build fedipub_actor_id: distant_actor.id, federated_url: 'https://example.com/data/1', title: 'A title', content: 'the content' }
           let(:url) { entity.federated_url }
 
           context 'when it exists locally' do
@@ -73,8 +73,8 @@ module Federails
                   result = described_class.find_or_initialize(url)
 
                   aggregate_failures do
-                    expect(result.federails_actor).to be_a Federails::Actor
-                    expect(result.federails_actor).not_to be_persisted
+                    expect(result.fedipub_actor).to be_a Federails::Actor
+                    expect(result.fedipub_actor).not_to be_persisted
                   end
                 end
               end
@@ -119,7 +119,7 @@ module Federails
         let(:entities) do
           # Noise
           FactoryBot.create(:distant_actor).tap do |actor|
-            Fixtures::Classes::FakeArticleDataModel.create(title: 'Not the right one', content: 'Hello world', federated_url: 'https://some_example.com/posts/1', federails_actor: actor)
+            Fixtures::Classes::FakeArticleDataModel.create(title: 'Not the right one', content: 'Hello world', federated_url: 'https://some_example.com/posts/1', fedipub_actor: actor)
           end
 
           [
@@ -128,7 +128,7 @@ module Federails
               title:           'The right one',
               content:         'Hello world',
               federated_url:   'https://some_example.com/posts/10',
-              federails_actor: FactoryBot.create(:distant_actor)
+              fedipub_actor: FactoryBot.create(:distant_actor)
             ),
           ]
         end

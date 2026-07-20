@@ -15,7 +15,7 @@ RSpec.shared_examples 'Announceable' do |klass, attributes|
 
     it 'assigns self as actor' do
       activity = instance.announce!
-      expect(activity.actor).to eq(instance.try(:federails_actor) || instance)
+      expect(activity.actor).to eq(instance.try(:fedipub_actor) || instance)
     end
 
     it 'sends to public collection' do
@@ -25,7 +25,7 @@ RSpec.shared_examples 'Announceable' do |klass, attributes|
 
     it 'ccs to actors follower collection' do
       activity = instance.announce!
-      expect(activity.cc).to eq [(instance.try(:federails_actor) || instance).followers_url]
+      expect(activity.cc).to eq [(instance.try(:fedipub_actor) || instance).followers_url]
     end
   end
 

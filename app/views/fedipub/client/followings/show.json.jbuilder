@@ -1,1 +1,1 @@
-json.partial! 'federails/client/followings/following', following: @following
+json.partial! 'fedipub/client/followings/following', following: @following

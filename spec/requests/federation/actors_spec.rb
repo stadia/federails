@@ -17,30 +17,30 @@ RSpec.describe '/federation/actors', type: :request do
   let(:other_user) { FactoryBot.create :user }
 
   before do
-    Federails::Following.create actor: user.federails_actor, target_actor: other_user.federails_actor
-    Federails::Following.create actor: other_user.federails_actor, target_actor: user.federails_actor
+    Federails::Following.create actor: user.fedipub_actor, target_actor: other_user.fedipub_actor
+    Federails::Following.create actor: other_user.fedipub_actor, target_actor: user.fedipub_actor
   end
 
   describe 'GET /show' do
     it 'renders a successful response' do
-      get federails.server_actor_url(user.federails_actor), headers: { accept: Mime[:activitypub] }
+      get fedipub.server_actor_url(user.fedipub_actor), headers: { accept: Mime[:activitypub] }
       expect(response).to be_successful
     end
 
     it 'includes standard activitypub context' do
-      get federails.server_actor_url(user.federails_actor), headers: { accept: Mime[:activitypub] }
+      get fedipub.server_actor_url(user.fedipub_actor), headers: { accept: Mime[:activitypub] }
       json = response.parsed_body
       expect(json['@context']).to include('https://www.w3.org/ns/activitystreams')
     end
 
     it 'includes w3c security context' do
-      get federails.server_actor_url(user.federails_actor), headers: { accept: Mime[:activitypub] }
+      get fedipub.server_actor_url(user.fedipub_actor), headers: { accept: Mime[:activitypub] }
       json = response.parsed_body
       expect(json['@context']).to include('https://w3id.org/security/v1')
     end
 
     it 'includes additional context from actor' do # rubocop:todo RSpec/ExampleLength
-      get federails.server_actor_url(user.federails_actor), headers: { accept: Mime[:activitypub] }
+      get fedipub.server_actor_url(user.fedipub_actor), headers: { accept: Mime[:activitypub] }
       json = response.parsed_body
       expect(json['@context']).to include(
         {
@@ -55,23 +55,23 @@ RSpec.describe '/federation/actors', type: :request do
 
     ACTIVITYPUB_CONTENT_TYPES.each do |accept|
       it "responds with LD in response to a #{accept} request" do
-        get federails.server_actor_url(user.federails_actor), headers: { accept: accept }
+        get fedipub.server_actor_url(user.fedipub_actor), headers: { accept: accept }
         expect(response.content_type).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"; charset=utf-8'
       end
     end
 
     context 'when the actor is tombstoned' do
       before do
-        user.federails_actor.tombstone!
+        user.fedipub_actor.tombstone!
       end
 
       it 'responds with a 410' do
-        get federails.server_actor_url(user.federails_actor), headers: { accept: Mime[:activitypub] }
+        get fedipub.server_actor_url(user.fedipub_actor), headers: { accept: Mime[:activitypub] }
         expect(response).to have_http_status :gone
       end
 
       it 'responds with the Tombstone object' do
-        get federails.server_actor_url(user.federails_actor), headers: { accept: Mime[:activitypub] }
+        get fedipub.server_actor_url(user.fedipub_actor), headers: { accept: Mime[:activitypub] }
 
         hash = response.parsed_body
 
@@ -84,13 +84,13 @@ RSpec.describe '/federation/actors', type: :request do
 
   describe 'GET /followers' do
     it 'renders a successful response' do
-      get federails.followers_server_actor_url(user.federails_actor), headers: { accept: Mime[:activitypub] }
+      get fedipub.followers_server_actor_url(user.fedipub_actor), headers: { accept: Mime[:activitypub] }
       expect(response).to be_successful
     end
 
     ACTIVITYPUB_CONTENT_TYPES.each do |accept|
       it "responds with LD in response to a #{accept} request" do
-        get federails.followers_server_actor_url(user.federails_actor), headers: { accept: accept }
+        get fedipub.followers_server_actor_url(user.fedipub_actor), headers: { accept: accept }
         expect(response.content_type).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"; charset=utf-8'
       end
     end
@@ -98,13 +98,13 @@ RSpec.describe '/federation/actors', type: :request do
 
   describe 'GET /following' do
     it 'renders a successful response' do
-      get federails.following_server_actor_url(user.federails_actor), headers: { accept: Mime[:activitypub] }
+      get fedipub.following_server_actor_url(user.fedipub_actor), headers: { accept: Mime[:activitypub] }
       expect(response).to be_successful
     end
 
     ACTIVITYPUB_CONTENT_TYPES.each do |accept|
       it "responds with LD in response to a #{accept} request" do
-        get federails.following_server_actor_url(user.federails_actor), headers: { accept: accept }
+        get fedipub.following_server_actor_url(user.fedipub_actor), headers: { accept: accept }
         expect(response.content_type).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"; charset=utf-8'
       end
     end

@@ -1,8 +1,8 @@
-require_relative 'lib/federails/version'
+require_relative 'lib/fedipub/version'
 
 Gem::Specification.new do |spec|
   spec.required_ruby_version = '>= 3.1.2'
-  spec.name        = 'federails'
+  spec.name        = 'fedipub'
   spec.version     = Federails::VERSION
   spec.authors     = ['Manuel Tancoigne']
   spec.email       = ['manu@experimentslabs.com']
@@ -13,8 +13,8 @@ Gem::Specification.new do |spec|
 
   spec.metadata['rubygems_mfa_required'] = 'true'
   spec.metadata['homepage_uri'] = spec.homepage
-  spec.metadata['source_code_uri'] = 'https://gitlab.com/experimentslabs/federails/'
-  spec.metadata['changelog_uri'] = 'https://gitlab.com/experimentslabs/federails/-/blob/main/CHANGELOG.md'
+  spec.metadata['source_code_uri'] = 'https://gitlab.com/experimentslabs/fedipub/'
+  spec.metadata['changelog_uri'] = 'https://gitlab.com/experimentslabs/fedipub/-/blob/main/CHANGELOG.md'
 
   spec.files = Dir.chdir(File.expand_path(__dir__)) do
     Dir['{app,config,db,lib}/**/*', 'LICENSE', 'Rakefile', 'README.md']

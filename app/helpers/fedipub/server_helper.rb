@@ -1,11 +1,11 @@
-require 'federails/utils/context'
+require 'fedipub/utils/context'
 
 module Federails
   module ServerHelper
     def remote_follow_url
       method_name = Federails.configuration.remote_follow_url_method.to_s
-      if method_name.starts_with? 'federails.'
-        send(method_name.gsub('federails.', ''))
+      if method_name.starts_with? 'fedipub.'
+        send(method_name.gsub('fedipub.', ''))
       else
         Rails.application.routes.url_helpers.send(method_name)
       end

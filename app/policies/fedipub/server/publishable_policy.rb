@@ -2,7 +2,7 @@ module Federails
   module Server
     class PublishablePolicy < Federails::FederailsPolicy
       def show?
-        @record.send(@record.federails_data_configuration[:should_federate_method])
+        @record.send(@record.fedipub_data_configuration[:should_federate_method])
       end
 
       class Scope < Scope

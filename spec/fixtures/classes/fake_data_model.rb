@@ -1,4 +1,4 @@
-require 'federails/data_transformer/note'
+require 'fedipub/data_transformer/note'
 
 module Fixtures
   module Classes
@@ -6,7 +6,7 @@ module Fixtures
       self.table_name = 'posts'
       include Federails::DataEntity
 
-      acts_as_federails_data handles:             'TestThing',
+      acts_as_fedipub_data handles:             'TestThing',
                              actor_entity_method: :user,
                              route_path_segment:  :fake_data
 

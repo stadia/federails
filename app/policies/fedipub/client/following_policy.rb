@@ -10,7 +10,7 @@ module Federails
       end
 
       def accept?
-        in_following? && @record.target_actor_id == @user.federails_actor.id
+        in_following? && @record.target_actor_id == @user.fedipub_actor.id
       end
 
       def follow?
@@ -19,7 +19,7 @@ module Federails
 
       class Scope < Scope
         def resolve
-          scope.with_actor(@user.federails_actor)
+          scope.with_actor(@user.fedipub_actor)
         end
       end
 
@@ -28,7 +28,7 @@ module Federails
       def in_following?
         return false unless user_with_actor?
 
-        @record.actor_id == @user.federails_actor&.id || @record.target_actor_id == @user.federails_actor&.id
+        @record.actor_id == @user.fedipub_actor&.id || @record.target_actor_id == @user.fedipub_actor&.id
       end
     end
   end

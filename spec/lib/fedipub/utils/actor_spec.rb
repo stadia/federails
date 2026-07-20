@@ -1,5 +1,5 @@
 require 'rails_helper'
-require 'federails/utils/actor'
+require 'fedipub/utils/actor'
 
 RSpec.describe Federails::Utils::Actor do
   describe '.tombstone!' do

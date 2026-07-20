@@ -8,8 +8,8 @@ module Federails
     #
     # @return [Federails::Activity] the newly-created Announce activity
     def announce!(actor: nil)
-      actor ||= try(:federails_actor) || self
-      create_federails_activity('Announce',
+      actor ||= try(:fedipub_actor) || self
+      create_fedipub_activity('Announce',
                                 actor: actor,
                                 to:    [Fediverse::Collection::PUBLIC],
                                 cc:    [actor.followers_url])

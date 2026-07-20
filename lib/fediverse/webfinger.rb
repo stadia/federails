@@ -1,5 +1,5 @@
-require 'federails/utils/host'
-require 'federails/utils/json_request'
+require 'fedipub/utils/host'
+require 'fedipub/utils/json_request'
 
 module Fediverse
   # Methods related to Webfinger: find accounts, fetch actors,...

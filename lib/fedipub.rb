@@ -2,12 +2,12 @@ require 'jbuilder'
 require 'kaminari'
 require 'pundit'
 
-require 'federails/version'
-require 'federails/engine'
-require 'federails/configuration'
-require 'federails/utils/object'
-require 'federails/utils/json_request'
-require 'federails/utils/response_codes'
+require 'fedipub/version'
+require 'fedipub/engine'
+require 'fedipub/configuration'
+require 'fedipub/utils/object'
+require 'fedipub/utils/json_request'
+require 'fedipub/utils/response_codes'
 
 require 'fediverse'
 

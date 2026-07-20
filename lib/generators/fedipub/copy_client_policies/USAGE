@@ -5,4 +5,4 @@ Example:
     bin/rails generate copy_client_policies
 
     This will create:
-        app/policies/federails/client/*
+        app/policies/fedipub/client/*

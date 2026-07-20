@@ -62,7 +62,7 @@ RSpec.describe Post, type: :model do
       let(:distant_actor) { FactoryBot.create :distant_actor }
 
       context 'when Post already exists' do # rubocop:disable RSpec/MultipleMemoizedHelpers
-        let!(:post) { FactoryBot.create :post, :distant, federated_url: note_hash['id'], federails_actor: distant_actor }
+        let!(:post) { FactoryBot.create :post, :distant, federated_url: note_hash['id'], fedipub_actor: distant_actor }
 
         it 'updates the Post' do
           described_class.handle_incoming_fediverse_data(activity_hash)

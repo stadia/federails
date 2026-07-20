@@ -19,15 +19,15 @@ ActiveRecord::Schema[7.2].define(version: 2025_11_21_160720) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "federated_url"
-    t.integer "federails_actor_id"
+    t.integer "fedipub_actor_id"
     t.datetime "deleted_at"
-    t.index ["federails_actor_id"], name: "index_comments_on_federails_actor_id"
+    t.index ["fedipub_actor_id"], name: "index_comments_on_fedipub_actor_id"
     t.index ["parent_id"], name: "index_comments_on_parent_id"
     t.index ["post_id"], name: "index_comments_on_post_id"
     t.index ["user_id"], name: "index_comments_on_user_id"
   end
 
-  create_table "federails_activities", force: :cascade do |t|
+  create_table "fedipub_activities", force: :cascade do |t|
     t.string "entity_type", null: false
     t.integer "entity_id", null: false
     t.string "action", null: false
@@ -37,12 +37,12 @@ ActiveRecord::Schema[7.2].define(version: 2025_11_21_160720) do
     t.string "uuid"
     t.string "to"
     t.string "cc"
-    t.index ["actor_id"], name: "index_federails_activities_on_actor_id"
-    t.index ["entity_type", "entity_id"], name: "index_federails_activities_on_entity"
-    t.index ["uuid"], name: "index_federails_activities_on_uuid", unique: true
+    t.index ["actor_id"], name: "index_fedipub_activities_on_actor_id"
+    t.index ["entity_type", "entity_id"], name: "index_fedipub_activities_on_entity"
+    t.index ["uuid"], name: "index_fedipub_activities_on_uuid", unique: true
   end
 
-  create_table "federails_actors", force: :cascade do |t|
+  create_table "fedipub_actors", force: :cascade do |t|
     t.string "name"
     t.string "federated_url"
     t.string "username"
@@ -63,12 +63,12 @@ ActiveRecord::Schema[7.2].define(version: 2025_11_21_160720) do
     t.boolean "local", default: false, null: false
     t.string "actor_type"
     t.datetime "tombstoned_at"
-    t.index ["entity_type", "entity_id"], name: "index_federails_actors_on_entity", unique: true
-    t.index ["federated_url"], name: "index_federails_actors_on_federated_url", unique: true
-    t.index ["uuid"], name: "index_federails_actors_on_uuid", unique: true
+    t.index ["entity_type", "entity_id"], name: "index_fedipub_actors_on_entity", unique: true
+    t.index ["federated_url"], name: "index_fedipub_actors_on_federated_url", unique: true
+    t.index ["uuid"], name: "index_fedipub_actors_on_uuid", unique: true
   end
 
-  create_table "federails_followings", force: :cascade do |t|
+  create_table "fedipub_followings", force: :cascade do |t|
     t.integer "actor_id", null: false
     t.integer "target_actor_id", null: false
     t.integer "status", default: 0
@@ -76,13 +76,13 @@ ActiveRecord::Schema[7.2].define(version: 2025_11_21_160720) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "uuid"
-    t.index ["actor_id", "target_actor_id"], name: "index_federails_followings_on_actor_id_and_target_actor_id", unique: true
-    t.index ["actor_id"], name: "index_federails_followings_on_actor_id"
-    t.index ["target_actor_id"], name: "index_federails_followings_on_target_actor_id"
-    t.index ["uuid"], name: "index_federails_followings_on_uuid", unique: true
+    t.index ["actor_id", "target_actor_id"], name: "index_fedipub_followings_on_actor_id_and_target_actor_id", unique: true
+    t.index ["actor_id"], name: "index_fedipub_followings_on_actor_id"
+    t.index ["target_actor_id"], name: "index_fedipub_followings_on_target_actor_id"
+    t.index ["uuid"], name: "index_fedipub_followings_on_uuid", unique: true
   end
 
-  create_table "federails_hosts", force: :cascade do |t|
+  create_table "fedipub_hosts", force: :cascade do |t|
     t.string "domain", null: false
     t.string "nodeinfo_url"
     t.string "software_name"
@@ -91,7 +91,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_11_21_160720) do
     t.text "services", default: "{}"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["domain"], name: "index_federails_hosts_on_domain", unique: true
+    t.index ["domain"], name: "index_fedipub_hosts_on_domain", unique: true
   end
 
   create_table "posts", force: :cascade do |t|
@@ -101,9 +101,9 @@ ActiveRecord::Schema[7.2].define(version: 2025_11_21_160720) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "federated_url"
-    t.integer "federails_actor_id"
+    t.integer "fedipub_actor_id"
     t.datetime "deleted_at"
-    t.index ["federails_actor_id"], name: "index_posts_on_federails_actor_id"
+    t.index ["fedipub_actor_id"], name: "index_posts_on_fedipub_actor_id"
     t.index ["user_id"], name: "index_posts_on_user_id"
   end
 
@@ -120,12 +120,12 @@ ActiveRecord::Schema[7.2].define(version: 2025_11_21_160720) do
   end
 
   add_foreign_key "comments", "comments", column: "parent_id"
-  add_foreign_key "comments", "federails_actors"
+  add_foreign_key "comments", "fedipub_actors"
   add_foreign_key "comments", "posts"
   add_foreign_key "comments", "users"
-  add_foreign_key "federails_activities", "federails_actors", column: "actor_id"
-  add_foreign_key "federails_followings", "federails_actors", column: "actor_id"
-  add_foreign_key "federails_followings", "federails_actors", column: "target_actor_id"
-  add_foreign_key "posts", "federails_actors"
+  add_foreign_key "fedipub_activities", "fedipub_actors", column: "actor_id"
+  add_foreign_key "fedipub_followings", "fedipub_actors", column: "actor_id"
+  add_foreign_key "fedipub_followings", "fedipub_actors", column: "target_actor_id"
+  add_foreign_key "posts", "fedipub_actors"
   add_foreign_key "posts", "users"
 end

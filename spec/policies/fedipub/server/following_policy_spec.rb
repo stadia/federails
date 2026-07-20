@@ -4,7 +4,7 @@ RSpec.describe Federails::Server::FollowingPolicy, type: :policy do
   let(:user) { FactoryBot.create :user }
   let(:signed_in_user) { FactoryBot.create :user }
   let(:scope) { Federails::Server::FollowingPolicy::Scope.new(nil, Federails::Following).resolve }
-  let(:following) { FactoryBot.create :following, actor: signed_in_user.federails_actor, target_actor: user.federails_actor }
+  let(:following) { FactoryBot.create :following, actor: signed_in_user.fedipub_actor, target_actor: user.fedipub_actor }
 
   permissions '.scope' do
     it 'returns all the followings' do

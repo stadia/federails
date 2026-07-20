@@ -77,7 +77,7 @@ module Federails
     # @example
     #   remote_follow_url_method 'main_app.my_custom_route_helper'
     mattr_accessor :remote_follow_url_method
-    @@remote_follow_url_method = 'federails.new_client_following_url'
+    @@remote_follow_url_method = 'fedipub.new_client_following_url'
 
     def self.site_host=(value)
       @@site_host = value

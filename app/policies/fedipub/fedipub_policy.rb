@@ -53,11 +53,11 @@ module Federails
     def owner?
       return false unless @user
 
-      @record.actor_id == @user.federails_actor.id
+      @record.actor_id == @user.fedipub_actor.id
     end
 
     def user_with_actor?
-      @user && Federails.actor_entity?(@user) && !!@user.federails_actor
+      @user && Federails.actor_entity?(@user) && !!@user.fedipub_actor
     end
   end
 end

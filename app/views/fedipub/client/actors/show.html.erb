@@ -1,12 +1,12 @@
 <h1><%= @actor.name %></h1>
 
 <section>
-  <%= render 'federails/client/followings/follow_actions', user: current_user, actor: @actor %>
+  <%= render 'fedipub/client/followings/follow_actions', user: current_user, actor: @actor %>
 </section>
 
 <section>
   <% if @actor.local? %>
-    <%= link_to 'All activities', federails.client_actor_activities_path(@actor) %>
+    <%= link_to 'All activities', fedipub.client_actor_activities_path(@actor) %>
   <% elsif @actor.profile_url %>
     <%= link_to 'Visit profile', @actor.profile_url %>
   <% end %>
@@ -82,7 +82,7 @@
   <% end %>
 
   <% @actor.following_follows.each do |following| %>
-    <%= render 'federails/client/followings/follow', following: following %>
+    <%= render 'fedipub/client/followings/follow', following: following %>
   <% end %>
 </section>
 
@@ -94,7 +94,7 @@
   <% end %>
 
   <% @actor.following_followers.each do |following| %>
-    <%= render 'federails/client/followings/follower', following: following %>
+    <%= render 'fedipub/client/followings/follower', following: following %>
   <% end %>
 </section>
 
@@ -107,6 +107,6 @@
     <p>No activity to display</p>
   <% end %>
   <% activities.each do |activity| %>
-    <%= render 'federails/client/activities/activity', activity: activity %>
+    <%= render 'fedipub/client/activities/activity', activity: activity %>
   <% end %>
 </section>

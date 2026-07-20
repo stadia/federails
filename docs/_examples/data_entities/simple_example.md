@@ -7,11 +7,11 @@ title: 'Data entity: Simple example'
 Goal: Publish local `Message`s as federated _Note_ and convert incoming _Notes_ as local Post.
 
 Configuration:
-- `User` model, configured with `acts_as_federails_actor`
+- `User` model, configured with `acts_as_fedipub_actor`
 - `Messages` model:
   - messages can have answers (`parent` relation)
   - messages belongs to a `User`
-  - doing `message.user.federails_actor` returns the actor
+  - doing `message.user.fedipub_actor` returns the actor
 
 ## Updating the "messages" table/model
 
@@ -27,7 +27,7 @@ class AddFederationAttributesToMessages < ActiveRecord::Migration[7.1]
   def change
     change_column_null :messages, :user_id, true                              # Users are now optional
     add_column :messages, :federated_url, :string, null: true, default: nil   # Required
-    add_reference :messages, :federails_actor, null: true, foreign_key: true  # Required
+    add_reference :messages, :fedipub_actor, null: true, foreign_key: true  # Required
   end
 end
 ```
@@ -37,7 +37,7 @@ end
 
 class Message < ApplicationRecord
   include Federails::DataEntity
-  acts_as_federails_data handles: 'Note',
+  acts_as_fedipub_data handles: 'Note',
                          actor_entity_method: :user
 
   validates :content, presence: true, allow_blank: false

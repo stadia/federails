@@ -1,5 +1,5 @@
-if @publishable.federails_tombstoned?
-  json.partial! 'federails/server/published/tombstone', publishable: @publishable
+if @publishable.fedipub_tombstoned?
+  json.partial! 'fedipub/server/published/tombstone', publishable: @publishable
 else
-  json.partial! 'federails/server/published/publishable', publishable: @publishable
+  json.partial! 'fedipub/server/published/publishable', publishable: @publishable
 end

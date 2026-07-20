@@ -16,7 +16,7 @@ RSpec.describe 'POST federation/actors/:actor_id/inbox with a Note to become a P
     end
     let(:headers) { { 'Content-Type' => 'application/json', 'Accept' => 'application/json' } }
     let(:make_request) do
-      post federails.server_actor_inbox_url(actor_id: local_actor.id), params: fediverse_object, headers: headers
+      post fedipub.server_actor_inbox_url(actor_id: local_actor.id), params: fediverse_object, headers: headers
     end
 
     context 'with a supported Note' do

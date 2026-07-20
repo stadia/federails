@@ -1,1 +1,1 @@
-json.partial! 'federails/server/activities/activity', activity: @activity
+json.partial! 'fedipub/server/activities/activity', activity: @activity

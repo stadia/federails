@@ -32,7 +32,7 @@ RSpec.describe Federails::Server::WebFingerController, type: :acceptance do
     end
 
     for_code 410, with_content_type: Mime[:jrd] do |url|
-      user.federails_actor.tombstone!
+      user.fedipub_actor.tombstone!
       test_response_of url, path_params: { resource: "acct:#{user.id}@localhost" }, headers: headers
     end
   end

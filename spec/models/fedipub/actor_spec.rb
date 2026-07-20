@@ -7,7 +7,7 @@ module Federails
     let(:distant_url) { 'https://mamot.fr/users/mtancoigne' }
     let(:distant_account) { 'mtancoigne@mamot.fr' }
     let(:existing_distant_actor) { FactoryBot.create :distant_actor, federated_url: distant_url, username: 'mtancoigne', server: 'mamot.fr' }
-    let(:existing_local_actor) { FactoryBot.create(:user).reload.federails_actor }
+    let(:existing_local_actor) { FactoryBot.create(:user).reload.fedipub_actor }
     # Cassette which should not be created by any example. Used to test the absence
     # of outgoing requests
     let(:error_cassette) { 'this_should_not_be_here' }
@@ -58,38 +58,38 @@ module Federails
 
       it 'sets the "local" flag' do
         user = FactoryBot.create :user
-        expect(user.federails_actor).to be_local
+        expect(user.fedipub_actor).to be_local
       end
 
       it 'creates a new RSA keypair with public key' do
         user = FactoryBot.create :user
-        expect(user.federails_actor.public_key).to include 'BEGIN PUBLIC KEY'
+        expect(user.fedipub_actor.public_key).to include 'BEGIN PUBLIC KEY'
       end
 
       it 'creates a new RSA keypair with private key' do
         user = FactoryBot.create :user
-        expect(user.federails_actor.private_key).to include 'BEGIN RSA PRIVATE KEY'
+        expect(user.fedipub_actor.private_key).to include 'BEGIN RSA PRIVATE KEY'
       end
     end
 
     describe 'hooks' do
-      describe 'on_federails_delete_requested' do
+      describe 'on_fedipub_delete_requested' do
         it 'tombstones the actor' do
           actor = FactoryBot.create :distant_actor
-          actor.run_callbacks :on_federails_delete_requested
+          actor.run_callbacks :on_fedipub_delete_requested
 
           expect(actor).to be_tombstoned
         end
       end
 
-      describe 'on_federails_undelete_requested' do
+      describe 'on_fedipub_undelete_requested' do
         it 'un-tombstones the actor' do # rubocop:disable RSpec/MultipleExpectations, RSpec/ExampleLength
           actor = FactoryBot.create :distant_actor, tombstoned_at: Time.current
           allow(actor).to receive(:sync!)
 
           expect(actor).to be_tombstoned
 
-          actor.run_callbacks :on_federails_undelete_requested
+          actor.run_callbacks :on_fedipub_undelete_requested
           aggregate_failures do
             expect(actor).not_to be_tombstoned
             expect(actor).to have_received(:sync!).once
@@ -116,7 +116,7 @@ module Federails
       it 'returns local actors' do
         user = FactoryBot.create :user
         result = described_class.find_by_account("#{user.id}@localhost")
-        expect(result).to eq user.federails_actor
+        expect(result).to eq user.fedipub_actor
       end
 
       it 'returns distant actors' do
@@ -175,8 +175,8 @@ module Federails
     describe '#find_by_federation_url' do
       it 'returns local actors' do
         user = FactoryBot.create :user
-        result = described_class.find_by_federation_url(user.federails_actor.federated_url)
-        expect(result).to eq user.federails_actor
+        result = described_class.find_by_federation_url(user.fedipub_actor.federated_url)
+        expect(result).to eq user.fedipub_actor
       end
 
       it 'returns distant actors' do
@@ -249,7 +249,7 @@ module Federails
 
       it 'returns the local actor' do
         # ID is used as username in dummy
-        expect(described_class.find_local_by_username(user.id)).to eq user.federails_actor
+        expect(described_class.find_local_by_username(user.id)).to eq user.fedipub_actor
       end
 
       it 'returns nil when not found' do
@@ -262,7 +262,7 @@ module Federails
 
       it 'returns the local actor' do
         # ID is used as username in dummy
-        expect(described_class.find_local_by_username!(user.id)).to eq user.federails_actor
+        expect(described_class.find_local_by_username!(user.id)).to eq user.fedipub_actor
       end
 
       it 'raises an error' do
@@ -336,7 +336,7 @@ module Federails
       end
 
       context 'with a local actor' do
-        let(:entity) { FactoryBot.create(:user).federails_actor }
+        let(:entity) { FactoryBot.create(:user).fedipub_actor }
 
         it 'creates an activity' do
           expect { entity.tombstone! }.to change(Federails::Activity, :count).by 1
@@ -388,7 +388,7 @@ module Federails
       end
 
       context 'with a local actor' do
-        let(:entity) { FactoryBot.create(:user).federails_actor }
+        let(:entity) { FactoryBot.create(:user).fedipub_actor }
 
         before do
           entity.tombstone!
@@ -414,7 +414,7 @@ module Federails
 
     describe '.sync!' do
       context 'with a local actor' do
-        let(:local_actor) { FactoryBot.create(:user).reload.federails_actor }
+        let(:local_actor) { FactoryBot.create(:user).reload.fedipub_actor }
 
         it 'returns false' do
           expect(local_actor.sync!).to be false

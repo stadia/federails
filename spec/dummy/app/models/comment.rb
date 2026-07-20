@@ -2,7 +2,7 @@ class Comment < ApplicationRecord
   include Federails::DataEntity
   include FederatedAndSoftDeletable
 
-  acts_as_federails_data handles:                 'Note',
+  acts_as_fedipub_data handles:                 'Note',
                          actor_entity_method:     :user,
                          should_federate_method:  :federate?,
                          soft_deleted_method:     :soft_deleted?,

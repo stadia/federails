@@ -16,7 +16,7 @@ module Federails
   # ```rb
   # class User < ApplicationRecord
   #   include Federails::ActorEntity
-  #   acts_as_federails_actor options
+  #   acts_as_fedipub_actor options
   # end
   # ```
   module ActorEntity
@@ -37,9 +37,9 @@ module Federails
       # @param auto_create_actors [Boolean] Whether to automatically create an actor when the entity is created
       #
       # @example
-      #   acts_as_federails_actor username_field: :username, name_field: :display_name, profile_url_method: :url_for, actor_type: 'Person'
+      #   acts_as_fedipub_actor username_field: :username, name_field: :display_name, profile_url_method: :url_for, actor_type: 'Person'
       # rubocop:disable Metrics/ParameterLists
-      def acts_as_federails_actor(
+      def acts_as_fedipub_actor(
         name_field:,
         username_field:,
         profile_url_method: nil,
@@ -107,14 +107,14 @@ module Federails
 
     included do
       # No "dependent: :xyz" as the "before_destroy" hook should have nullified the actor
-      has_one :federails_actor, class_name: 'Federails::Actor', as: :entity # rubocop:disable Rails/HasManyOrHasOneDependent
+      has_one :fedipub_actor, class_name: 'Federails::Actor', as: :entity # rubocop:disable Rails/HasManyOrHasOneDependent
 
-      after_create :create_federails_actor, if: lambda {
-        raise("Entity not configured for #{self.class.name}. Did you use \"acts_as_federails_actor\"?") unless Federails.actor_entity? self
+      after_create :create_fedipub_actor, if: lambda {
+        raise("Entity not configured for #{self.class.name}. Did you use \"acts_as_fedipub_actor\"?") unless Federails.actor_entity? self
 
         Federails.actor_entity(self)[:auto_create_actors]
       }
-      before_destroy :tombstone_federails_actor!
+      before_destroy :tombstone_fedipub_actor!
     end
 
     # Add custom data to actor responses.
@@ -147,20 +147,20 @@ module Federails
     # Result is used to determine if an actor related to this entity should be created as local actor or not
     #
     # Override it in your models if you need distant actors to be related to another entity.
-    def create_federails_actor_as_local?
+    def create_fedipub_actor_as_local?
       true
     end
 
-    def create_federails_actor
-      Federails::Actor.create_with(local: create_federails_actor_as_local?).find_or_create_by!(entity: self)
+    def create_fedipub_actor
+      Federails::Actor.create_with(local: create_fedipub_actor_as_local?).find_or_create_by!(entity: self)
     end
 
-    def tombstone_federails_actor!
-      federails_actor.presence&.tombstone!
+    def tombstone_fedipub_actor!
+      fedipub_actor.presence&.tombstone!
     end
 
-    def untombstone_federails_actor!
-      federails_actor.presence&.untombstone!
+    def untombstone_fedipub_actor!
+      fedipub_actor.presence&.untombstone!
     end
   end
 end

@@ -48,7 +48,7 @@ module Fediverse
 
       def payload(activity)
         Federails::ServerController.renderer.new.render(
-          template: 'federails/server/activities/show',
+          template: 'fedipub/server/activities/show',
           assigns:  { activity: activity },
           format:   :json
         )

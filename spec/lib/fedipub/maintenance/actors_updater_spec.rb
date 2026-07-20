@@ -1,5 +1,5 @@
 require 'rails_helper'
-require 'federails/maintenance/actors_updater'
+require 'fedipub/maintenance/actors_updater'
 
 RSpec.describe Federails::Maintenance::ActorsUpdater do
   let(:actor_url) { 'https://mamot.fr/users/mtancoigne' }

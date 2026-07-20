@@ -1,5 +1,5 @@
-require 'federails/utils/host'
-require 'federails/utils/actor'
+require 'fedipub/utils/host'
+require 'fedipub/utils/actor'
 require 'fediverse/webfinger'
 
 module Federails
@@ -51,8 +51,8 @@ module Federails
 
     after_create -> { FetchNodeinfoJob.perform_later(server) }, unless: :local?
 
-    on_federails_delete_requested -> { tombstone! }
-    on_federails_undelete_requested -> { untombstone! }
+    on_fedipub_delete_requested -> { tombstone! }
+    on_fedipub_undelete_requested -> { untombstone! }
 
     def distant?
       !local?
@@ -140,7 +140,7 @@ module Federails
     end
 
     def entity_configuration
-      raise("Entity not configured for #{entity_type}. Did you use \"acts_as_federails_actor\"?") unless Federails.actor_entity? entity_type
+      raise("Entity not configured for #{entity_type}. Did you use \"acts_as_fedipub_actor\"?") unless Federails.actor_entity? entity_type
 
       Federails.actor_entity entity_type
     end
@@ -192,7 +192,7 @@ module Federails
 
       def find_by_federation_url(federated_url)
         local_route = Utils::Host.local_route federated_url
-        return find_param(local_route[:id]) if local_route && local_route[:controller] == 'federails/server/actors' && local_route[:action] == 'show'
+        return find_param(local_route[:id]) if local_route && local_route[:controller] == 'fedipub/server/actors' && local_route[:action] == 'show'
 
         actor = find_by federated_url: federated_url
         return actor if actor
@@ -240,7 +240,7 @@ module Federails
         Federails::Configuration.actor_types.each_value do |entity|
           break if actor.present?
 
-          actor = entity[:class].find_by(entity[:username_field] => username)&.federails_actor
+          actor = entity[:class].find_by(entity[:username_field] => username)&.fedipub_actor
         end
         return actor if actor
 
@@ -294,7 +294,7 @@ module Federails
       local? && !tombstoned? && entity.present?
     end
 
-    def create_federails_activity(action, actor: self, to: nil, cc: nil)
+    def create_fedipub_activity(action, actor: self, to: nil, cc: nil)
       return unless local
 
       Activity.create! actor: actor, action: action, entity: self, to: to, cc: cc

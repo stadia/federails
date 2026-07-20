@@ -1,9 +1,9 @@
 module Federails
   class CopyClientPoliciesGenerator < Rails::Generators::Base
-    source_root File.expand_path('../../../../app/policies/federails', __dir__)
+    source_root File.expand_path('../../../../app/policies/fedipub', __dir__)
 
     def copy_policies
-      directory 'client', Rails.root.join('app', 'policies', 'federails', 'client')
+      directory 'client', Rails.root.join('app', 'policies', 'fedipub', 'client')
     end
   end
 end

@@ -1,6 +1,6 @@
 module Federails
   class CopyFactoriesGenerator < Rails::Generators::Base
-    SOURCE_DIRECTORY = File.expand_path('../../../../spec/factories/federails', __dir__)
+    SOURCE_DIRECTORY = File.expand_path('../../../../spec/factories/fedipub', __dir__)
     FACTORY_DEFINITION_REGEX = /(FactoryBot.define do\n\s+factory) :(\w+),/
 
     source_root SOURCE_DIRECTORY
@@ -18,7 +18,7 @@ module Federails
         source_path = File.join(SOURCE_DIRECTORY, node)
         next unless File.file?(source_path) && node.match?(/\.rb\Z/)
 
-        file_path = File.join(dest, "federails_#{node}")
+        file_path = File.join(dest, "fedipub_#{node}")
         copy_file node, file_path
         @files << file_path
         @factories << File.read(file_path).match(FACTORY_DEFINITION_REGEX)&.[](2)
@@ -32,10 +32,10 @@ module Federails
     def substitute_values!
       @factories.compact!
       @files.each do |file|
-        gsub_file file, FACTORY_DEFINITION_REGEX, '\1 :federails_\2,'
+        gsub_file file, FACTORY_DEFINITION_REGEX, '\1 :fedipub_\2,'
 
         @factories.each do |factory|
-          gsub_file file, ":#{factory}", ":federails_#{factory}"
+          gsub_file file, ":#{factory}", ":fedipub_#{factory}"
         end
       end
     end

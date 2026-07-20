@@ -6,6 +6,6 @@ publishable.to_activitypub_object.each_pair do |key, value|
 end
 
 json.id publishable.federated_url
-json.actor publishable.federails_actor.federated_url
+json.actor publishable.fedipub_actor.federated_url
 json.to [Fediverse::Collection::PUBLIC]
-json.cc [publishable.federails_actor.followers_url]
+json.cc [publishable.fedipub_actor.followers_url]

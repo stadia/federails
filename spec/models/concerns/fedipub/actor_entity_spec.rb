@@ -2,7 +2,7 @@ require 'rails_helper'
 
 module Federails
   RSpec.describe ActorEntity do
-    describe '#acts_as_federails_actor' do
+    describe '#acts_as_fedipub_actor' do
       it 'sets the class configuration in the Federails configuration' do
         aggregate_failures do
           expect(Federails::Configuration.actor_types).to have_key 'Fixtures::Classes::FakeUserModel'
@@ -19,7 +19,7 @@ module Federails
     end
 
     describe 'hooks' do
-      describe 'after_create: create_federails_actor' do
+      describe 'after_create: create_fedipub_actor' do
         context 'with default values' do
           let(:instance) { Fixtures::Classes::FakeUserModel.new email: Faker::Internet.unique.email }
 
@@ -30,7 +30,7 @@ module Federails
 
         context 'with a supplied actor' do
           let!(:actor) { FactoryBot.create :distant_actor }
-          let(:instance) { Fixtures::Classes::FakeUserModelWithoutAutoCreation.new email: Faker::Internet.unique.email, federails_actor: actor }
+          let(:instance) { Fixtures::Classes::FakeUserModelWithoutAutoCreation.new email: Faker::Internet.unique.email, fedipub_actor: actor }
 
           it 'does not create an actor' do
             expect { instance.save! }.not_to change(Federails::Actor, :count)
@@ -38,7 +38,7 @@ module Federails
 
           it 'associates existing actor' do
             instance.save!
-            expect(instance.federails_actor).to eq actor
+            expect(instance.fedipub_actor).to eq actor
           end
         end
 
@@ -56,7 +56,7 @@ module Federails
           let(:instance) { Fixtures::Classes::FakeUserModel.create! email: Faker::Internet.unique.email }
 
           it 'marks the actor as tombstoned' do
-            actor = instance.federails_actor
+            actor = instance.fedipub_actor
             instance.destroy!
             expect(actor.reload).to be_tombstoned
           end
@@ -66,7 +66,7 @@ module Federails
           let(:instance) { Fixtures::Classes::FakeUserModel.create! email: Faker::Internet.unique.email }
 
           before do
-            instance.federails_actor.destroy!
+            instance.fedipub_actor.destroy!
             instance.reload
           end
 

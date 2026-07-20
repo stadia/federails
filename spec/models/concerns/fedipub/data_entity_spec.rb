@@ -8,7 +8,7 @@ module Federails
     it_behaves_like 'Likeable', Fixtures::Classes::FakeDataModel, FactoryBot.attributes_for(:post)
 
     describe '#federated_url' do
-      let(:instance) { Fixtures::Classes::FakeDataModel.create! federails_actor: user.federails_actor, title: 'abc', content: 'def' }
+      let(:instance) { Fixtures::Classes::FakeDataModel.create! fedipub_actor: user.fedipub_actor, title: 'abc', content: 'def' }
 
       context 'when present' do
         before do
@@ -27,7 +27,7 @@ module Federails
       end
     end
 
-    describe '#acts_as_federails_data' do
+    describe '#acts_as_fedipub_data' do
       it 'sets the class configuration in the Federails configuration' do
         expect(Federails::Configuration.data_types).to have_key 'Fixtures::Classes::FakeDataModel'
       end
@@ -37,7 +37,7 @@ module Federails
       let(:actor) { FactoryBot.create :local_actor }
 
       context 'when soft deleted and :soft_deleted_method set' do
-        let!(:entity) { Fixtures::Classes::FakeArticleDataModel.create! federails_actor: actor, title: 'abc', content: 'def' }
+        let!(:entity) { Fixtures::Classes::FakeArticleDataModel.create! fedipub_actor: actor, title: 'abc', content: 'def' }
 
         it 'raises an error' do
           entity.update! deleted_at: Time.current
@@ -53,7 +53,7 @@ module Federails
       end
 
       context 'when the object exists' do
-        let!(:entity) { Fixtures::Classes::FakeDataModel.create! federails_actor: actor, title: 'abc', content: 'def' }
+        let!(:entity) { Fixtures::Classes::FakeDataModel.create! fedipub_actor: actor, title: 'abc', content: 'def' }
 
         it 'returns the object' do
           expect(Fixtures::Classes::FakeDataModel.find_untombstoned_by!(id: entity.id)).not_to be_nil
@@ -61,29 +61,29 @@ module Federails
       end
     end
 
-    describe '#federails_sync!' do
+    describe '#fedipub_sync!' do
       context 'with a local entity' do
         let(:actor) { FactoryBot.create :local_actor }
-        let!(:entity) { Fixtures::Classes::FakeArticleDataModel.create! federails_actor: actor, title: 'abc', content: 'def' }
+        let!(:entity) { Fixtures::Classes::FakeArticleDataModel.create! fedipub_actor: actor, title: 'abc', content: 'def' }
 
         it 'returns false' do
-          expect(entity.federails_sync!).to be false
+          expect(entity.fedipub_sync!).to be false
         end
       end
 
       context 'with a distant entity' do
         let(:actor) { FactoryBot.create :distant_actor, federated_url: 'https://mamot.fr/users/mtancoigne', username: 'mtancoigne', server: 'mamot.fr' }
-        let!(:entity) { Fixtures::Classes::FakeArticleDataModel.create! federails_actor: actor, federated_url: 'https://mamot.fr/users/mtancoigne/statuses/113741447018463971', title: 'abc', content: 'def' }
+        let!(:entity) { Fixtures::Classes::FakeArticleDataModel.create! fedipub_actor: actor, federated_url: 'https://mamot.fr/users/mtancoigne/statuses/113741447018463971', title: 'abc', content: 'def' }
 
         it 'updates the entity' do
           VCR.use_cassette 'dummy/fediverse/request/get_note_200' do
-            expect { entity.federails_sync! }.to change { entity.reload.title }.from('abc').to('A post')
+            expect { entity.fedipub_sync! }.to change { entity.reload.title }.from('abc').to('A post')
           end
         end
 
         it 'returns true' do
           VCR.use_cassette 'dummy/fediverse/request/get_note_200' do
-            expect(entity.federails_sync!).to be true
+            expect(entity.fedipub_sync!).to be true
           end
         end
       end
@@ -94,24 +94,24 @@ module Federails
         2.times do
           Fixtures::Classes::FakeArticleDataModel.create! title: 'title', content: 'content', user: user
         end
-        Fixtures::Classes::FakeArticleDataModel.create! federails_actor: FactoryBot.create(:distant_actor), federated_url: 'https://somewhere/the_note', title: 'title', content: 'content'
+        Fixtures::Classes::FakeArticleDataModel.create! fedipub_actor: FactoryBot.create(:distant_actor), federated_url: 'https://somewhere/the_note', title: 'title', content: 'content'
       end
 
-      describe '.local_federails_entities' do
+      describe '.local_fedipub_entities' do
         it 'returns only local entities' do
-          expect(Fixtures::Classes::FakeArticleDataModel.local_federails_entities.count).to eq 2
+          expect(Fixtures::Classes::FakeArticleDataModel.local_fedipub_entities.count).to eq 2
         end
       end
 
-      describe '.distant_federails_entities' do
+      describe '.distant_fedipub_entities' do
         it 'returns only distant entities' do
-          expect(Fixtures::Classes::FakeArticleDataModel.distant_federails_entities.count).to eq 1
+          expect(Fixtures::Classes::FakeArticleDataModel.distant_fedipub_entities.count).to eq 1
         end
       end
     end
 
     describe 'hooks' do
-      describe 'after_create: create_federails_activity' do
+      describe 'after_create: create_fedipub_activity' do
         context 'with default values' do
           let(:instance) { Fixtures::Classes::FakeDataModel.new FactoryBot.attributes_for(:post, user_id: user.id) }
 
@@ -121,7 +121,7 @@ module Federails
         end
       end
 
-      describe 'after_update: create_federails_activity' do
+      describe 'after_update: create_fedipub_activity' do
         context 'with default values' do
           let(:instance) { Fixtures::Classes::FakeDataModel.create! FactoryBot.attributes_for(:post, user_id: user.id) }
 
@@ -131,7 +131,7 @@ module Federails
         end
       end
 
-      describe 'after_delete: create_federails_activity' do
+      describe 'after_delete: create_fedipub_activity' do
         context 'with default values' do
           let(:instance) { Fixtures::Classes::FakeDataModel.create! FactoryBot.attributes_for(:post, user_id: user.id) }
 

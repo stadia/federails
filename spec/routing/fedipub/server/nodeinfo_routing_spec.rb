@@ -3,8 +3,8 @@ require 'rails_helper'
 module Federails
   module Server
     RSpec.describe NodeinfoController, type: :routing do
-      let(:index_url) { { url: '/.well-known/nodeinfo', target: ['federails/server/nodeinfo#index'] } }
-      let(:show_url) { { url: '/nodeinfo/2.0', target: ['federails/server/nodeinfo#show'] } }
+      let(:index_url) { { url: '/.well-known/nodeinfo', target: ['fedipub/server/nodeinfo#index'] } }
+      let(:show_url) { { url: '/nodeinfo/2.0', target: ['fedipub/server/nodeinfo#show'] } }
 
       describe 'routing' do
         it 'routes to #index' do

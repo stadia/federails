@@ -1,5 +1,5 @@
 require 'rails_helper'
-require 'federails/utils/host'
+require 'fedipub/utils/host'
 
 RSpec.describe Federails::Utils::Host do
   describe '#localhost' do

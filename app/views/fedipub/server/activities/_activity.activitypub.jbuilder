@@ -17,7 +17,7 @@ json.result activity.result if activity.result
 json.result activity.instrument if activity.instrument
 
 if activity.entity.is_a? Federails::Activity
-  json.object { json.partial!('federails/server/activities/activity', activity: activity.entity, context: false, addressing: false) }
+  json.object { json.partial!('fedipub/server/activities/activity', activity: activity.entity, context: false, addressing: false) }
 elsif activity.entity.respond_to? :to_activitypub_object
   json.object activity.entity.to_activitypub_object
 elsif activity.entity.respond_to? :federated_url

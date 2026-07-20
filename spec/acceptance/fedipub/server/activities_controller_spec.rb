@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe Federails::Server::ActivitiesController, type: :acceptance do
   resource 'Federation/Activities', 'Activities management'
   let(:headers) { { accept: 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"' } }
-  let(:actor) { FactoryBot.create(:user).federails_actor }
+  let(:actor) { FactoryBot.create(:user).fedipub_actor }
   let(:following) { FactoryBot.create :following, actor: actor }
   let(:following_activity) { following.follow_activity }
 
@@ -92,10 +92,10 @@ RSpec.describe Federails::Server::ActivitiesController, type: :acceptance do
     let(:inbox_payload) do
       {
         '@context' => 'https://www.w3.org/ns/activitystreams',
-        'id'       => federails.server_actor_activity_url(actor, following.follow_activity),
+        'id'       => fedipub.server_actor_activity_url(actor, following.follow_activity),
         'type'     => 'Create',
         'actor'    => distant_actor.federated_url,
-        'object'   => federails.server_actor_following_url(actor, following),
+        'object'   => fedipub.server_actor_following_url(actor, following),
         'to'       => [Fediverse::Collection::PUBLIC],
         'cc'       => [actor.followers_url],
       }

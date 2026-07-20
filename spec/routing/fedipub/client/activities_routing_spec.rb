@@ -5,15 +5,15 @@ module Federails
     RSpec.describe ActivitiesController, type: :routing do
       describe 'routing' do
         it 'routes to #index' do
-          expect(get: '/app/activities').to route_to('federails/client/activities#index')
+          expect(get: '/app/activities').to route_to('fedipub/client/activities#index')
         end
 
         it 'routes to #index via actors' do
-          expect(get: '/app/actors/1/activities').to route_to('federails/client/activities#index', actor_id: '1')
+          expect(get: '/app/actors/1/activities').to route_to('fedipub/client/activities#index', actor_id: '1')
         end
 
         it 'routes to #feed' do
-          expect(get: '/app/feed').to route_to('federails/client/activities#feed')
+          expect(get: '/app/feed').to route_to('fedipub/client/activities#feed')
         end
       end
 

@@ -2,8 +2,8 @@ Description:
     Copies configuration file and initializer
 
 Example:
-    bin/rails generate federails:install
+    bin/rails generate fedipub:install
 
     This will create:
-        config/federails.yml
-        config/initializers/federails.rb
+        config/fedipub.yml
+        config/initializers/fedipub.rb

@@ -8,7 +8,7 @@ nav_order: 10
 Add this line to your application's Gemfile:
 
 ```ruby
-gem "federails"
+gem "fedipub"
 ```
 
 And then execute:
@@ -22,31 +22,31 @@ $ bundle
 ### Generate configuration files
 
 ```sh
-bundle exec rails generate federails:install
+bundle exec rails generate fedipub:install
 ```
 
 It creates an initializer and a configuration file:
-- `config/initializers/federails.rb`
-- `config/federails.yml`
+- `config/initializers/fedipub.rb`
+- `config/fedipub.yml`
 
 By default, Federails is configured using `config_from` method, that loads the appropriate YAML file, but you may want
 to configure it differently:
 
 ```rb
-# config/initializers/federails.rb
+# config/initializers/fedipub.rb
 Federails.configure do |config|
   config.host = 'localhost'
   # ...
 end
 ```
 
-For now, refer to [the source code](https://gitlab.com/experimentslabs/federails/-/blob/main/lib/federails/configuration.rb) 
+For now, refer to [the source code](https://gitlab.com/experimentslabs/fedipub/-/blob/main/lib/fedipub/configuration.rb) 
 for the full list of options.
 
 ### Copy the migrations
 
 ```sh
-bundle exec rails federails:install:migrations
+bundle exec rails fedipub:install:migrations
 ```
 
 Review the changes and apply them.
@@ -108,7 +108,7 @@ You can override the views like with any other engine. We provide a rake task to
 override what you want:
 
 ```sh
-rails generate federails:copy_client_views
+rails generate fedipub:copy_client_views
 ```
 
 ### Disabling/not using the client
@@ -133,7 +133,7 @@ end
 
 This _GET_ route _should_ render a page allowing to follow the actor passed as `uri` parameter.
 
-In the client (`app/controllers/federails/client/followings_controller.rb#new`), we use a page that allows signed-in
+In the client (`app/controllers/fedipub/client/followings_controller.rb#new`), we use a page that allows signed-in
 actor to find another actor and follow it. In the Federails client implementation, we fetch the actor, save it locally
 and redirect to a page that displays it, with the "Follow" button, but you can do whatever you want, as long as the user
 has ability to follow the actor in the end.
@@ -144,7 +144,7 @@ has ability to follow the actor in the end.
 Copy the migrations:
 
 ```sh
-bundle exec rails federails:install:migrations
+bundle exec rails fedipub:install:migrations
 ```
 
 ## User model
@@ -161,7 +161,7 @@ class User < ApplicationRecord
   include Federails::ActorEntity
 
   # Configure field names
-  acts_as_federails_actor username_field: :username, name_field: :name, profile_url_method: :user_url
+  acts_as_fedipub_actor username_field: :username, name_field: :name, profile_url_method: :user_url
 end
 ```
 
@@ -171,7 +171,7 @@ an existing model with existing data, you will need to generate the correspondin
 Usage example:
 
 ```rb
-actor = User.find(1).federails_actor
+actor = User.find(1).fedipub_actor
 
 actor.inbox
 actor.outbox
@@ -190,13 +190,13 @@ in the data models:
 class Note < ApplicationRecord
   include Federails::DataEntity
   
-  acts_as_federails_data
+  acts_as_fedipub_data
 
-  on_federails_delete_requested -> { Rails.logger.info { 'Deletion requested' } }
+  on_fedipub_delete_requested -> { Rails.logger.info { 'Deletion requested' } }
 end
 ```
 
-For options, pre-requisites, etc..., refer to the documentation of `Federails::DataEntity.acts_as_federails_data`.
+For options, pre-requisites, etc..., refer to the documentation of `Federails::DataEntity.acts_as_fedipub_data`.
 
 You can check the "Examples" for implementation samples 
 
@@ -207,28 +207,28 @@ configured to handle Note and transform them as Post/Comment.
 
 `DataEntity` concern uses the `after_destroy` hook to send `Delete` activities to the Fediverse. 
 
-Incoming `Delete` activities will trigger the custom `on_federails_delete_requested` hook, and **you'll need to implement
+Incoming `Delete` activities will trigger the custom `on_fedipub_delete_requested` hook, and **you'll need to implement
 the behavior yourself**.
 
 ### Support for soft-delete
 
 If your model supports soft-delete, you can pass the `soft_deleted_method` and `soft_delete_date_method` parameters to
-`acts_as_federails_data`. If you do so, requests made to fetch a soft-deleted entity will result into a nice `Tombstone`
+`acts_as_fedipub_data`. If you do so, requests made to fetch a soft-deleted entity will result into a nice `Tombstone`
 ActivityPub object and a 410 _gone_ status, instead of a 404 error.
 
-You also will need to call `create_federails_activity 'Delete'` in your soft-deletion process.
+You also will need to call `create_fedipub_activity 'Delete'` in your soft-deletion process.
 
 ```rb
 # Assume soft-deletion is made by filling `deleted_at` attribute
 class Note < ApplicationRecord
   include Federails::DataEntity
 
-  acts_as_federails_data handles: 'Note',
+  acts_as_fedipub_data handles: 'Note',
                          #...
                          soft_deleted_method: :deleted?,
                          soft_delete_date_method: :deleted_at
 
-  on_federails_delete_requested :soft_delete!
+  on_fedipub_delete_requested :soft_delete!
   
   def deleted?
     deleted_at.present?
@@ -238,7 +238,7 @@ class Note < ApplicationRecord
     update! deleted_at: Time.current
     
     # Manually create the delete activity for locally-created entities only
-    create_federails_activity 'Delete' if local_federails_entity?
+    create_fedipub_activity 'Delete' if local_fedipub_entity?
   end
 end
 ```
@@ -254,5 +254,5 @@ to a `nil` value.
 If you want to override the client's views, copy them in your application:
 
 ```sh
-rails generate federails:copy_client_views
+rails generate fedipub:copy_client_views
 ```
