@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_07_23_113716) do
+ActiveRecord::Schema[7.2].define(version: 2026_07_23_115052) do
   create_table "comments", force: :cascade do |t|
     t.text "content", null: false
     t.integer "user_id"
@@ -19,9 +19,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_23_113716) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "federated_url"
-    t.integer "federails_actor_id"
+    t.integer "fedipub_actor_id"
     t.datetime "deleted_at"
-    t.index ["federails_actor_id"], name: "index_comments_on_federails_actor_id"
+    t.index ["fedipub_actor_id"], name: "index_comments_on_fedipub_actor_id"
     t.index ["parent_id"], name: "index_comments_on_parent_id"
     t.index ["post_id"], name: "index_comments_on_post_id"
     t.index ["user_id"], name: "index_comments_on_user_id"
@@ -103,9 +103,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_23_113716) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "federated_url"
-    t.integer "federails_actor_id"
+    t.integer "fedipub_actor_id"
     t.datetime "deleted_at"
-    t.index ["federails_actor_id"], name: "index_posts_on_federails_actor_id"
+    t.index ["fedipub_actor_id"], name: "index_posts_on_fedipub_actor_id"
     t.index ["user_id"], name: "index_posts_on_user_id"
   end
 
@@ -122,12 +122,12 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_23_113716) do
   end
 
   add_foreign_key "comments", "comments", column: "parent_id"
-  add_foreign_key "comments", "fedipub_actors", column: "federails_actor_id"
+  add_foreign_key "comments", "fedipub_actors"
   add_foreign_key "comments", "posts"
   add_foreign_key "comments", "users"
   add_foreign_key "fedipub_activities", "fedipub_actors", column: "actor_id"
   add_foreign_key "fedipub_followings", "fedipub_actors", column: "actor_id"
   add_foreign_key "fedipub_followings", "fedipub_actors", column: "target_actor_id"
-  add_foreign_key "posts", "fedipub_actors", column: "federails_actor_id"
+  add_foreign_key "posts", "fedipub_actors"
   add_foreign_key "posts", "users"
 end
