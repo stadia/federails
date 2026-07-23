@@ -1,4 +1,4 @@
-class AddResultAndInstrumentToFedipubActivities < ActiveRecord::Migration[7.2]
+class AddResultAndInstrumentToFederailsActivities < ActiveRecord::Migration[7.2]
   def change
     add_column :federails_activities, :result, :string
     add_column :federails_activities, :instrument, :string

@@ -1,4 +1,4 @@
-class CreateFedipubFollowings < ActiveRecord::Migration[7.0]
+class CreateFederailsFollowings < ActiveRecord::Migration[7.0]
   def change
     create_table :federails_followings do |t|
       t.references :actor, null: false, foreign_key: { to_table: :federails_actors }

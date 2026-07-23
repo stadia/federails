@@ -1,4 +1,4 @@
-class CreateFedipubActors < ActiveRecord::Migration[7.0]
+class CreateFederailsActors < ActiveRecord::Migration[7.0]
   def change
     create_table :federails_actors do |t|
       t.string :name
