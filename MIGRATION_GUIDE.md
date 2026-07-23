@@ -22,6 +22,25 @@ First of all, read the **[general upgrade steps](#general-steps)**
 
 - There are new migrations, so don't forget to _install_ them
 
+IMPORTANT: This release renames the project from "Federails" to "Fedipub". You will need to rename usage in your app.
+
+1. If you have database references to things like `federails_actor`, you will need to create a migration in your app to rename your columns, like so:
+
+```
+class RenameFederailsFieldsToFedipub < ActiveRecord::Migration[7.2]
+  def change
+    rename_column :posts, 'federails_actor_id', 'fedipub_actor_id'
+    rename_column :comments, 'federails_actor_id', 'fedipub_actor_id'
+  end
+end
+```
+
+2. If you reference it anywhere, replace the `Federails::` namespace with `Fedipub::`
+
+3. Change method calls such as `acts_as_federails_actor` to `acts_as_fedipub_actor`.
+
+If you do a global search and replace for "federails" to "fedipub", ensure you DO NOT change existing migrations in your app; renaming of actual database content is handled by a new migration.
+
 ## From 0.6.2 to 0.7.0
 
 First of all, read the **[general upgrade steps](#general-steps)**
@@ -81,4 +100,4 @@ First of all, read the **[general upgrade steps](#general-steps)**
 - `acts_as_federails_actor`'s `username_field` is now required. If you used the default value you should use the value used
   as `Federails::Configuration.user_username_field` as replacement.
 - In models including `Federails::Entity`, manually call `acts_as_federails_actor` to configure it properly if it's not
-  yet done.  
+  yet done.
