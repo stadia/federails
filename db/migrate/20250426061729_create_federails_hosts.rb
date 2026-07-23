@@ -1,6 +1,6 @@
 class CreateFedipubHosts < ActiveRecord::Migration[7.2]
   def change
-    create_table :fedipub_hosts do |t|
+    create_table :federails_hosts do |t|
       t.string :domain, null: false, default: nil
       t.string :nodeinfo_url
       t.string :software_name
