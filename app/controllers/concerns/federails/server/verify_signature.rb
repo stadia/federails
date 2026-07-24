@@ -23,7 +23,7 @@ module Federails
             remote_ip:       request.remote_ip,
             signature_input: request.headers['Signature-Input'],
             actor:           extract_payload_actor,
-          }.inspect
+          }
         end
       end
 
