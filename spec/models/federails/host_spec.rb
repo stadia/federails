@@ -55,6 +55,18 @@ RSpec.describe Federails::Host do
       end
     end
 
+    context 'when the host returns a non-JSON response' do
+      # HTTP 200 with an HTML body (error page, Cloudflare, login wall, parked
+      # domain) passes expected_status then makes JSON.parse raise JSON::ParserError.
+      it 'swallows JSON::ParserError so a batch update is not aborted' do
+        fresh = described_class.new domain: domain
+        allow(described_class).to receive(:find_or_initialize_by).with(domain: domain).and_return(fresh)
+        allow(fresh).to receive(:sync!).and_raise(JSON::ParserError, "unexpected character: '<!DOCTYPE' at line 2 column 1")
+
+        expect { described_class.create_or_update(domain) }.not_to raise_error
+      end
+    end
+
     context 'when host already exists' do
       let!(:host) { described_class.create domain: domain }
 

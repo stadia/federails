@@ -44,6 +44,10 @@ module Federails
         recover_from_domain_race(domain, new_record)
       rescue Fediverse::NodeInfo::NoActivityPubError
         Federails.logger.info { "#{domain} does not provide ActivityPub service" }
+      rescue JSON::ParserError => e
+        # Non-JSON body (HTML error page, Cloudflare interstitial, login wall) —
+        # one misbehaving host must not abort a batch update.
+        Federails.logger.info { "#{domain} returned a non-JSON response: '#{e.message}'" }
       rescue Federails::Utils::JsonRequest::UnhandledResponseStatus, Faraday::SSLError, Faraday::ConnectionFailed, Faraday::TimeoutError => e
         Federails.logger.info { "Error connecting to #{domain}: '#{e.message}'" }
       end
