@@ -95,12 +95,12 @@ module Fedipub
 
       private
 
-      def dispatch_callback(name, instance, *args)
+      def dispatch_callback(name, instance, *)
         case name
         when :after_followed
-          instance.send(@after_followed, *args) if @after_followed
+          instance.send(@after_followed, *) if @after_followed
         when :after_follow_accepted
-          instance.send(@after_follow_accepted, *args) if @after_follow_accepted
+          instance.send(@after_follow_accepted, *) if @after_follow_accepted
         end
       end
     end
