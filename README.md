@@ -54,6 +54,7 @@ Extensions add extra features to Fedipub:
 ## Projects using Federails
 
 - [Manyfold](https://github.com/manyfold3d/manyfold)
+- [Prismo](https://github.com/mbajur/prismo)
 
 ## License
 
