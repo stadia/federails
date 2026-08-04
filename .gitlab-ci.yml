@@ -8,7 +8,7 @@ stages:
   image: ruby:$RUBY_VERSION
   parallel:
     matrix:
-      - RUBY_VERSION: ['3.3', '3.4']
+      - RUBY_VERSION: ['3.3', '3.4', '4.0']
 
 .cache: &cache_definition
   untracked: true
@@ -77,7 +77,7 @@ rspec:
     # - https://endoflife.date/ruby
     # - https://endoflife.date/rails
     matrix:
-      - RUBY_VERSION: [ '3.3', '3.4' ]
+      - RUBY_VERSION: [ '3.3', '3.4', '4.0' ]
         RAILS_VERSION: [  '7.2', '8.0' ]
   stage: test
   script:
