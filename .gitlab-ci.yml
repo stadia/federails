@@ -78,7 +78,7 @@ rspec:
     # - https://endoflife.date/rails
     matrix:
       - RUBY_VERSION: [ '3.3', '3.4', '4.0' ]
-        RAILS_VERSION: [  '7.2', '8.0' ]
+        RAILS_VERSION: [  '7.2', '8.0', '8.1' ]
   stage: test
   script:
     - bundle exec rails db:test:prepare
@@ -95,7 +95,7 @@ pages:
     - if: $CI_COMMIT_TAG
   script:
     # This step should be removed for Ruby > 3.1
-    # See: https://github.com/jekyll/jekyll/issues/9563
+    # See: https://github.com/jekyll/jekyll/issues/963
     - gem update --system
     - bundle config unset --local without
     - bundle install --quiet

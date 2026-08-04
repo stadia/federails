@@ -38,6 +38,7 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 - Reduce schema lookups to W3C security vocabulary by preloading context.
 - Drop support for Ruby 3.1 and 3.2
 - Add support for Ruby 4.0
+- Add support for Rails 8.1
 
 ### Fixed
 

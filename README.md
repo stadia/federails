@@ -32,7 +32,7 @@ The general direction is to be able to:
 This gem is tested against non end-of-life versions of [Ruby](https://endoflife.date/ruby) and [Rails](https://endoflife.date/rails):
 
 - Ruby versions 3.3, 3.4 and 4.0
-- Rails 7.2 to 8.0.x.
+- Rails 7.2 to 8.1.
 
 Feel free to open an issue if we missed something
 
