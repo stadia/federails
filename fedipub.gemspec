@@ -1,7 +1,7 @@
 require_relative 'lib/fedipub/version'
 
 Gem::Specification.new do |spec|
-  spec.required_ruby_version = '>= 3.1.2'
+  spec.required_ruby_version = '>= 3.3.0'
   spec.name        = 'fedipub'
   spec.version     = Fedipub::VERSION
   spec.authors     = ['Manuel Tancoigne']
@@ -27,5 +27,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'json-ld-preloaded', '>= 3.2.0'
   spec.add_dependency 'kaminari', '>= 1.2.0'
   spec.add_dependency 'pundit', '>= 2.3.0'
-  spec.add_dependency 'rails', '>= 7.0.4'
+  spec.add_dependency 'rails', '>= 7.2.0'
 end

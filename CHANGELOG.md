@@ -36,6 +36,7 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 - Reverse any `Fedipub::Activity` by calling `undo!` to create an Undo activity addressed in the same way.
 - Set `results` and `instrument` fields for outgoing `Fedipub::Activity` objects.
 - Reduce schema lookups to W3C security vocabulary by preloading context.
+- Drop support for Ruby 3.1 and 3.2
 
 ### Fixed
 
