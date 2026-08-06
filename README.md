@@ -46,13 +46,10 @@ It _may_ work on other versions, but we won't provide support.
 
 ## Extensions
 
-Extensions extends the features of Fedipub.
+Extensions add extra features to Fedipub:
 
-The extensions previously available for Federails are now in the process of being adapted to Fedipub, so there are none yet.
-
-Existing extensions for Federails:
-- [Federails Moderation](https://github.com/manyfold3d/federails-moderation/)
-  > A gem that provides moderation capabilities for Federails
+- [Fedipub Moderation](https://github.com/fedipub/fedipub-moderation/)
+  > A gem that provides trust & safety for Fedipub
 
 ## License
 

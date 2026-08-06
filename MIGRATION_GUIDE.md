@@ -8,7 +8,7 @@ desired one, do these steps (in the order you see fit)
 - Update the gem to the desired version.
 - Copy and apply new migrations 
   ```sh
-  bundle exec rails fedipub:install:migrations
+  bundle exec rake fedipub:install:migrations
   ```
 - Re-copy client views if you use them, and adapt them.
   ```sh
@@ -16,7 +16,7 @@ desired one, do these steps (in the order you see fit)
   ```
 - Follow directions of the migration guide, for every version intermediate version 
 
-## Next
+## From 0.8.0 to 0.9.0
 
 First of all, read the **[general upgrade steps](#general-steps)**
 

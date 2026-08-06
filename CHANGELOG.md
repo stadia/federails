@@ -30,6 +30,10 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ## [Unreleased]
 
+## [0.9.0] 2026-08-06
+
+Renamed project from "Federails" to "Fedipub". See the migration guide for instructions on how to update your code.
+
 ### Added
 
 - Announce (boost/RT), like or dislike `Fedipub::DataEntity` and `Fedipub::Actor` objects using new `announce!`, `like!` and `dislike!` methods.
@@ -38,9 +42,7 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 - Reduce schema lookups to W3C security vocabulary by preloading context.
 - Drop support for Ruby 3.1 and 3.2
 - Add support for Ruby 4.0
-- Add support for Rails 8.1
-
-### Fixed
+- Add support for Rails 8.1 
 
 ## [0.8.0] 2026-03-25
 
