@@ -26,12 +26,22 @@ IMPORTANT: This release renames the project from "Federails" to "Fedipub". You w
 
 1. If you have database references to things like `federails_actor`, you will need to create a migration in your app to rename your columns, like so:
 
-```
+```ruby
 class RenameFederailsFieldsToFedipub < ActiveRecord::Migration[7.2]
   def change
     rename_column :posts, 'federails_actor_id', 'fedipub_actor_id'
     rename_column :comments, 'federails_actor_id', 'fedipub_actor_id'
   end
+end
+```
+
+Also, if you have any polymorphic relationships in your app that refer to Fedipub models, you will need to update the type field. We recommend running something like this at application start, though exactly what you need to do will depend on your application, this is just an example:
+
+```ruby
+[
+  [Comment, :commenter_type]
+].each do |table, field|
+  table.where(field => "Federails::Actor").update_all(field => "Fedipub::Actor")
 end
 ```
 
