@@ -48,7 +48,7 @@ It _may_ work on other versions, but we won't provide support.
 
 Extensions add extra features to Fedipub:
 
-- [Fedipub Moderation](https://github.com/fedipub/fedipub-moderation/)
+- [Fedipub Moderation](https://gitlab.com/fedipub/fedipub-moderation/)
   > A gem that provides trust & safety for Fedipub
 
 ## License
