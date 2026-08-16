@@ -25,8 +25,13 @@ module Federails
         [publishable.federails_actor.followers_url]
       end
 
+      # publishable_data is symbolized by normalize_activitypub_hash while Alba
+      # attributes come back string-keyed; merging the two as-is would keep both
+      # variants and emit duplicate JSON keys (e.g. "@context" twice). Strict
+      # JSON-LD consumers (Fedify/Hollo, ...) choke on that, so normalize the
+      # Alba side before merging.
       def serializable_hash
-        publishable_data(object).merge(super)
+        publishable_data(object).merge(super.deep_symbolize_keys)
       end
 
       def publishable_data(publishable)
