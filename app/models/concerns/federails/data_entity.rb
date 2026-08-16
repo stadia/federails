@@ -1,3 +1,4 @@
+# typed: false
 # rbs_inline: enabled
 
 require 'fediverse/inbox'
@@ -206,7 +207,8 @@ module Federails
     end
 
     # Computed value for the federated URL
-    def federated_url #: String?
+    #: -> String?
+    def federated_url
       return nil unless send(federails_data_configuration[:should_federate_method])
       return attributes['federated_url'] if attributes['federated_url'].present?
 
@@ -216,15 +218,18 @@ module Federails
     end
 
     # Check whether the entity was created locally or comes from the Fediverse
-    def local_federails_entity? #: bool
+    #: -> bool
+    def local_federails_entity?
       attributes['federated_url'].blank?
     end
 
-    def federails_tombstoned? #: bool
+    #: -> bool
+    def federails_tombstoned?
       federails_data_configuration[:soft_deleted_method] ? send(federails_data_configuration[:soft_deleted_method]) : false
     end
 
-    def federails_tombstoned_at #: DateTime?
+    #: -> DateTime?
+    def federails_tombstoned_at
       federails_data_configuration[:soft_delete_date_method] ? send(federails_data_configuration[:soft_delete_date_method]) : nil
     end
 
@@ -241,7 +246,8 @@ module Federails
     # @note The returned URLs are inserted directly into the +cc+ field and
     #   delivered via NotifyInboxJob. Ensure values come from trusted sources
     #   to prevent open federation or SSRF vectors.
-    def federation_reply_recipients #: Array[String]
+    #: -> Array[String]
+    def federation_reply_recipients
       []
     end
 

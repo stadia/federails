@@ -7,7 +7,7 @@ module Federails
         @record.send(@record.federails_data_configuration[:should_federate_method])
       end
 
-      class Scope < Scope
+      class Scope < Federails::FederailsPolicy::Scope
         def resolve
           raise NotImplementedError
         end

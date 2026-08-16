@@ -9,7 +9,7 @@ module Federails
       # GET /app/activities
       # GET /app/activities.json
       def index
-        @activities = policy_scope(Federails::Activity, policy_scope_class: Federails::Client::ActivityPolicy::Scope).all
+        @activities = policy_scope(Federails::Activity, policy_scope_class: Federails::FederailsPolicy::Scope).all
         @activities = @activities.where actor: Actor.find_param(params[:actor_id]) if params[:actor_id]
         render_serialized(Federails::Client::ActivityResource, @activities) if request.format.json?
       end

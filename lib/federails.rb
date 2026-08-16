@@ -1,3 +1,4 @@
+# typed: false
 # rbs_inline: enabled
 
 require 'alba'
@@ -28,7 +29,7 @@ module Federails
 
   class << self
     #: () { (Federails::Configuration) -> void } -> void
-    def configure
+    def configure(&)
       yield @@configuration
     end
 

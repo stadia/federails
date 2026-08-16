@@ -1,3 +1,4 @@
+# typed: false
 # rbs_inline: enabled
 
 require 'logger'
@@ -129,7 +130,7 @@ module Federails
     mattr_reader :actor_types
     @@actor_types = {}
 
-    #: (Class, Hash[Symbol, untyped]) -> void
+    #: (Class, ?Hash[Symbol, untyped]) -> void
     def self.register_actor_class(klass, config = {})
       @@actor_types[klass.name] = config.merge(class: klass)
     end
@@ -138,7 +139,7 @@ module Federails
     mattr_reader :data_types
     @@data_types = {}
 
-    #: (Class, Hash[Symbol, untyped]) -> void
+    #: (Class, ?Hash[Symbol, untyped]) -> void
     def self.register_data_type(klass, config = {})
       @@data_types[klass.name] = config.merge(class: klass)
     end

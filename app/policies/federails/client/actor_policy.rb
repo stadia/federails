@@ -7,7 +7,7 @@ module Federails
         true
       end
 
-      class Scope < Scope
+      class Scope < Federails::FederailsPolicy::Scope
         def resolve
           scope
         end

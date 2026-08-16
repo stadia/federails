@@ -18,7 +18,7 @@ module Federails
         authorize Federails::Activity, policy_class: Federails::Server::ActivityPolicy
 
         actor      = Actor.find_param(params[:actor_id])
-        activities = policy_scope(Federails::Activity, policy_scope_class: Federails::Server::ActivityPolicy::Scope).where(actor: actor).order(created_at: :desc)
+        activities = policy_scope(Federails::Activity, policy_scope_class: Federails::FederailsPolicy::Scope).where(actor: actor).order(created_at: :desc)
 
         render_collection(
           collection: activities,

@@ -19,7 +19,7 @@ module Federails
         create?
       end
 
-      class Scope < Scope
+      class Scope < Federails::FederailsPolicy::Scope
         def resolve
           scope.with_actor(@user.federails_actor)
         end

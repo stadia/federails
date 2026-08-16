@@ -1,3 +1,4 @@
+# typed: ignore
 # rbs_inline: enabled
 
 module Federails
