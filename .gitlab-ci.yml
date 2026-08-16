@@ -58,6 +58,17 @@ rubocop:
   dependencies:
     - bundle
 
+sorbet:
+  image: ruby:3.3
+  stage: test
+  script:
+    - bundle exec rake sig:rbs
+    - bin/tapioca gems --verify
+    - bin/tapioca dsl --verify
+    - bin/srb tc
+  dependencies:
+    - bundle
+
 factory_bot_lint:
   <<: *lint_matrix
   stage: test

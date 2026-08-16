@@ -11,6 +11,12 @@ AI 에이전트를 위한 프로젝트 룰북입니다.
 
 - JSON 직렬화에는 Jbuilder 대신 Alba 시리얼라이저(`app/serializers/`)를 사용한다. 새로운 JSON 응답을 추가하거나 기존 Jbuilder 템플릿을 만나면 Alba Resource 클래스로 작성·변환한다.
 
+## 타입 체크
+
+- 타입 체크는 `bin/srb tc`로 수행한다.
+- 인라인 RBS(`# rbs_inline: enabled`, `#:`)는 유지한다. Sorbet은 `sorbet/config`의 `--enable-experimental-rbs-comments`로 동일한 인라인 주석을 직접 검사한다.
+- 인라인 RBS 생성물은 `bundle exec rake sig:rbs`로 갱신한다. gem/DSL RBI는 각각 `bin/tapioca gems`, `bin/tapioca dsl`로 갱신한다.
+
 ## 도구 사용 규칙
 
 - 라이브러리나 런타임 구조를 조사할 때는 가능한 경우 Rails MCP Server, Context7, Sequential Thinking 같은 제공 도구를 목적에 맞게 사용한다.

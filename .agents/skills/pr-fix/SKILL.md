@@ -72,14 +72,14 @@ bin/rubocop --autocorrect-all
 # 4-3. 전체 테스트 스위트 실행
 bin/rails test
 
-# 4-4. (선택) Steep 타입 체크 (서비스/모델 변경 시)
-bundle exec steep check
+# 4-4. (선택) Sorbet 타입 체크 (서비스/모델 변경 시)
+bin/srb tc
 ```
 
 **실패 시 처리:**
 - 테스트 실패: 실패 원인 분석하고 수정 후 재실행
 - RuboCop 오류: 자동 수정으로 해결 안 되면 수동 수정
-- Steep 오류: RBS 시그니처 업데이트
+- Sorbet 오류: 인라인 RBS 주석 또는 Tapioca RBI 업데이트
 
 ### 5단계: 변경 사항 커밋
 모든 검증이 통과하면 커밋을 생성합니다.
@@ -123,7 +123,7 @@ Co-Authored-By: Codex Sonnet 4.5 <noreply@anthropic.com>"
 🧪 테스트 결과:
    - bin/rails test: 통과 (143 runs, 0 failures)
    - bin/rubocop: 위반 없음
-   - bundle exec steep check: 타입 오류 없음
+   - bin/srb tc: 타입 오류 없음
 
 📦 커밋 생성:
    - SHA: a1b2c3d

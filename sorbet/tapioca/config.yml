@@ -1,0 +1,17 @@
+gem:
+  # Add your `gem` command parameters here:
+  #
+  # net-imap conflicts with Sorbet's bundled stdlib RBI (rbi/stdlib/net.rbi);
+  # we do not call it directly, so rely on the stdlib definitions.
+  exclude:
+    - net-imap
+  # doc: true
+  # workers: 5
+dsl:
+  # Add your `dsl` command parameters here:
+  #
+  # exclude:
+  # - SomeGeneratorName
+  # workers: 5
+  # federails is an engine: boot the dummy app for DSL generation
+  app_root: spec/dummy

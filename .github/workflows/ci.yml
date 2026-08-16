@@ -68,3 +68,29 @@ jobs:
 
       - name: Run RuboCop
         run: bundle exec rubocop --format github --format progress
+
+  sorbet:
+    name: Sorbet
+    runs-on: ubuntu-latest
+    env:
+      BUNDLE_WITHOUT: doc
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Verify rbs-inline signatures
+        run: bundle exec rake sig:rbs
+
+      - name: Verify Tapioca RBI files
+        run: |
+          bin/tapioca gems --verify
+          bin/tapioca dsl --verify
+
+      - name: Run Sorbet
+        run: bin/srb tc

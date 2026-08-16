@@ -20,6 +20,11 @@ gem 'rubocop-rbs_inline'
 gem 'rubocop-rspec'
 gem 'rubocop-rspec_rails'
 
+# Type checking (Sorbet + rbs-inline + Tapioca)
+gem 'rbs-inline', require: false
+gem 'sorbet', require: false
+gem 'tapioca', require: false
+
 # Testing
 gem 'database_cleaner'
 gem 'factory_bot_rails'

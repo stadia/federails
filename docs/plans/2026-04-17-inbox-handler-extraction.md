@@ -444,12 +444,10 @@ Expected: 사용자용 호출 예가 없음. 있을 경우 경로 업데이트.
 Run: `bundle exec rspec`
 Expected: 모든 예제 통과.
 
-- [ ] **Step 5: steep 타입체크 (설정되어 있다면)**
+- [ ] **Step 5: Sorbet 타입체크**
 
-Run: `bundle exec steep check 2>&1 | tail -20`
-Expected: 신규 에러 없음. 사전 대비 동일한 결과.
-
-*Steep이 프로젝트에 없다면 이 단계는 생략.*
+Run: `bin/srb tc`
+Expected: 신규 에러 없음.
 
 - [ ] **Step 6: 커밋**
 
