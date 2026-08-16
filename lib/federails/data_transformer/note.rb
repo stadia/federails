@@ -11,6 +11,12 @@ module Federails
       # @param content [String] Note content
       # @param name [String, nil] Optional name/title
       # @param custom [Hash] Optional additional keys (e.g.: attachment, icon, ...). Defaults will override these.
+      # @param to [Array<String>, nil] Recipients for the object itself. Defaults to the public collection.
+      # @param cc [Array<String>, nil] Copied recipients for the object itself. Defaults to the actor's followers.
+      #
+      #   Objects must carry their own addressing: some implementations (e.g. Hollo/Fedify)
+      #   derive object visibility from the object's to/cc only, and treat an unaddressed
+      #   object as a direct message, hiding it from profiles and searches.
       #
       # @return [Hash]
       #
@@ -20,7 +26,7 @@ module Federails
       # See:
       #   - https://www.w3.org/TR/activitystreams-vocabulary/#dfn-object
       #   - https://www.w3.org/TR/activitystreams-vocabulary/#dfn-note
-      def self.to_federation(entity, content:, name: nil, custom: {})
+      def self.to_federation(entity, content:, name: nil, custom: {}, to: nil, cc: nil)
         # Merge default and custom contexts
         context = Utils::Context.generate(additional: custom.delete('@context'))
         # Merge in standard Note fields
@@ -31,7 +37,9 @@ module Federails
                      'content'      => content,
                      'attributedTo' => entity.federails_actor.federated_url,
                      'published'    => entity.created_at,
-                     'updated'      => entity.updated_at
+                     'updated'      => entity.updated_at,
+                     'to'           => to || [Fediverse::Collection::PUBLIC],
+                     'cc'           => cc || [entity.federails_actor.followers_url]
       end
     end
   end
