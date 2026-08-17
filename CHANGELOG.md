@@ -32,6 +32,7 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ### Maintenance
 
+- CI is now interruptible on failure
 - Update rubocop annotation syntax
 - Refactor HTTP signature code
 

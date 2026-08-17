@@ -67,6 +67,7 @@ See [CONTRIBUTING](CONTRIBUTING.md) to have an overview of the process and the t
 ### Contributors
 
 - [echarp](https://gitlab.com/echarp)
+- [Francesco Urdih](https://gitlab.com/francesco.urdih)
 - [James Smith](https://gitlab.com/floppy.uk)
 - [Manuel Tancoigne](https://gitlab.com/mtancoigne)
 - [pessi-v](https://github.com/pessi-v)
