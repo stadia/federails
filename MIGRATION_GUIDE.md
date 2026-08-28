@@ -24,6 +24,32 @@ First of all, read the **[general upgrade steps](#general-steps)**
 
 IMPORTANT: This release renames the project from "Federails" to "Fedipub". You will need to rename usage in your app.
 
+### Rename your code *before* installing the migrations
+
+`rake fedipub:install:migrations` depends on `:environment`, so it boots your application first. If your
+initializer still calls `Federails.config_from`, the task aborts before copying anything:
+
+```
+rake aborted!
+NameError: uninitialized constant Federails
+Federails.config_from "federails"
+config/initializers/federails.rb:5:in '<main>'
+```
+
+So for this upgrade the order is fixed — do steps 2 and 3 below first, then install and run the migrations.
+
+Note that the initializer and its YAML config are two separate renames:
+
+```sh
+git mv config/initializers/federails.rb config/initializers/fedipub.rb
+git mv config/federails.yml config/fedipub.yml
+```
+
+`Fedipub.config_from 'fedipub'` reads `config/fedipub.yml`, so if you keep the old file name you must pass it
+explicitly: `Fedipub.config_from 'federails'`.
+
+Also update `mount Federails::Engine` to `mount Fedipub::Engine` in `config/routes.rb`.
+
 1. If you have database references to things like `federails_actor`, you will need to create a migration in your app to rename your columns, like so:
 
 ```ruby
@@ -47,9 +73,25 @@ end
 
 2. If you reference it anywhere, replace the `Federails::` namespace with `Fedipub::`
 
-3. Change method calls such as `acts_as_federails_actor` to `acts_as_fedipub_actor`.
+3. Change method calls such as `acts_as_federails_actor` to `acts_as_fedipub_actor`, and `acts_as_federails_data` to
+   `acts_as_fedipub_data`.
 
 If you do a global search and replace for "federails" to "fedipub", ensure you DO NOT change existing migrations in your app; renaming of actual database content is handled by a new migration.
+
+The same applies to the migrations copied from the gem: `rake fedipub:install:migrations` skips a gem migration when
+your app already has one with the same name, ignoring the `.federails.` / `.fedipub.` scope suffix. That is why the
+gem keeps its historical migration file names spelled "federails", and why renaming the copies already sitting in your
+`db/migrate` would make the task copy `create_fedipub_actors` again on top of tables you already have. Lines like
+`NOTE: Migration ..._create_federails_actors.rb from fedipub has been skipped` are the expected output, not an error.
+
+### Data left behind by the rename
+
+`RenameFederailsToFedipub` renames tables and indexes only, so polymorphic columns keep pointing at the old
+namespace. `BackfillFedipubEntityTypes` takes care of `fedipub_activities.entity_type` (which holds
+`Federails::Actor` for Update/Delete/Announce/Like on an actor and `Federails::Activity` for Undo); it ships with the
+gem, so installing and running the migrations is enough.
+
+Polymorphic columns in *your own* tables are not covered — see the `commenter_type` example above.
 
 ## From 0.6.2 to 0.7.0
 

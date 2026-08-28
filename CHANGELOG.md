@@ -30,6 +30,12 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ## [Unreleased]
 
+### Fixed
+
+- Backfill `fedipub_activities.entity_type` on upgrade. The 0.9.0 rename migration only renamed tables and indexes, so
+  activities stored before the rename kept `Federails::Actor` / `Federails::Activity` and their `entity` silently
+  resolved to `nil`.
+
 ## [0.9.0] 2026-08-06
 
 Renamed project from "Federails" to "Fedipub". See the migration guide for instructions on how to update your code.
