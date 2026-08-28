@@ -27,11 +27,7 @@ class Fedipub::Activity
   end
 
   module CommonRelationMethods
-    sig do
-      params(
-        block: T.nilable(T.proc.params(record: ::Fedipub::Activity).returns(T.untyped))
-      ).returns(T::Boolean)
-    end
+    sig { params(block: T.nilable(T.proc.params(record: ::Fedipub::Activity).returns(T.untyped))).returns(T::Boolean) }
     def any?(&block); end
 
     sig { params(column_name: T.any(String, Symbol)).returns(T.any(Integer, Float, BigDecimal)) }
@@ -335,11 +331,7 @@ class Fedipub::Activity
     sig { returns(::Fedipub::Activity) }
     def last!; end
 
-    sig do
-      params(
-        block: T.nilable(T.proc.params(record: ::Fedipub::Activity).returns(T.untyped))
-      ).returns(T::Boolean)
-    end
+    sig { params(block: T.nilable(T.proc.params(record: ::Fedipub::Activity).returns(T.untyped))).returns(T::Boolean) }
     def many?(&block); end
 
     sig { params(column_name: T.any(String, Symbol)).returns(T.untyped) }
@@ -366,18 +358,10 @@ class Fedipub::Activity
     end
     def new(attributes = nil, &block); end
 
-    sig do
-      params(
-        block: T.nilable(T.proc.params(record: ::Fedipub::Activity).returns(T.untyped))
-      ).returns(T::Boolean)
-    end
+    sig { params(block: T.nilable(T.proc.params(record: ::Fedipub::Activity).returns(T.untyped))).returns(T::Boolean) }
     def none?(&block); end
 
-    sig do
-      params(
-        block: T.nilable(T.proc.params(record: ::Fedipub::Activity).returns(T.untyped))
-      ).returns(T::Boolean)
-    end
+    sig { params(block: T.nilable(T.proc.params(record: ::Fedipub::Activity).returns(T.untyped))).returns(T::Boolean) }
     def one?(&block); end
 
     sig { params(column_names: T.untyped).returns(T.untyped) }

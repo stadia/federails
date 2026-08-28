@@ -727,51 +727,6 @@ class Post
     sig { void }
     def deleted_at_will_change!; end
 
-    sig { returns(T.nilable(::Integer)) }
-    def fedipub_actor_id; end
-
-    sig { params(value: T.nilable(::Integer)).returns(T.nilable(::Integer)) }
-    def fedipub_actor_id=(value); end
-
-    sig { returns(T::Boolean) }
-    def fedipub_actor_id?; end
-
-    sig { returns(T.nilable(::Integer)) }
-    def fedipub_actor_id_before_last_save; end
-
-    sig { returns(T.untyped) }
-    def fedipub_actor_id_before_type_cast; end
-
-    sig { returns(T::Boolean) }
-    def fedipub_actor_id_came_from_user?; end
-
-    sig { returns(T.nilable([T.nilable(::Integer), T.nilable(::Integer)])) }
-    def fedipub_actor_id_change; end
-
-    sig { returns(T.nilable([T.nilable(::Integer), T.nilable(::Integer)])) }
-    def fedipub_actor_id_change_to_be_saved; end
-
-    sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
-    def fedipub_actor_id_changed?(from: T.unsafe(nil), to: T.unsafe(nil)); end
-
-    sig { returns(T.nilable(::Integer)) }
-    def fedipub_actor_id_in_database; end
-
-    sig { returns(T.nilable([T.nilable(::Integer), T.nilable(::Integer)])) }
-    def fedipub_actor_id_previous_change; end
-
-    sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
-    def fedipub_actor_id_previously_changed?(from: T.unsafe(nil), to: T.unsafe(nil)); end
-
-    sig { returns(T.nilable(::Integer)) }
-    def fedipub_actor_id_previously_was; end
-
-    sig { returns(T.nilable(::Integer)) }
-    def fedipub_actor_id_was; end
-
-    sig { void }
-    def fedipub_actor_id_will_change!; end
-
     sig { returns(T.nilable(::String)) }
     def federated_url; end
 
@@ -816,6 +771,51 @@ class Post
 
     sig { void }
     def federated_url_will_change!; end
+
+    sig { returns(T.nilable(::Integer)) }
+    def fedipub_actor_id; end
+
+    sig { params(value: T.nilable(::Integer)).returns(T.nilable(::Integer)) }
+    def fedipub_actor_id=(value); end
+
+    sig { returns(T::Boolean) }
+    def fedipub_actor_id?; end
+
+    sig { returns(T.nilable(::Integer)) }
+    def fedipub_actor_id_before_last_save; end
+
+    sig { returns(T.untyped) }
+    def fedipub_actor_id_before_type_cast; end
+
+    sig { returns(T::Boolean) }
+    def fedipub_actor_id_came_from_user?; end
+
+    sig { returns(T.nilable([T.nilable(::Integer), T.nilable(::Integer)])) }
+    def fedipub_actor_id_change; end
+
+    sig { returns(T.nilable([T.nilable(::Integer), T.nilable(::Integer)])) }
+    def fedipub_actor_id_change_to_be_saved; end
+
+    sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
+    def fedipub_actor_id_changed?(from: T.unsafe(nil), to: T.unsafe(nil)); end
+
+    sig { returns(T.nilable(::Integer)) }
+    def fedipub_actor_id_in_database; end
+
+    sig { returns(T.nilable([T.nilable(::Integer), T.nilable(::Integer)])) }
+    def fedipub_actor_id_previous_change; end
+
+    sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
+    def fedipub_actor_id_previously_changed?(from: T.unsafe(nil), to: T.unsafe(nil)); end
+
+    sig { returns(T.nilable(::Integer)) }
+    def fedipub_actor_id_previously_was; end
+
+    sig { returns(T.nilable(::Integer)) }
+    def fedipub_actor_id_was; end
+
+    sig { void }
+    def fedipub_actor_id_will_change!; end
 
     sig { returns(::Integer) }
     def id; end
@@ -917,10 +917,10 @@ class Post
     def restore_deleted_at!; end
 
     sig { void }
-    def restore_fedipub_actor_id!; end
+    def restore_federated_url!; end
 
     sig { void }
-    def restore_federated_url!; end
+    def restore_fedipub_actor_id!; end
 
     sig { void }
     def restore_id!; end
@@ -955,17 +955,17 @@ class Post
     sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
     def saved_change_to_deleted_at?(from: T.unsafe(nil), to: T.unsafe(nil)); end
 
-    sig { returns(T.nilable([T.nilable(::Integer), T.nilable(::Integer)])) }
-    def saved_change_to_fedipub_actor_id; end
-
-    sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
-    def saved_change_to_fedipub_actor_id?(from: T.unsafe(nil), to: T.unsafe(nil)); end
-
     sig { returns(T.nilable([T.nilable(::String), T.nilable(::String)])) }
     def saved_change_to_federated_url; end
 
     sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
     def saved_change_to_federated_url?(from: T.unsafe(nil), to: T.unsafe(nil)); end
+
+    sig { returns(T.nilable([T.nilable(::Integer), T.nilable(::Integer)])) }
+    def saved_change_to_fedipub_actor_id; end
+
+    sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
+    def saved_change_to_fedipub_actor_id?(from: T.unsafe(nil), to: T.unsafe(nil)); end
 
     sig { returns(T.nilable([::Integer, ::Integer])) }
     def saved_change_to_id; end
@@ -1142,10 +1142,10 @@ class Post
     def will_save_change_to_deleted_at?(from: T.unsafe(nil), to: T.unsafe(nil)); end
 
     sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
-    def will_save_change_to_fedipub_actor_id?(from: T.unsafe(nil), to: T.unsafe(nil)); end
+    def will_save_change_to_federated_url?(from: T.unsafe(nil), to: T.unsafe(nil)); end
 
     sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
-    def will_save_change_to_federated_url?(from: T.unsafe(nil), to: T.unsafe(nil)); end
+    def will_save_change_to_fedipub_actor_id?(from: T.unsafe(nil), to: T.unsafe(nil)); end
 
     sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
     def will_save_change_to_id?(from: T.unsafe(nil), to: T.unsafe(nil)); end

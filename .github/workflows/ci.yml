@@ -84,6 +84,9 @@ jobs:
           ruby-version: .ruby-version
           bundler-cache: true
 
+      - name: Set up database
+        run: bundle exec rake db:create db:migrate
+
       - name: Verify Tapioca RBI files
         run: |
           bin/tapioca gems --verify

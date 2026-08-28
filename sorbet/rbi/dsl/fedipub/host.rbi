@@ -553,11 +553,7 @@ class Fedipub::Host
     def same_app_and_version(*args, &blk); end
 
     sig { params(args: T.untyped).returns(PrivateAssociationRelation) }
-    sig do
-      params(
-        blk: T.proc.params(record: ::Fedipub::Host).returns(BasicObject)
-      ).returns(T::Array[::Fedipub::Host])
-    end
+    sig { params(blk: T.proc.params(record: ::Fedipub::Host).returns(BasicObject)).returns(T::Array[::Fedipub::Host]) }
     def select(*args, &blk); end
 
     sig { params(args: T.untyped, blk: T.untyped).returns(PrivateAssociationRelation) }
@@ -1284,11 +1280,7 @@ class Fedipub::Host
     def same_app_and_version(*args, &blk); end
 
     sig { params(args: T.untyped).returns(PrivateRelation) }
-    sig do
-      params(
-        blk: T.proc.params(record: ::Fedipub::Host).returns(BasicObject)
-      ).returns(T::Array[::Fedipub::Host])
-    end
+    sig { params(blk: T.proc.params(record: ::Fedipub::Host).returns(BasicObject)).returns(T::Array[::Fedipub::Host]) }
     def select(*args, &blk); end
 
     sig { params(args: T.untyped, blk: T.untyped).returns(PrivateRelation) }

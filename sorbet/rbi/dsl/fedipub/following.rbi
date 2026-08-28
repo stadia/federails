@@ -41,11 +41,7 @@ class Fedipub::Following
     sig { params(column_name: T.any(String, Symbol)).returns(T.any(Integer, Float, BigDecimal)) }
     def average(column_name); end
 
-    sig do
-      params(
-        block: T.nilable(T.proc.params(object: ::Fedipub::Following).void)
-      ).returns(::Fedipub::Following)
-    end
+    sig { params(block: T.nilable(T.proc.params(object: ::Fedipub::Following).void)).returns(::Fedipub::Following) }
     sig do
       params(
         attributes: T::Array[T.untyped],
@@ -67,11 +63,7 @@ class Fedipub::Following
     sig { params(column_name: NilClass, block: T.proc.params(object: ::Fedipub::Following).void).returns(Integer) }
     def count(column_name = nil, &block); end
 
-    sig do
-      params(
-        block: T.nilable(T.proc.params(object: ::Fedipub::Following).void)
-      ).returns(::Fedipub::Following)
-    end
+    sig { params(block: T.nilable(T.proc.params(object: ::Fedipub::Following).void)).returns(::Fedipub::Following) }
     sig do
       params(
         attributes: T::Array[T.untyped],
@@ -86,11 +78,7 @@ class Fedipub::Following
     end
     def create(attributes = nil, &block); end
 
-    sig do
-      params(
-        block: T.nilable(T.proc.params(object: ::Fedipub::Following).void)
-      ).returns(::Fedipub::Following)
-    end
+    sig { params(block: T.nilable(T.proc.params(object: ::Fedipub::Following).void)).returns(::Fedipub::Following) }
     sig do
       params(
         attributes: T::Array[T.untyped],
@@ -367,11 +355,7 @@ class Fedipub::Following
     sig { params(column_name: T.any(String, Symbol)).returns(T.untyped) }
     def minimum(column_name); end
 
-    sig do
-      params(
-        block: T.nilable(T.proc.params(object: ::Fedipub::Following).void)
-      ).returns(::Fedipub::Following)
-    end
+    sig { params(block: T.nilable(T.proc.params(object: ::Fedipub::Following).void)).returns(::Fedipub::Following) }
     sig do
       params(
         attributes: T::Array[T.untyped],

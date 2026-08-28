@@ -1616,6 +1616,9 @@ class Fedipub::Actor
     def restore_server!; end
 
     sig { void }
+    def restore_shared_inbox_url!; end
+
+    sig { void }
     def restore_tombstoned_at!; end
 
     sig { void }
@@ -1735,6 +1738,12 @@ class Fedipub::Actor
     sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
     def saved_change_to_server?(from: T.unsafe(nil), to: T.unsafe(nil)); end
 
+    sig { returns(T.nilable([T.nilable(::String), T.nilable(::String)])) }
+    def saved_change_to_shared_inbox_url; end
+
+    sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
+    def saved_change_to_shared_inbox_url?(from: T.unsafe(nil), to: T.unsafe(nil)); end
+
     sig { returns(T.nilable([T.nilable(::ActiveSupport::TimeWithZone), T.nilable(::ActiveSupport::TimeWithZone)])) }
     def saved_change_to_tombstoned_at; end
 
@@ -1803,6 +1812,51 @@ class Fedipub::Actor
 
     sig { void }
     def server_will_change!; end
+
+    sig { returns(T.nilable(::String)) }
+    def shared_inbox_url; end
+
+    sig { params(value: T.nilable(::String)).returns(T.nilable(::String)) }
+    def shared_inbox_url=(value); end
+
+    sig { returns(T::Boolean) }
+    def shared_inbox_url?; end
+
+    sig { returns(T.nilable(::String)) }
+    def shared_inbox_url_before_last_save; end
+
+    sig { returns(T.untyped) }
+    def shared_inbox_url_before_type_cast; end
+
+    sig { returns(T::Boolean) }
+    def shared_inbox_url_came_from_user?; end
+
+    sig { returns(T.nilable([T.nilable(::String), T.nilable(::String)])) }
+    def shared_inbox_url_change; end
+
+    sig { returns(T.nilable([T.nilable(::String), T.nilable(::String)])) }
+    def shared_inbox_url_change_to_be_saved; end
+
+    sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
+    def shared_inbox_url_changed?(from: T.unsafe(nil), to: T.unsafe(nil)); end
+
+    sig { returns(T.nilable(::String)) }
+    def shared_inbox_url_in_database; end
+
+    sig { returns(T.nilable([T.nilable(::String), T.nilable(::String)])) }
+    def shared_inbox_url_previous_change; end
+
+    sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
+    def shared_inbox_url_previously_changed?(from: T.unsafe(nil), to: T.unsafe(nil)); end
+
+    sig { returns(T.nilable(::String)) }
+    def shared_inbox_url_previously_was; end
+
+    sig { returns(T.nilable(::String)) }
+    def shared_inbox_url_was; end
+
+    sig { void }
+    def shared_inbox_url_will_change!; end
 
     sig { returns(T.nilable(::ActiveSupport::TimeWithZone)) }
     def tombstoned_at; end
@@ -2037,6 +2091,9 @@ class Fedipub::Actor
 
     sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
     def will_save_change_to_server?(from: T.unsafe(nil), to: T.unsafe(nil)); end
+
+    sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
+    def will_save_change_to_shared_inbox_url?(from: T.unsafe(nil), to: T.unsafe(nil)); end
 
     sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
     def will_save_change_to_tombstoned_at?(from: T.unsafe(nil), to: T.unsafe(nil)); end

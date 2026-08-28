@@ -62,6 +62,7 @@ sorbet:
   image: ruby:3.3
   stage: test
   script:
+    - bundle exec rake db:create db:migrate
     - bin/tapioca gems --verify
     - bin/tapioca dsl --verify
     - bin/srb tc
