@@ -53,7 +53,7 @@ RSpec.shared_examples 'Likeable' do |klass, attributes|
         let!(:remote_instance) do
           klass.create! attributes.merge(
             fedipub_actor: remote_actor,
-            federated_url:   "https://remote.example/notes/#{SecureRandom.uuid}"
+            federated_url: "https://remote.example/notes/#{SecureRandom.uuid}"
           )
         end
 

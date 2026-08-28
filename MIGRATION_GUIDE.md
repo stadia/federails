@@ -8,19 +8,48 @@ desired one, do these steps (in the order you see fit)
 - Update the gem to the desired version.
 - Copy and apply new migrations 
   ```sh
-  bundle exec rails federails:install:migrations
+  bundle exec rake fedipub:install:migrations
   ```
 - Re-copy client views if you use them, and adapt them.
   ```sh
-  rails generate federails:copy_client_views
+  rails generate fedipub:copy_client_views
   ```
 - Follow directions of the migration guide, for every version intermediate version 
 
-## Next
+## From 0.8.0 to 0.9.0
 
 First of all, read the **[general upgrade steps](#general-steps)**
 
 - There are new migrations, so don't forget to _install_ them
+
+IMPORTANT: This release renames the project from "Federails" to "Fedipub". You will need to rename usage in your app.
+
+1. If you have database references to things like `federails_actor`, you will need to create a migration in your app to rename your columns, like so:
+
+```ruby
+class RenameFederailsFieldsToFedipub < ActiveRecord::Migration[7.2]
+  def change
+    rename_column :posts, 'federails_actor_id', 'fedipub_actor_id'
+    rename_column :comments, 'federails_actor_id', 'fedipub_actor_id'
+  end
+end
+```
+
+Also, if you have any polymorphic relationships in your app that refer to Fedipub models, you will need to update the type field. We recommend running something like this at application start, though exactly what you need to do will depend on your application, this is just an example:
+
+```ruby
+[
+  [Comment, :commenter_type]
+].each do |table, field|
+  table.where(field => "Federails::Actor").update_all(field => "Fedipub::Actor")
+end
+```
+
+2. If you reference it anywhere, replace the `Federails::` namespace with `Fedipub::`
+
+3. Change method calls such as `acts_as_federails_actor` to `acts_as_fedipub_actor`.
+
+If you do a global search and replace for "federails" to "fedipub", ensure you DO NOT change existing migrations in your app; renaming of actual database content is handled by a new migration.
 
 ## From 0.6.2 to 0.7.0
 
@@ -81,4 +110,4 @@ First of all, read the **[general upgrade steps](#general-steps)**
 - `acts_as_federails_actor`'s `username_field` is now required. If you used the default value you should use the value used
   as `Federails::Configuration.user_username_field` as replacement.
 - In models including `Federails::Entity`, manually call `acts_as_federails_actor` to configure it properly if it's not
-  yet done.  
+  yet done.

@@ -1,7 +1,7 @@
 require_relative 'lib/fedipub/version'
 
 Gem::Specification.new do |spec|
-  spec.required_ruby_version = '>= 3.2.0'
+  spec.required_ruby_version = '>= 3.3.0'
   spec.name        = 'fedipub'
   spec.version     = Fedipub::VERSION
   spec.authors     = ['Manuel Tancoigne']
@@ -13,8 +13,8 @@ Gem::Specification.new do |spec|
 
   spec.metadata['rubygems_mfa_required'] = 'true'
   spec.metadata['homepage_uri'] = spec.homepage
-  spec.metadata['source_code_uri'] = 'https://gitlab.com/experimentslabs/fedipub/'
-  spec.metadata['changelog_uri'] = 'https://gitlab.com/experimentslabs/fedipub/-/blob/main/CHANGELOG.md'
+  spec.metadata['source_code_uri'] = 'https://gitlab.com/fedipub/fedipub/'
+  spec.metadata['changelog_uri'] = 'https://gitlab.com/fedipub/fedipub/-/blob/main/CHANGELOG.md'
 
   spec.files = Dir.chdir(File.expand_path(__dir__)) do
     Dir['{app,config,db,lib}/**/*', 'LICENSE', 'Rakefile', 'README.md']
@@ -25,8 +25,8 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'faraday-follow_redirects'
   spec.add_dependency 'json-ld', '>= 3.2.0'
   spec.add_dependency 'json-ld-preloaded', '>= 3.2.0'
-  spec.add_dependency 'ostruct'
+  spec.add_dependency 'ostruct', '>= 0.6.3'
   spec.add_dependency 'pagy', '>= 43'
   spec.add_dependency 'pundit', '>= 2.3.0'
-  spec.add_dependency 'rails', '>= 7.0.4'
+  spec.add_dependency 'rails', '>= 7.2.0'
 end

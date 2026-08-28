@@ -14,8 +14,8 @@ module Fediverse
           Fedipub::Block.find_or_create_by!(actor: actor, target_actor: target_actor)
 
           Fedipub::Following.where(actor: actor, target_actor: target_actor)
-                              .or(Fedipub::Following.where(actor: target_actor, target_actor: actor))
-                              .destroy_all
+                            .or(Fedipub::Following.where(actor: target_actor, target_actor: actor))
+                            .destroy_all
 
           true
         end

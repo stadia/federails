@@ -8,7 +8,7 @@ stages:
   image: ruby:$RUBY_VERSION
   parallel:
     matrix:
-      - RUBY_VERSION: ['3.2', '3.3', '3.4']
+      - RUBY_VERSION: ['3.3', '3.4', '4.0']
 
 .cache: &cache_definition
   untracked: true
@@ -88,10 +88,8 @@ rspec:
     # - https://endoflife.date/ruby
     # - https://endoflife.date/rails
     matrix:
-      - RUBY_VERSION: [ '3.2', '3.3', '3.4' ]
-        RAILS_VERSION: [ '8.0' ]
-      - RUBY_VERSION: [ '3.2', '3.3', '3.4' ]
-        RAILS_VERSION: [ '7.2' ]
+      - RUBY_VERSION: [ '3.3', '3.4', '4.0' ]
+        RAILS_VERSION: [  '7.2', '8.0', '8.1' ]
   stage: test
   script:
     - bundle exec rails db:test:prepare
@@ -107,6 +105,9 @@ pages:
   rules:
     - if: $CI_COMMIT_TAG
   script:
+    # This step should be removed for Ruby > 3.1
+    # See: https://github.com/jekyll/jekyll/issues/963
+    - gem update --system
     - bundle config unset --local without
     - bundle install --quiet
     - .gitlab/scripts/copy_documentation_files

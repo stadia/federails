@@ -30,19 +30,27 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ## [Unreleased]
 
+## [0.9.0] 2026-08-06
+
+Renamed project from "Federails" to "Fedipub". See the migration guide for instructions on how to update your code.
+
 ### Added
 
 - Shared inbox endpoint (`POST /federation/inbox`) for server-level activity delivery
 - Actors now advertise `endpoints.sharedInbox` in their ActivityPub document
 - Outgoing delivery prefers remote actor's shared inbox when available
 - New migration: `add_shared_inbox_url_to_federails_actors`
-- Announce (boost/RT), like or dislike `Federails::DataEntity` and `Federails::Actor` objects using new `announce!`, `like!` and `dislike!` methods.
-- Reverse any `Federails::Activity` by calling `undo!` to create an Undo activity addressed in the same way.
-- Set `result` and `instrument` fields for outgoing `Federails::Activity` objects.
+- Announce (boost/RT), like or dislike `Fedipub::DataEntity` and `Fedipub::Actor` objects using new `announce!`, `like!` and `dislike!` methods.
+- Reverse any `Fedipub::Activity` by calling `undo!` to create an Undo activity addressed in the same way.
+- Set `results` and `instrument` fields for outgoing `Fedipub::Activity` objects.
+- Reduce schema lookups to W3C security vocabulary by preloading context.
+- Drop support for Ruby 3.1 and 3.2
+- Add support for Ruby 4.0
+- Add support for Rails 8.1
 
 ### Changed
 
-- [**BREAKING**] `accept!` now requires a `follow_activity:` keyword argument. Pass the originating `Federails::Activity` record;
+- [**BREAKING**] `accept!` now requires a `follow_activity:` keyword argument. Pass the originating `Fedipub::Activity` record;
   omitting it or passing `nil` explicitly raises `ArgumentError`.
 - `after_followed` callbacks now receive a `follow_activity:` keyword argument alongside the existing `follow`
   positional argument. The legacy single-argument signature is still supported via a deprecation-level log message.
@@ -174,7 +182,7 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 ### Fixed
 
 - `sleeping_king_studios-yard` repository has been renamed to `sleeping_king_studios-docs`. A gem has been released
-- [#25](https://gitlab.com/experimentslabs/federails/-/issues/25) - `Actor#local?` now resolves with a new `local` flag
+- [#25](https://gitlab.com/fedipub/federails/-/issues/25) - `Actor#local?` now resolves with a new `local` flag
   on `Actor`, so it is now reliable.
 - Distant actors can now have local entities. Override `create_federails_actor_as_local?` in your models to determine
   if associated actor is local or not (defaults to `true`)

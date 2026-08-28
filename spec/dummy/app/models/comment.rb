@@ -3,10 +3,10 @@ class Comment < ApplicationRecord
   include FederatedAndSoftDeletable
 
   acts_as_fedipub_data handles:                 'Note',
-                         actor_entity_method:     :user,
-                         should_federate_method:  :federate?,
-                         soft_deleted_method:     :soft_deleted?,
-                         soft_delete_date_method: :deleted_at?
+                       actor_entity_method:     :user,
+                       should_federate_method:  :federate?,
+                       soft_deleted_method:     :soft_deleted?,
+                       soft_delete_date_method: :deleted_at?
 
   validates :content, presence: true, allow_blank: false
   validates :post, presence: true, allow_blank: false, unless: :parent_id
@@ -20,15 +20,15 @@ class Comment < ApplicationRecord
 
   def to_activitypub_object
     Fedipub::DataTransformer::Note.to_federation self,
-                                                   content: content,
-                                                   custom:  {
-                                                     '@context' => [
-                                                       'https://purl.archive.org/miscellany',
-                                                       {
-                                                         Hashtag: 'as:Hashtag',
-                                                       },
-                                                     ],
-                                                   }
+                                                 content: content,
+                                                 custom:  {
+                                                   '@context' => [
+                                                     'https://purl.archive.org/miscellany',
+                                                     {
+                                                       Hashtag: 'as:Hashtag',
+                                                     },
+                                                   ],
+                                                 }
   end
 
   def self.handle_federated_object?(hash)
@@ -40,8 +40,8 @@ class Comment < ApplicationRecord
     raise 'No parent defined in object' if hash['inReplyTo'].blank?
 
     attrs = Fedipub::Utils::Object.timestamp_attributes(hash)
-                                    .merge federated_url: hash['id'],
-                                           content:       hash['content']
+                                  .merge federated_url: hash['id'],
+                                         content:       hash['content']
 
     parent_or_post = Fedipub::Utils::Object.find_or_create! hash['inReplyTo']
 

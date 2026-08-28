@@ -12,9 +12,9 @@ module Fedipub
     def announce!(actor: nil)
       actor ||= try(:fedipub_actor) || self
       create_fedipub_activity('Announce',
-                                actor: actor,
-                                to:    [Fediverse::Collection::PUBLIC],
-                                cc:    [actor.followers_url])
+                              actor: actor,
+                              to:    [Fediverse::Collection::PUBLIC],
+                              cc:    [actor.followers_url])
     end
   end
 end

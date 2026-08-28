@@ -144,15 +144,15 @@ module Fedipub
         route_path_segment ||= name.pluralize.underscore
 
         Fedipub::Configuration.register_data_type self,
-                                                    route_path_segment:      route_path_segment,
-                                                    actor_entity_method:     actor_entity_method,
-                                                    url_param:               url_param,
-                                                    handles:                 handles,
-                                                    with:                    with,
-                                                    filter_method:           filter_method,
-                                                    should_federate_method:  should_federate_method,
-                                                    soft_deleted_method:     soft_deleted_method,
-                                                    soft_delete_date_method: soft_delete_date_method
+                                                  route_path_segment:      route_path_segment,
+                                                  actor_entity_method:     actor_entity_method,
+                                                  url_param:               url_param,
+                                                  handles:                 handles,
+                                                  with:                    with,
+                                                  filter_method:           filter_method,
+                                                  should_federate_method:  should_federate_method,
+                                                  soft_deleted_method:     soft_deleted_method,
+                                                  soft_delete_date_method: soft_delete_date_method
 
         # NOTE: Delete activities cannot be handled like this as we can't be sure to have the object's type
         Fediverse::Inbox.register_handler 'Create', handles, self, with

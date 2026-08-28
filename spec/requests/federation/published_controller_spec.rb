@@ -46,10 +46,10 @@ RSpec.describe '/federation/published', type: :request do
       let(:deleted_entity) do
         Fixtures::Classes::FakeArticleDataModel.create!(
           fedipub_actor: actor,
-          title:           'title',
-          content:         'content',
-          user:            user,
-          deleted_at:      Time.current
+          title:         'title',
+          content:       'content',
+          user:          user,
+          deleted_at:    Time.current
         )
       end
 

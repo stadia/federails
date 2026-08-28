@@ -109,9 +109,9 @@ module Fediverse
         return update_processed_activity!(existing_activity, payload) if existing_activity
 
         recent_activity = Fedipub::Activity.where(actor: actor, action: payload['type'], federated_url: nil)
-                                             .where(created_at: dispatched_at..)
-                                             .order(created_at: :asc) # oldest = most likely ours
-                                             .first
+                                           .where(created_at: dispatched_at..)
+                                           .order(created_at: :asc) # oldest = most likely ours
+                                           .first
 
         return recent_activity.update!(federated_url: federated_url) if recent_activity
 

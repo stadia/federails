@@ -2,11 +2,15 @@
 
 Fedipub is an engine that brings ActivityPub to Ruby on Rails application.
 
+> [!note]
+> This project was know as _Federails_ (and the `federails` gem and extensions) and has been
+> renamed recently to Fedipub.
+
 ## Community
 
 You can join the [matrix chat room](https://matrix.to/#/#fedipub:matrix.org) to chat with humans.
 
-Open issues or feature requests on the [issue tracker](https://gitlab.com/experimentslabs/fedipub/-/issues)
+Open issues or feature requests on the [issue tracker](https://gitlab.com/fedipub/fedipub/-/issues)
 
 ## Features
 
@@ -25,10 +29,10 @@ The general direction is to be able to:
 
 ## Supported Ruby on Rails versions
 
-This gem is tested against non end-of-life versions of Ruby and Rails:
+This gem is tested against non end-of-life versions of [Ruby](https://endoflife.date/ruby) and [Rails](https://endoflife.date/rails):
 
-- Ruby versions 3.1 to 3.4
-- Rails 7.1 to 8.0.x.
+- Ruby versions 3.3, 3.4 and 4.0
+- Rails 7.2 to 8.1.
 
 Feel free to open an issue if we missed something
 
@@ -45,10 +49,10 @@ shape, are documented in [Usage](docs/usage.md).
 
 ## Extensions
 
-Extensions extends the features of Fedipub.
+Extensions add extra features to Fedipub:
 
-- [Fedipub Moderation](https://github.com/manyfold3d/fedipub-moderation/)
-  > A gem that provides moderation capabilities for Fedipub
+- [Fedipub Moderation](https://gitlab.com/fedipub/fedipub-moderation/)
+  > A gem that provides trust & safety for Fedipub
 
 ## License
 

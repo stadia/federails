@@ -50,7 +50,7 @@ end
 
 If no logger is injected, Fedipub falls back to Ruby's standard `Logger`.
 
-For now, refer to [the source code](https://gitlab.com/experimentslabs/fedipub/-/blob/main/lib/fedipub/configuration.rb) 
+For now, refer to [the source code](https://gitlab.com/fedipub/fedipub/-/blob/main/lib/fedipub/configuration.rb) 
 for the full list of options.
 
 ### Copy the migrations

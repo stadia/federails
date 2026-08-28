@@ -7,15 +7,15 @@ module Fixtures
       include Fedipub::DataEntity
 
       acts_as_fedipub_data handles:             'TestThing',
-                             actor_entity_method: :user,
-                             route_path_segment:  :fake_data
+                           actor_entity_method: :user,
+                           route_path_segment:  :fake_data
 
       belongs_to :user, optional: true
 
       def to_activitypub_object
         Fedipub::DataTransformer::Note.to_federation self,
-                                                       name:    title,
-                                                       content: content
+                                                     name:    title,
+                                                     content: content
       end
     end
   end

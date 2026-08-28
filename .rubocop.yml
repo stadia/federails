@@ -25,7 +25,7 @@ AllCops:
     - spec/dummy/db/schema.rb
     - coverage/**/*
     - vendor/**/*
-  TargetRubyVersion: 3.2
+  TargetRubyVersion: 3.3.0
   NewCops: enable
 
 RSpec:
