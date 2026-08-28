@@ -18,10 +18,10 @@ module Fedipub
     # : (Integer?) -> void
     def self.site_port=: (Integer?) -> void
 
-    # : (Class, Hash[Symbol, untyped]) -> void
-    def self.register_actor_class: (Class, Hash[Symbol, untyped]) -> void
+    # : (Class, ?Hash[Symbol, untyped]) -> void
+    def self.register_actor_class: (Class, ?Hash[Symbol, untyped]) -> void
 
-    # : (Class, Hash[Symbol, untyped]) -> void
-    def self.register_data_type: (Class, Hash[Symbol, untyped]) -> void
+    # : (Class, ?Hash[Symbol, untyped]) -> void
+    def self.register_data_type: (Class, ?Hash[Symbol, untyped]) -> void
   end
 end

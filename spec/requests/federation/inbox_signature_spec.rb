@@ -62,7 +62,11 @@ RSpec.describe 'Inbox HTTP Signature Verification', type: :request do
       expect(response).to have_http_status(:unauthorized)
       expect(Fedipub.logger).to have_received(:warn) do |&block|
         log = block.call
-        expect(log).to match(%r{Signature verification failed.*remote_ip.*https://remote\.example/actor}m)
+        expect(log).to include(
+          message:   a_string_starting_with('Signature verification failed'),
+          remote_ip: '127.0.0.1',
+          actor:     'https://remote.example/actor'
+        )
       end
     end
 
@@ -76,7 +80,10 @@ RSpec.describe 'Inbox HTTP Signature Verification', type: :request do
       expect(response).to have_http_status(:unauthorized)
       expect(Fedipub.logger).to have_received(:warn) do |&block|
         log = block.call
-        expect(log).to include(':actor=>nil')
+        expect(log).to include(
+          message: a_string_starting_with('Signature verification failed'),
+          actor:   nil
+        )
       end
     end
 

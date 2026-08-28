@@ -5,7 +5,7 @@ module Fedipub
     class ActorPolicy < Fedipub::FedipubPolicy
       def lookup?: () -> untyped
 
-      class Scope < Scope
+      class Scope < Fedipub::FedipubPolicy::Scope
         def resolve: () -> untyped
       end
     end

@@ -147,13 +147,17 @@ module Fedipub
     end
 
     # Computed value for the federated URL
+    # : -> String?
     def federated_url: () -> String?
 
     # Check whether the entity was created locally or comes from the Fediverse
+    # : -> bool
     def local_fedipub_entity?: () -> bool
 
+    # : -> bool
     def fedipub_tombstoned?: () -> bool
 
+    # : -> DateTime?
     def fedipub_tombstoned_at: () -> DateTime?
 
     # : () -> Hash[Symbol, untyped]
@@ -167,6 +171,7 @@ module Fedipub
     # @note The returned URLs are inserted directly into the +cc+ field and
     #   delivered via NotifyInboxJob. Ensure values come from trusted sources
     #   to prevent open federation or SSRF vectors.
+    # : -> Array[String]
     def federation_reply_recipients: () -> Array[String]
 
     # : () -> bool

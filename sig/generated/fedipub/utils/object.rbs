@@ -60,6 +60,13 @@ module Fedipub
 
       # : (String | Hash[String, untyped]) -> untyped
       private def self.from_distant_server: (String | Hash[String, untyped]) -> untyped
+
+      # `attributedTo` may be a String, a linked object with an `id`, or an
+      # Array of either — all valid per ActivityStreams. find_by_federation_url
+      # expects a String, so normalize to the first URL. Passing the raw Array
+      # would raise `NoMethodError: undefined method 'match?' for an Array`.
+      # : (untyped) -> String?
+      private def self.attributed_to_url: (untyped) -> String?
     end
   end
 end

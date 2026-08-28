@@ -15,7 +15,7 @@ module Fedipub
 
       def featured_tags?: () -> untyped
 
-      class Scope < Scope
+      class Scope < Fedipub::FedipubPolicy::Scope
         def resolve: () -> untyped
       end
     end

@@ -11,7 +11,7 @@ module Fedipub
 
       def follow?: () -> untyped
 
-      class Scope < Scope
+      class Scope < Fedipub::FedipubPolicy::Scope
         def resolve: () -> untyped
       end
 

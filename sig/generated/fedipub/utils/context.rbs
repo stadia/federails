@@ -3,8 +3,8 @@
 module Fedipub
   module Utils
     module Context
-      # : (?additional: String | Array[String] | nil) -> String | Array[String]
-      def self.generate: (?additional: String | Array[String] | nil) -> String
+      # : (?additional: String | Array[String] | nil) -> (String | Array[String])
+      def self.generate: (?additional: String | Array[String] | nil) -> (String | Array[String])
     end
   end
 end

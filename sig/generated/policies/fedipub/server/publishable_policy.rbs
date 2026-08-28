@@ -5,7 +5,7 @@ module Fedipub
     class PublishablePolicy < Fedipub::FedipubPolicy
       def show?: () -> untyped
 
-      class Scope < Scope
+      class Scope < Fedipub::FedipubPolicy::Scope
         def resolve: () -> untyped
       end
     end

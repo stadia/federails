@@ -2,6 +2,10 @@
 
 module Fedipub
   class Host < ApplicationRecord
+    # Errors that only mean a single remote host is unusable right now. They are
+    # logged and swallowed so that one misbehaving host cannot abort a batch update.
+    SYNC_FAILURES: untyped
+
     # : () -> bool
     def same_app?: () -> bool
 
@@ -15,6 +19,11 @@ module Fedipub
     # Creates or update a Host
     # : (String, ?min_update_interval: Integer | ActiveSupport::Duration) -> Fedipub::Host?
     def self.create_or_update: (String, ?min_update_interval: Integer | ActiveSupport::Duration) -> Fedipub::Host?
+
+    # Logs why a host could not be synced and returns nil, so that the caller
+    # sees "no host" rather than the logger's return value.
+    # : (String, StandardError) -> nil
+    private def self.log_sync_failure: (String, StandardError) -> nil
 
     # Recover from a concurrent insert of the same domain by returning the host
     # created by the competing job. Re-raise when it is not this race: the entry

@@ -5,6 +5,18 @@ require 'fediverse/node_info'
 
 module Fedipub
   class Host < ApplicationRecord
+    # Errors that only mean a single remote host is unusable right now. They are
+    # logged and swallowed so that one misbehaving host cannot abort a batch update.
+    SYNC_FAILURES = [
+      Fediverse::NodeInfo::NoActivityPubError,
+      JSON::ParserError,
+      Fedipub::Utils::JsonRequest::UnhandledResponseStatus,
+      Faraday::SSLError,
+      Faraday::ConnectionFailed,
+      Faraday::TimeoutError,
+    ].freeze
+    private_constant :SYNC_FAILURES
+
     attribute :protocols, :json
     attribute :services, :json
 
@@ -43,17 +55,30 @@ module Fedipub
         entry
       rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotUnique
         recover_from_domain_race(domain, new_record)
-      rescue Fediverse::NodeInfo::NoActivityPubError
-        Fedipub.logger.info { "#{domain} does not provide ActivityPub service" }
-      rescue JSON::ParserError => e
-        # Non-JSON body (HTML error page, Cloudflare interstitial, login wall) —
-        # one misbehaving host must not abort a batch update.
-        Fedipub.logger.info { "#{domain} returned a non-JSON response: '#{e.message}'" }
-      rescue Fedipub::Utils::JsonRequest::UnhandledResponseStatus, Faraday::SSLError, Faraday::ConnectionFailed, Faraday::TimeoutError => e
-        Fedipub.logger.info { "Error connecting to #{domain}: '#{e.message}'" }
+      rescue *SYNC_FAILURES => e
+        log_sync_failure(domain, e)
       end
 
       private
+
+      # Logs why a host could not be synced and returns nil, so that the caller
+      # sees "no host" rather than the logger's return value.
+      #: (String, StandardError) -> nil
+      def log_sync_failure(domain, error)
+        Fedipub.logger.info do
+          case error
+          when Fediverse::NodeInfo::NoActivityPubError
+            "#{domain} does not provide ActivityPub service"
+          when JSON::ParserError
+            # Non-JSON body: HTML error page, Cloudflare interstitial, login wall.
+            "#{domain} returned a non-JSON response: '#{error.message}'"
+          else
+            "Error connecting to #{domain}: '#{error.message}'"
+          end
+        end
+
+        nil
+      end
 
       # Recover from a concurrent insert of the same domain by returning the host
       # created by the competing job. Re-raise when it is not this race: the entry
