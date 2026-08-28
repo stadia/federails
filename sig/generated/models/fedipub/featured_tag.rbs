@@ -1,6 +1,0 @@
-# Generated from app/models/fedipub/featured_tag.rb with RBS::Inline
-
-module Fedipub
-  class FeaturedTag < ApplicationRecord
-  end
-end

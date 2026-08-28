@@ -1,5 +1,0 @@
-# Generated from lib/fedipub/version.rb with RBS::Inline
-
-module Fedipub
-  VERSION: String
-end

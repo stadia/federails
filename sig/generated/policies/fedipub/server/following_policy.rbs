@@ -1,8 +1,0 @@
-# Generated from app/policies/fedipub/server/following_policy.rb with RBS::Inline
-
-module Fedipub
-  module Server
-    class FollowingPolicy < Fedipub::FedipubPolicy
-    end
-  end
-end

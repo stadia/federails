@@ -1,9 +1,0 @@
-# Generated from app/policies/fedipub/client/activity_policy.rb with RBS::Inline
-
-module Fedipub
-  module Client
-    class ActivityPolicy < Fedipub::FedipubPolicy
-      def feed?: () -> untyped
-    end
-  end
-end

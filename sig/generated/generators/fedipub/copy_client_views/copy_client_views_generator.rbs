@@ -1,7 +1,0 @@
-# Generated from lib/generators/fedipub/copy_client_views/copy_client_views_generator.rb with RBS::Inline
-
-module Fedipub
-  class CopyClientViewsGenerator < Rails::Generators::Base
-    def copy_views: () -> untyped
-  end
-end

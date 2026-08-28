@@ -4,6 +4,5 @@
 --ignore=vendor/
 --ignore=docs/
 --ignore=spec/
---ignore=.gem_rbs_collection/
 --parser=prism
 --enable-experimental-rbs-comments

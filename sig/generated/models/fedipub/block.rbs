@@ -1,6 +1,0 @@
-# Generated from app/models/fedipub/block.rb with RBS::Inline
-
-module Fedipub
-  class Block < ApplicationRecord
-  end
-end

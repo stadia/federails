@@ -62,7 +62,6 @@ sorbet:
   image: ruby:3.3
   stage: test
   script:
-    - bundle exec rake sig:rbs
     - bin/tapioca gems --verify
     - bin/tapioca dsl --verify
     - bin/srb tc

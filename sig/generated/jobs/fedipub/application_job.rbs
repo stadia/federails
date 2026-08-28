@@ -1,6 +1,0 @@
-# Generated from app/jobs/fedipub/application_job.rb with RBS::Inline
-
-module Fedipub
-  class ApplicationJob < ActiveJob::Base
-  end
-end

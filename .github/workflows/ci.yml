@@ -84,9 +84,6 @@ jobs:
           ruby-version: .ruby-version
           bundler-cache: true
 
-      - name: Verify rbs-inline signatures
-        run: bundle exec rake sig:rbs
-
       - name: Verify Tapioca RBI files
         run: |
           bin/tapioca gems --verify

@@ -1,6 +1,0 @@
-# Generated from app/models/fedipub/application_record.rb with RBS::Inline
-
-module Fedipub
-  class ApplicationRecord < ActiveRecord::Base
-  end
-end

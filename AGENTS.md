@@ -15,7 +15,7 @@ AI 에이전트를 위한 프로젝트 룰북입니다.
 
 - 타입 체크는 `bin/srb tc`로 수행한다.
 - 인라인 RBS(`# rbs_inline: enabled`, `#:`)는 유지한다. Sorbet은 `sorbet/config`의 `--enable-experimental-rbs-comments`로 동일한 인라인 주석을 직접 검사한다.
-- 인라인 RBS 생성물은 `bundle exec rake sig:rbs`로 갱신한다. gem/DSL RBI는 각각 `bin/tapioca gems`, `bin/tapioca dsl`로 갱신한다.
+- 인라인 RBS에서 `.rbs` 파일을 생성하지 않는다. Sorbet이 주석을 직접 읽으므로 생성물에는 소비자가 없다. gem/DSL RBI는 각각 `bin/tapioca gems`, `bin/tapioca dsl`로 갱신한다.
 
 ## 도구 사용 규칙
 

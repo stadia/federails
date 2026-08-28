@@ -21,7 +21,6 @@ rspec_examples.txt
 # Git worktrees
 /.worktrees/
 .idea
-.gem_rbs_collection
 spec/dummy/log/test.log.0
 .omx
 graphify-out

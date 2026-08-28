@@ -1,9 +1,0 @@
-# Generated from app/serializers/fedipub/serializer_support.rb with RBS::Inline
-
-module Fedipub
-  module SerializerSupport
-    def self?.json_ld_context: (?additional: untyped) -> untyped
-
-    def self?.route_helpers: () -> untyped
-  end
-end
