@@ -84,6 +84,39 @@ gem keeps its historical migration file names spelled "federails", and why renam
 `db/migrate` would make the task copy `create_fedipub_actors` again on top of tables you already have. Lines like
 `NOTE: Migration ..._create_federails_actors.rb from fedipub has been skipped` are the expected output, not an error.
 
+### If your app squashed its migration history
+
+The skip above is keyed on files, not on the database. If your app collapsed its history into a baseline
+(`init_schema`-style) migration that creates the `federails_*` tables itself, the gem's historical migrations are no
+longer in `db/migrate`, so nothing matches by name and `install:migrations` copies all of them back in. They then run
+against tables that already exist:
+
+```
+== 20260828081723 CreateFederailsActors: migrating ===
+-- create_table(:federails_actors)
+PG::DuplicateTable: ERROR:  relation "federails_actors" already exists
+```
+
+This breaks a fresh `db:drop db:create db:migrate` too, because the copies sort after your baseline.
+
+Do not delete the offending files — the next upgrade would copy them straight back. Empty them out instead, keeping
+the class name so future runs skip them:
+
+```ruby
+# This migration comes from fedipub (originally 20200712133150)
+# Superseded by db/migrate/<timestamp>_init_schema.rb, which already creates this schema.
+class CreateFederailsActors < ActiveRecord::Migration[7.0]
+  def change; end
+end
+```
+
+Before doing that, confirm your baseline really does cover them — compare `connection.columns` and
+`connection.indexes` for each `federails_*` table against the gem's migrations. `RenameFederailsToFedipub` renames
+three indexes by their exact names (`index_federails_activities_on_entity`, `index_federails_actors_on_entity`,
+`index_federails_followings_on_actor_id_and_target_actor_id`), so those have to exist under those names.
+
+Only the rename and backfill migrations should actually execute.
+
 ### Data left behind by the rename
 
 `RenameFederailsToFedipub` renames tables and indexes only, so polymorphic columns keep pointing at the old
