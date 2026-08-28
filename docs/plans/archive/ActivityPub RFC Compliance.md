@@ -1,7 +1,7 @@
-# ActivityPub RFC 컴플라이언스 매트릭스 (Federails)
+# ActivityPub RFC 컴플라이언스 매트릭스 (Fedipub)
 
 - 스펙: https://www.w3.org/TR/activitypub/
-- Federails 자동 리포트(원본): https://gitlab.com/experimentslabs/federails/-/blob/main/report.md
+- Fedipub 자동 리포트(원본): https://gitlab.com/experimentslabs/fedipub/-/blob/main/report.md
 - 목표: MUST/MUST NOT 우선으로 **구현됨/부분/미구현/불명(unknown)** 을 구분하고, 근거(코드/테스트/이슈)를 링크
 
 ## 상태 정의(권장)
@@ -25,53 +25,53 @@
 - Status: 🟡 Partial
 - Note: Actor 문서에 inbox/outbox 필드를 제공하나, inbox 자체를 OrderedCollection으로 GET 제공하는지(5.2)는 별도 확인 필요.
 - Evidence:
-  - Actor JSON includes inbox/outbox: https://gitlab.com/experimentslabs/federails/-/blob/main/app/views/federails/server/actors/_actor.activitypub.jbuilder (lines ~15-16)
-  - Inbox endpoint exists (POST /actors/:id/inbox): https://gitlab.com/experimentslabs/federails/-/blob/main/app/controllers/federails/server/activities_controller.rb (create action)
-  - Outbox endpoint exists (GET /actors/:id/outbox.json): https://gitlab.com/experimentslabs/federails/-/blob/main/app/controllers/federails/server/activities_controller.rb (outbox action)
-  - Outbox renders OrderedCollectionPage: https://gitlab.com/experimentslabs/federails/-/blob/main/app/views/federails/server/activities/outbox.activitypub.jbuilder
+  - Actor JSON includes inbox/outbox: https://gitlab.com/experimentslabs/fedipub/-/blob/main/app/views/fedipub/server/actors/_actor.activitypub.jbuilder (lines ~15-16)
+  - Inbox endpoint exists (POST /actors/:id/inbox): https://gitlab.com/experimentslabs/fedipub/-/blob/main/app/controllers/fedipub/server/activities_controller.rb (create action)
+  - Outbox endpoint exists (GET /actors/:id/outbox.json): https://gitlab.com/experimentslabs/fedipub/-/blob/main/app/controllers/fedipub/server/activities_controller.rb (outbox action)
+  - Outbox renders OrderedCollectionPage: https://gitlab.com/experimentslabs/fedipub/-/blob/main/app/views/fedipub/server/activities/outbox.activitypub.jbuilder
 
 ### 2. 5.1 Outbox MUST be an OrderedCollection
 - Status: 🟡 Partial
 - Note: 현재는 OrderedCollection(컨테이너) + page 분리 대신, page 형태로 제공. 스펙 의도에 부합하는지/호환성 확인 필요.
 - Evidence:
-  - Outbox response type OrderedCollectionPage: https://gitlab.com/experimentslabs/federails/-/blob/main/app/views/federails/server/activities/outbox.activitypub.jbuilder
+  - Outbox response type OrderedCollectionPage: https://gitlab.com/experimentslabs/fedipub/-/blob/main/app/views/fedipub/server/activities/outbox.activitypub.jbuilder
 
 ### 3. 7 MUST: POST Content-Type and GET Accept application/ld+json profile=AS
 - Status: ✅ Implemented
 - Note: 수신(서버) 측에서 Content-Type 강제검증은 아직 확인 필요.
 - Evidence:
-  - Delivery request sets Content-Type/Accept to activitypub mime: https://gitlab.com/experimentslabs/federails/-/blob/main/lib/fediverse/notifier.rb (request method sets headers)
+  - Delivery request sets Content-Type/Accept to activitypub mime: https://gitlab.com/experimentslabs/fedipub/-/blob/main/lib/fediverse/notifier.rb (request method sets headers)
 
 ### 4. 7 MUST: delivery activities MUST provide object (Create/Update/Delete/Follow/Add/Remove/Like/Block/Undo)
 - Status: 🟡 Partial
 - Note: entity가 nil/미지원 타입일 때 object 누락 가능성. 또한 addressing(bto/bcc/audience)은 아직 미구현(#29).
 - Evidence:
-  - Activity payload includes actor+type and sets object from entity: https://gitlab.com/experimentslabs/federails/-/blob/main/app/views/federails/server/activities/_activity.activitypub.jbuilder
+  - Activity payload includes actor+type and sets object from entity: https://gitlab.com/experimentslabs/fedipub/-/blob/main/app/views/fedipub/server/activities/_activity.activitypub.jbuilder
 
 ### 5. 5.3/5.4 followers/following collections MUST be Collection or OrderedCollection
 - Status: ✅ Implemented
 - Evidence:
-  - followers returns OrderedCollectionPage: https://gitlab.com/experimentslabs/federails/-/blob/main/app/views/federails/server/actors/followers.activitypub.jbuilder
-  - following returns OrderedCollectionPage: https://gitlab.com/experimentslabs/federails/-/blob/main/app/views/federails/server/actors/following.activitypub.jbuilder
-  - Actor JSON links followers/following: https://gitlab.com/experimentslabs/federails/-/blob/main/app/views/federails/server/actors/_actor.activitypub.jbuilder (lines ~17-18)
+  - followers returns OrderedCollectionPage: https://gitlab.com/experimentslabs/fedipub/-/blob/main/app/views/fedipub/server/actors/followers.activitypub.jbuilder
+  - following returns OrderedCollectionPage: https://gitlab.com/experimentslabs/fedipub/-/blob/main/app/views/fedipub/server/actors/following.activitypub.jbuilder
+  - Actor JSON links followers/following: https://gitlab.com/experimentslabs/fedipub/-/blob/main/app/views/fedipub/server/actors/_actor.activitypub.jbuilder (lines ~17-18)
 
 ### 6. 5.6 MUST NOT deliver to Public special collection
 - Status: ✅ Implemented
 - Evidence:
-  - Notifier excludes Public from recipients: https://gitlab.com/experimentslabs/federails/-/blob/main/lib/fediverse/notifier.rb (reject Public constant)
-  - Default addressing sets to=Public, cc includes followers: https://gitlab.com/experimentslabs/federails/-/blob/main/app/models/federails/activity.rb (set_default_addressing)
+  - Notifier excludes Public from recipients: https://gitlab.com/experimentslabs/fedipub/-/blob/main/lib/fediverse/notifier.rb (reject Public constant)
+  - Default addressing sets to=Public, cc includes followers: https://gitlab.com/experimentslabs/fedipub/-/blob/main/app/models/fedipub/activity.rb (set_default_addressing)
 
 ### 7. 7.1 MUST de-duplicate final recipient list
 - Status: ✅ Implemented
 - Note: RFC 요구사항. 구현 시 uniq + canonicalization 필요.
 - Evidence:
-  - inboxes_for builds list but does not uniq: https://gitlab.com/experimentslabs/federails/-/blob/main/lib/fediverse/notifier.rb
+  - inboxes_for builds list but does not uniq: https://gitlab.com/experimentslabs/fedipub/-/blob/main/lib/fediverse/notifier.rb
 
 ### 8. 7.1 MUST exclude delivering actor from recipients
 - Status: ✅ Implemented
 - Note: actor가 자기 자신 주소를 to/cc에 넣을 경우(실수/악성) 방지 필요.
 - Evidence:
-  - Added self-exclusion: `inboxes.reject { |url| url == activity.actor.inbox_url }`: https://gitlab.com/experimentslabs/federails/-/blob/main/lib/fediverse/notifier.rb (inboxes_for)
+  - Added self-exclusion: `inboxes.reject { |url| url == activity.actor.inbox_url }`: https://gitlab.com/experimentslabs/fedipub/-/blob/main/lib/fediverse/notifier.rb (inboxes_for)
 
 ### 9. 5.2 MUST de-duplicate activities returned by inbox (by activity id)
 - Status: ⚪ Unknown
@@ -83,7 +83,7 @@
 - Status: 🟡 Partial
 - Note: bto/bcc/audience 미지원 → #29. 따라서 MUST 완전 충족은 아님.
 - Evidence:
-  - Notifier considers to+cc only: https://gitlab.com/experimentslabs/federails/-/blob/main/lib/fediverse/notifier.rb (uses [activity.to, activity.cc])
+  - Notifier considers to+cc only: https://gitlab.com/experimentslabs/fedipub/-/blob/main/lib/fediverse/notifier.rb (uses [activity.to, activity.cc])
 
 
 ### Section 3.1 (https://www.w3.org/TR/activitypub/#obj-id)

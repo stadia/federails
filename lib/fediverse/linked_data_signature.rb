@@ -23,7 +23,7 @@ module Fediverse
         creator_uri = signature['creator']&.sub(/#.*\z/, '')
         return { verified: false, error: 'No creator in signature' } unless creator_uri
 
-        actor = Federails::Actor.find_or_create_by_federation_url(creator_uri)
+        actor = Fedipub::Actor.find_or_create_by_federation_url(creator_uri)
         return { verified: false, error: 'Could not resolve signing actor' } unless actor
         return { verified: false, error: 'Actor has no public key' } if actor.public_key.blank?
 
@@ -35,7 +35,7 @@ module Fediverse
       def verify_with_retry(actor, signature_value, to_verify)
         verified = check_signature(actor, signature_value, to_verify)
         return verified if verified || !actor.respond_to?(:sync!)
-        return false unless actor.updated_at < Federails::Configuration.remote_entities_cache_duration.ago
+        return false unless actor.updated_at < Fedipub::Configuration.remote_entities_cache_duration.ago
 
         actor.sync!
         check_signature(actor, signature_value, to_verify)

@@ -1,6 +1,6 @@
-# ActivityPub 스펙 ↔ Federails 구현 맵 (운영용)
+# ActivityPub 스펙 ↔ Fedipub 구현 맵 (운영용)
 
-목표: ActivityPub RFC(https://www.w3.org/TR/activitypub/) 요구사항을 **Federails 코드/테스트/이슈**에 연결해서,
+목표: ActivityPub RFC(https://www.w3.org/TR/activitypub/) 요구사항을 **Fedipub 코드/테스트/이슈**에 연결해서,
 "구현됨/부분/미구현"을 빠르게 판정할 수 있게 한다.
 
 관련 노트:
@@ -46,13 +46,13 @@
 
 ---
 
-## Federails 오픈 이슈(스펙 관련) 빠른 링크
-- #24 Handle multi-type activities: https://gitlab.com/experimentslabs/federails/-/issues/24
-- #31 Fan-out inbox delivery jobs: https://gitlab.com/experimentslabs/federails/-/issues/31
-- #28 to/cc addressing: https://gitlab.com/experimentslabs/federails/-/issues/28
-- #29 bcc/bto/audience: https://gitlab.com/experimentslabs/federails/-/issues/29
-- #26 Encrypt private keys at rest: https://gitlab.com/experimentslabs/federails/-/issues/26
-- #23 sensible User-Agent: https://gitlab.com/experimentslabs/federails/-/issues/23
+## Fedipub 오픈 이슈(스펙 관련) 빠른 링크
+- #24 Handle multi-type activities: https://gitlab.com/experimentslabs/fedipub/-/issues/24
+- #31 Fan-out inbox delivery jobs: https://gitlab.com/experimentslabs/fedipub/-/issues/31
+- #28 to/cc addressing: https://gitlab.com/experimentslabs/fedipub/-/issues/28
+- #29 bcc/bto/audience: https://gitlab.com/experimentslabs/fedipub/-/issues/29
+- #26 Encrypt private keys at rest: https://gitlab.com/experimentslabs/fedipub/-/issues/26
+- #23 sensible User-Agent: https://gitlab.com/experimentslabs/fedipub/-/issues/23
 
 ---
 

@@ -1,0 +1,14 @@
+require 'rails_helper'
+
+RSpec.describe Fedipub::Client::FollowingResource do
+  it 'renders the following as json' do
+    following = FactoryBot.create :following
+    json = JSON.parse(described_class.new(following).serialize)
+    aggregate_failures do
+      expect(json['id']).to eq(following.id)
+      expect(json['actor_id']).to eq(following.actor_id)
+      expect(json['target_actor_id']).to eq(following.target_actor_id)
+      expect(json['status']).to eq(following.status)
+    end
+  end
+end

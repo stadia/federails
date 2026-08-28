@@ -1,0 +1,23 @@
+# Generated from app/policies/fedipub/client/following_policy.rb with RBS::Inline
+
+module Fedipub
+  module Client
+    class FollowingPolicy < Fedipub::FedipubPolicy
+      def show?: () -> untyped
+
+      def destroy?: () -> untyped
+
+      def accept?: () -> untyped
+
+      def follow?: () -> untyped
+
+      class Scope < Scope
+        def resolve: () -> untyped
+      end
+
+      private
+
+      def in_following?: () -> untyped
+    end
+  end
+end

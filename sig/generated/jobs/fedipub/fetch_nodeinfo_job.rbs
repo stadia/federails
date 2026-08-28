@@ -1,0 +1,8 @@
+# Generated from app/jobs/fedipub/fetch_nodeinfo_job.rb with RBS::Inline
+
+module Fedipub
+  class FetchNodeinfoJob < ApplicationJob
+    # @param domain [String] Domain to create/update
+    def perform: (untyped domain) -> untyped
+  end
+end

@@ -41,8 +41,8 @@ class PostsController < ApplicationController
         format.html { redirect_to post_url(@post), notice: 'Post was successfully updated.' }
         format.json { render json: PostResource.new(@post).serializable_hash, status: :ok, location: @post }
       else
-        format.html { render :edit, status: Federails::Utils::ResponseCodes::UNPROCESSABLE_CONTENT }
-        format.json { render json: @post.errors, status: Federails::Utils::ResponseCodes::UNPROCESSABLE_CONTENT }
+        format.html { render :edit, status: Fedipub::Utils::ResponseCodes::UNPROCESSABLE_CONTENT }
+        format.json { render json: @post.errors, status: Fedipub::Utils::ResponseCodes::UNPROCESSABLE_CONTENT }
       end
     end
   end
@@ -80,7 +80,7 @@ class PostsController < ApplicationController
   end
 
   def render_create_failure(format)
-    format.html { render :new, status: Federails::Utils::ResponseCodes::UNPROCESSABLE_CONTENT }
-    format.json { render json: @post.errors, status: Federails::Utils::ResponseCodes::UNPROCESSABLE_CONTENT }
+    format.html { render :new, status: Fedipub::Utils::ResponseCodes::UNPROCESSABLE_CONTENT }
+    format.json { render json: @post.errors, status: Fedipub::Utils::ResponseCodes::UNPROCESSABLE_CONTENT }
   end
 end

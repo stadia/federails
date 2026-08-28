@@ -367,8 +367,8 @@ class User
   end
 
   module GeneratedAssociationMethods
-    sig { params(args: T.untyped, blk: T.untyped).returns(::Federails::Actor) }
-    def build_federails_actor(*args, &blk); end
+    sig { params(args: T.untyped, blk: T.untyped).returns(::Fedipub::Actor) }
+    def build_fedipub_actor(*args, &blk); end
 
     sig { returns(T::Array[T.untyped]) }
     def comment_ids; end
@@ -384,17 +384,17 @@ class User
     sig { params(value: T::Enumerable[::Comment]).void }
     def comments=(value); end
 
-    sig { params(args: T.untyped, blk: T.untyped).returns(::Federails::Actor) }
-    def create_federails_actor(*args, &blk); end
+    sig { params(args: T.untyped, blk: T.untyped).returns(::Fedipub::Actor) }
+    def create_fedipub_actor(*args, &blk); end
 
-    sig { params(args: T.untyped, blk: T.untyped).returns(::Federails::Actor) }
-    def create_federails_actor!(*args, &blk); end
+    sig { params(args: T.untyped, blk: T.untyped).returns(::Fedipub::Actor) }
+    def create_fedipub_actor!(*args, &blk); end
 
-    sig { returns(T.nilable(::Federails::Actor)) }
-    def federails_actor; end
+    sig { returns(T.nilable(::Fedipub::Actor)) }
+    def fedipub_actor; end
 
-    sig { params(value: T.nilable(::Federails::Actor)).void }
-    def federails_actor=(value); end
+    sig { params(value: T.nilable(::Fedipub::Actor)).void }
+    def fedipub_actor=(value); end
 
     sig { returns(T::Array[T.untyped]) }
     def post_ids; end
@@ -410,11 +410,11 @@ class User
     sig { params(value: T::Enumerable[::Post]).void }
     def posts=(value); end
 
-    sig { returns(T.nilable(::Federails::Actor)) }
-    def reload_federails_actor; end
+    sig { returns(T.nilable(::Fedipub::Actor)) }
+    def reload_fedipub_actor; end
 
     sig { void }
-    def reset_federails_actor; end
+    def reset_fedipub_actor; end
   end
 
   module GeneratedAssociationRelationMethods

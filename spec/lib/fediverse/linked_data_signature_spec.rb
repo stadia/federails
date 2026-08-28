@@ -3,7 +3,7 @@ require 'fediverse/linked_data_signature'
 
 RSpec.describe Fediverse::LinkedDataSignature do
   let(:keypair) { OpenSSL::PKey::RSA.generate(2048) }
-  let(:actor) { FactoryBot.create(:user).federails_actor }
+  let(:actor) { FactoryBot.create(:user).fedipub_actor }
 
   let(:document) do
     {
@@ -45,7 +45,7 @@ RSpec.describe Fediverse::LinkedDataSignature do
     context 'with a valid signature' do
       it 'returns verified true with the actor' do
         signed = sign_document(document)
-        allow(Federails::Actor).to receive(:find_or_create_by_federation_url).and_return(actor)
+        allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url).and_return(actor)
 
         result = described_class.verify(signed)
 
@@ -58,7 +58,7 @@ RSpec.describe Fediverse::LinkedDataSignature do
       it 'returns verified false' do
         signed = sign_document(document)
         signed['object']['content'] = 'Tampered!'
-        allow(Federails::Actor).to receive(:find_or_create_by_federation_url).and_return(actor)
+        allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url).and_return(actor)
 
         result = described_class.verify(signed)
 
@@ -94,7 +94,7 @@ RSpec.describe Fediverse::LinkedDataSignature do
             'signatureValue' => '!!!invalid-base64!!!',
           }
         )
-        allow(Federails::Actor).to receive(:find_or_create_by_federation_url).and_return(actor)
+        allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url).and_return(actor)
 
         result = described_class.verify(doc)
 
@@ -107,7 +107,7 @@ RSpec.describe Fediverse::LinkedDataSignature do
       it 'returns verified false with error' do
         signed = sign_document(document)
         actor.update!(public_key: 'not-a-valid-pem')
-        allow(Federails::Actor).to receive(:find_or_create_by_federation_url).and_return(actor)
+        allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url).and_return(actor)
 
         result = described_class.verify(signed)
 
@@ -120,7 +120,7 @@ RSpec.describe Fediverse::LinkedDataSignature do
       it 'returns verified false with error' do
         actor.update!(public_key: nil)
         signed = sign_document(document)
-        allow(Federails::Actor).to receive(:find_or_create_by_federation_url).and_return(actor)
+        allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url).and_return(actor)
 
         result = described_class.verify(signed)
 
@@ -132,7 +132,7 @@ RSpec.describe Fediverse::LinkedDataSignature do
     context 'when actor cannot be resolved' do
       it 'returns verified false with error' do
         signed = sign_document(document)
-        allow(Federails::Actor).to receive(:find_or_create_by_federation_url).and_return(nil)
+        allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url).and_return(nil)
 
         result = described_class.verify(signed)
 
@@ -152,7 +152,7 @@ RSpec.describe Fediverse::LinkedDataSignature do
 
       it 'verifies a valid signature through the full normalization path' do
         signed = sign_document(document)
-        allow(Federails::Actor).to receive(:find_or_create_by_federation_url).and_return(actor)
+        allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url).and_return(actor)
 
         result = described_class.verify(signed)
 
@@ -163,7 +163,7 @@ RSpec.describe Fediverse::LinkedDataSignature do
       it 'rejects a tampered document through the full normalization path' do
         signed = sign_document(document)
         signed['object']['content'] = 'Tampered!'
-        allow(Federails::Actor).to receive(:find_or_create_by_federation_url).and_return(actor)
+        allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url).and_return(actor)
 
         result = described_class.verify(signed)
 

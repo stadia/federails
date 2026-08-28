@@ -1,4 +1,4 @@
-# Fedify vs Federails 상세 분석 - Collections, Activities, Objects
+# Fedify vs Fedipub 상세 분석 - Collections, Activities, Objects
 
 **분석 일시:** 2026-03-25  
 **목적:** Collections, Activities, Objects 구현 강화 방안
@@ -7,7 +7,7 @@
 
 ## 📊 핵심 갭 분석 요약
 
-| 영역 | Fedify | Federails | 강화 필요도 |
+| 영역 | Fedify | Fedipub | 강화 필요도 |
 |------|--------|-----------|------------|
 | **Collections** | 완전 (built-in + custom) | 기본 (followers/following만) | 🔴 높음 |
 | **Activities** | 타입 안전 + 핸들러 완전 | 기본 저장/라우팅 | 🔴 높음 |
@@ -18,9 +18,9 @@
 
 ## 1️⃣ Collections (컬렉션)
 
-### 현재 Federails 상태
+### 현재 Fedipub 상태
 ```ruby
-# app/controllers/federails/server/actors_controller.rb
+# app/controllers/fedipub/server/actors_controller.rb
 def followers
   @actors = @actor.followers.order(created_at: :desc)
   # Pagy 사용, 기본 OrderedCollection
@@ -44,7 +44,7 @@ federation.setFeaturedDispatcher("/users/{id}/featured", handler)  // featured
 // 그 외 임의 컬렉션
 ```
 
-**Federails 필요:**
+**Fedipub 필요:**
 - `liked` 컬렉션 (사용자가 좋아요한 객체들)
 - `featured` 컬렉션 (사용자가 추천한 객체들)  
 - 앱 특화 커스텀 컬렉션 지원
@@ -64,7 +64,7 @@ federation.setFeaturedDispatcher("/users/{id}/featured", handler)  // featured
 }
 ```
 
-**Federails 필요:**
+**Fedipub 필요:**
 - `first`, `last` 링크 필수 포함
 - `current` 페이지 표시 (선택)
 - 페이지당 항목 수 설정 가능
@@ -76,7 +76,7 @@ federation.setFeaturedDispatcher("/users/{id}/featured", handler)  // featured
 const collection = await ctx.fetchCollection(url)
 ```
 
-**Federails:** `Fediverse::Collection.fetch` 있음 (basic)
+**Fedipub:** `Fediverse::Collection.fetch` 있음 (basic)
 ```ruby
 # lib/fediverse/collection.rb
 class Collection < Array
@@ -95,9 +95,9 @@ end
 
 ## 2️⃣ Activities (활동)
 
-### 현재 Federails 상태
+### 현재 Fedipub 상태
 ```ruby
-# app/models/federails/activity.rb
+# app/models/fedipub/activity.rb
 class Activity < ApplicationRecord
   belongs_to :entity, polymorphic: true
   belongs_to :actor
@@ -131,7 +131,7 @@ const activity = new Create({
 })
 ```
 
-**Federails 필요:**
+**Fedipub 필요:**
 - `Create`, `Delete`, `Follow`, `Accept`, `Reject`, `Like`, `Announce`, `Undo` 등 Activity 타입 클래스
 - 각 Activity의 유효성 검사 (필수 필드)
 - Activity별 특화 로직 (예: Delete는 object 참조 해제)
@@ -148,7 +148,7 @@ federation
   // ... 모든 Activity 타입
 ```
 
-**Federails 현재:**
+**Fedipub 현재:**
 ```ruby
 # lib/fediverse/inbox.rb - 부분 구현
 def dispatch_request(payload)
@@ -173,7 +173,7 @@ activity.validate()  // 필수 필드 체크
 activity.toJsonLd()  // 표준 형식
 ```
 
-**Federails:**
+**Fedipub:**
 ```ruby
 # ActivitiesController
 def validate_payload(hash)
@@ -196,9 +196,9 @@ end
 ctx.sendActivity(recipients, activity)
 ```
 
-**Federails:**
+**Fedipub:**
 ```ruby
-# app/models/federails/activity.rb
+# app/models/fedipub/activity.rb
 def set_default_addressing
   self.to = [Fediverse::Collection::PUBLIC]
   self.cc = [actor.followers_url, entity.try(:followers_url)]
@@ -214,7 +214,7 @@ end
 
 ## 3️⃣ Objects (객체)
 
-### 현재 Federails 상태
+### 현재 Fedipub 상태
 ```ruby
 # JSON-LD compact 사용
 JSON::LD::API.compact(payload, payload['@context'])
@@ -245,9 +245,9 @@ const note = new Note({
 })
 ```
 
-**Federails 필요:**
+**Fedipub 필요:**
 ```ruby
-# app/models/federails/object/ 하위에 각 객체 타입
+# app/models/fedipub/object/ 하위에 각 객체 타입
 class Note < Object
   validates :content, presence: true
   # contentMap (다국어)
@@ -274,7 +274,7 @@ end
 const object = await ctx.fetchObject(url)
 ```
 
-**Federails:**
+**Fedipub:**
 ```ruby
 # lib/fediverse/request.rb
 def self.dereference(value)
@@ -295,7 +295,7 @@ end
 note.validate()  // content 필수 등
 ```
 
-**Federails 필요:**
+**Fedipub 필요:**
 - 객체 타입별 스키마 정의
 - 필수 필드 검사
 - MIME 타입 검증
@@ -308,7 +308,7 @@ note.validate()  // content 필수 등
 // 원본 출처 (via, generator 등)
 ```
 
-**Federails 필요:**
+**Fedipub 필요:**
 - 메타데이터 추출 및 저장
 - 원본 출처 추적
 - 페더레이션 경로 기록
@@ -321,7 +321,7 @@ note.validate()  // content 필수 등
 
 #### Activity Vocabulary 구현
 ```
-app/models/federails/vocab/
+app/models/fedipub/vocab/
   ├── activity/
   │   ├── base.rb
   │   ├── create.rb
@@ -346,9 +346,9 @@ app/models/federails/vocab/
 
 #### Handler 시스템
 ```ruby
-# config/initializers/federails_handlers.rb
-Federails::Inbox.register_handler(Follow, MyApp::FollowHandler, :process)
-Federails::Inbox.register_handler(Create, MyApp::CreateHandler, :process)
+# config/initializers/fedipub_handlers.rb
+Fedipub::Inbox.register_handler(Follow, MyApp::FollowHandler, :process)
+Fedipub::Inbox.register_handler(Create, MyApp::CreateHandler, :process)
 # ...
 ```
 
@@ -356,7 +356,7 @@ Federails::Inbox.register_handler(Create, MyApp::CreateHandler, :process)
 
 #### Custom Collections
 ```ruby
-# app/models/federails/collection.rb
+# app/models/fedipub/collection.rb
 class Collection < ApplicationRecord
   # 사용자 정의 컬렉션 지원
   belongs_to :actor
@@ -395,18 +395,18 @@ end
 
 | 우선순위 | 패턴 | 적용 위치 | 효과 |
 |---------|------|----------|------|
-| 🔴 P0 | Type-safe Activities | `app/models/federails/vocab/` | 안정성 ↑ |
-| 🔴 P0 | Activity Handlers | `lib/federails/inbox.rb` | 기능 완성 |
-| 🔴 P1 | Custom Collections | `app/models/federails/collection.rb` | 유연성 ↑ |
+| 🔴 P0 | Type-safe Activities | `app/models/fedipub/vocab/` | 안정성 ↑ |
+| 🔴 P0 | Activity Handlers | `lib/fedipub/inbox.rb` | 기능 완성 |
+| 🔴 P1 | Custom Collections | `app/models/fedipub/collection.rb` | 유연성 ↑ |
 | 🟡 P2 | Object Caching | `lib/fediverse/request.rb` | 성능 ↑ |
-| 🟡 P2 | Activity Validation | `app/controllers/federails/server/activities_controller.rb` | 신뢰성 ↑ |
-| 🟢 P3 | Object Vocabulary | `app/models/federails/vocab/object/` | 완전성 ↑ |
+| 🟡 P2 | Activity Validation | `app/controllers/fedipub/server/activities_controller.rb` | 신뢰성 ↑ |
+| 🟢 P3 | Object Vocabulary | `app/models/fedipub/vocab/object/` | 완전성 ↑ |
 
 ---
 
 ## 📊 최종 평가
 
-### 현재 Federails 점수 (Fedify = 10 기준)
+### 현재 Fedipub 점수 (Fedify = 10 기준)
 
 | 영역 | 현재 | 목표 | 갭 |
 |------|------|------|-----|
@@ -417,7 +417,7 @@ end
 
 ### 핵심 결론
 
-**Federails는 ActivityPub "기반"은 있으나, "완성"은 아님:**
+**Fedipub는 ActivityPub "기반"은 있으나, "완성"은 아님:**
 
 ✅ **잘된 것:**
 - HTTP Signatures (GET/POST)
@@ -432,7 +432,7 @@ end
 - **객체 캐싱/검증**
 
 **Fedify 참고 시 가장 큰 차이:**
-> Fedify는 **타입 시스템과 핸들러 패턴**으로 robust함. Federails는 **ActiveRecord 중심**으로 단순하지만 유연성 부족.
+> Fedify는 **타입 시스템과 핸들러 패턴**으로 robust함. Fedipub는 **ActiveRecord 중심**으로 단순하지만 유연성 부족.
 
 ---
 
@@ -444,7 +444,7 @@ end
 
 #### 1. Activity Vocabulary 타입 시스템 구축
 ```
-app/models/federails/vocab/
+app/models/fedipub/vocab/
 ├── base.rb              # Base class with validations
 ├── activity.rb          # Activity base (actor, object, to, cc, etc.)
 ├── create.rb            # Create Activity
@@ -472,7 +472,7 @@ app/models/federails/vocab/
 
 #### 2. Activity Handler 라우팅 시스템
 ```
-lib/federails/
+lib/fedipub/
 ├── activity_handler.rb  # Base handler class
 └── handlers/
     ├── create_handler.rb
@@ -484,14 +484,14 @@ lib/federails/
 **핵심 요구사항:**
 ```ruby
 # lib/fediverse/inbox.rb 개선
-Federails::Inbox.register_handler('Create', MyApp::CreateHandler)
-Federails::Inbox.register_handler('Follow', MyApp::FollowHandler)
+Fedipub::Inbox.register_handler('Create', MyApp::CreateHandler)
+Fedipub::Inbox.register_handler('Follow', MyApp::FollowHandler)
 # 모든 Activity 타입에 핸들러 등록
 ```
 
 #### 3. Custom Collections 추가
 ```
-app/models/federails/
+app/models/fedipub/
 ├── collection.rb        # liked, featured, custom 지원
 └── collection_item.rb   # Collection 내 아이템
 ```
@@ -555,4 +555,4 @@ lib/fediverse/request.rb 개선:
 
 ---
 
-**Tags:** #federails #fedify #activitypub #collections #activities #objects #vocabulary #todo
+**Tags:** #fedipub #fedify #activitypub #collections #activities #objects #vocabulary #todo

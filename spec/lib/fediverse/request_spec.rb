@@ -23,7 +23,7 @@ module Fediverse
             'id'       => 'https://example.com/actors/1',
             'type'     => 'Person',
           }
-          allow(Federails::Utils::JsonRequest).to receive(:get_json).and_return(json)
+          allow(Fedipub::Utils::JsonRequest).to receive(:get_json).and_return(json)
           allow(JSON::LD::API).to receive(:compact).and_raise(
             JSON::LD::JsonLdError::ProtectedTermRedefinition,
             'protected term redefinition'

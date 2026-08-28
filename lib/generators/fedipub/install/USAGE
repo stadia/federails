@@ -1,0 +1,9 @@
+Description:
+    Copies configuration file and initializer
+
+Example:
+    bin/rails generate fedipub:install
+
+    This will create:
+        config/fedipub.yml
+        config/initializers/fedipub.rb

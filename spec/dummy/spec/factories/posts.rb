@@ -7,7 +7,7 @@ FactoryBot.define do
 
     trait :distant do
       user { nil }
-      federails_actor factory: :distant_actor
+      fedipub_actor factory: :distant_actor
       federated_url { "https://example.com/content/#{rand(1...10_000)}" }
     end
   end

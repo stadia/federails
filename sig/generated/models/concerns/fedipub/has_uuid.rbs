@@ -1,0 +1,45 @@
+# Generated from app/models/concerns/fedipub/has_uuid.rb with RBS::Inline
+
+module Fedipub
+  # Model concern providing UUIDs as model parameter (instead of IDs).
+  #
+  #
+  # A _required_, `uuid` field is required on the model's table for this concern to work:
+  #
+  # ```rb
+  # # Example migration
+  # add_column :my_table, :uuid, :text, default: nil, index: { unique: true }
+  # ```
+  #
+  # Usage:
+  #
+  # ```rb
+  # class MyModel < ApplicationRecord
+  #   include Fedipub::HasUuid
+  # end
+  #
+  # # And now:
+  # instance = MyModel.find_param 'aaaa_bbbb_cccc_dddd_....'
+  # instance.to_param
+  # # => 'aaaa_bbbb_cccc_dddd_....'
+  # ```
+  #
+  # It can be added on existing tables without data migration as the `uuid` accessor will generate the value when missing.
+  module HasUuid
+    extend ActiveSupport::Concern
+
+    # : (String) -> untyped
+    def self.find_param: (String) -> untyped
+
+    # : () -> String
+    def to_param: () -> String
+
+    # : () -> String
+    def uuid: () -> String
+
+    private
+
+    # : () -> void
+    def generate_uuid: () -> void
+  end
+end

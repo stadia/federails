@@ -1,0 +1,6 @@
+# Generated from lib/fedipub/engine.rb with RBS::Inline
+
+module Fedipub
+  class Engine < ::Rails::Engine
+  end
+end

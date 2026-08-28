@@ -5,18 +5,18 @@ module Fediverse
     class SignatureVerificationError < StandardError
     end
 
-    # : (sender: Federails::Actor, request: untyped) -> String
-    def self.sign: (sender: Federails::Actor, request: untyped) -> String
+    # : (sender: Fedipub::Actor, request: untyped) -> String
+    def self.sign: (sender: Fedipub::Actor, request: untyped) -> String
 
     # Performs a signed GET request on behalf of a local actor
     #
     # @param url [String] Target URL
-    # @param actor [Federails::Actor] Local actor to sign as
+    # @param actor [Fedipub::Actor] Local actor to sign as
     # @return [Hash, nil] Parsed JSON response or nil on failure
     def self.signed_get: (untyped url, actor: untyped) -> untyped
 
-    # : (sender: Federails::Actor, request: untyped) -> bool
-    def self.verify: (sender: Federails::Actor, request: untyped) -> bool
+    # : (sender: Fedipub::Actor, request: untyped) -> bool
+    def self.verify: (sender: Fedipub::Actor, request: untyped) -> bool
 
     # Parse an HTTP Signature header (cavage draft format) into its components
     # : (String) -> { key_id: String, headers: String, signature: String, algorithm: String? }
@@ -28,8 +28,8 @@ module Fediverse
 
     # Verify an inbound request's HTTP Signature, returning the sending actor.
     # Supports both cavage draft and RFC 9421 formats.
-    # : (untyped) -> Federails::Actor
-    def self.verify_request!: (untyped) -> Federails::Actor
+    # : (untyped) -> Fedipub::Actor
+    def self.verify_request!: (untyped) -> Fedipub::Actor
 
     # RFC 9421 uses label=:bytes: format; cavage uses keyId="..." format
     private def self.rfc9421_format?: (untyped sig_header) -> untyped

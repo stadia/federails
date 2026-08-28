@@ -1,0 +1,99 @@
+# typed: false
+# rbs_inline: enabled
+
+module Fedipub
+  # Stores following data between actors
+  class Following < ApplicationRecord
+    include Fedipub::HasUuid
+
+    enum :status, pending: 0, accepted: 1
+
+    validates :target_actor_id, uniqueness: { scope: [:actor_id, :target_actor_id] }
+
+    belongs_to :actor
+    belongs_to :target_actor, class_name: 'Fedipub::Actor'
+    has_many :activities, as: :entity, dependent: :destroy
+
+    after_create :create_activity, if: :locally_instigated?
+    after_create :after_follow, if: :locally_instigated?
+    after_update :after_follow_accepted
+    after_destroy :destroy_activity, if: :locally_instigated?
+
+    define_callbacks :on_fedipub_delete_requested
+
+    set_callback :on_fedipub_delete_requested, -> { destroy! unless locally_instigated? }
+
+    scope :with_actor, ->(actor) { where(actor_id: actor.id).or(where(target_actor_id: actor.id)) }
+
+    #: () -> String
+    def federated_url
+      attributes['federated_url'].presence || Fedipub::Engine.routes.url_helpers.server_actor_following_url(actor_id: actor.to_param, id: to_param)
+    end
+
+    #: (follow_activity: Fedipub::Activity) -> void
+    def accept!(follow_activity:)
+      raise ArgumentError, 'follow_activity is required' if follow_activity.nil?
+
+      transaction do
+        update! status: :accepted
+        Activity.create! actor: target_actor, action: 'Accept', entity: follow_activity, to: [actor.federated_url]
+      end
+    end
+
+    #: () -> Fedipub::Activity?
+    def follow_activity
+      Activity.find_by actor: actor, action: 'Follow', entity: target_actor
+    end
+
+    class << self
+      #: (String, actor: Fedipub::Actor) -> Fedipub::Following
+      def new_from_account(account, actor:)
+        target_actor = Actor.find_or_create_by_account account
+        new actor: actor, target_actor: target_actor
+      end
+    end
+
+    private
+
+    #: () -> bool
+    def locally_instigated?
+      actor.local?
+    end
+
+    #: () -> void
+    def after_follow
+      return unless target_actor&.entity
+
+      fa = follow_activity
+      unless fa
+        Fedipub.logger.warn { "after_follow: follow_activity not found for Following##{id}, skipping after_followed callback" }
+        return
+      end
+
+      target_actor.entity.class.send(
+        :dispatch_followed_callback,
+        target_actor.entity,
+        self,
+        follow_activity: fa
+      )
+    end
+
+    #: () -> void
+    def after_follow_accepted
+      return unless status_previously_changed? && status == 'accepted'
+      return unless actor&.entity
+
+      actor.entity.class.send(:dispatch_callback, :after_follow_accepted, actor.entity, self)
+    end
+
+    #: () -> Fedipub::Activity
+    def create_activity
+      Activity.create! actor: actor, action: 'Follow', entity: target_actor, to: [target_actor.federated_url]
+    end
+
+    #: () -> Fedipub::Activity
+    def destroy_activity
+      follow_activity&.undo!
+    end
+  end
+end

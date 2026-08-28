@@ -12,40 +12,40 @@ module Fediverse
     class << self
       # Enqueues a separate delivery job for each recipient inbox.
       #
-      # @param activity [Federails::Activity]
+      # @param activity [Fedipub::Activity]
       def enqueue_deliveries(activity)
         inboxes = inboxes_for(activity)
-        Federails.logger.debug('Nobody to notice') && return if inboxes.none?
+        Fedipub.logger.debug('Nobody to notice') && return if inboxes.none?
 
-        ActiveJob.perform_all_later(inboxes.map { |url| Federails::NotifyInboxJob.new(activity, url) })
+        ActiveJob.perform_all_later(inboxes.map { |url| Fedipub::NotifyInboxJob.new(activity, url) })
       end
 
       # Delivers an activity to a single inbox. Called by NotifyInboxJob.
       #
-      # @param activity [Federails::Activity]
+      # @param activity [Fedipub::Activity]
       # @param inbox_url [String]
       def deliver_to_inbox(activity, inbox_url)
         message = payload(activity)
         validate_message!(activity, message)
-        Federails.logger.debug { "Sending activity ##{activity.id} to inbox at #{inbox_url}" }
+        Fedipub.logger.debug { "Sending activity ##{activity.id} to inbox at #{inbox_url}" }
         resp = post_to_inbox(inbox_url: inbox_url, message: message, from: activity.actor)
-        Federails.logger.debug { "#{resp.status}, #{resp.body}" }
+        Fedipub.logger.debug { "#{resp.status}, #{resp.body}" }
       end
 
       # Posts an activity to its recipients (legacy synchronous delivery).
       #
-      # @param activity [Federails::Activity]
+      # @param activity [Fedipub::Activity]
       def post_to_inboxes(activity)
         inboxes = inboxes_for(activity)
-        Federails.logger.debug('Nobody to notice') && return if inboxes.none?
+        Fedipub.logger.debug('Nobody to notice') && return if inboxes.none?
 
         message = payload(activity)
         inboxes.each do |url|
-          Federails.logger.debug { "Sending activity ##{activity.id} to inbox at #{url}" }
+          Fedipub.logger.debug { "Sending activity ##{activity.id} to inbox at #{url}" }
           resp = post_to_inbox(inbox_url: url, message: message, from: activity.actor)
-          Federails.logger.debug { "#{resp.status}, #{resp.body}" }
-        rescue Federails::PermanentDeliveryError, Federails::TemporaryDeliveryError => e
-          Federails.logger.warn { "Delivery failed for #{url}: #{e.message}" }
+          Fedipub.logger.debug { "#{resp.status}, #{resp.body}" }
+        rescue Fedipub::PermanentDeliveryError, Fedipub::TemporaryDeliveryError => e
+          Fedipub.logger.warn { "Delivery failed for #{url}: #{e.message}" }
         end
       end
 
@@ -61,11 +61,11 @@ module Fediverse
         sender = forwarding_sender_for(collection_urls)
         message = payload.to_json
         inboxes.each do |url|
-          Federails.logger.debug { "Forwarding activity to inbox at #{url}" }
+          Fedipub.logger.debug { "Forwarding activity to inbox at #{url}" }
           resp = post_to_inbox(inbox_url: url, message: message, from: sender)
-          Federails.logger.debug { "#{resp.status}, #{resp.body}" }
-        rescue Federails::PermanentDeliveryError, Federails::TemporaryDeliveryError => e
-          Federails.logger.warn { "Forward delivery failed for #{url}: #{e.message}" }
+          Fedipub.logger.debug { "#{resp.status}, #{resp.body}" }
+        rescue Fedipub::PermanentDeliveryError, Fedipub::TemporaryDeliveryError => e
+          Fedipub.logger.warn { "Forward delivery failed for #{url}: #{e.message}" }
         end
       end
 
@@ -73,7 +73,7 @@ module Fediverse
 
       # Determines the list of inboxes that the activity should be delivered to
       #
-      # @return [Array<Federails::Actor>]
+      # @return [Array<Fedipub::Actor>]
       def inboxes_for(activity)
         return [] unless activity.actor.local?
 
@@ -88,18 +88,18 @@ module Fediverse
         ].flatten.compact.uniq.reject { |url| url == Fediverse::Collection::PUBLIC }
 
         # Batch-fetch actors already known in DB to avoid N+1 queries
-        known_actors = Federails::Actor.includes(:entity).where(federated_url: addressing).index_by(&:federated_url)
+        known_actors = Fedipub::Actor.includes(:entity).where(federated_url: addressing).index_by(&:federated_url)
 
         inboxes = addressing.flat_map do |url|
-          actor = known_actors[url] || Federails::Actor.find_or_create_by_federation_url(url)
+          actor = known_actors[url] || Fedipub::Actor.find_or_create_by_federation_url(url)
           [actor.shared_inbox_url.presence || actor.inbox_url]
         rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid
           collection_to_actors(url).map { |a| a.shared_inbox_url.presence || a.inbox_url }
         end
         # Filter out actors who have blocked the sender
-        blocked_actor_ids = Federails::Block.where(target_actor: activity.actor).select(:actor_id)
+        blocked_actor_ids = Fedipub::Block.where(target_actor: activity.actor).select(:actor_id)
         if blocked_actor_ids.exists?
-          blocked_actors = Federails::Actor.where(id: blocked_actor_ids)
+          blocked_actors = Fedipub::Actor.where(id: blocked_actor_ids)
           blocked_inbox_urls = blocked_actors.flat_map { |a| [a.inbox_url, a.shared_inbox_url] }.compact.to_set
           inboxes.reject! { |url| blocked_inbox_urls.include?(url) }
         end
@@ -108,7 +108,7 @@ module Fediverse
         inboxes.compact.uniq.reject { |url| excluded.include?(url) }
       end
 
-      #: (String, ?max_depth: Integer) -> Array[Federails::Actor]
+      #: (String, ?max_depth: Integer) -> Array[Fedipub::Actor]
       def collection_to_actors(url, max_depth: MAX_COLLECTION_DEPTH)
         return [] if max_depth <= 0
 
@@ -119,15 +119,15 @@ module Fediverse
         actor_urls = collection.to_a
 
         # Batch-fetch actors already known in DB to avoid N+1 queries
-        known_actors = Federails::Actor.includes(:entity).where(federated_url: actor_urls).index_by(&:federated_url)
+        known_actors = Fedipub::Actor.includes(:entity).where(federated_url: actor_urls).index_by(&:federated_url)
 
         actor_urls.filter_map do |actor_url|
-          known_actors[actor_url] || Federails::Actor.find_or_create_by_federation_url(actor_url)
+          known_actors[actor_url] || Fedipub::Actor.find_or_create_by_federation_url(actor_url)
         rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid
           collection_to_actors(actor_url, max_depth: max_depth - 1)
         end
         .flatten
-      rescue Errors::NotACollection, URI::InvalidURIError, Federails::Utils::JsonRequest::UnhandledResponseStatus
+      rescue Errors::NotACollection, URI::InvalidURIError, Fedipub::Utils::JsonRequest::UnhandledResponseStatus
         []
       end
 
@@ -135,32 +135,32 @@ module Fediverse
       def actor_inbox_for(actor_url)
         return if actor_url.blank?
 
-        Federails::Actor.find_or_create_by_federation_url(actor_url).inbox_url
+        Fedipub::Actor.find_or_create_by_federation_url(actor_url).inbox_url
       rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid
         nil
       end
 
-      #: (Array[String]) -> Federails::Actor?
+      #: (Array[String]) -> Fedipub::Actor?
       def forwarding_sender_for(collection_urls)
         collection_urls.filter_map do |url|
-          route = Federails::Utils::Host.local_route(url)
-          next unless route.present? && route[:controller] == 'federails/server/actors' && route[:action] == 'followers'
+          route = Fedipub::Utils::Host.local_route(url)
+          next unless route.present? && route[:controller] == 'fedipub/server/actors' && route[:action] == 'followers'
 
-          Federails::Actor.find_param(route[:id])
+          Fedipub::Actor.find_param(route[:id])
         rescue ActiveRecord::RecordNotFound
           nil
         end.first
       end
 
-      #: (Federails::Activity) -> String
+      #: (Fedipub::Activity) -> String
       def payload(activity)
-        json = Federails::Server::ActivityResource.new(activity).serializable_hash.with_indifferent_access
+        json = Fedipub::Server::ActivityResource.new(activity).serializable_hash.with_indifferent_access
         json.delete(:bto)
         json.delete(:bcc)
         json.to_json
       end
 
-      #: (inbox_url: String, message: String, ?from: Federails::Actor?) -> untyped
+      #: (inbox_url: String, message: String, ?from: Fedipub::Actor?) -> untyped
       def post_to_inbox(inbox_url:, message:, from: nil)
         conn = Faraday.default_connection
         resp = conn.builder.build_response(
@@ -172,25 +172,25 @@ module Fediverse
         return resp if status.between?(200, 299)
 
         if permanent_delivery_status?(status)
-          raise Federails::PermanentDeliveryError.new(
+          raise Fedipub::PermanentDeliveryError.new(
             delivery_error_message(inbox_url: inbox_url, status: status, body: resp.body, retry_after: nil, permanent: true),
             response_code: status, inbox_url: inbox_url
           )
         else
           retry_after = resp.headers['Retry-After'] if status == 429
-          raise Federails::TemporaryDeliveryError.new(
+          raise Fedipub::TemporaryDeliveryError.new(
             delivery_error_message(inbox_url: inbox_url, status: status, body: resp.body, retry_after: retry_after, permanent: false),
             response_code: status, inbox_url: inbox_url, retry_after: retry_after&.to_i
           )
         end
       rescue Faraday::ConnectionFailed, Faraday::TimeoutError, Faraday::SSLError => e
-        raise Federails::TemporaryDeliveryError.new(
+        raise Fedipub::TemporaryDeliveryError.new(
           "Delivery to #{inbox_url} failed: #{e.class} #{e.message}",
           response_code: nil, inbox_url: inbox_url
         )
       end
 
-      #: (url: String, message: String, from: Federails::Actor?) -> untyped
+      #: (url: String, message: String, from: Fedipub::Actor?) -> untyped
       def signed_request(url:, message:, from:)
         req = request(url: url, message: message)
         req.headers['Signature'] = Fediverse::Signature.sign(sender: from, request: req) if from
@@ -235,12 +235,12 @@ module Fediverse
         message + " - #{body_excerpt.tr("\n", ' ')[0, 300]}"
       end
 
-      #: (Federails::Activity, Hash[Symbol, untyped]) -> void
+      #: (Fedipub::Activity, Hash[Symbol, untyped]) -> void
       def validate_payload!(activity, json)
         return unless activity.action.in?(ACTIONS_REQUIRING_OBJECT)
         return unless json[:object].nil? || update_object_id_missing?(json)
 
-        raise Federails::InvalidDeliveryPayloadError.new(
+        raise Fedipub::InvalidDeliveryPayloadError.new(
           invalid_payload_message(activity, json),
           response_code: nil,
           inbox_url:     nil
@@ -252,7 +252,7 @@ module Fediverse
         json[:type] == 'Update' && json[:object].is_a?(Hash) && json[:object][:id].blank?
       end
 
-      #: (Federails::Activity, Hash[Symbol, untyped]) -> String
+      #: (Fedipub::Activity, Hash[Symbol, untyped]) -> String
       def invalid_payload_message(activity, json)
         object_state = if json[:object].nil?
                          'missing object'
@@ -269,17 +269,17 @@ module Fediverse
           "(#{activity.action}, entity_type=#{entity_type.inspect}, entity_id=#{entity_id.inspect}): #{object_state}"
       end
 
-      #: (Federails::Activity, String) -> void
+      #: (Fedipub::Activity, String) -> void
       def validate_message!(activity, message)
         validate_payload!(activity, JSON.parse(message).with_indifferent_access)
       end
 
-      #: (String) -> Array[Federails::Actor]?
+      #: (String) -> Array[Fedipub::Actor]?
       def actors_for_local_collection(url)
-        route = Federails::Utils::Host.local_route(url)
-        return unless route.present? && route[:controller] == 'federails/server/actors'
+        route = Fedipub::Utils::Host.local_route(url)
+        return unless route.present? && route[:controller] == 'fedipub/server/actors'
 
-        actor = Federails::Actor.find_param(route[:id])
+        actor = Fedipub::Actor.find_param(route[:id])
         followings = case route[:action]
                      when 'followers'
                        actor.following_followers.includes(:actor)

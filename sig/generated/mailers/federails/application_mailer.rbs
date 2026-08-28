@@ -1,6 +1,0 @@
-# Generated from app/mailers/federails/application_mailer.rb with RBS::Inline
-
-module Federails
-  class ApplicationMailer < ActionMailer::Base
-  end
-end

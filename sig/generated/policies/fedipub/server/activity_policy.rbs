@@ -1,0 +1,9 @@
+# Generated from app/policies/fedipub/server/activity_policy.rb with RBS::Inline
+
+module Fedipub
+  module Server
+    class ActivityPolicy < Fedipub::FedipubPolicy
+      def outbox?: () -> untyped
+    end
+  end
+end

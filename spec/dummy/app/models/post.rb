@@ -1,8 +1,8 @@
 class Post < ApplicationRecord
-  include Federails::DataEntity
+  include Fedipub::DataEntity
   include FederatedAndSoftDeletable
 
-  acts_as_federails_data handles:                 'Note',
+  acts_as_fedipub_data handles:                 'Note',
                          actor_entity_method:     :user,
                          soft_deleted_method:     :soft_deleted?,
                          soft_delete_date_method: :deleted_at?
@@ -14,7 +14,7 @@ class Post < ApplicationRecord
   has_many :comments, dependent: :destroy
 
   def to_activitypub_object
-    Federails::DataTransformer::Note.to_federation self,
+    Fedipub::DataTransformer::Note.to_federation self,
                                                    name:    title,
                                                    content: content
   end
@@ -25,7 +25,7 @@ class Post < ApplicationRecord
   end
 
   def self.from_activitypub_object(hash)
-    Federails::Utils::Object.timestamp_attributes(hash)
+    Fedipub::Utils::Object.timestamp_attributes(hash)
                             .merge federated_url: hash['id'],
                                    title:         hash['published'] || 'A post',
                                    content:       hash['content']

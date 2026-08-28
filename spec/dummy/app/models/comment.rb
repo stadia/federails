@@ -1,8 +1,8 @@
 class Comment < ApplicationRecord
-  include Federails::DataEntity
+  include Fedipub::DataEntity
   include FederatedAndSoftDeletable
 
-  acts_as_federails_data handles:                 'Note',
+  acts_as_fedipub_data handles:                 'Note',
                          actor_entity_method:     :user,
                          should_federate_method:  :federate?,
                          soft_deleted_method:     :soft_deleted?,
@@ -19,7 +19,7 @@ class Comment < ApplicationRecord
   scope :parents, -> { where parent_id: nil }
 
   def to_activitypub_object
-    Federails::DataTransformer::Note.to_federation self,
+    Fedipub::DataTransformer::Note.to_federation self,
                                                    content: content,
                                                    custom:  {
                                                      '@context' => [
@@ -39,11 +39,11 @@ class Comment < ApplicationRecord
   def self.from_activitypub_object(hash)
     raise 'No parent defined in object' if hash['inReplyTo'].blank?
 
-    attrs = Federails::Utils::Object.timestamp_attributes(hash)
+    attrs = Fedipub::Utils::Object.timestamp_attributes(hash)
                                     .merge federated_url: hash['id'],
                                            content:       hash['content']
 
-    parent_or_post = Federails::Utils::Object.find_or_create! hash['inReplyTo']
+    parent_or_post = Fedipub::Utils::Object.find_or_create! hash['inReplyTo']
 
     if parent_or_post.is_a? Post
       attrs[:post] = parent_or_post

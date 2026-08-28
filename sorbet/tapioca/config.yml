@@ -13,5 +13,5 @@ dsl:
   # exclude:
   # - SomeGeneratorName
   # workers: 5
-  # federails is an engine: boot the dummy app for DSL generation
+  # fedipub is an engine: boot the dummy app for DSL generation
   app_root: spec/dummy

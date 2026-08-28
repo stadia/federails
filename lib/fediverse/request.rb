@@ -22,10 +22,10 @@ module Fediverse
 
       #: (String) -> Hash[String, untyped]?
       def get(id)
-        json = Federails::Utils::JsonRequest.get_json(id)
+        json = Fedipub::Utils::JsonRequest.get_json(id)
         compact_json_ld(json)
-      rescue JSON::ParserError, Federails::Utils::JsonRequest::UnhandledResponseStatus => e
-        Federails.logger.warn { "Failed to dereference #{id}: #{e.message}" }
+      rescue JSON::ParserError, Fedipub::Utils::JsonRequest::UnhandledResponseStatus => e
+        Fedipub.logger.warn { "Failed to dereference #{id}: #{e.message}" }
         nil
       end
 
@@ -33,7 +33,7 @@ module Fediverse
       def compact_json_ld(json)
         JSON::LD::API.compact(json, json['@context'])
       rescue JSON::LD::JsonLdError => e
-        Federails.logger.warn { "Unable to compact JSON-LD for #{json['id'] || 'unknown object'}: #{e.class} #{e.message}" }
+        Fedipub.logger.warn { "Unable to compact JSON-LD for #{json['id'] || 'unknown object'}: #{e.class} #{e.message}" }
         json
       end
     end

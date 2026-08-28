@@ -375,8 +375,8 @@ class Comment
     sig { params(value: T::Enumerable[::Comment]).void }
     def answers=(value); end
 
-    sig { params(args: T.untyped, blk: T.untyped).returns(::Federails::Actor) }
-    def build_federails_actor(*args, &blk); end
+    sig { params(args: T.untyped, blk: T.untyped).returns(::Fedipub::Actor) }
+    def build_fedipub_actor(*args, &blk); end
 
     sig { params(args: T.untyped, blk: T.untyped).returns(::Comment) }
     def build_parent(*args, &blk); end
@@ -387,11 +387,11 @@ class Comment
     sig { params(args: T.untyped, blk: T.untyped).returns(::User) }
     def build_user(*args, &blk); end
 
-    sig { params(args: T.untyped, blk: T.untyped).returns(::Federails::Actor) }
-    def create_federails_actor(*args, &blk); end
+    sig { params(args: T.untyped, blk: T.untyped).returns(::Fedipub::Actor) }
+    def create_fedipub_actor(*args, &blk); end
 
-    sig { params(args: T.untyped, blk: T.untyped).returns(::Federails::Actor) }
-    def create_federails_actor!(*args, &blk); end
+    sig { params(args: T.untyped, blk: T.untyped).returns(::Fedipub::Actor) }
+    def create_fedipub_actor!(*args, &blk); end
 
     sig { params(args: T.untyped, blk: T.untyped).returns(::Comment) }
     def create_parent(*args, &blk); end
@@ -411,17 +411,17 @@ class Comment
     sig { params(args: T.untyped, blk: T.untyped).returns(::User) }
     def create_user!(*args, &blk); end
 
-    sig { returns(T.nilable(::Federails::Actor)) }
-    def federails_actor; end
+    sig { returns(T.nilable(::Fedipub::Actor)) }
+    def fedipub_actor; end
 
-    sig { params(value: T.nilable(::Federails::Actor)).void }
-    def federails_actor=(value); end
-
-    sig { returns(T::Boolean) }
-    def federails_actor_changed?; end
+    sig { params(value: T.nilable(::Fedipub::Actor)).void }
+    def fedipub_actor=(value); end
 
     sig { returns(T::Boolean) }
-    def federails_actor_previously_changed?; end
+    def fedipub_actor_changed?; end
+
+    sig { returns(T::Boolean) }
+    def fedipub_actor_previously_changed?; end
 
     sig { returns(T.nilable(::Comment)) }
     def parent; end
@@ -447,8 +447,8 @@ class Comment
     sig { returns(T::Boolean) }
     def post_previously_changed?; end
 
-    sig { returns(T.nilable(::Federails::Actor)) }
-    def reload_federails_actor; end
+    sig { returns(T.nilable(::Fedipub::Actor)) }
+    def reload_fedipub_actor; end
 
     sig { returns(T.nilable(::Comment)) }
     def reload_parent; end
@@ -460,7 +460,7 @@ class Comment
     def reload_user; end
 
     sig { void }
-    def reset_federails_actor; end
+    def reset_fedipub_actor; end
 
     sig { void }
     def reset_parent; end
@@ -504,7 +504,7 @@ class Comment
     def deleted(*args, &blk); end
 
     sig { params(args: T.untyped, blk: T.untyped).returns(PrivateAssociationRelation) }
-    def distant_federails_entities(*args, &blk); end
+    def distant_fedipub_entities(*args, &blk); end
 
     sig { params(value: T::Boolean).returns(PrivateAssociationRelation) }
     def distinct(value = true); end
@@ -555,7 +555,7 @@ class Comment
     def limit(*args, &blk); end
 
     sig { params(args: T.untyped, blk: T.untyped).returns(PrivateAssociationRelation) }
-    def local_federails_entities(*args, &blk); end
+    def local_fedipub_entities(*args, &blk); end
 
     sig { params(args: T.untyped, blk: T.untyped).returns(PrivateAssociationRelation) }
     def lock(*args, &blk); end
@@ -785,49 +785,49 @@ class Comment
     def deleted_at_will_change!; end
 
     sig { returns(T.nilable(::Integer)) }
-    def federails_actor_id; end
+    def fedipub_actor_id; end
 
     sig { params(value: T.nilable(::Integer)).returns(T.nilable(::Integer)) }
-    def federails_actor_id=(value); end
+    def fedipub_actor_id=(value); end
 
     sig { returns(T::Boolean) }
-    def federails_actor_id?; end
+    def fedipub_actor_id?; end
 
     sig { returns(T.nilable(::Integer)) }
-    def federails_actor_id_before_last_save; end
+    def fedipub_actor_id_before_last_save; end
 
     sig { returns(T.untyped) }
-    def federails_actor_id_before_type_cast; end
+    def fedipub_actor_id_before_type_cast; end
 
     sig { returns(T::Boolean) }
-    def federails_actor_id_came_from_user?; end
+    def fedipub_actor_id_came_from_user?; end
 
     sig { returns(T.nilable([T.nilable(::Integer), T.nilable(::Integer)])) }
-    def federails_actor_id_change; end
+    def fedipub_actor_id_change; end
 
     sig { returns(T.nilable([T.nilable(::Integer), T.nilable(::Integer)])) }
-    def federails_actor_id_change_to_be_saved; end
+    def fedipub_actor_id_change_to_be_saved; end
 
     sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
-    def federails_actor_id_changed?(from: T.unsafe(nil), to: T.unsafe(nil)); end
+    def fedipub_actor_id_changed?(from: T.unsafe(nil), to: T.unsafe(nil)); end
 
     sig { returns(T.nilable(::Integer)) }
-    def federails_actor_id_in_database; end
+    def fedipub_actor_id_in_database; end
 
     sig { returns(T.nilable([T.nilable(::Integer), T.nilable(::Integer)])) }
-    def federails_actor_id_previous_change; end
+    def fedipub_actor_id_previous_change; end
 
     sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
-    def federails_actor_id_previously_changed?(from: T.unsafe(nil), to: T.unsafe(nil)); end
+    def fedipub_actor_id_previously_changed?(from: T.unsafe(nil), to: T.unsafe(nil)); end
 
     sig { returns(T.nilable(::Integer)) }
-    def federails_actor_id_previously_was; end
+    def fedipub_actor_id_previously_was; end
 
     sig { returns(T.nilable(::Integer)) }
-    def federails_actor_id_was; end
+    def fedipub_actor_id_was; end
 
     sig { void }
-    def federails_actor_id_will_change!; end
+    def fedipub_actor_id_will_change!; end
 
     sig { returns(T.nilable(::String)) }
     def federated_url; end
@@ -1064,7 +1064,7 @@ class Comment
     def restore_deleted_at!; end
 
     sig { void }
-    def restore_federails_actor_id!; end
+    def restore_fedipub_actor_id!; end
 
     sig { void }
     def restore_federated_url!; end
@@ -1106,10 +1106,10 @@ class Comment
     def saved_change_to_deleted_at?(from: T.unsafe(nil), to: T.unsafe(nil)); end
 
     sig { returns(T.nilable([T.nilable(::Integer), T.nilable(::Integer)])) }
-    def saved_change_to_federails_actor_id; end
+    def saved_change_to_fedipub_actor_id; end
 
     sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
-    def saved_change_to_federails_actor_id?(from: T.unsafe(nil), to: T.unsafe(nil)); end
+    def saved_change_to_fedipub_actor_id?(from: T.unsafe(nil), to: T.unsafe(nil)); end
 
     sig { returns(T.nilable([T.nilable(::String), T.nilable(::String)])) }
     def saved_change_to_federated_url; end
@@ -1253,7 +1253,7 @@ class Comment
     def will_save_change_to_deleted_at?(from: T.unsafe(nil), to: T.unsafe(nil)); end
 
     sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
-    def will_save_change_to_federails_actor_id?(from: T.unsafe(nil), to: T.unsafe(nil)); end
+    def will_save_change_to_fedipub_actor_id?(from: T.unsafe(nil), to: T.unsafe(nil)); end
 
     sig { params(from: T.untyped, to: T.untyped).returns(T::Boolean) }
     def will_save_change_to_federated_url?(from: T.unsafe(nil), to: T.unsafe(nil)); end
@@ -1297,7 +1297,7 @@ class Comment
     def deleted(*args, &blk); end
 
     sig { params(args: T.untyped, blk: T.untyped).returns(PrivateRelation) }
-    def distant_federails_entities(*args, &blk); end
+    def distant_fedipub_entities(*args, &blk); end
 
     sig { params(value: T::Boolean).returns(PrivateRelation) }
     def distinct(value = true); end
@@ -1348,7 +1348,7 @@ class Comment
     def limit(*args, &blk); end
 
     sig { params(args: T.untyped, blk: T.untyped).returns(PrivateRelation) }
-    def local_federails_entities(*args, &blk); end
+    def local_fedipub_entities(*args, &blk); end
 
     sig { params(args: T.untyped, blk: T.untyped).returns(PrivateRelation) }
     def lock(*args, &blk); end

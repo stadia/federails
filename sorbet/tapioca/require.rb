@@ -3,7 +3,7 @@
 
 # Add your extra requires here (`bin/tapioca require` can be used to bootstrap this list)
 
-# federails is a Rails engine: framework pieces must be loaded before the gem is required.
+# fedipub is a Rails engine: framework pieces must be loaded before the gem is required.
 require 'rails'
 require 'rails/generators'
 require 'active_record'

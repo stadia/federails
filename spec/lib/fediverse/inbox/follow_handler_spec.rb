@@ -7,7 +7,7 @@ module Fediverse
   # rubocop:disable Metrics/ClassLength
   class Inbox
     RSpec.describe FollowHandler do
-      let(:local_actor) { FactoryBot.create(:user).federails_actor }
+      let(:local_actor) { FactoryBot.create(:user).fedipub_actor }
       let(:distant_actor) { FactoryBot.create :distant_actor }
 
       describe '#handle_create_follow_request' do
@@ -22,11 +22,11 @@ module Fediverse
         it 'creates the following' do
           expect do
             described_class.handle_create_follow_request(distant_following)
-          end.to change(Federails::Following, :count).by(1)
+          end.to change(Fedipub::Following, :count).by(1)
         end
 
         it 'does not dispatch the followed callback twice for a local actor follow' do
-          local_target = FactoryBot.create(:user).federails_actor
+          local_target = FactoryBot.create(:user).fedipub_actor
           local_follow = {
             'id'     => 'http://example.com/local_follow_request',
             'actor'  => local_actor.federated_url,
@@ -52,7 +52,7 @@ module Fediverse
 
           expect do
             described_class.handle_create_follow_request(distant_following)
-          end.not_to change(Federails::Following, :count)
+          end.not_to change(Fedipub::Following, :count)
         end
 
         context 'when the Following is already accepted and a new activity id arrives' do
@@ -73,16 +73,16 @@ module Fediverse
 
           before do
             described_class.handle_create_follow_request(inbound_follow)
-            Federails::Following.find_by!(actor: distant_actor, target_actor: local_actor).update!(status: :accepted)
+            Fedipub::Following.find_by!(actor: distant_actor, target_actor: local_actor).update!(status: :accepted)
           end
 
           it 'creates a new Accept activity referencing the existing Follow activity' do
             expect do
               described_class.handle_create_follow_request(duplicate_follow)
-            end.to change(Federails::Activity.where(action: 'Accept'), :count).by(1)
+            end.to change(Fedipub::Activity.where(action: 'Accept'), :count).by(1)
 
-            follow_activity = Federails::Activity.find_by!(actor: distant_actor, action: 'Follow', entity: local_actor)
-            accept_activity = Federails::Activity.where(action: 'Accept').order(:created_at).last
+            follow_activity = Fedipub::Activity.find_by!(actor: distant_actor, action: 'Follow', entity: local_actor)
+            accept_activity = Fedipub::Activity.where(action: 'Accept').order(:created_at).last
             expect(accept_activity.entity).to eq(follow_activity)
             expect(accept_activity.actor).to eq(local_actor)
             expect(accept_activity.to).to eq([distant_actor.federated_url])
@@ -91,7 +91,7 @@ module Fediverse
           it 'does not create a duplicate Following' do
             expect do
               described_class.handle_create_follow_request(duplicate_follow)
-            end.not_to change(Federails::Following, :count)
+            end.not_to change(Fedipub::Following, :count)
           end
         end
 
@@ -118,7 +118,7 @@ module Fediverse
           it 'does not send an Accept' do
             expect do
               described_class.handle_create_follow_request(duplicate_follow)
-            end.not_to change(Federails::Activity.where(action: 'Accept'), :count)
+            end.not_to change(Fedipub::Activity.where(action: 'Accept'), :count)
           end
         end
 
@@ -131,9 +131,9 @@ module Fediverse
 
           expect do
             described_class.handle_create_follow_request(inbound_follow)
-          end.to change(Federails::Activity.where(action: 'Follow'), :count).by(1)
+          end.to change(Fedipub::Activity.where(action: 'Follow'), :count).by(1)
 
-          follow_activity = Federails::Activity.find_by!(
+          follow_activity = Fedipub::Activity.find_by!(
             actor:  distant_actor,
             action: 'Follow',
             entity: local_actor
@@ -177,7 +177,7 @@ module Fediverse
           begin
             User.send(:define_method, :accept_follow, original_accept_follow)
           rescue StandardError => e
-            Federails.logger.error { "Failed to restore User#accept_follow in spec: #{e.message}" }
+            Fedipub.logger.error { "Failed to restore User#accept_follow in spec: #{e.message}" }
             raise
           end
         end
@@ -185,27 +185,27 @@ module Fediverse
         it 'records the inbound Follow before accept! tries to reference it' do
           expect { Fediverse::Inbox.dispatch_request(payload) }.not_to raise_error
 
-          follow_activity = Federails::Activity.find_by!(
+          follow_activity = Fedipub::Activity.find_by!(
             actor:         remote_actor,
             action:        'Follow',
             entity:        local_actor,
             federated_url: payload['id']
           )
-          accept_activity = Federails::Activity.find_by!(action: 'Accept', actor: local_actor)
+          accept_activity = Fedipub::Activity.find_by!(action: 'Accept', actor: local_actor)
 
           expect(accept_activity.entity).to eq(follow_activity)
           expect(accept_activity.to).to eq([remote_actor.federated_url])
         end
 
         it 'does not enqueue delivery jobs for the remote Follow activity' do
-          expect { Fediverse::Inbox.dispatch_request(payload) }.to have_enqueued_job(Federails::NotifyInboxJob).exactly(1).times
+          expect { Fediverse::Inbox.dispatch_request(payload) }.to have_enqueued_job(Fedipub::NotifyInboxJob).exactly(1).times
         end
       end
 
       describe '.dispatch_followed_callback compatibility' do
-        let(:follow) { Federails::Following.create!(actor: distant_actor, target_actor: local_actor) }
+        let(:follow) { Fedipub::Following.create!(actor: distant_actor, target_actor: local_actor) }
         let(:follow_activity) do
-          Federails::Activity.create!(
+          Fedipub::Activity.create!(
             actor:         distant_actor,
             action:        'Follow',
             entity:        local_actor,
@@ -216,7 +216,7 @@ module Fediverse
 
         it 'passes follow_activity to keyword-capable callbacks' do
           modern_host_class = Class.new do
-            extend Federails::ActorEntity::ClassMethods
+            extend Fedipub::ActorEntity::ClassMethods
 
             after_followed :accept_follow
 
@@ -232,7 +232,7 @@ module Fediverse
 
         it 'falls back to the legacy one-argument callback shape' do
           legacy_host_class = Class.new do
-            extend Federails::ActorEntity::ClassMethods
+            extend Fedipub::ActorEntity::ClassMethods
 
             after_followed :accept_follow
 
@@ -248,7 +248,7 @@ module Fediverse
 
         it 'returns without raising when after_followed is not configured' do
           host_class = Class.new do
-            extend Federails::ActorEntity::ClassMethods
+            extend Fedipub::ActorEntity::ClassMethods
           end
 
           expect do
@@ -258,7 +258,7 @@ module Fediverse
 
         it 'raises NoMethodError when the configured callback is not defined on the instance' do
           host_class = Class.new do
-            extend Federails::ActorEntity::ClassMethods
+            extend Fedipub::ActorEntity::ClassMethods
 
             after_followed :missing_callback
           end
@@ -270,7 +270,7 @@ module Fediverse
       end
 
       describe '#handle_accept_follow_request' do
-        let(:local_following) { Federails::Following.create(actor: local_actor, target_actor: distant_actor) }
+        let(:local_following) { Fedipub::Following.create(actor: local_actor, target_actor: distant_actor) }
         let(:payload) do
           {
             'actor' => distant_actor.federated_url,
@@ -333,22 +333,22 @@ module Fediverse
         end
 
         context 'with a pending following' do
-          let(:local_following) { Federails::Following.create(actor: local_actor, target_actor: distant_actor) }
+          let(:local_following) { Fedipub::Following.create(actor: local_actor, target_actor: distant_actor) }
 
           it 'destroys the target Following' do
             expect do
               described_class.handle_undo_follow_request(payload)
-            end.to change(Federails::Following, :count).by(-1)
+            end.to change(Fedipub::Following, :count).by(-1)
           end
         end
 
         context 'with an accepted following' do
-          let(:local_following) { Federails::Following.create(actor: local_actor, target_actor: distant_actor, status: :accepted) }
+          let(:local_following) { Fedipub::Following.create(actor: local_actor, target_actor: distant_actor, status: :accepted) }
 
           it 'destroys the target Following' do
             expect do
               described_class.handle_undo_follow_request(payload)
-            end.to change(Federails::Following, :count).by(-1)
+            end.to change(Fedipub::Following, :count).by(-1)
           end
         end
 
@@ -358,7 +358,7 @@ module Fediverse
               'object' => 'https://remote.example/activities/follow-undo',
             }
           end
-          let(:local_following) { Federails::Following.create(actor: local_actor, target_actor: distant_actor) }
+          let(:local_following) { Fedipub::Following.create(actor: local_actor, target_actor: distant_actor) }
 
           before do
             allow(Fediverse::Request).to receive(:dereference).with(payload['object']).and_return(following)
@@ -367,13 +367,13 @@ module Fediverse
           it 'dereferences the original activity before destroying the following' do
             expect do
               described_class.handle_undo_follow_request(payload)
-            end.to change(Federails::Following, :count).by(-1)
+            end.to change(Fedipub::Following, :count).by(-1)
           end
         end
       end
 
       describe '#handle_reject_follow_request' do
-        let!(:pending_following) { Federails::Following.create(actor: local_actor, target_actor: distant_actor) }
+        let!(:pending_following) { Fedipub::Following.create(actor: local_actor, target_actor: distant_actor) }
         let(:payload) do
           {
             'actor'  => distant_actor.federated_url,
@@ -395,7 +395,7 @@ module Fediverse
         it 'destroys the pending following' do
           expect do
             described_class.handle_reject_follow_request(payload)
-          end.to change(Federails::Following, :count).by(-1)
+          end.to change(Fedipub::Following, :count).by(-1)
         end
 
         it 'does not raise when no matching following exists' do
@@ -417,7 +417,7 @@ module Fediverse
 
           expect do
             described_class.handle_reject_follow_request(payload)
-          end.not_to change(Federails::Following, :count)
+          end.not_to change(Fedipub::Following, :count)
 
           expect(pending_following.reload).to be_accepted
         end

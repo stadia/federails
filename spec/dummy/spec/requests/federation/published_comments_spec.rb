@@ -5,19 +5,19 @@ RSpec.describe '/federation/published', type: :request do
     let(:comment) { FactoryBot.create :comment }
 
     it 'renders a successful response' do
-      get federails.server_published_url(publishable_type: 'comments', id: comment.id)
+      get fedipub.server_published_url(publishable_type: 'comments', id: comment.id)
 
       expect(response).to be_successful
     end
 
     it 'includes standard JSON-LD context' do
-      get federails.server_published_url(publishable_type: 'comments', id: comment.id)
+      get fedipub.server_published_url(publishable_type: 'comments', id: comment.id)
       json = response.parsed_body
       expect(json['@context']).to include('https://www.w3.org/ns/activitystreams')
     end
 
     it 'includes additional JSON-LD context' do
-      get federails.server_published_url(publishable_type: 'comments', id: comment.id)
+      get fedipub.server_published_url(publishable_type: 'comments', id: comment.id)
       json = response.parsed_body
       expect(json['@context']).to include('https://purl.archive.org/miscellany')
       expect(json['@context']).to include({ 'Hashtag' => 'as:Hashtag' })
@@ -25,7 +25,7 @@ RSpec.describe '/federation/published', type: :request do
 
     context 'when the comment does not exist' do
       it 'renders an error' do
-        get federails.server_published_url(publishable_type: 'comments', id: 'invalid')
+        get fedipub.server_published_url(publishable_type: 'comments', id: 'invalid')
 
         expect(response).to have_http_status :not_found
       end

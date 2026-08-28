@@ -1,0 +1,19 @@
+# Generated from app/controllers/fedipub/client/activities_controller.rb with RBS::Inline
+
+module Fedipub
+  module Client
+    class ActivitiesController < Fedipub::ClientController
+      # GET /app/activities
+      # GET /app/activities.json
+      def index: () -> untyped
+
+      # GET /app/feed
+      # GET /app/feed.json
+      def feed: () -> untyped
+
+      private
+
+      def authorize_action!: () -> untyped
+    end
+  end
+end

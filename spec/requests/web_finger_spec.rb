@@ -5,35 +5,35 @@ RSpec.describe '/well-known', type: :request do
     let(:user) { FactoryBot.create :user }
 
     it 'renders a successful response given acct: URI' do
-      get federails.webfinger_url, params: { resource: "acct:#{user.id}@localhost" }
+      get fedipub.webfinger_url, params: { resource: "acct:#{user.id}@localhost" }
       expect(response).to be_successful
     end
 
     it 'renders a not found response given an @ address' do
       expect do
-        get federails.webfinger_url, params: { resource: "@#{user.id}@localhost" }
+        get fedipub.webfinger_url, params: { resource: "@#{user.id}@localhost" }
       end.to raise_error ActiveRecord::RecordNotFound
     end
 
     it 'renders a not found response given a bare address' do
       expect do
-        get federails.webfinger_url, params: { resource: "#{user.id}@localhost" }
+        get fedipub.webfinger_url, params: { resource: "#{user.id}@localhost" }
       end.to raise_error ActiveRecord::RecordNotFound
     end
 
     it 'renders a successful response given HTTP URI' do
-      get federails.webfinger_url, params: { resource: user.federails_actor.federated_url }
+      get fedipub.webfinger_url, params: { resource: user.fedipub_actor.federated_url }
       expect(response).to be_successful
     end
 
     ['application/jrd+json', 'application/json'].each do |accept|
       it "responds with JRD in response to a #{accept} request" do
-        get federails.webfinger_url, params: { resource: user.federails_actor.federated_url }, headers: { accept: accept }
+        get fedipub.webfinger_url, params: { resource: user.fedipub_actor.federated_url }, headers: { accept: accept }
         expect(response.content_type).to eq 'application/jrd+json; charset=utf-8'
       end
 
       it "responds with 404 in response to a #{accept} request for a nonexistent account" do
-        get federails.webfinger_url, params: { resource: 'acct:nobody@localhost' }, headers: { accept: accept }
+        get fedipub.webfinger_url, params: { resource: 'acct:nobody@localhost' }, headers: { accept: accept }
         expect(response).to be_not_found
         if accept == 'application/json'
           expect(response.parsed_body['error']).to eq 'ActiveRecord::RecordNotFound'
@@ -44,24 +44,24 @@ RSpec.describe '/well-known', type: :request do
     end
 
     context 'with a tombstoned actor' do
-      let(:actor) { user.federails_actor.tombstone! }
+      let(:actor) { user.fedipub_actor.tombstone! }
 
       ['application/jrd+json', 'application/json'].each do |accept|
         it "returns an error page to a #{accept} request with an URL resource" do
-          get federails.webfinger_url, params: { resource: actor.federated_url }, headers: { accept: accept }
+          get fedipub.webfinger_url, params: { resource: actor.federated_url }, headers: { accept: accept }
           expect(response).to have_http_status :gone
           if accept == 'application/json'
-            expect(response.parsed_body['error']).to eq 'Federails::Actor::TombstonedError'
+            expect(response.parsed_body['error']).to eq 'Fedipub::Actor::TombstonedError'
           else
             expect(response.body).to be_blank
           end
         end
 
         it "returns an error page to a #{accept} request with an 'acct:' resource" do
-          get federails.webfinger_url, params: { resource: actor.acct_uri }, headers: { accept: accept }
+          get fedipub.webfinger_url, params: { resource: actor.acct_uri }, headers: { accept: accept }
           expect(response).to have_http_status :gone
           if accept == 'application/json'
-            expect(response.parsed_body['error']).to eq 'Federails::Actor::TombstonedError'
+            expect(response.parsed_body['error']).to eq 'Fedipub::Actor::TombstonedError'
           else
             expect(response.body).to be_blank
           end
@@ -71,7 +71,7 @@ RSpec.describe '/well-known', type: :request do
 
     context 'when checking content' do
       let(:result) do
-        get federails.webfinger_url, params: { resource: "acct:#{user.id}@localhost" }, headers: { accept: accept }
+        get fedipub.webfinger_url, params: { resource: "acct:#{user.id}@localhost" }, headers: { accept: accept }
         response.parsed_body
       end
 
@@ -83,14 +83,14 @@ RSpec.describe '/well-known', type: :request do
         html_profile = result['links'].find { |x| x['rel'] == 'https://webfinger.net/rel/profile-page' }
         expect(html_profile).to be_present
         expect(html_profile['type']).to eq 'text/html'
-        expect(html_profile['href']).to eq user.federails_actor.profile_url
+        expect(html_profile['href']).to eq user.fedipub_actor.profile_url
       end
 
       it 'includes self link to activitypub actor' do
         self_link = result['links'].find { |x| x['rel'] == 'self' }
         expect(self_link).to be_present
         expect(self_link['type']).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"'
-        expect(self_link['href']).to eq user.federails_actor.federated_url
+        expect(self_link['href']).to eq user.fedipub_actor.federated_url
       end
 
       it 'includes ostatus subscribe template for remote following' do
@@ -103,12 +103,12 @@ RSpec.describe '/well-known', type: :request do
 
   describe 'GET /.well-known/host-meta' do
     it 'renders a successful response' do
-      get federails.host_meta_url
+      get fedipub.host_meta_url
       expect(response).to be_successful
     end
 
     it 'includes the lrdd template in the XRD body' do
-      get federails.host_meta_url
+      get fedipub.host_meta_url
 
       expect(response.body).to include('rel="lrdd"')
       expect(response.body).to include('resource={uri}')
@@ -116,7 +116,7 @@ RSpec.describe '/well-known', type: :request do
 
     ['application/xrd+xml', 'application/xml'].each do |accept|
       it "responds with XRD in response to a #{accept} request" do
-        get federails.host_meta_url, headers: { accept: accept }
+        get fedipub.host_meta_url, headers: { accept: accept }
         expect(response.content_type).to eq 'application/xrd+xml; charset=utf-8'
       end
     end

@@ -15,11 +15,11 @@ RSpec.describe '/federation/inbox (shared)', type: :request do
   end
 
   before do
-    Federails::Configuration.verify_signatures = false
+    Fedipub::Configuration.verify_signatures = false
   end
 
   after do
-    Federails::Configuration.verify_signatures = true
+    Fedipub::Configuration.verify_signatures = true
   end
 
   describe 'POST /federation/inbox' do
@@ -27,19 +27,19 @@ RSpec.describe '/federation/inbox (shared)', type: :request do
       allow(Fediverse::Inbox).to receive(:dispatch_request).and_return(true)
       allow(Fediverse::Inbox).to receive(:maybe_forward)
 
-      post federails.server_shared_inbox_path, params: payload, headers: { 'Content-Type' => 'application/activity+json' }
+      post fedipub.server_shared_inbox_path, params: payload, headers: { 'Content-Type' => 'application/activity+json' }
 
       expect(response).to have_http_status(:created)
     end
 
     it 'returns 415 for unsupported content type' do
-      post federails.server_shared_inbox_path, params: payload, headers: { 'Content-Type' => 'text/plain' }
+      post fedipub.server_shared_inbox_path, params: payload, headers: { 'Content-Type' => 'text/plain' }
 
       expect(response).to have_http_status(:unsupported_media_type)
     end
 
     it 'returns 422 for invalid payload' do
-      post federails.server_shared_inbox_path, params: '{}', headers: { 'Content-Type' => 'application/activity+json' }
+      post fedipub.server_shared_inbox_path, params: '{}', headers: { 'Content-Type' => 'application/activity+json' }
 
       expect(response).to have_http_status(:unprocessable_entity).or have_http_status(:unprocessable_content)
     end
@@ -47,16 +47,16 @@ RSpec.describe '/federation/inbox (shared)', type: :request do
     it 'returns 200 for duplicate activity' do
       allow(Fediverse::Inbox).to receive(:dispatch_request).and_return(:duplicate)
 
-      post federails.server_shared_inbox_path, params: payload, headers: { 'Content-Type' => 'application/activity+json' }
+      post fedipub.server_shared_inbox_path, params: payload, headers: { 'Content-Type' => 'application/activity+json' }
 
       expect(response).to have_http_status(:ok)
     end
 
     context 'when verify_signatures is true' do
-      before { Federails::Configuration.verify_signatures = true }
+      before { Fedipub::Configuration.verify_signatures = true }
 
       it 'rejects unsigned POST with 401' do
-        post federails.server_shared_inbox_path, params: payload, headers: { 'Content-Type' => 'application/activity+json' }
+        post fedipub.server_shared_inbox_path, params: payload, headers: { 'Content-Type' => 'application/activity+json' }
 
         expect(response).to have_http_status(:unauthorized)
       end

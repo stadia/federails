@@ -29,12 +29,12 @@
 
 ## 2. P2-1: RFC 9421 HTTP Message Signatures
 
-**배경:** 현재 Federails는 draft-cavage-12 서명 방식을 사용. RFC 9421은 이를 대체하는 IETF 표준으로, Mastodon은 아직 draft-cavage를 사용하지만 점진적 전환이 예상됨.
+**배경:** 현재 Fedipub는 draft-cavage-12 서명 방식을 사용. RFC 9421은 이를 대체하는 IETF 표준으로, Mastodon은 아직 draft-cavage를 사용하지만 점진적 전환이 예상됨.
 
 **설계 방향:**
 - `Fediverse::Signature`에 RFC 9421 서명/검증을 별도 모듈로 추가 (기존 draft-cavage와 병존)
 - 인바운드: `Signature` 헤더와 `Signature-Input` 헤더 존재 여부로 RFC 9421 vs draft-cavage 자동 감지
-- 아웃바운드: 설정으로 서명 방식 선택 (`Federails.configuration.signature_algorithm`). 기본값은 draft-cavage (호환성), 옵트인으로 RFC 9421
+- 아웃바운드: 설정으로 서명 방식 선택 (`Fedipub.configuration.signature_algorithm`). 기본값은 draft-cavage (호환성), 옵트인으로 RFC 9421
 - 서명 알고리즘: `rsa-pss-sha512` (RFC 9421 권장) + `rsa-v1_5-sha256` (draft-cavage 호환)
 
 **의존관계:** 없음 (독립 구현 가능)
@@ -105,7 +105,7 @@
 - **수신 핸들러:** `register_handler("Move", "*", MoveHandler, :handle_move)`
   - `actor` (이전 계정)와 `target` (새 계정)을 검증
   - 검증 조건: 새 계정의 `alsoKnownAs`에 이전 계정이 포함되어 있어야 함 (Mastodon 방식의 양방향 확인)
-  - 검증 통과시: 이전 계정의 로컬 followers에게 콜백 (`on_federails_move_received`) 발생. 호스트앱이 follower 이전, UI 안내 등을 결정
+  - 검증 통과시: 이전 계정의 로컬 followers에게 콜백 (`on_fedipub_move_received`) 발생. 호스트앱이 follower 이전, UI 안내 등을 결정
   - 이전 계정 Actor를 tombstone 상태로 전환하지는 않음 — 호스트앱 결정
 - **발신:** `type: "Move"`, `actor: 이전 계정 URI`, `target: 새 계정 URI`
   - 발신 전 전제조건: 새 계정에서 `alsoKnownAs` 설정이 완료되어 있어야 함
@@ -158,7 +158,7 @@
   - `target`이 로컬 actor의 `featured` URL이면 → `FeaturedItem` 생성/삭제
   - `target`이 로컬 actor의 `featured_tags` URL이면 → `FeaturedTag` 생성/삭제
   - same-origin 검증: `actor`와 `target` 컬렉션의 소유자가 동일해야 함
-  - 그 외 `target`은 호스트앱 콜백 (`on_federails_add_received`, `on_federails_remove_received`)으로 위임
+  - 그 외 `target`은 호스트앱 콜백 (`on_fedipub_add_received`, `on_fedipub_remove_received`)으로 위임
 - **발신:** 호스트앱이 `actor.feature(object)` / `actor.unfeature(object)` 호출시 자동으로 Add/Remove activity 생성 및 배달
 
 **의존관계:** P1-7 featured/featured_tags 컬렉션 (구현 완료)
@@ -181,11 +181,11 @@
 - **수신 핸들러:** `register_handler("Flag", "*", FlagHandler, :handle_flag)`
   - `object` 파싱: 첫 번째 요소가 actor URI, 나머지가 콘텐츠 URI (Mastodon 관례)
   - 대상 actor가 로컬인지 검증
-  - 엔진은 Flag activity를 기록만 하고, 호스트앱 콜백 (`on_federails_flag_received`)으로 위임
+  - 엔진은 Flag activity를 기록만 하고, 호스트앱 콜백 (`on_fedipub_flag_received`)으로 위임
   - 콜백에 전달하는 정보: 신고자 actor, 대상 actor, 대상 콘텐츠 URI 목록, `content` (신고 사유)
-- **발신:** 호스트앱이 신고를 생성할 때 호출할 수 있는 API (`Federails::Flag.create_and_deliver(reporter:, target_actor:, objects:, content:)`)
+- **발신:** 호스트앱이 신고를 생성할 때 호출할 수 있는 API (`Fedipub::Flag.create_and_deliver(reporter:, target_actor:, objects:, content:)`)
   - `to`는 대상 actor의 서버 inbox (Mastodon은 신고를 대상 서버에만 전송)
-- **모델:** `Federails::Flag` 모델은 만들지 않음. 신고의 저장/관리는 호스트앱 책임. 엔진은 수신 콜백과 발신 헬퍼만 제공
+- **모델:** `Fedipub::Flag` 모델은 만들지 않음. 신고의 저장/관리는 호스트앱 책임. 엔진은 수신 콜백과 발신 헬퍼만 제공
 
 **의존관계:** 없음
 
@@ -204,26 +204,26 @@
 
 ### Rake Tasks
 
-- **`rake federails:status`** — 현재 구현 상태 출력. Actor 수(로컬/리모트), Following 수, 최근 배달 성공/실패 비율, 등록된 핸들러 목록
-- **`rake federails:test_delivery[actor_uri]`** — 특정 actor에 테스트 activity(Note 타입) 전송. 서명, 배달, 응답 코드를 단계별 출력. 연합 연결 확인용
-- **`rake federails:verify_remote[domain]`** — 리모트 서버와 핸드셰이크 검증. WebFinger → actor fetch → 서명 교환까지 단계별 성공/실패 출력
-- **`rake federails:inspect_actor[uri]`** — actor JSON 출력 + 공개키 상태 + endpoints + 컬렉션 URL 접근 가능 여부
+- **`rake fedipub:status`** — 현재 구현 상태 출력. Actor 수(로컬/리모트), Following 수, 최근 배달 성공/실패 비율, 등록된 핸들러 목록
+- **`rake fedipub:test_delivery[actor_uri]`** — 특정 actor에 테스트 activity(Note 타입) 전송. 서명, 배달, 응답 코드를 단계별 출력. 연합 연결 확인용
+- **`rake fedipub:verify_remote[domain]`** — 리모트 서버와 핸드셰이크 검증. WebFinger → actor fetch → 서명 교환까지 단계별 성공/실패 출력
+- **`rake fedipub:inspect_actor[uri]`** — actor JSON 출력 + 공개키 상태 + endpoints + 컬렉션 URL 접근 가능 여부
 
 ### RSpec 헬퍼
 
-- **`Federails::TestHelper::SignedRequest`** — 서명된 inbox POST 요청을 생성하는 공유 컨텍스트. 현재 `spec/support/signature_helper.rb`에 내부용으로 있는 것을 공개 API로 정리
-- **`Federails::TestHelper::ActorFactory`** — 로컬/리모트 actor를 빠르게 만드는 헬퍼. 키쌍 자동 생성 포함
+- **`Fedipub::TestHelper::SignedRequest`** — 서명된 inbox POST 요청을 생성하는 공유 컨텍스트. 현재 `spec/support/signature_helper.rb`에 내부용으로 있는 것을 공개 API로 정리
+- **`Fedipub::TestHelper::ActorFactory`** — 로컬/리모트 actor를 빠르게 만드는 헬퍼. 키쌍 자동 생성 포함
 
 ### Rails Console 헬퍼
 
-- **`Federails.debug_actor(uri)`** — actor 정보 + 키 상태 + 최근 activity 요약
-- **`Federails.debug_delivery(activity)`** — 특정 activity의 배달 대상, 상태, 실패 이유 추적
+- **`Fedipub.debug_actor(uri)`** — actor 정보 + 키 상태 + 최근 activity 요약
+- **`Fedipub.debug_delivery(activity)`** — 특정 activity의 배달 대상, 상태, 실패 이유 추적
 
 **의존관계:** 모든 P0/P1 구현이 완료된 후 작업하는 것이 자연스러움
 
 **수용 조건:**
 - 4개 rake task가 동작하고 유용한 출력을 생성
-- RSpec 헬퍼를 호스트앱에서 `require 'federails/test_helpers'`로 사용 가능
+- RSpec 헬퍼를 호스트앱에서 `require 'fedipub/test_helpers'`로 사용 가능
 - console 헬퍼가 연합 디버깅에 실용적
 
 **비목표:** 웹 기반 대시보드, Grafana/Prometheus 메트릭 연동

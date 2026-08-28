@@ -177,7 +177,7 @@ module Fediverse
     describe '#fetch_actor_url' do
       it 'returns an Actor' do
         VCR.use_cassette 'fediverse/webfinger/fetch_actor_url_get' do
-          expect(described_class.fetch_actor_url('https://mamot.fr/users/mtancoigne')).to be_a Federails::Actor
+          expect(described_class.fetch_actor_url('https://mamot.fr/users/mtancoigne')).to be_a Fedipub::Actor
         end
       end
 
@@ -226,7 +226,7 @@ module Fediverse
     describe '#fetch_actor' do
       it 'returns an Actor' do
         VCR.use_cassette 'fediverse/webfinger/fetch_actor_get' do
-          expect(described_class.fetch_actor('mtancoigne', 'mamot.fr')).to be_a Federails::Actor
+          expect(described_class.fetch_actor('mtancoigne', 'mamot.fr')).to be_a Fedipub::Actor
         end
       end
 
@@ -263,7 +263,7 @@ module Fediverse
         let(:where_chain) { instance_double(ActiveRecord::QueryMethods::WhereChain) }
 
         before do
-          allow(Federails::Actor).to receive(:where).with(local: true).and_return(local_scope)
+          allow(Fedipub::Actor).to receive(:where).with(local: true).and_return(local_scope)
           allow(local_scope).to receive(:where).with(no_args).and_return(where_chain)
           allow(where_chain).to receive(:not).with(entity_type: nil).and_return(local_scope)
           allow(local_scope).to receive(:first).and_return(local_actor)
@@ -278,7 +278,7 @@ module Fediverse
         end
 
         it 'raises when signed get returns an unhandled status' do
-          allow(Fediverse::Signature).to receive(:signed_get).and_raise(Federails::Utils::JsonRequest::UnhandledResponseStatus.new('404'))
+          allow(Fediverse::Signature).to receive(:signed_get).and_raise(Fedipub::Utils::JsonRequest::UnhandledResponseStatus.new('404'))
 
           expect do
             described_class.send(:signed_get_json, 'https://example.com/users/jdoe')

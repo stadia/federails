@@ -37,7 +37,7 @@ P0/P1 로드맵의 10개 항목 모두에 대해 구현 시도가 들어가 있�
 - 로그에 resolve된 로컬 수신자 목록 출력
 
 **수정 대상:**
-- `app/controllers/federails/server/shared_inbox_controller.rb`
+- `app/controllers/fedipub/server/shared_inbox_controller.rb`
 
 ---
 
@@ -60,7 +60,7 @@ P0/P1 로드맵의 10개 항목 모두에 대해 구현 시도가 들어가 있�
 - 6회 초과시 예외 raise
 
 **수정 대상:**
-- `app/jobs/federails/notify_inbox_job.rb`
+- `app/jobs/fedipub/notify_inbox_job.rb`
 
 ---
 
@@ -71,7 +71,7 @@ P0/P1 로드맵의 10개 항목 모두에 대해 구현 시도가 들어가 있�
 **변경:**
 - `resolve_target_entity`에서 로컬 객체를 찾지 못하면 `Fediverse::Request.dereference(object)`로 리모트 fetch 시도
 - fetch 타임아웃 5초 (Faraday 연결/읽기 타임아웃)
-- fetch 성공시 결과를 `Federails::Utils::Object.find_or_initialize`로 로컬 DataEntity에 저장
+- fetch 성공시 결과를 `Fedipub::Utils::Object.find_or_initialize`로 로컬 DataEntity에 저장
 - fetch 실패(타임아웃, 4xx, 5xx)시 object URI만 기록하고 핸들러는 정상 완료 — Announce 자체는 유효하므로 거부하지 않음
 - `handle_undo_announce`에서도 동일한 로직 적용
 
@@ -110,7 +110,7 @@ P0/P1 로드맵의 10개 항목 모두에 대해 구현 시도가 들어가 있�
 
 ## 6. G5: Inbound bto/bcc 방어적 무시
 
-**현재 상태:** `Fediverse::Inbox#record_processed_activity`에서 수신한 activity의 `bto`/`bcc`를 그대로 `Federails::Activity`에 저장.
+**현재 상태:** `Fediverse::Inbox#record_processed_activity`에서 수신한 activity의 `bto`/`bcc`를 그대로 `Fedipub::Activity`에 저장.
 
 **변경:**
 - `record_processed_activity`에서 `bto`/`bcc` 필드를 `nil`로 설정하여 저장하지 않음
@@ -118,7 +118,7 @@ P0/P1 로드맵의 10개 항목 모두에 대해 구현 시도가 들어가 있�
 - 핸들러에 전달되는 payload는 원본 유지 — 핸들러가 원본 payload를 볼 수 있어야 디버깅에 유리. 저장 단계에서만 제거
 
 **수용 조건:**
-- 수신 activity에 `bto`/`bcc`가 있어도 `Federails::Activity` 레코드에는 저장되지 않음
+- 수신 activity에 `bto`/`bcc`가 있어도 `Fedipub::Activity` 레코드에는 저장되지 않음
 - 핸들러에 전달되는 payload는 원본 유지
 
 **수정 대상:**

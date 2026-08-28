@@ -8,11 +8,11 @@ module Fediverse
       # : (Hash[String, untyped]) -> untyped
       def self.dispatch_delete_request: (Hash[String, untyped]) -> untyped
 
-      # Triggers on_federails_delete_requested callback on the matching local object.
+      # Triggers on_fedipub_delete_requested callback on the matching local object.
       # : (Hash[String, untyped]) -> void
       def self.handle_delete_request: (Hash[String, untyped]) -> void
 
-      # Triggers on_federails_undelete_requested callback when an Undo+Delete is received.
+      # Triggers on_fedipub_undelete_requested callback when an Undo+Delete is received.
       # : (Hash[String, untyped]) -> void
       def self.handle_undelete_request: (Hash[String, untyped]) -> void
     end

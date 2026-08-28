@@ -21,13 +21,13 @@ RSpec.describe 'POST federation/actors/:actor_id/inbox with a Note to become a P
       }
     end
     let(:make_request) do
-      post federails.server_actor_inbox_url(actor_id: local_actor.id), params: fediverse_object, headers: headers
+      post fedipub.server_actor_inbox_url(actor_id: local_actor.id), params: fediverse_object, headers: headers
     end
 
     context 'with a supported Note' do
       it 'rejects non-ActivityPub content types' do
         post(
-          federails.server_actor_inbox_url(actor_id: local_actor.id),
+          fedipub.server_actor_inbox_url(actor_id: local_actor.id),
           params:  fediverse_object,
           headers: headers.merge('Content-Type' => 'application/json')
         )
@@ -38,7 +38,7 @@ RSpec.describe 'POST federation/actors/:actor_id/inbox with a Note to become a P
       context 'when JSON-LD compaction fails' do
         before do
           VCR.use_cassette 'fediverse/request/get_actor_200' do
-            Federails::Actor.find_or_create_by_federation_url distant_actor_url
+            Fedipub::Actor.find_or_create_by_federation_url distant_actor_url
           end
 
           allow(JSON::LD::API).to receive(:compact).and_raise(
@@ -64,7 +64,7 @@ RSpec.describe 'POST federation/actors/:actor_id/inbox with a Note to become a P
       context 'when actor already exist' do
         before do
           VCR.use_cassette 'fediverse/request/get_actor_200' do
-            Federails::Actor.find_or_create_by_federation_url distant_actor_url
+            Fedipub::Actor.find_or_create_by_federation_url distant_actor_url
           end
         end
 
@@ -76,7 +76,7 @@ RSpec.describe 'POST federation/actors/:actor_id/inbox with a Note to become a P
 
         it 'does not create a new actor' do
           VCR.use_cassette 'dummy/fediverse/request/get_note_200' do
-            expect { make_request }.not_to change(Federails::Actor, :count)
+            expect { make_request }.not_to change(Fedipub::Actor, :count)
           end
         end
       end
@@ -89,7 +89,7 @@ RSpec.describe 'POST federation/actors/:actor_id/inbox with a Note to become a P
         end
 
         it 'creates the distant actor' do
-          expect { make_request }.to change { Federails::Actor.distant.count }.by 1
+          expect { make_request }.to change { Fedipub::Actor.distant.count }.by 1
         end
 
         it 'creates a Post' do

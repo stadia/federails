@@ -1,6 +1,0 @@
-# Generated from app/models/federails/featured_item.rb with RBS::Inline
-
-module Federails
-  class FeaturedItem < ApplicationRecord
-  end
-end

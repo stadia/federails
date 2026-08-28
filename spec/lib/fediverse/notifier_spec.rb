@@ -6,7 +6,7 @@ module Fediverse
   FakeActivity = Struct.new :id, :actor, :recipients, :action, :entity, :to, :cc, :bto, :bcc, :audience, :result, :instrument, keyword_init: true
 
   RSpec.describe Notifier do
-    let(:local_actor) { FactoryBot.create(:user).federails_actor }
+    let(:local_actor) { FactoryBot.create(:user).fedipub_actor }
     let(:distant_target_actor) { FactoryBot.create :distant_actor }
 
     describe 'delivery' do
@@ -129,7 +129,7 @@ module Fediverse
       it 'stops resolving nested collections when max_depth is reached' do
         allow(Collection).to receive(:fetch).with('https://example.com/collection').and_return(['https://example.com/nested'])
         allow(Collection).to receive(:fetch).with('https://example.com/nested').and_return(['https://example.com/actors/1'])
-        allow(Federails::Actor).to receive(:find_or_create_by_federation_url).with('https://example.com/nested').and_raise(ActiveRecord::RecordNotFound)
+        allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url).with('https://example.com/nested').and_raise(ActiveRecord::RecordNotFound)
 
         expect(described_class.send(:collection_to_actors, 'https://example.com/collection', max_depth: 1)).to eq([])
       end
@@ -146,7 +146,7 @@ module Fediverse
       end
 
       it 'excludes local actors from local followers collections' do
-        second_local_actor = FactoryBot.create(:user).federails_actor
+        second_local_actor = FactoryBot.create(:user).fedipub_actor
         FactoryBot.create :following, actor: distant_target_actor, target_actor: local_actor
         FactoryBot.create :following, actor: second_local_actor, target_actor: local_actor
 
@@ -157,7 +157,7 @@ module Fediverse
 
       it 'returns an empty list when fetching a collection returns an unhandled status' do
         allow(Collection).to receive(:fetch).and_raise(
-          Federails::Utils::JsonRequest::UnhandledResponseStatus,
+          Fedipub::Utils::JsonRequest::UnhandledResponseStatus,
           'Unhandled status code 500 for GET https://example.com/collection'
         )
 
@@ -214,7 +214,7 @@ module Fediverse
         expect do
           described_class.send(:post_to_inbox, inbox_url: distant_target_actor.inbox_url, message: '{}', from: local_actor)
         end.to raise_error(
-          Federails::PermanentDeliveryError,
+          Fedipub::PermanentDeliveryError,
           /HTTP 400 - invalid signature/
         )
       end
@@ -228,7 +228,7 @@ module Fediverse
           expect do
             described_class.send(:post_to_inbox, inbox_url: distant_target_actor.inbox_url, message: '{}', from: local_actor)
           end.to raise_error(
-            Federails::TemporaryDeliveryError,
+            Fedipub::TemporaryDeliveryError,
             /HTTP 429 \(Retry-After: 120\) - slow down/
           )
         end
@@ -242,7 +242,7 @@ module Fediverse
           expect do
             described_class.send(:post_to_inbox, inbox_url: distant_target_actor.inbox_url, message: '{}', from: local_actor)
           end.to raise_error(
-            Federails::TemporaryDeliveryError,
+            Fedipub::TemporaryDeliveryError,
             /HTTP 503 - maintenance/
           )
         end
@@ -262,13 +262,13 @@ module Fediverse
       end
 
       it 'refuses to send a Create activity when the serialized object is missing' do
-        allow(Federails::Server::ActivityResource).to receive(:new)
-          .and_return(instance_double(Federails::Server::ActivityResource, serializable_hash: { id: 'https://example.com/activities/1', type: 'Create', actor: local_actor.federated_url }))
+        allow(Fedipub::Server::ActivityResource).to receive(:new)
+          .and_return(instance_double(Fedipub::Server::ActivityResource, serializable_hash: { id: 'https://example.com/activities/1', type: 'Create', actor: local_actor.federated_url }))
         allow(described_class).to receive(:post_to_inbox)
 
         expect do
           described_class.deliver_to_inbox(fake_activity, distant_target_actor.inbox_url)
-        end.to raise_error(Federails::InvalidDeliveryPayloadError, /missing object/)
+        end.to raise_error(Fedipub::InvalidDeliveryPayloadError, /missing object/)
 
         expect(described_class).not_to have_received(:post_to_inbox)
       end
@@ -282,8 +282,8 @@ module Fediverse
           entity: fake_entity
         )
 
-        allow(Federails::Server::ActivityResource).to receive(:new)
-          .and_return(instance_double(Federails::Server::ActivityResource, serializable_hash: {
+        allow(Fedipub::Server::ActivityResource).to receive(:new)
+          .and_return(instance_double(Fedipub::Server::ActivityResource, serializable_hash: {
                                         id:     'https://example.com/activities/1',
                                         type:   'Update',
                                         actor:  local_actor.federated_url,
@@ -293,7 +293,7 @@ module Fediverse
 
         expect do
           described_class.deliver_to_inbox(invalid_update, distant_target_actor.inbox_url)
-        end.to raise_error(Federails::InvalidDeliveryPayloadError, /missing object\.id for Update/)
+        end.to raise_error(Fedipub::InvalidDeliveryPayloadError, /missing object\.id for Update/)
 
         expect(described_class).not_to have_received(:post_to_inbox)
       end

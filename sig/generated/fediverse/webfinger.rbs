@@ -23,14 +23,14 @@ module Fediverse
     # @param username [String]
     # @param domain [String]
     #
-    # @return [Federails::Actor, nil] Federails actor or nothing when not found
+    # @return [Fedipub::Actor, nil] Fedipub actor or nothing when not found
     def self.fetch_actor: (untyped username, untyped domain) -> untyped
 
     # Fetches an actor given its URL
     #
     # @param url [String] Actor's federation URL
     #
-    # @return [Federails::Actor, nil] Federails actor or nothing when not found
+    # @return [Fedipub::Actor, nil] Fedipub actor or nothing when not found
     def self.fetch_actor_url: (untyped url) -> untyped
 
     # Gets the real actor's federation URL from its username and domain
@@ -58,9 +58,9 @@ module Fediverse
     # @return [String] Server and port
     private def self.server_and_port: (untyped string) -> untyped
 
-    # Builds a +Federails::Actor+ from a Webfinger response
+    # Builds a +Fedipub::Actor+ from a Webfinger response
     # @param data [Hash] Webfinger response
-    # @return [Federails::Actor]
+    # @return [Fedipub::Actor]
     private def self.webfinger_to_actor: (untyped data) -> untyped
 
     # Performs a signed GET request using a local actor for authentication

@@ -8,7 +8,7 @@ nav_order: 10
 Add this line to your application's Gemfile:
 
 ```ruby
-gem "federails"
+gem "fedipub"
 ```
 
 And then execute:
@@ -22,19 +22,19 @@ $ bundle
 ### Generate configuration files
 
 ```sh
-bundle exec rails generate federails:install
+bundle exec rails generate fedipub:install
 ```
 
 It creates an initializer and a configuration file:
-- `config/initializers/federails.rb`
-- `config/federails.yml`
+- `config/initializers/fedipub.rb`
+- `config/fedipub.yml`
 
-By default, Federails is configured using `config_from` method, that loads the appropriate YAML file, but you may want
+By default, Fedipub is configured using `config_from` method, that loads the appropriate YAML file, but you may want
 to configure it differently:
 
 ```rb
-# config/initializers/federails.rb
-Federails.configure do |config|
+# config/initializers/fedipub.rb
+Fedipub.configure do |config|
   config.host = 'localhost'
   # ...
 end
@@ -43,20 +43,20 @@ end
 Object-like dependencies such as the logger should be configured in the initializer rather than YAML:
 
 ```rb
-Federails.configure do |config|
+Fedipub.configure do |config|
   config.logger = Rails.logger
 end
 ```
 
-If no logger is injected, Federails falls back to Ruby's standard `Logger`.
+If no logger is injected, Fedipub falls back to Ruby's standard `Logger`.
 
-For now, refer to [the source code](https://gitlab.com/experimentslabs/federails/-/blob/main/lib/federails/configuration.rb) 
+For now, refer to [the source code](https://gitlab.com/experimentslabs/fedipub/-/blob/main/lib/fedipub/configuration.rb) 
 for the full list of options.
 
 ### Copy the migrations
 
 ```sh
-bundle exec rails federails:install:migrations
+bundle exec rails fedipub:install:migrations
 ```
 
 Review the changes and apply them.
@@ -64,11 +64,11 @@ Review the changes and apply them.
 ## Routes
 
 Mount the engine on `/`: routes to `/.well-known/*` and `/nodeinfo/*` must be at the root of the site.
-Federails routes are then available under the configured path (`routes_path`):
+Fedipub routes are then available under the configured path (`routes_path`):
 
 ```rb
 # config/routes.rb
-mount Federails::Engine => '/'
+mount Fedipub::Engine => '/'
 ```
 
 With `routes_path = 'federation'`, routes will be:
@@ -94,7 +94,7 @@ With `routes_path = 'federation'`, routes will be:
 Some routes can be disabled in configuration if you don't want to expose particular features:
 
 ```rb
-Federails.configure do |config|
+Fedipub.configure do |config|
   # Disable routing for .well-known and nodeinfo
   config.enable_discovery = false
 
@@ -102,9 +102,9 @@ Federails.configure do |config|
   config.client_routes_path = nil
 end
 ```
-## Federails client
+## Fedipub client
 
-To get started, you can use the Federails client: routes and views to list actors, follow them, list activities, etc...
+To get started, you can use the Fedipub client: routes and views to list actors, follow them, list activities, etc...
 
 To enable the routes, set the `config.client_routes_path` to something so they can be mounted in your application.
 
@@ -119,14 +119,14 @@ You can override the views like with any other engine. We provide a rake task to
 override what you want:
 
 ```sh
-rails generate federails:copy_client_views
+rails generate fedipub:copy_client_views
 ```
 
 ### Disabling/not using the client
 
 To disable the client, set `client_routes_path` to `nil`.
 
-Disabling the client will break some of the Federails features, as Federails _needs_ some of the client routes to
+Disabling the client will break some of the Fedipub features, as Fedipub _needs_ some of the client routes to
 generate URLS. You will need provide the routes yourself:
 
 #### Remote following
@@ -137,15 +137,15 @@ user interface, you can set the path like this, assuming that `new_follow_url` i
 query parameter template will be automatically appended, you don't need to specify that.
 
 ```rb
-Federails.configure do |config|
+Fedipub.configure do |config|
   config.remote_follow_url_method = :new_follow_url
 end
 ```
 
 This _GET_ route _should_ render a page allowing to follow the actor passed as `uri` parameter.
 
-In the client (`app/controllers/federails/client/followings_controller.rb#new`), we use a page that allows signed-in
-actor to find another actor and follow it. In the Federails client implementation, we fetch the actor, save it locally
+In the client (`app/controllers/fedipub/client/followings_controller.rb#new`), we use a page that allows signed-in
+actor to find another actor and follow it. In the Fedipub client implementation, we fetch the actor, save it locally
 and redirect to a page that displays it, with the "Follow" button, but you can do whatever you want, as long as the user
 has ability to follow the actor in the end.
 
@@ -155,34 +155,34 @@ has ability to follow the actor in the end.
 Copy the migrations:
 
 ```sh
-bundle exec rails federails:install:migrations
+bundle exec rails fedipub:install:migrations
 ```
 
 ## User model
 
 In the ActivityPub world, we refer to _actors_ to represent the thing that publishes or subscribe to _other actors_.
 
-Federails provides a concern to include in your "user" model or whatever will publish data:
+Fedipub provides a concern to include in your "user" model or whatever will publish data:
 
 ```rb
 # app/models/user.rb
 
 class User < ApplicationRecord
   # Include the concern here:
-  include Federails::ActorEntity
+  include Fedipub::ActorEntity
 
   # Configure field names
-  acts_as_federails_actor username_field: :username, name_field: :name, profile_url_method: :user_url
+  acts_as_fedipub_actor username_field: :username, name_field: :name, profile_url_method: :user_url
 end
 ```
 
-This concern automatically create a `Federails::Actor` after a user creation, as well as the `actor` reference. When adding it to
+This concern automatically create a `Fedipub::Actor` after a user creation, as well as the `actor` reference. When adding it to
 an existing model with existing data, you will need to generate the corresponding actors yourself in a migration.
 
 Usage example:
 
 ```rb
-actor = User.find(1).federails_actor
+actor = User.find(1).fedipub_actor
 
 actor.inbox
 actor.outbox
@@ -197,9 +197,9 @@ If your actor entity wants to react to incoming follows, register a callback wit
 
 ```rb
 class User < ApplicationRecord
-  include Federails::ActorEntity
+  include Fedipub::ActorEntity
 
-  acts_as_federails_actor username_field: :username, name_field: :name, profile_url_method: :user_url
+  acts_as_fedipub_actor username_field: :username, name_field: :name, profile_url_method: :user_url
 
   after_followed :accept_follow
 
@@ -209,7 +209,7 @@ class User < ApplicationRecord
 end
 ```
 
-Federails now dispatches `after_followed` after the inbound `Follow` activity has been recorded, so the callback can safely
+Fedipub now dispatches `after_followed` after the inbound `Follow` activity has been recorded, so the callback can safely
 reuse the canonical `follow_activity` when creating an `Accept`.
 
 For backward compatibility, legacy one-argument callbacks such as `def accept_follow(follow)` still work, but new code should
@@ -217,21 +217,21 @@ prefer the keyword form so it does not need to rediscover the original `Follow` 
 
 ## Data models
 
-To ease the work of publishing data to the Fediverse and saving content from it, Federails provides a concern to include
+To ease the work of publishing data to the Fediverse and saving content from it, Fedipub provides a concern to include
 in the data models:
 
 
 ```rb
 class Note < ApplicationRecord
-  include Federails::DataEntity
+  include Fedipub::DataEntity
   
-  acts_as_federails_data
+  acts_as_fedipub_data
 
-  on_federails_delete_requested -> { logger.info { 'Deletion requested' } }
+  on_fedipub_delete_requested -> { logger.info { 'Deletion requested' } }
 end
 ```
 
-For options, pre-requisites, etc..., refer to the documentation of `Federails::DataEntity.acts_as_federails_data`.
+For options, pre-requisites, etc..., refer to the documentation of `Fedipub::DataEntity.acts_as_fedipub_data`.
 
 You can check the "Examples" for implementation samples 
 
@@ -242,28 +242,28 @@ configured to handle Note and transform them as Post/Comment.
 
 `DataEntity` concern uses the `after_destroy` hook to send `Delete` activities to the Fediverse. 
 
-Incoming `Delete` activities will trigger the custom `on_federails_delete_requested` hook, and **you'll need to implement
+Incoming `Delete` activities will trigger the custom `on_fedipub_delete_requested` hook, and **you'll need to implement
 the behavior yourself**.
 
 ### Support for soft-delete
 
 If your model supports soft-delete, you can pass the `soft_deleted_method` and `soft_delete_date_method` parameters to
-`acts_as_federails_data`. If you do so, requests made to fetch a soft-deleted entity will result into a nice `Tombstone`
+`acts_as_fedipub_data`. If you do so, requests made to fetch a soft-deleted entity will result into a nice `Tombstone`
 ActivityPub object and a 410 _gone_ status, instead of a 404 error.
 
-You also will need to call `create_federails_activity 'Delete'` in your soft-deletion process.
+You also will need to call `create_fedipub_activity 'Delete'` in your soft-deletion process.
 
 ```rb
 # Assume soft-deletion is made by filling `deleted_at` attribute
 class Note < ApplicationRecord
-  include Federails::DataEntity
+  include Fedipub::DataEntity
 
-  acts_as_federails_data handles: 'Note',
+  acts_as_fedipub_data handles: 'Note',
                          #...
                          soft_deleted_method: :deleted?,
                          soft_delete_date_method: :deleted_at
 
-  on_federails_delete_requested :soft_delete!
+  on_fedipub_delete_requested :soft_delete!
   
   def deleted?
     deleted_at.present?
@@ -273,26 +273,26 @@ class Note < ApplicationRecord
     update! deleted_at: Time.current
     
     # Manually create the delete activity for locally-created entities only
-    create_federails_activity 'Delete' if local_federails_entity?
+    create_fedipub_activity 'Delete' if local_fedipub_entity?
   end
 end
 ```
 
-## Using the Federails client
+## Using the Fedipub client
 
-Federails comes with a client, enabled by default, that provides basic views to display and interact with Federails data,
+Fedipub comes with a client, enabled by default, that provides basic views to display and interact with Fedipub data,
 accessible on `/app` by default (changeable with the configuration option `client_routes_path`)
 
 ## Shared Inbox
 
-Federails provides a server-level shared inbox endpoint (`POST /federation/inbox`) as defined in the
+Fedipub provides a server-level shared inbox endpoint (`POST /federation/inbox`) as defined in the
 [ActivityPub specification](https://www.w3.org/TR/activitypub/#shared-inbox-delivery). This allows remote servers to
 deliver a single copy of an activity for all recipients on your server, rather than posting to each actor's individual
 inbox separately.
 
 The shared inbox is automatically enabled -- no additional configuration is required. Local actors advertise their
 shared inbox URL via the `endpoints.sharedInbox` property in their ActivityPub actor document, and when delivering
-activities to remote servers, Federails will prefer the remote actor's shared inbox when available.
+activities to remote servers, Fedipub will prefer the remote actor's shared inbox when available.
 
 The shared inbox goes through the same processing pipeline as the per-actor inbox: HTTP Signature verification,
 JSON-LD compaction, payload validation, and handler dispatch. From the host application's perspective, there is no
@@ -300,44 +300,44 @@ difference between an activity received via the shared inbox and one received vi
 
 ## Inbox activity handlers
 
-Federails registers built-in inbox handlers for the following ActivityPub activities:
+Fedipub registers built-in inbox handlers for the following ActivityPub activities:
 
 - `Follow` / `Accept` / `Reject` / `Delete`
 - `Like` / `Undo Like`
 - `Announce` / `Undo Announce`
 - `Block` / `Undo Block`
 
-For `Like` and `Announce`, Federails routes the activity to callback points on `Federails::DataEntity`.
-The gem provides the callback names; applications register their own methods on models that include `Federails::DataEntity`.
+For `Like` and `Announce`, Fedipub routes the activity to callback points on `Fedipub::DataEntity`.
+The gem provides the callback names; applications register their own methods on models that include `Fedipub::DataEntity`.
 
-Register callbacks on the model that includes `Federails::DataEntity`:
+Register callbacks on the model that includes `Fedipub::DataEntity`:
 
 ```rb
 # app/models/post.rb
 class Post < ApplicationRecord
-  include Federails::DataEntity
+  include Fedipub::DataEntity
 
-  on_federails_like_received :handle_federails_like!
-  on_federails_undo_like_received :handle_federails_undo_like!
-  on_federails_announce_received :handle_federails_announce!
-  on_federails_undo_announce_received :handle_federails_undo_announce!
+  on_fedipub_like_received :handle_fedipub_like!
+  on_fedipub_undo_like_received :handle_fedipub_undo_like!
+  on_fedipub_announce_received :handle_fedipub_announce!
+  on_fedipub_undo_announce_received :handle_fedipub_undo_announce!
 
-  def handle_federails_like!(actor_url)
+  def handle_fedipub_like!(actor_url)
     # Custom Like behavior for this entity
     true
   end
 
-  def handle_federails_undo_like!(actor_url)
+  def handle_fedipub_undo_like!(actor_url)
     # Custom Undo Like behavior for this entity
     true
   end
 
-  def handle_federails_announce!(actor_url)
+  def handle_fedipub_announce!(actor_url)
     # Custom Announce behavior for this entity
     true
   end
 
-  def handle_federails_undo_announce!(actor_url)
+  def handle_fedipub_undo_announce!(actor_url)
     # Custom Undo Announce behavior for this entity
     true
   end
@@ -346,10 +346,10 @@ end
 
 The built-in handlers resolve the target object and call:
 
-- `object.run_callbacks :on_federails_like_received`
-- `object.run_callbacks :on_federails_undo_like_received`
-- `object.run_callbacks :on_federails_announce_received`
-- `object.run_callbacks :on_federails_undo_announce_received`
+- `object.run_callbacks :on_fedipub_like_received`
+- `object.run_callbacks :on_fedipub_undo_like_received`
+- `object.run_callbacks :on_fedipub_announce_received`
+- `object.run_callbacks :on_fedipub_undo_announce_received`
 
 Registered callback methods receive the activity actor as their argument.
 
@@ -366,5 +366,5 @@ to a `nil` value.
 If you want to override the client's views, copy them in your application:
 
 ```sh
-rails generate federails:copy_client_views
+rails generate fedipub:copy_client_views
 ```

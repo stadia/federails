@@ -1,1 +1,1 @@
-Federails::Engine.root.glob('spec/**/*_shared.rb').each { |f| require f }
+Fedipub::Engine.root.glob('spec/**/*_shared.rb').each { |f| require f }

@@ -6,7 +6,7 @@ module Fediverse
     class SignatureVerificationError < StandardError; end
 
     class << self
-      #: (sender: Federails::Actor, request: untyped) -> String
+      #: (sender: Fedipub::Actor, request: untyped) -> String
       def sign(sender:, request:)
         private_key = OpenSSL::PKey::RSA.new sender.private_key, Rails.application.credentials.secret_key_base
         headers = '(request-target) host date digest'
@@ -25,7 +25,7 @@ module Fediverse
       # Performs a signed GET request on behalf of a local actor
       #
       # @param url [String] Target URL
-      # @param actor [Federails::Actor] Local actor to sign as
+      # @param actor [Fedipub::Actor] Local actor to sign as
       # @return [Hash, nil] Parsed JSON response or nil on failure
       def signed_get(url, actor:)
         uri = URI.parse(url)
@@ -47,14 +47,14 @@ module Fediverse
         end
 
         unless response.status == 200
-          raise Federails::Utils::JsonRequest::UnhandledResponseStatus,
+          raise Fedipub::Utils::JsonRequest::UnhandledResponseStatus,
                 "Unhandled status code #{response.status} for signed GET #{url}"
         end
 
         JSON.parse(response.body)
       end
 
-      #: (sender: Federails::Actor, request: untyped) -> bool
+      #: (sender: Fedipub::Actor, request: untyped) -> bool
       def verify(sender:, request:)
         raise 'Unsigned headers' unless request.headers['Signature']
 
@@ -83,7 +83,7 @@ module Fediverse
         signature = params['signature']
 
         if key_id.blank?
-          Federails.logger.warn { "[Signature] Raw header (missing keyId): #{header.inspect}" }
+          Fedipub.logger.warn { "[Signature] Raw header (missing keyId): #{header.inspect}" }
           raise SignatureVerificationError, 'Malformed Signature header: missing keyId'
         end
         raise SignatureVerificationError, 'Malformed Signature header: missing signature' if signature.blank?
@@ -110,7 +110,7 @@ module Fediverse
 
       # Verify an inbound request's HTTP Signature, returning the sending actor.
       # Supports both cavage draft and RFC 9421 formats.
-      #: (untyped) -> Federails::Actor
+      #: (untyped) -> Fedipub::Actor
       def verify_request!(request)
         sig_header = request.headers['Signature']
         raise SignatureVerificationError, 'Missing Signature header' if sig_header.blank?
@@ -136,7 +136,7 @@ module Fediverse
 
         actor_uri = parsed[:key_id].sub(/#.*\z/, '')
         actor = begin
-          Federails::Actor.find_or_create_by_federation_url(actor_uri)
+          Fedipub::Actor.find_or_create_by_federation_url(actor_uri)
         rescue StandardError => e
           raise SignatureVerificationError, "Unable to load signed actor: #{e.message}"
         end
@@ -148,7 +148,7 @@ module Fediverse
 
         return actor if key.verify(digest, raw_signature, comparison_string)
 
-        if actor.updated_at < Federails::Configuration.remote_entities_cache_duration.ago
+        if actor.updated_at < Fedipub::Configuration.remote_entities_cache_duration.ago
           begin
             actor.sync!
           rescue StandardError => e
@@ -191,7 +191,7 @@ module Fediverse
 
         actor_uri = parsed[:key_id].sub(/#.*\z/, '')
         actor = begin
-          Federails::Actor.find_or_create_by_federation_url(actor_uri)
+          Fedipub::Actor.find_or_create_by_federation_url(actor_uri)
         rescue StandardError => e
           raise SignatureVerificationError, "Unable to load signed actor: #{e.message}"
         end
@@ -201,7 +201,7 @@ module Fediverse
 
         return actor if rfc9421_verify(key, parsed[:signature], base, parsed[:algorithm])
 
-        if actor.updated_at < Federails::Configuration.remote_entities_cache_duration.ago
+        if actor.updated_at < Fedipub::Configuration.remote_entities_cache_duration.ago
           begin
             actor.sync!
           rescue StandardError => e
@@ -324,11 +324,11 @@ module Fediverse
         when 'rsa-v1_5-sha256', nil
           key.verify(OpenSSL::Digest.new('SHA256'), signature, base)
         else
-          Federails.logger.warn { "[Signature] Unknown RFC 9421 algorithm '#{algorithm}', trying rsa-pss-sha512" }
+          Fedipub.logger.warn { "[Signature] Unknown RFC 9421 algorithm '#{algorithm}', trying rsa-pss-sha512" }
           key.verify_pss('SHA512', signature, base, salt_length: 64, mgf1_hash: 'SHA512')
         end
       rescue OpenSSL::PKey::PKeyError => e
-        Federails.logger.warn { "[Signature] RFC 9421 verify error: #{e.message}" }
+        Fedipub.logger.warn { "[Signature] RFC 9421 verify error: #{e.message}" }
         false
       end
 

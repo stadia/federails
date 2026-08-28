@@ -10,18 +10,18 @@ module Fediverse
 
     # Enqueues a separate delivery job for each recipient inbox.
     #
-    # @param activity [Federails::Activity]
+    # @param activity [Fedipub::Activity]
     def self.enqueue_deliveries: (untyped activity) -> untyped
 
     # Delivers an activity to a single inbox. Called by NotifyInboxJob.
     #
-    # @param activity [Federails::Activity]
+    # @param activity [Fedipub::Activity]
     # @param inbox_url [String]
     def self.deliver_to_inbox: (untyped activity, untyped inbox_url) -> untyped
 
     # Posts an activity to its recipients (legacy synchronous delivery).
     #
-    # @param activity [Federails::Activity]
+    # @param activity [Fedipub::Activity]
     def self.post_to_inboxes: (untyped activity) -> untyped
 
     # : (Hash[String, untyped], Array[String], ?exclude_actor: String?) -> void
@@ -29,26 +29,26 @@ module Fediverse
 
     # Determines the list of inboxes that the activity should be delivered to
     #
-    # @return [Array<Federails::Actor>]
+    # @return [Array<Fedipub::Actor>]
     private def self.inboxes_for: (untyped activity) -> untyped
 
-    # : (String, ?max_depth: Integer) -> Array[Federails::Actor]
-    private def self.collection_to_actors: (String, ?max_depth: Integer) -> Array[Federails::Actor]
+    # : (String, ?max_depth: Integer) -> Array[Fedipub::Actor]
+    private def self.collection_to_actors: (String, ?max_depth: Integer) -> Array[Fedipub::Actor]
 
     # : (String?) -> String?
     private def self.actor_inbox_for: (String?) -> String?
 
-    # : (Array[String]) -> Federails::Actor?
-    private def self.forwarding_sender_for: (Array[String]) -> Federails::Actor?
+    # : (Array[String]) -> Fedipub::Actor?
+    private def self.forwarding_sender_for: (Array[String]) -> Fedipub::Actor?
 
-    # : (Federails::Activity) -> String
-    private def self.payload: (Federails::Activity) -> String
+    # : (Fedipub::Activity) -> String
+    private def self.payload: (Fedipub::Activity) -> String
 
-    # : (inbox_url: String, message: String, ?from: Federails::Actor?) -> untyped
-    private def self.post_to_inbox: (inbox_url: String, message: String, ?from: Federails::Actor?) -> untyped
+    # : (inbox_url: String, message: String, ?from: Fedipub::Actor?) -> untyped
+    private def self.post_to_inbox: (inbox_url: String, message: String, ?from: Fedipub::Actor?) -> untyped
 
-    # : (url: String, message: String, from: Federails::Actor?) -> untyped
-    private def self.signed_request: (url: String, message: String, from: Federails::Actor?) -> untyped
+    # : (url: String, message: String, from: Fedipub::Actor?) -> untyped
+    private def self.signed_request: (url: String, message: String, from: Fedipub::Actor?) -> untyped
 
     # : (url: String, message: String) -> untyped
     private def self.request: (url: String, message: String) -> untyped
@@ -62,19 +62,19 @@ module Fediverse
     # : (inbox_url: String, status: Integer, body: untyped, retry_after: String?, permanent: bool) -> String
     private def self.delivery_error_message: (inbox_url: String, status: Integer, body: untyped, retry_after: String?, permanent: bool) -> String
 
-    # : (Federails::Activity, Hash[Symbol, untyped]) -> void
-    private def self.validate_payload!: (Federails::Activity, Hash[Symbol, untyped]) -> void
+    # : (Fedipub::Activity, Hash[Symbol, untyped]) -> void
+    private def self.validate_payload!: (Fedipub::Activity, Hash[Symbol, untyped]) -> void
 
     # : (Hash[Symbol, untyped]) -> bool
     private def self.update_object_id_missing?: (Hash[Symbol, untyped]) -> bool
 
-    # : (Federails::Activity, Hash[Symbol, untyped]) -> String
-    private def self.invalid_payload_message: (Federails::Activity, Hash[Symbol, untyped]) -> String
+    # : (Fedipub::Activity, Hash[Symbol, untyped]) -> String
+    private def self.invalid_payload_message: (Fedipub::Activity, Hash[Symbol, untyped]) -> String
 
-    # : (Federails::Activity, String) -> void
-    private def self.validate_message!: (Federails::Activity, String) -> void
+    # : (Fedipub::Activity, String) -> void
+    private def self.validate_message!: (Fedipub::Activity, String) -> void
 
-    # : (String) -> Array[Federails::Actor]?
-    private def self.actors_for_local_collection: (String) -> Array[Federails::Actor]?
+    # : (String) -> Array[Fedipub::Actor]?
+    private def self.actors_for_local_collection: (String) -> Array[Fedipub::Actor]?
   end
 end

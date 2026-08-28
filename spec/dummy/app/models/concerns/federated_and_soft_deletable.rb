@@ -5,8 +5,8 @@ module FederatedAndSoftDeletable
     scope :deleted, -> { where.not deleted_at: nil }
     scope :not_deleted, -> { where deleted_at: nil }
 
-    on_federails_delete_requested :handle_federails_delete_request!
-    on_federails_undelete_requested :handle_federails_undelete_request!
+    on_fedipub_delete_requested :handle_fedipub_delete_request!
+    on_fedipub_undelete_requested :handle_fedipub_undelete_request!
   end
 
   def soft_deleted?
@@ -16,18 +16,18 @@ module FederatedAndSoftDeletable
   def soft_delete!
     update! deleted_at: Time.current
     # Manually create the delete activity
-    create_federails_activity 'Delete' if local_federails_entity?
+    create_fedipub_activity 'Delete' if local_fedipub_entity?
   end
 
   private
 
-  def handle_federails_delete_request!
+  def handle_fedipub_delete_request!
     update! deleted_at: Time.current
   end
 
-  def handle_federails_undelete_request!
+  def handle_fedipub_undelete_request!
     self.deleted_at = nil
-    federails_sync!
+    fedipub_sync!
     save!
   end
 end

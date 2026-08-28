@@ -15,7 +15,7 @@ module Fediverse
       def fetch(domain)
         url = nodeinfo_url(domain)
 
-        hash = Federails::Utils::JsonRequest.get_json url
+        hash = Fedipub::Utils::JsonRequest.get_json url
         raise NoActivityPubError, "#{domain} does not handle activitypub protocol" unless hash['protocols'].include? 'activitypub'
 
         {
@@ -32,13 +32,13 @@ module Fediverse
 
       #: (String) -> String
       def base_url(domain)
-        scheme = Federails::Configuration.force_ssl ? 'https' : 'http'
+        scheme = Fedipub::Configuration.force_ssl ? 'https' : 'http'
         @base_url = "#{scheme}://#{domain}"
       end
 
       #: (String) -> String
       def nodeinfo_url(domain)
-        response = Federails::Utils::JsonRequest.get_json "#{base_url(domain)}/.well-known/nodeinfo", follow_redirects: true
+        response = Fedipub::Utils::JsonRequest.get_json "#{base_url(domain)}/.well-known/nodeinfo", follow_redirects: true
         entry = NODEINFO_SCHEMA_RELS.lazy.map { |rel| response['links']&.find { |link| link['rel'] == rel } }.find(&:itself)
 
         entry['href']

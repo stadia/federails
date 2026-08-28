@@ -1,0 +1,11 @@
+# Generated from app/controllers/fedipub/server/nodeinfo_controller.rb with RBS::Inline
+
+module Fedipub
+  module Server
+    class NodeinfoController < Fedipub::ServerController
+      def index: () -> untyped
+
+      def show: () -> untyped
+    end
+  end
+end

@@ -1,16 +1,16 @@
-# Federails vs Fedify 비교 분석
+# Fedipub vs Fedify 비교 분석
 
 **분석 일시:** 2026-03-25  
-**Federails:** https://github.com/stadia/federails (Ruby on Rails 엔진)  
+**Fedipub:** https://github.com/stadia/fedipub (Ruby on Rails 엔진)  
 **Fedify:** https://github.com/fedify-dev/fedify (v2.1.0, TypeScript 프레임워크)  
 
 ---
 
 ## 📌 Executive Summary
 
-Federails는 Ruby on Rails 기반 ActivityPub 엔진으로, **거의 완전한 ActivityPub 구현**을 달성했습니다. WebFinger, NodeInfo, Actor/Activity/Following 모델, Inbox/Outbox 및 **HTTP Signatures (완전)** 기능이 모두 구현되어 있어 **실제 페더레이션이 가능한 상태**입니다. Fedify는 **더 성숙한 TypeScript 프레임워크**로, 4가지 HTTP 서명 방식과 고급 신뢰성 기능을 제공하며, Federails는 Rails 생태계에서 실용적인 대안입니다.
+Fedipub는 Ruby on Rails 기반 ActivityPub 엔진으로, **거의 완전한 ActivityPub 구현**을 달성했습니다. WebFinger, NodeInfo, Actor/Activity/Following 모델, Inbox/Outbox 및 **HTTP Signatures (완전)** 기능이 모두 구현되어 있어 **실제 페더레이션이 가능한 상태**입니다. Fedify는 **더 성숙한 TypeScript 프레임워크**로, 4가지 HTTP 서명 방식과 고급 신뢰성 기능을 제공하며, Fedipub는 Rails 생태계에서 실용적인 대안입니다.
 
-| 구분 | Federails | Fedify |
+| 구분 | Fedipub | Fedify |
 |------|-----------|--------|
 | **언어** | Ruby | TypeScript |
 | **프레임워크** | Rails 엔진 | Deno/Bun/Node.js |
@@ -21,28 +21,28 @@ Federails는 Ruby on Rails 기반 ActivityPub 엔진으로, **거의 완전한 A
 
 ---
 
-## 🔍 Federails 현재 구현 상태
+## 🔍 Fedipub 현재 구현 상태
 
 ### ✅ 구현된 기능
 
 #### 1. Core Models
-- **Actor** (`Federails::Actor`)
+- **Actor** (`Fedipub::Actor`)
   - 로컬/원격 액터 지원
   - Polymorphic association으로 엔티티와 연결
   - Tombstone 상태 지원
   - 필드: `federated_url`, `username`, `server`, `inbox_url`, `outbox_url`, `followers_url`, `followings_url`, `profile_url`, `actor_type`
 
-- **Activity** (`Federails::Activity`)
+- **Activity** (`Fedipub::Activity`)
   - Activity 저장 및 관리
   - `to`, `cc`, `bto`, `bcc`, `audience` 필드 (YAML 직렬화)
   - `post_to_inboxes` job을 통한 배달
 
-- **Following** (`Federails::Following`)
+- **Following** (`Fedipub::Following`)
   - 팔로우 관계 관리
   - `pending`/`accepted` 상태
   - `accept!` 메서드로 수동 승인
 
-- **Host** (`Federails::Host`)
+- **Host** (`Fedipub::Host`)
   - 원격 서버 정보 저장
   - NodeInfo 동기화 지원
 
@@ -79,9 +79,9 @@ Federails는 Ruby on Rails 기반 ActivityPub 엔진으로, **거의 완전한 A
 - `dispatch_request` 메서드로 라우팅
 
 #### 4. Concerns
-- **ActorEntity** (`Federails::ActorEntity`)
+- **ActorEntity** (`Fedipub::ActorEntity`)
   - 모델을 ActivityPub 액터로 만드는 concern
-  - `acts_as_federails_actor` 설정
+  - `acts_as_fedipub_actor` 설정
 
 - **HasUuid**
   - UUID 기반 식별자
@@ -90,8 +90,8 @@ Federails는 Ruby on Rails 기반 ActivityPub 엔진으로, **거의 완전한 A
   - Delete 요청 처리
 
 #### 5. Configuration
-- `config/federails.yml` 설정 파일
-- 초기화 설정 지원 (`config/initializers/federails.rb`)
+- `config/fedipub.yml` 설정 파일
+- 초기화 설정 지원 (`config/initializers/fedipub.rb`)
 - 옵션:
   - `app_name`, `app_version`
   - `site_host`, `site_port`
@@ -101,7 +101,7 @@ Federails는 Ruby on Rails 기반 ActivityPub 엔진으로, **거의 완전한 A
 
 ---
 
-## ⚠️ Federails에서 구현 필요한 기능
+## ⚠️ Fedipub에서 구현 필요한 기능
 
 ### 🔴 필수 (MUST - ActivityPub RFC)
 
@@ -207,7 +207,7 @@ Federails는 Ruby on Rails 기반 ActivityPub 엔진으로, **거의 완전한 A
 
 ### ActivityPub 표준 준수
 
-| 기능 | Federails | Fedify | 구현 필요 |
+| 기능 | Fedipub | Fedify | 구현 필요 |
 |------|-----------|--------|-----------|
 | **Actors** | 🟡 부분 | ✅ 완전 | 로컬/원격 구분 개선 |
 | **Inbox** | 🟡 기본 | ✅ 완전 | 서명 검증 추가 |
@@ -220,7 +220,7 @@ Federails는 Ruby on Rails 기반 ActivityPub 엔진으로, **거의 완전한 A
 
 ### 보안 및 인증
 
-| 기능 | Federails | Fedify |
+| 기능 | Fedipub | Fedify |
 |------|-----------|--------|
 | **HTTP Signatures (draft-cavage)** | ✅ | ✅ |
 | **HTTP Message Signatures (RFC 9421)** | ❌ | ✅ |
@@ -231,7 +231,7 @@ Federails는 Ruby on Rails 기반 ActivityPub 엔진으로, **거의 완전한 A
 
 ### 개발자 경험
 
-| 기능 | Federails | Fedify |
+| 기능 | Fedipub | Fedify |
 |------|-----------|--------|
 | **타입 안전성** | Ruby (동적) | TypeScript (정적) |
 | **문서화** | 🟡 기본 | ✅ 풍부 |
@@ -246,7 +246,7 @@ Federails는 Ruby on Rails 기반 ActivityPub 엔진으로, **거의 완전한 A
 
 ### 중요 발견: Activity Handler 이미 구현됨
 
-**Federails `lib/fediverse/inbox.rb` 확인 결과:**
+**Fedipub `lib/fediverse/inbox.rb` 확인 결과:**
 
 ```ruby
 # 이미 구현된 해담들
@@ -258,7 +258,7 @@ register_handler 'Delete', '*', self, :handle_delete_request
 register_handler 'Undo', 'Delete', self, :handle_undelete_request
 ```
 
-**Federails에 이미 있는 기능:**
+**Fedipub에 이미 있는 기능:**
 - ✅ `register_handler(activity_type, object_type, klass, method)`
 - ✅ `dispatch_request(payload)` - 중복 체크, origin 검증
 - ✅ `get_handlers()` - wildcard('*') 지원
@@ -267,7 +267,7 @@ register_handler 'Undo', 'Delete', self, :handle_undelete_request
 
 **Fedify와의 차이:**
 - Fedify: TypeScript 클래스 기반 타입 안전 (`on(Follow, handler)`)
-- Federails: 동적 메소드 호출 (간접하지만 데이터 유효성 약함)
+- Fedipub: 동적 메소드 호출 (간접하지만 데이터 유효성 약함)
 
 ---
 
@@ -314,26 +314,26 @@ register_handler 'Undo', 'Delete', self, :handle_undelete_request
   }
 });
 ```
-**Federails 적용:** InboxController의 `create` 액션에 추가
+**Fedipub 적용:** InboxController의 `create` 액션에 추가
 
 ### 2. RFC 9421 Accept-Signature 협상
-**Federails 적용:** Outbox 배달 시 401 응답 처리
+**Fedipub 적용:** Outbox 배달 시 401 응답 처리
 
 ### 3. 타입 안전한 Activity 객체
-**Federails 적용:** Strong parameter + Validator 강화
+**Fedipub 적용:** Strong parameter + Validator 강화
 
 ### 4. 상세한 로깅 및 관측성
-**Federails 적용:** Rails.logger 활용 + 커스텀 로그
+**Fedipub 적용:** Rails.logger 활용 + 커스텀 로그
 
 ---
 
 ## 📚 참고 자료
 
-### Federails
-- GitHub: https://github.com/stadia/federails
-- Docs: https://github.com/stadia/federails/tree/main/docs
-- Issue Tracker: https://gitlab.com/experimentslabs/federails/-/issues
-- Matrix: #federails:matrix.org
+### Fedipub
+- GitHub: https://github.com/stadia/fedipub
+- Docs: https://github.com/stadia/fedipub/tree/main/docs
+- Issue Tracker: https://gitlab.com/experimentslabs/fedipub/-/issues
+- Matrix: #fedipub:matrix.org
 
 ### Fedify
 - GitHub: https://github.com/fedify-dev/fedify
@@ -349,7 +349,7 @@ register_handler 'Undo', 'Delete', self, :handle_undelete_request
 
 ## 🏁 결론
 
-Federails는 **Rails 생태계에 ActivityPub을 가져오는 프로덕션-ready 엔진**입니다. WebFinger, HTTP Signatures (완전), Actor/Activity/Following/Inbox/Outbox 등 **핵심 페더레이션 기능이 모두 구현**되어 있어 실제 서버 간 통신이 가능합니다.
+Fedipub는 **Rails 생태계에 ActivityPub을 가져오는 프로덕션-ready 엔진**입니다. WebFinger, HTTP Signatures (완전), Actor/Activity/Following/Inbox/Outbox 등 **핵심 페더레이션 기능이 모두 구현**되어 있어 실제 서버 간 통신이 가능합니다.
 
 **Fedify 대비 갭:**
 1. **RFC 9421 (Accept-Signature)** - 최신 표준 지원
@@ -361,8 +361,8 @@ Federails는 **Rails 생태계에 ActivityPub을 가져오는 프로덕션-ready
 2. **중기:** Linked Data Signatures (Mastodon 호환)
 3. **장기:** 에러 처리 및 관측성 강화 (Fedify 패턴 참고)
 
-Federails는 **이미 프로덕션 사용이 가능**하며, Fedify의 고급 기능을 참고하여 경쟁력을 높일 수 있습니다.
+Fedipub는 **이미 프로덕션 사용이 가능**하며, Fedify의 고급 기능을 참고하여 경쟁력을 높일 수 있습니다.
 
 ---
 
-**Tags:** #federails #fedify #activitypub #rails #ruby #federation #comparison
+**Tags:** #fedipub #fedify #activitypub #rails #ruby #federation #comparison

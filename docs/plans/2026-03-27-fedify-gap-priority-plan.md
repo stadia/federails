@@ -2,24 +2,24 @@
 
 Date: 2026-03-27
 Reference project: `/Users/jeff.dean/github/fedify`
-Target project: `/Users/jeff.dean/projects/federails`
+Target project: `/Users/jeff.dean/projects/fedipub`
 
 ## Goal
 
 Use Fedify as the reference ActivityPub server framework and extract the next
-set of implementation priorities for Federails after the recent MUST-level
+set of implementation priorities for Fedipub after the recent MUST-level
 server-to-server work.
 
 This is not a "copy Fedify" plan.
 It is a practical gap analysis:
 
 - what Fedify provides as a framework
-- what Federails already has
+- what Fedipub already has
 - what should be implemented next, in order
 
-## Current Federails baseline
+## Current Fedipub baseline
 
-Based on the current code and recent planning docs, Federails already has
+Based on the current code and recent planning docs, Fedipub already has
 meaningful server-to-server coverage in these areas:
 
 - discovery: WebFinger, host-meta, NodeInfo
@@ -35,7 +35,7 @@ meaningful server-to-server coverage in these areas:
 Key local references:
 
 - `docs/plans/2026-03-10-activitypub-coverage-audit.md`
-- `app/controllers/federails/server/activities_controller.rb`
+- `app/controllers/fedipub/server/activities_controller.rb`
 - `lib/fediverse/inbox.rb`
 - `lib/fediverse/notifier.rb`
 - `lib/fediverse/signature.rb`
@@ -73,7 +73,7 @@ Key Fedify references:
 
 ## Gap summary
 
-The main Federails gaps compared to Fedify are not basic actor fetch or follow
+The main Fedipub gaps compared to Fedify are not basic actor fetch or follow
 support anymore. They are the next-layer concerns:
 
 1. inbound request authentication
@@ -89,7 +89,7 @@ support anymore. They are the next-layer concerns:
 ### Why this is first
 
 This is the most important security and interoperability gap.
-Federails can currently generate outbound signatures, but inbound inbox POSTs
+Fedipub can currently generate outbound signatures, but inbound inbox POSTs
 are not visibly rejected based on sender authentication before dispatch.
 
 Fedify treats signature verification as a default inbox boundary concern.
@@ -103,7 +103,7 @@ Fedify treats signature verification as a default inbox boundary concern.
 
 ### Candidate files
 
-- `app/controllers/federails/server/activities_controller.rb`
+- `app/controllers/fedipub/server/activities_controller.rb`
 - `lib/fediverse/signature.rb`
 - `lib/fediverse/request.rb`
 - request / acceptance specs around inbox POST
@@ -120,7 +120,7 @@ Fedify treats signature verification as a default inbox boundary concern.
 ### Why this is second
 
 Fedify models shared inbox as a first-class concept.
-Federails currently exposes only personal inboxes and delivers actor-by-actor.
+Fedipub currently exposes only personal inboxes and delivers actor-by-actor.
 This is a real interoperability and efficiency gap.
 
 ### Scope
@@ -134,8 +134,8 @@ This is a real interoperability and efficiency gap.
 ### Candidate files
 
 - `config/routes.rb`
-- `app/views/federails/server/actors/_actor.activitypub.jbuilder`
-- `app/controllers/federails/server/activities_controller.rb`
+- `app/views/fedipub/server/actors/_actor.activitypub.jbuilder`
+- `app/controllers/fedipub/server/activities_controller.rb`
 - `lib/fediverse/notifier.rb`
 - actor / activities request specs
 
@@ -149,7 +149,7 @@ This is a real interoperability and efficiency gap.
 
 ### Why this is next
 
-Federails already has asynchronous delivery via `ActiveJob`, but not the richer
+Fedipub already has asynchronous delivery via `ActiveJob`, but not the richer
 delivery contract that Fedify provides for retry policy, permanent failure
 handling, and per-object ordering.
 
@@ -166,9 +166,9 @@ This becomes important as soon as local posting volume or follower counts grow.
 
 ### Candidate files
 
-- `app/jobs/federails/notify_inbox_job.rb`
+- `app/jobs/fedipub/notify_inbox_job.rb`
 - `lib/fediverse/notifier.rb`
-- `app/models/federails/activity.rb`
+- `app/models/fedipub/activity.rb`
 
 ### Done when
 
@@ -180,7 +180,7 @@ This becomes important as soon as local posting volume or follower counts grow.
 
 ### Why this matters
 
-Federails is currently strong for follows and generic object creation/update,
+Fedipub is currently strong for follows and generic object creation/update,
 but narrow outside that slice.
 
 Fedify's framework surface assumes broader activity vocabulary support.
@@ -196,12 +196,12 @@ Fedify's framework surface assumes broader activity vocabulary support.
 
 - define built-in handling expectations for each activity
 - decide what is framework responsibility vs host app responsibility
-- add persistence or hooks only where Federails can support them cleanly
+- add persistence or hooks only where Fedipub can support them cleanly
 
 ### Candidate files
 
 - `lib/fediverse/inbox.rb`
-- `app/models/concerns/federails/data_entity.rb`
+- `app/models/concerns/fedipub/data_entity.rb`
 - relevant models and request specs
 
 ### Done when
@@ -263,7 +263,7 @@ Shared inbox and inbound verification provide more immediate value.
 A major Fedify strength is that it feels like a framework product, not just a
 library with protocol helpers.
 
-Federails should gradually improve the surrounding operator experience too.
+Fedipub should gradually improve the surrounding operator experience too.
 
 ### Candidate areas
 
@@ -289,7 +289,7 @@ These may be revisited later, but should not block the priority list above:
 
 - full client-to-server ActivityPub support
 - trying to match every Fedify package feature one-for-one
-- relay server support inside core Federails
+- relay server support inside core Fedipub
 - broad cryptographic redesign before shared inbox and inbound auth are solved
 
 ## Suggested next implementation tranche

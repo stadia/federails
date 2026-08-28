@@ -31,7 +31,7 @@
 - `spec/lib/fediverse/inbox_spec.rb` — follow/delete 관련 `describe` 블록 제거
 - `sig/generated/fediverse/inbox.rbs` — 자동 재생성
 - `CHANGELOG.md` — 변경 사항 문서화
-- `docs/plans/archive/Fedify vs Federails Collections Activities Objects 분석.md` 등 이전 참조 — 필요 시만 (archive 문서는 건드리지 않는다)
+- `docs/plans/archive/Fedify vs Fedipub Collections Activities Objects 분석.md` 등 이전 참조 — 필요 시만 (archive 문서는 건드리지 않는다)
 
 ---
 
@@ -64,7 +64,7 @@ require 'fediverse/request'
 module Fediverse
   class Inbox
     RSpec.describe FollowHandler do
-      let(:local_actor) { FactoryBot.create(:user).federails_actor }
+      let(:local_actor) { FactoryBot.create(:user).fedipub_actor }
       let(:distant_actor) { FactoryBot.create :distant_actor }
 
       # 이동된 describe 블록들
@@ -96,13 +96,13 @@ module Fediverse
     module FollowHandler
       class << self
         # Creates a Following record from an incoming Follow activity.
-        #: (Hash[String, untyped]) -> Federails::Following
+        #: (Hash[String, untyped]) -> Fedipub::Following
         def handle_create_follow_request(activity)
-          actor        = Federails::Actor.find_or_create_by_object activity['actor']
-          target_actor = Federails::Actor.find_or_create_by_object activity['object']
+          actor        = Fedipub::Actor.find_or_create_by_object activity['actor']
+          target_actor = Fedipub::Actor.find_or_create_by_object activity['object']
 
           follow_activity = inbound_follow_activity(actor: actor, target_actor: target_actor, activity: activity)
-          following = Federails::Following.find_or_initialize_by actor: actor, target_actor: target_actor
+          following = Fedipub::Following.find_or_initialize_by actor: actor, target_actor: target_actor
           if following.new_record?
             following.federated_url = activity['id']
             following.save!
@@ -116,17 +116,17 @@ module Fediverse
         end
 
         # Marks a pending Following as accepted when the target actor confirms.
-        #: (Hash[String, untyped]) -> Federails::Activity?
+        #: (Hash[String, untyped]) -> Fedipub::Activity?
         def handle_accept_follow_request(activity)
           original_activity = Request.dereference(activity['object'])
 
-          actor        = Federails::Actor.find_or_create_by_object original_activity['actor']
-          target_actor = Federails::Actor.find_or_create_by_object original_activity['object']
+          actor        = Fedipub::Actor.find_or_create_by_object original_activity['actor']
+          target_actor = Fedipub::Actor.find_or_create_by_object original_activity['object']
           raise 'Follow not accepted by target actor but by someone else' if activity['actor'] != target_actor.federated_url
 
-          follow = Federails::Following.find_by actor: actor, target_actor: target_actor
+          follow = Fedipub::Following.find_by actor: actor, target_actor: target_actor
           unless follow
-            Federails.logger.warn do
+            Fedipub.logger.warn do
               "Follow not found for #{actor.federated_url} -> #{target_actor.federated_url}. " \
                 "Original activity id: #{activity['object']}"
             end
@@ -135,7 +135,7 @@ module Fediverse
 
           follow_activity = follow.follow_activity
           unless follow_activity
-            Federails.logger.warn do
+            Fedipub.logger.warn do
               "Follow activity not found for #{actor.federated_url} -> #{target_actor.federated_url}. " \
                 "Original activity id: #{activity['object']}"
             end
@@ -145,28 +145,28 @@ module Fediverse
         end
 
         # Destroys a Following record when the follower undoes their Follow.
-        #: (Hash[String, untyped]) -> Federails::Following?
+        #: (Hash[String, untyped]) -> Fedipub::Following?
         def handle_undo_follow_request(activity)
           original_activity = activity['object']
 
-          actor        = Federails::Actor.find_or_create_by_object original_activity['actor']
-          target_actor = Federails::Actor.find_or_create_by_object original_activity['object']
+          actor        = Fedipub::Actor.find_or_create_by_object original_activity['actor']
+          target_actor = Fedipub::Actor.find_or_create_by_object original_activity['object']
 
-          follow = Federails::Following.find_by actor: actor, target_actor: target_actor
+          follow = Fedipub::Following.find_by actor: actor, target_actor: target_actor
           follow&.destroy
         end
 
         # Destroys a pending Following when the target actor rejects the request.
         # AP Section 7.7: MUST NOT add to Following collection on Reject.
-        #: (Hash[String, untyped]) -> Federails::Following?
+        #: (Hash[String, untyped]) -> Fedipub::Following?
         def handle_reject_follow_request(activity)
           original_activity = Request.dereference(activity['object'])
 
-          actor = Federails::Actor.find_or_create_by_object(original_activity['actor'])
-          target_actor = Federails::Actor.find_or_create_by_object(original_activity['object'])
+          actor = Fedipub::Actor.find_or_create_by_object(original_activity['actor'])
+          target_actor = Fedipub::Actor.find_or_create_by_object(original_activity['object'])
           raise 'Follow not rejected by target actor but by someone else' if activity['actor'] != target_actor.federated_url
 
-          follow = Federails::Following.pending.find_by(actor: actor, target_actor: target_actor)
+          follow = Fedipub::Following.pending.find_by(actor: actor, target_actor: target_actor)
           follow&.destroy
         end
 
@@ -175,11 +175,11 @@ module Fediverse
         # Re-sends an Accept Activity when a Follow is received for an already-accepted Following
         # under a new activity id. De-duplication in dispatch_request ensures this path is only
         # reached for genuinely new inbound Follow activities.
-        #: (Federails::Following, Federails::Activity?) -> void
+        #: (Fedipub::Following, Fedipub::Activity?) -> void
         def resend_accept_for_duplicate_follow(following, follow_activity)
           return unless follow_activity
 
-          Federails::Activity.create!(
+          Fedipub::Activity.create!(
             actor:  following.target_actor,
             action: 'Accept',
             entity: follow_activity,
@@ -187,11 +187,11 @@ module Fediverse
           )
         end
 
-        #: (actor: Federails::Actor, target_actor: Federails::Actor, activity: Hash[String, untyped]) -> Federails::Activity?
+        #: (actor: Fedipub::Actor, target_actor: Fedipub::Actor, activity: Hash[String, untyped]) -> Fedipub::Activity?
         def inbound_follow_activity(actor:, target_actor:, activity:)
-          return Federails::Activity.find_by(actor: actor, action: 'Follow', entity: target_actor) if actor.local?
+          return Fedipub::Activity.find_by(actor: actor, action: 'Follow', entity: target_actor) if actor.local?
 
-          Federails::Activity.find_or_initialize_by(actor: actor, action: 'Follow', entity: target_actor).tap do |follow_activity|
+          Fedipub::Activity.find_or_initialize_by(actor: actor, action: 'Follow', entity: target_actor).tap do |follow_activity|
             follow_activity.federated_url = activity['id'] if follow_activity.federated_url.blank? && activity['id'].present?
             follow_activity.to = activity['to'] || [target_actor.federated_url]
             follow_activity.cc = activity['cc']
@@ -202,7 +202,7 @@ module Fediverse
           end
         end
 
-        #: (Federails::Actor, Federails::Following, Federails::Activity?) -> void
+        #: (Fedipub::Actor, Fedipub::Following, Fedipub::Activity?) -> void
         def dispatch_followed_callback(target_actor, following, follow_activity)
           return unless target_actor&.entity
 
@@ -237,7 +237,7 @@ Run: `bundle exec rspec spec/lib/fediverse/inbox/follow_handler_spec.rb spec/lib
 Expected: PASS (양쪽 모두)
 
 추가 회귀 확인:
-Run: `bundle exec rspec spec/lib/fediverse/inbox/ spec/lib/fediverse/inbox_spec.rb spec/models/federails/following_spec.rb spec/requests/federation/`
+Run: `bundle exec rspec spec/lib/fediverse/inbox/ spec/lib/fediverse/inbox_spec.rb spec/models/fedipub/following_spec.rb spec/requests/federation/`
 Expected: PASS
 
 - [ ] **Step 6: RBS 재생성**
@@ -291,7 +291,7 @@ require 'fediverse/inbox/delete_handler'
 module Fediverse
   class Inbox
     RSpec.describe DeleteHandler do
-      let(:local_actor) { FactoryBot.create(:user).federails_actor }
+      let(:local_actor) { FactoryBot.create(:user).fedipub_actor }
       let(:distant_actor) { FactoryBot.create :distant_actor }
 
       # 이동된 describe 블록들
@@ -324,29 +324,29 @@ module Fediverse
         #: (Hash[String, untyped]) -> untyped
         def dispatch_delete_request(payload)
           payload['object'] = payload['object']['id'] unless payload['object'].is_a? String
-          object = Federails::Utils::Object.find_distant_object_in_all payload['object']
+          object = Fedipub::Utils::Object.find_distant_object_in_all payload['object']
           return if object.blank?
 
-          object.run_callbacks :on_federails_delete_requested
+          object.run_callbacks :on_fedipub_delete_requested
         end
 
-        # Triggers on_federails_delete_requested callback on the matching local object.
+        # Triggers on_fedipub_delete_requested callback on the matching local object.
         #: (Hash[String, untyped]) -> void
         def handle_delete_request(activity)
-          object = Federails::Utils::Object.find_distant_object_in_all(activity['object'])
+          object = Fedipub::Utils::Object.find_distant_object_in_all(activity['object'])
           return if object.blank?
 
-          object.run_callbacks :on_federails_delete_requested
+          object.run_callbacks :on_fedipub_delete_requested
         end
 
-        # Triggers on_federails_undelete_requested callback when an Undo+Delete is received.
+        # Triggers on_fedipub_undelete_requested callback when an Undo+Delete is received.
         #: (Hash[String, untyped]) -> void
         def handle_undelete_request(activity)
           delete_activity = Request.dereference(activity['object'])
-          object = Federails::Utils::Object.find_distant_object_in_all(delete_activity['object'])
+          object = Fedipub::Utils::Object.find_distant_object_in_all(delete_activity['object'])
           return if object.blank?
 
-          object.run_callbacks :on_federails_undelete_requested
+          object.run_callbacks :on_fedipub_undelete_requested
         end
       end
     end

@@ -1,0 +1,11 @@
+# Generated from app/serializers/fedipub/server/actor_resource.rb with RBS::Inline
+
+module Fedipub
+  module Server
+    class ActorResource < BaseResource
+      def serializable_hash: () -> untyped
+
+      def actor_data: (untyped actor) -> untyped
+    end
+  end
+end

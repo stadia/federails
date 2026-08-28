@@ -1,6 +1,6 @@
-# Federails ActivityPub P0/P1 통합 로드맵 스펙
+# Fedipub ActivityPub P0/P1 통합 로드맵 스펙
 
-> Federails v0.8.0 기준. 기존 docs/plans/ 문서 6건을 통합 재정리한 단일 스펙.
+> Fedipub v0.8.0 기준. 기존 docs/plans/ 문서 6건을 통합 재정리한 단일 스펙.
 > 연합 대상: Mastodon + Misskey/Calckey 계열 우선.
 
 ---
@@ -14,7 +14,7 @@
 
 ### Actor System
 - 다형성 Actor (로컬/리모트), RSA 키쌍 생성, Tombstone 상태
-- `acts_as_federails_actor` concern, 리모트 actor 동기화
+- `acts_as_fedipub_actor` concern, 리모트 actor 동기화
 - Host 모델 (리모트 서버 정보 + NodeInfo sync)
 
 ### Inbox/Outbox (S2S)
@@ -139,7 +139,7 @@
 - `Server::ActivitiesController#create` (inbox POST)에 before_action으로 검증 적용
   - 실패시 401 Unauthorized 반환
   - 키 갱신 대응: 검증 실패시 actor를 re-fetch하여 1회 재시도 (키 로테이션 대응)
-- 설정 옵션: `Federails.configuration.verify_signatures` (기본 `true`, 개발/테스트 환경에서 끌 수 있도록)
+- 설정 옵션: `Fedipub.configuration.verify_signatures` (기본 `true`, 개발/테스트 환경에서 끌 수 있도록)
 
 **테스트 기준:**
 - 유효한 서명 → 정상 처리
@@ -194,13 +194,13 @@
   - 404/410 → 즉시 포기, 추가 추적 상태는 남기지 않음
   - 429 → `Retry-After` 헤더 존중
   - 5xx / 네트워크 에러 → retry 대상
-- **활동 순서 보장:** 동일 target inbox에 대해 activity를 `created_at` 순으로 배달. `NotifyInboxJob`에 inbox URL 기반 concurrency key를 두어 같은 inbox에 대한 job이 직렬 실행되도록 함 (ActiveJob 백엔드가 지원하지 않으면 `federails_delivery_locks` 테이블로 advisory lock)
+- **활동 순서 보장:** 동일 target inbox에 대해 activity를 `created_at` 순으로 배달. `NotifyInboxJob`에 inbox URL 기반 concurrency key를 두어 같은 inbox에 대한 job이 직렬 실행되도록 함 (ActiveJob 백엔드가 지원하지 않으면 `fedipub_delivery_locks` 테이블로 advisory lock)
 - **현재 범위:** 실패 배달의 별도 영속 추적이나 운영용 rake task는 포함하지 않음
 
 ### P1-2: Like Activity
 
 - 수신 핸들러: `register_handler("Like", "*", handler, :on_like)` — 기본 핸들러는 activity 저장만 수행, 호스트앱이 오버라이드 가능
-- 발신: `Federails::Activity`에 `type: "Like"` 지원, `object`에 liked 대상 URI
+- 발신: `Fedipub::Activity`에 `type: "Like"` 지원, `object`에 liked 대상 URI
 - `Undo(Like)` 핸들러 추가
 - liked 컬렉션과 연동 (P1-7)
 
@@ -251,7 +251,7 @@
 | 자료 | 용도 |
 |---|---|
 | Fedify v2.1.0 소스 | 서명 검증, LD Signatures, shared inbox 구현 참조 |
-| Federails 기존 소스 (`Fediverse::Signature`, `Fediverse::Inbox`, `NotifyInboxJob` 등) | 현재 구현 기반, 확장 지점 파악 |
+| Fedipub 기존 소스 (`Fediverse::Signature`, `Fediverse::Inbox`, `NotifyInboxJob` 등) | 현재 구현 기반, 확장 지점 파악 |
 | ActivityPub 스펙 W3C | MUST/SHOULD 준수 기준 |
 | draft-cavage-http-signatures-12 | 현재 서명 방식 기준 문서 |
 | `json-ld` gem 문서 | LD Signatures 정규화(URDNA2015) 구현시 참조 |

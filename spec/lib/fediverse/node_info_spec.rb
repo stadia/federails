@@ -42,8 +42,8 @@ RSpec.describe Fediverse::NodeInfo do
       end
 
       before do
-        allow(Federails::Utils::JsonRequest).to receive(:get_json).with(wk_nodeinfo_url, follow_redirects: true).and_return(fake_wk_response).once
-        allow(Federails::Utils::JsonRequest).to receive(:get_json).with(nodeinfo_url).and_return(fake_response).once
+        allow(Fedipub::Utils::JsonRequest).to receive(:get_json).with(wk_nodeinfo_url, follow_redirects: true).and_return(fake_wk_response).once
+        allow(Fedipub::Utils::JsonRequest).to receive(:get_json).with(nodeinfo_url).and_return(fake_response).once
       end
 
       it 'raises an exception' do
@@ -66,8 +66,8 @@ RSpec.describe Fediverse::NodeInfo do
       end
 
       before do
-        allow(Federails::Utils::JsonRequest).to receive(:get_json).with(wk_nodeinfo_url, follow_redirects: true).and_return(fake_wk_response).once
-        allow(Federails::Utils::JsonRequest).to receive(:get_json).with(nodeinfo_url).and_return(fake_response).once
+        allow(Fedipub::Utils::JsonRequest).to receive(:get_json).with(wk_nodeinfo_url, follow_redirects: true).and_return(fake_wk_response).once
+        allow(Fedipub::Utils::JsonRequest).to receive(:get_json).with(nodeinfo_url).and_return(fake_response).once
       end
 
       it 'uses schema 2.1 endpoint' do
@@ -95,8 +95,8 @@ RSpec.describe Fediverse::NodeInfo do
       end
 
       before do
-        allow(Federails::Utils::JsonRequest).to receive(:get_json).with(wk_nodeinfo_url, follow_redirects: true).and_return(fake_wk_response).once
-        allow(Federails::Utils::JsonRequest).to receive(:get_json).with(nodeinfo_url).and_return(fake_response).once
+        allow(Fedipub::Utils::JsonRequest).to receive(:get_json).with(wk_nodeinfo_url, follow_redirects: true).and_return(fake_wk_response).once
+        allow(Fedipub::Utils::JsonRequest).to receive(:get_json).with(nodeinfo_url).and_return(fake_response).once
       end
 
       it 'prefers schema 2.1 endpoint' do
@@ -106,11 +106,11 @@ RSpec.describe Fediverse::NodeInfo do
 
     context 'when node has no nodeinfo' do
       before do
-        allow(Federails::Utils::JsonRequest).to receive(:get_json).with(wk_nodeinfo_url, follow_redirects: true).and_raise(Federails::Utils::JsonRequest::UnhandledResponseStatus).once
+        allow(Fedipub::Utils::JsonRequest).to receive(:get_json).with(wk_nodeinfo_url, follow_redirects: true).and_raise(Fedipub::Utils::JsonRequest::UnhandledResponseStatus).once
       end
 
       it 'raises an exception' do
-        expect { described_class.fetch(domain) }.to raise_error Federails::Utils::JsonRequest::UnhandledResponseStatus
+        expect { described_class.fetch(domain) }.to raise_error Fedipub::Utils::JsonRequest::UnhandledResponseStatus
       end
     end
   end

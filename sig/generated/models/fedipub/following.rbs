@@ -1,0 +1,37 @@
+# Generated from app/models/fedipub/following.rb with RBS::Inline
+
+module Fedipub
+  # Stores following data between actors
+  class Following < ApplicationRecord
+    include Fedipub::HasUuid
+
+    # : () -> String
+    def federated_url: () -> String
+
+    # : (follow_activity: Fedipub::Activity) -> void
+    def accept!: (follow_activity: Fedipub::Activity) -> void
+
+    # : () -> Fedipub::Activity?
+    def follow_activity: () -> Fedipub::Activity?
+
+    # : (String, actor: Fedipub::Actor) -> Fedipub::Following
+    def self.new_from_account: (String, actor: Fedipub::Actor) -> Fedipub::Following
+
+    private
+
+    # : () -> bool
+    def locally_instigated?: () -> bool
+
+    # : () -> void
+    def after_follow: () -> void
+
+    # : () -> void
+    def after_follow_accepted: () -> void
+
+    # : () -> Fedipub::Activity
+    def create_activity: () -> Fedipub::Activity
+
+    # : () -> Fedipub::Activity
+    def destroy_activity: () -> Fedipub::Activity
+  end
+end

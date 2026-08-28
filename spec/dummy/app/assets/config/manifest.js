@@ -1,3 +1,3 @@
 //= link_tree ../images
 //= link_directory ../stylesheets .css
-//= link federails_manifest.js
+//= link fedipub_manifest.js

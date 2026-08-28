@@ -8,14 +8,14 @@ module Fediverse
     module FollowHandler
       class << self
         # Creates a Following record from an incoming Follow activity.
-        #: (Hash[String, untyped]) -> Federails::Following
+        #: (Hash[String, untyped]) -> Fedipub::Following
         # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
         def handle_create_follow_request(activity)
-          actor = Federails::Actor.find_or_create_by_object(activity['actor'])
-          target_actor = Federails::Actor.find_or_create_by_object(activity['object'])
+          actor = Fedipub::Actor.find_or_create_by_object(activity['actor'])
+          target_actor = Fedipub::Actor.find_or_create_by_object(activity['object'])
 
           follow_activity = inbound_follow_activity(actor: actor, target_actor: target_actor, activity: activity)
-          following = Federails::Following.find_or_initialize_by(actor: actor, target_actor: target_actor)
+          following = Fedipub::Following.find_or_initialize_by(actor: actor, target_actor: target_actor)
           if following.new_record?
             following.federated_url = activity['id']
             following.save!
@@ -34,22 +34,22 @@ module Fediverse
         # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
         # Marks a pending Following as accepted when the target actor confirms.
-        #: (Hash[String, untyped]) -> Federails::Activity?
+        #: (Hash[String, untyped]) -> Fedipub::Activity?
         # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
         def handle_accept_follow_request(activity)
           original_activity = Request.dereference(activity['object'])
           unless original_activity
-            Federails.logger.warn { "Follow activity could not be dereferenced: #{activity['object']}" }
+            Fedipub.logger.warn { "Follow activity could not be dereferenced: #{activity['object']}" }
             return
           end
 
-          actor = Federails::Actor.find_or_create_by_object(original_activity['actor'])
-          target_actor = Federails::Actor.find_or_create_by_object(original_activity['object'])
+          actor = Fedipub::Actor.find_or_create_by_object(original_activity['actor'])
+          target_actor = Fedipub::Actor.find_or_create_by_object(original_activity['object'])
           raise 'Follow not accepted by target actor but by someone else' if activity['actor'] != target_actor.federated_url
 
-          follow = Federails::Following.find_by(actor: actor, target_actor: target_actor)
+          follow = Fedipub::Following.find_by(actor: actor, target_actor: target_actor)
           unless follow
-            Federails.logger.warn do
+            Fedipub.logger.warn do
               "Follow not found for #{actor.federated_url} -> #{target_actor.federated_url}. " \
                 "Original activity id: #{activity['object']}"
             end
@@ -58,7 +58,7 @@ module Fediverse
 
           follow_activity = follow.follow_activity
           unless follow_activity
-            Federails.logger.warn do
+            Fedipub.logger.warn do
               "Follow activity not found for #{actor.federated_url} -> #{target_actor.federated_url}. " \
                 "Original activity id: #{activity['object']}"
             end
@@ -70,34 +70,34 @@ module Fediverse
         # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
         # Destroys a Following record when the follower undoes their Follow.
-        #: (Hash[String, untyped]) -> Federails::Following?
+        #: (Hash[String, untyped]) -> Fedipub::Following?
         def handle_undo_follow_request(activity)
           original_activity = activity['object']
           original_activity = Request.dereference(original_activity) if original_activity.is_a?(String)
           return unless original_activity
 
-          actor = Federails::Actor.find_or_create_by_object(original_activity['actor'])
-          target_actor = Federails::Actor.find_or_create_by_object(original_activity['object'])
+          actor = Fedipub::Actor.find_or_create_by_object(original_activity['actor'])
+          target_actor = Fedipub::Actor.find_or_create_by_object(original_activity['object'])
 
-          follow = Federails::Following.find_by(actor: actor, target_actor: target_actor)
+          follow = Fedipub::Following.find_by(actor: actor, target_actor: target_actor)
           follow&.destroy
         end
 
         # Destroys a pending Following when the target actor rejects the request.
         # AP Section 7.7: MUST NOT add to Following collection on Reject.
-        #: (Hash[String, untyped]) -> Federails::Following?
+        #: (Hash[String, untyped]) -> Fedipub::Following?
         def handle_reject_follow_request(activity)
           original_activity = Request.dereference(activity['object'])
           unless original_activity
-            Federails.logger.warn { "Follow activity could not be dereferenced for reject: #{activity['object']}" }
+            Fedipub.logger.warn { "Follow activity could not be dereferenced for reject: #{activity['object']}" }
             return
           end
 
-          actor = Federails::Actor.find_or_create_by_object(original_activity['actor'])
-          target_actor = Federails::Actor.find_or_create_by_object(original_activity['object'])
+          actor = Fedipub::Actor.find_or_create_by_object(original_activity['actor'])
+          target_actor = Fedipub::Actor.find_or_create_by_object(original_activity['object'])
           raise 'Follow not rejected by target actor but by someone else' if activity['actor'] != target_actor.federated_url
 
-          follow = Federails::Following.pending.find_by(actor: actor, target_actor: target_actor)
+          follow = Fedipub::Following.pending.find_by(actor: actor, target_actor: target_actor)
           follow&.destroy
         end
 
@@ -106,11 +106,11 @@ module Fediverse
         # Re-sends an Accept Activity when a Follow is received for an already-accepted Following
         # under a new activity id. De-duplication in dispatch_request ensures this path is only
         # reached for genuinely new inbound Follow activities.
-        #: (Federails::Following, Federails::Activity?) -> void
+        #: (Fedipub::Following, Fedipub::Activity?) -> void
         def resend_accept_for_duplicate_follow(following, follow_activity)
           return unless follow_activity
 
-          Federails::Activity.create!(
+          Fedipub::Activity.create!(
             actor:  following.target_actor,
             action: 'Accept',
             entity: follow_activity,
@@ -118,12 +118,12 @@ module Fediverse
           )
         end
 
-        #: (actor: Federails::Actor, target_actor: Federails::Actor, activity: Hash[String, untyped]) -> Federails::Activity?
+        #: (actor: Fedipub::Actor, target_actor: Fedipub::Actor, activity: Hash[String, untyped]) -> Fedipub::Activity?
         # rubocop:disable Metrics/AbcSize
         def inbound_follow_activity(actor:, target_actor:, activity:)
-          return Federails::Activity.find_by(actor: actor, action: 'Follow', entity: target_actor) if actor.local?
+          return Fedipub::Activity.find_by(actor: actor, action: 'Follow', entity: target_actor) if actor.local?
 
-          Federails::Activity.find_or_initialize_by(actor: actor, action: 'Follow', entity: target_actor).tap do |follow_activity|
+          Fedipub::Activity.find_or_initialize_by(actor: actor, action: 'Follow', entity: target_actor).tap do |follow_activity|
             follow_activity.federated_url = activity['id'] if follow_activity.federated_url.blank? && activity['id'].present?
             follow_activity.to = activity['to'] || [target_actor.federated_url]
             follow_activity.cc = activity['cc']
@@ -135,7 +135,7 @@ module Fediverse
         end
         # rubocop:enable Metrics/AbcSize
 
-        #: (Federails::Actor, Federails::Following, Federails::Activity?) -> void
+        #: (Fedipub::Actor, Fedipub::Following, Fedipub::Activity?) -> void
         def dispatch_followed_callback(target_actor, following, follow_activity)
           return unless target_actor&.entity
 

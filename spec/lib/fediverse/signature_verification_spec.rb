@@ -13,7 +13,7 @@ Rfc9421MockRequest = Struct.new(:body, :headers) do
 end
 
 RSpec.describe Fediverse::Signature do
-  let(:actor) { FactoryBot.create(:user).federails_actor }
+  let(:actor) { FactoryBot.create(:user).fedipub_actor }
 
   describe '.parse_signature_header' do
     it 'parses a valid signature header' do
@@ -134,7 +134,7 @@ RSpec.describe Fediverse::Signature do
       request = build_signed_request(actor, body)
       actor_uri = actor.federated_url
 
-      allow(Federails::Actor).to receive(:find_or_create_by_federation_url)
+      allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url)
         .with(actor_uri).and_return(actor)
 
       result = described_class.verify_request!(request)
@@ -149,7 +149,7 @@ RSpec.describe Fediverse::Signature do
       wrong_key = OpenSSL::PKey::RSA.new(2048)
       real_public_key = actor.class.find(actor.id).public_key
 
-      allow(Federails::Actor).to receive(:find_or_create_by_federation_url)
+      allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url)
         .with(actor_uri).and_return(actor)
       allow(actor).to receive(:public_key).and_return(wrong_key.public_key.to_pem, real_public_key)
       allow(actor).to receive(:updated_at).and_return(2.days.ago)
@@ -166,7 +166,7 @@ RSpec.describe Fediverse::Signature do
 
       wrong_key = OpenSSL::PKey::RSA.new(2048)
 
-      allow(Federails::Actor).to receive(:find_or_create_by_federation_url)
+      allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url)
         .with(actor_uri).and_return(actor)
       allow(actor).to receive_messages(public_key: wrong_key.public_key.to_pem, updated_at: 1.minute.ago)
       allow(actor).to receive(:sync!)
@@ -182,7 +182,7 @@ RSpec.describe Fediverse::Signature do
 
       wrong_key = OpenSSL::PKey::RSA.new(2048)
 
-      allow(Federails::Actor).to receive(:find_or_create_by_federation_url)
+      allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url)
         .with(actor_uri).and_return(actor)
       allow(actor).to receive_messages(public_key: wrong_key.public_key.to_pem, updated_at: 2.days.ago)
       allow(actor).to receive(:sync!)
@@ -195,19 +195,19 @@ RSpec.describe Fediverse::Signature do
     it 'strips the key fragment from keyId to get actor URI' do
       request = build_signed_request(actor, body)
 
-      allow(Federails::Actor).to receive(:find_or_create_by_federation_url)
+      allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url)
         .with(actor.federated_url).and_return(actor)
 
       described_class.verify_request!(request)
 
-      expect(Federails::Actor).to have_received(:find_or_create_by_federation_url)
+      expect(Fedipub::Actor).to have_received(:find_or_create_by_federation_url)
         .with(actor.federated_url)
     end
 
     it 'wraps actor lookup errors as SignatureVerificationError' do
       request = build_signed_request(actor, body)
 
-      allow(Federails::Actor).to receive(:find_or_create_by_federation_url)
+      allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url)
         .with(actor.federated_url).and_raise(ActiveRecord::RecordNotFound)
 
       expect { described_class.verify_request!(request) }
@@ -219,7 +219,7 @@ RSpec.describe Fediverse::Signature do
       actor_uri = actor.federated_url
       wrong_key = OpenSSL::PKey::RSA.new(2048)
 
-      allow(Federails::Actor).to receive(:find_or_create_by_federation_url)
+      allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url)
         .with(actor_uri).and_return(actor)
       allow(actor).to receive_messages(public_key: wrong_key.public_key.to_pem, updated_at: 2.days.ago)
       allow(actor).to receive(:sync!).and_raise(Faraday::ConnectionFailed.new('boom'))
@@ -264,7 +264,7 @@ RSpec.describe Fediverse::Signature do
       signed = sign_rfc9421(actor, components, body_str: body, content_digest_header: content_digest)
       request = build_rfc9421_request(body, signed[:signature], signed[:signature_input], content_digest_header: content_digest)
 
-      allow(Federails::Actor).to receive(:find_or_create_by_federation_url)
+      allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url)
         .with(actor.federated_url).and_return(actor)
 
       expect(described_class.verify_request!(request)).to eq(actor)
@@ -276,7 +276,7 @@ RSpec.describe Fediverse::Signature do
                                                body_str: body, content_digest_header: content_digest)
       request = build_rfc9421_request(body, signed[:signature], signed[:signature_input], content_digest_header: content_digest)
 
-      allow(Federails::Actor).to receive(:find_or_create_by_federation_url)
+      allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url)
         .with(actor.federated_url).and_return(actor)
 
       expect(described_class.verify_request!(request)).to eq(actor)
@@ -318,7 +318,7 @@ RSpec.describe Fediverse::Signature do
 
       request = build_rfc9421_request(body, signature_header, signature_input_header, content_digest_header: content_digest)
 
-      allow(Federails::Actor).to receive(:find_or_create_by_federation_url)
+      allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url)
         .with(actor.federated_url).and_return(actor)
 
       expect(described_class.verify_request!(request)).to eq(actor)

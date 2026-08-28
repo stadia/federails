@@ -2,7 +2,7 @@ require 'rails_helper'
 require 'fediverse/signature'
 
 RSpec.describe Fediverse::Signature do
-  let(:actor) { FactoryBot.create(:user).federails_actor }
+  let(:actor) { FactoryBot.create(:user).fedipub_actor }
 
   context 'when signing requests' do
     let(:request) do
@@ -108,7 +108,7 @@ RSpec.describe Fediverse::Signature do
 
       expect do
         described_class.signed_get(url, actor: actor)
-      end.to raise_error(Federails::Utils::JsonRequest::UnhandledResponseStatus, /404/)
+      end.to raise_error(Fedipub::Utils::JsonRequest::UnhandledResponseStatus, /404/)
     end
   end
 end

@@ -6,7 +6,7 @@ module Fediverse
   FakeActivity = Struct.new(:id, :actor, :recipients, :action, :entity, :to, :cc, :bto, :bcc, :audience)
 
   RSpec.describe Notifier do
-    let(:local_actor) { FactoryBot.create(:user).federails_actor }
+    let(:local_actor) { FactoryBot.create(:user).fedipub_actor }
 
     describe 'shared inbox deduplication' do
       let(:shared_inbox) { 'https://example.com/inbox' }

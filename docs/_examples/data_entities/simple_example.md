@@ -7,11 +7,11 @@ title: 'Data entity: Simple example'
 Goal: Publish local `Message`s as federated _Note_ and convert incoming _Notes_ as local Post.
 
 Configuration:
-- `User` model, configured with `acts_as_federails_actor`
+- `User` model, configured with `acts_as_fedipub_actor`
 - `Messages` model:
   - messages can have answers (`parent` relation)
   - messages belongs to a `User`
-  - doing `message.user.federails_actor` returns the actor
+  - doing `message.user.fedipub_actor` returns the actor
 
 ## Updating the "messages" table/model
 
@@ -27,7 +27,7 @@ class AddFederationAttributesToMessages < ActiveRecord::Migration[7.1]
   def change
     change_column_null :messages, :user_id, true                              # Users are now optional
     add_column :messages, :federated_url, :string, null: true, default: nil   # Required
-    add_reference :messages, :federails_actor, null: true, foreign_key: true  # Required
+    add_reference :messages, :fedipub_actor, null: true, foreign_key: true  # Required
   end
 end
 ```
@@ -36,8 +36,8 @@ end
 # app/models/message.rb
 
 class Message < ApplicationRecord
-  include Federails::DataEntity
-  acts_as_federails_data handles: 'Note',
+  include Fedipub::DataEntity
+  acts_as_fedipub_data handles: 'Note',
                          actor_entity_method: :user
 
   validates :content, presence: true, allow_blank: false
@@ -49,7 +49,7 @@ class Message < ApplicationRecord
   # Transforms the instance to a valid ActivityPub object   
   # @return [Hash]
   def to_activitypub_object
-    Federails::DataTransformer::Note.to_federation self,
+    Fedipub::DataTransformer::Note.to_federation self,
                                                    content:   content,
                                                    inReplyTo: parent?.federated_url
   end
@@ -61,13 +61,13 @@ class Message < ApplicationRecord
   # @return [Hash] Valid Hash 
   def self.from_activitypub_object(hash)
     # Gets the timestamps values with a helper
-    attrs = Federails::Utils::Object.timestamp_attributes(hash)
+    attrs = Fedipub::Utils::Object.timestamp_attributes(hash)
                                     # Complete attributes
                                     .merge federated_url: hash['id'],
                                            content:       hash['content']
 
     # Find the parent if message is an answer
-    parent = Federails::Utils::Object.find_or_create! hash['inReplyTo'] if hash['inReplyTo'].present? 
+    parent = Fedipub::Utils::Object.find_or_create! hash['inReplyTo'] if hash['inReplyTo'].present? 
     attrs[:parent] = parent if parent
 
     attrs

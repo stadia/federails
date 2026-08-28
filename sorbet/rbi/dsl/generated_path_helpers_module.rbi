@@ -34,7 +34,7 @@ module GeneratedPathHelpersModule
   def edit_user_registration_path(*args); end
 
   sig { params(args: T.untyped).returns(String) }
-  def federails_path(*args); end
+  def fedipub_path(*args); end
 
   sig { params(args: T.untyped).returns(String) }
   def new_post_path(*args); end

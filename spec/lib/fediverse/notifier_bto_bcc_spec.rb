@@ -5,14 +5,14 @@ module Fediverse
   BtoBccFakeEntity = Struct.new(:federated_url)
 
   RSpec.describe Notifier, '.payload bto/bcc stripping' do
-    let(:actor) { FactoryBot.create(:user).federails_actor }
-    let(:target_actor) { FactoryBot.create(:user).federails_actor }
+    let(:actor) { FactoryBot.create(:user).fedipub_actor }
+    let(:target_actor) { FactoryBot.create(:user).fedipub_actor }
     let(:bto_actor) { FactoryBot.create :distant_actor }
     let(:bcc_actor) { FactoryBot.create :distant_actor }
     let(:entity) { FactoryBot.create :post }
 
     let(:activity) do
-      Federails::Activity.create!(
+      Fedipub::Activity.create!(
         actor:  actor,
         entity: entity,
         action: 'Create',

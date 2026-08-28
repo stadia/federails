@@ -1,0 +1,6 @@
+# Generated from app/mailers/fedipub/application_mailer.rb with RBS::Inline
+
+module Fedipub
+  class ApplicationMailer < ActionMailer::Base
+  end
+end

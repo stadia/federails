@@ -1,0 +1,13 @@
+# Generated from app/policies/fedipub/server/publishable_policy.rb with RBS::Inline
+
+module Fedipub
+  module Server
+    class PublishablePolicy < Fedipub::FedipubPolicy
+      def show?: () -> untyped
+
+      class Scope < Scope
+        def resolve: () -> untyped
+      end
+    end
+  end
+end

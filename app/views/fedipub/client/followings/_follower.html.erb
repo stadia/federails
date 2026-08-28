@@ -1,0 +1,7 @@
+<div>
+  <b><%= link_to following.actor.name, fedipub.client_actor_url(following.actor) %></b>
+  (<%= following.actor.at_address %>) (<%= following.status %>)
+  <% if following.pending? && following.target_actor == current_user&.fedipub_actor %>
+    <%= button_to 'Accept', fedipub.accept_client_following_path(following), method: :put %>
+  <% end %>
+</div>

@@ -1,12 +1,12 @@
-# Federails
+# Fedipub
 
-Federails is an engine that brings ActivityPub to Ruby on Rails application.
+Fedipub is an engine that brings ActivityPub to Ruby on Rails application.
 
 ## Community
 
-You can join the [matrix chat room](https://matrix.to/#/#federails:matrix.org) to chat with humans.
+You can join the [matrix chat room](https://matrix.to/#/#fedipub:matrix.org) to chat with humans.
 
-Open issues or feature requests on the [issue tracker](https://gitlab.com/experimentslabs/federails/-/issues)
+Open issues or feature requests on the [issue tracker](https://gitlab.com/experimentslabs/fedipub/-/issues)
 
 ## Features
 
@@ -45,10 +45,10 @@ shape, are documented in [Usage](docs/usage.md).
 
 ## Extensions
 
-Extensions extends the features of Federails.
+Extensions extends the features of Fedipub.
 
-- [Federails Moderation](https://github.com/manyfold3d/federails-moderation/)
-  > A gem that provides moderation capabilities for Federails
+- [Fedipub Moderation](https://github.com/manyfold3d/fedipub-moderation/)
+  > A gem that provides moderation capabilities for Fedipub
 
 ## License
 

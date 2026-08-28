@@ -1,7 +1,7 @@
 # rbs_inline: enabled
 
-require 'federails/utils/host'
-require 'federails/utils/json_request'
+require 'fedipub/utils/host'
+require 'fedipub/utils/json_request'
 require 'fediverse/signature'
 
 module Fediverse
@@ -26,7 +26,7 @@ module Fediverse
       #
       # @return [Boolean]
       def local_user?(hash)
-        hash[:username] && (hash[:domain].nil? || (hash[:domain] == Federails::Utils::Host.localhost))
+        hash[:username] && (hash[:domain].nil? || (hash[:domain] == Fedipub::Utils::Host.localhost))
       end
 
       # Fetches a distant actor
@@ -34,7 +34,7 @@ module Fediverse
       # @param username [String]
       # @param domain [String]
       #
-      # @return [Federails::Actor, nil] Federails actor or nothing when not found
+      # @return [Fedipub::Actor, nil] Fedipub actor or nothing when not found
       def fetch_actor(username, domain)
         fetch_actor_url webfinger(username, domain)
       end
@@ -43,7 +43,7 @@ module Fediverse
       #
       # @param url [String] Actor's federation URL
       #
-      # @return [Federails::Actor, nil] Federails actor or nothing when not found
+      # @return [Fedipub::Actor, nil] Fedipub actor or nothing when not found
       def fetch_actor_url(url)
         json = begin
           get_json url
@@ -62,7 +62,7 @@ module Fediverse
       def webfinger(username, domain)
         json = webfinger_response(username, domain)
         unless json.is_a?(Hash)
-          Federails.logger.debug { "Invalid WebFinger payload for #{username}@#{domain}: #{json.inspect}" }
+          Fedipub.logger.debug { "Invalid WebFinger payload for #{username}@#{domain}: #{json.inspect}" }
           raise ActiveRecord::RecordNotFound
         end
 
@@ -81,7 +81,7 @@ module Fediverse
       def remote_follow_url(username, domain, actor_url: nil)
         json = webfinger_response(username, domain)
         unless json.is_a?(Hash)
-          Federails.logger.debug { "Invalid remote follow payload for #{username}@#{domain}: #{json.inspect}" }
+          Fedipub.logger.debug { "Invalid remote follow payload for #{username}@#{domain}: #{json.inspect}" }
           raise ActiveRecord::RecordNotFound
         end
 
@@ -100,7 +100,7 @@ module Fediverse
       # Makes a webfinger request for a given username/domain
       # @return [Hash] Webfinger response's content
       def webfinger_response(username, domain)
-        scheme = Federails.configuration.force_ssl ? 'https' : 'http'
+        scheme = Fedipub.configuration.force_ssl ? 'https' : 'http'
         get_json "#{scheme}://#{domain}/.well-known/webfinger", resource: "acct:#{username}@#{domain}"
       end
 
@@ -115,19 +115,19 @@ module Fediverse
         end
       end
 
-      # Builds a +Federails::Actor+ from a Webfinger response
+      # Builds a +Fedipub::Actor+ from a Webfinger response
       # @param data [Hash] Webfinger response
-      # @return [Federails::Actor]
+      # @return [Fedipub::Actor]
       def webfinger_to_actor(data)
         unless data.is_a?(Hash)
-          Federails.logger.debug { "Invalid actor payload: #{data.inspect}" }
+          Fedipub.logger.debug { "Invalid actor payload: #{data.inspect}" }
           raise ActiveRecord::RecordNotFound
         end
 
         data = data.clone
         id = data.delete('id')
         endpoints = data.delete('endpoints')
-        Federails::Actor.new federated_url:    id,
+        Fedipub::Actor.new federated_url:    id,
                              username:         data.delete('preferredUsername'),
                              actor_type:       data.delete('type'),
                              name:             data.delete('name'),
@@ -148,22 +148,22 @@ module Fediverse
       # @return [Hash]
       # @raise [ActiveRecord::RecordNotFound] when no local actor exists or request fails
       def signed_get_json(url)
-        actor = Federails::Actor.where(local: true).where.not(entity_type: nil).first
+        actor = Fedipub::Actor.where(local: true).where.not(entity_type: nil).first
         raise ActiveRecord::RecordNotFound, 'No local actor available for signed fetch' unless actor
 
-        Federails.logger.debug { "Retrying with signed GET for #{url}" }
+        Fedipub.logger.debug { "Retrying with signed GET for #{url}" }
         Fediverse::Signature.signed_get(url, actor: actor)
-      rescue Federails::Utils::JsonRequest::UnhandledResponseStatus => e
-        Federails.logger.debug { e.message }
+      rescue Fedipub::Utils::JsonRequest::UnhandledResponseStatus => e
+        Fedipub.logger.debug { e.message }
         raise ActiveRecord::RecordNotFound
       rescue Faraday::ConnectionFailed
-        Federails.logger.debug { "Failed to reach server for signed GET #{url}" }
+        Fedipub.logger.debug { "Failed to reach server for signed GET #{url}" }
         raise ActiveRecord::RecordNotFound
       rescue JSON::ParserError
-        Federails.logger.debug { "Invalid JSON response for signed GET #{url}" }
+        Fedipub.logger.debug { "Invalid JSON response for signed GET #{url}" }
         raise ActiveRecord::RecordNotFound
       rescue URI::InvalidURIError
-        Federails.logger.debug { "Invalid URI for signed GET #{url}" }
+        Fedipub.logger.debug { "Invalid URI for signed GET #{url}" }
         raise ActiveRecord::RecordNotFound
       end
 
@@ -171,21 +171,21 @@ module Fediverse
       # @return [Hash]
       # @raise [ActiveRecord::RecordNotFound] when the response is invalid
       def get_json(url, params = {})
-        Federails::Utils::JsonRequest.get_json(url, params: params, follow_redirects: true, headers: { accept: 'application/json' })
-      rescue Federails::Utils::JsonRequest::UnhandledResponseStatus => e
-        Federails.logger.debug { e.message }
+        Fedipub::Utils::JsonRequest.get_json(url, params: params, follow_redirects: true, headers: { accept: 'application/json' })
+      rescue Fedipub::Utils::JsonRequest::UnhandledResponseStatus => e
+        Fedipub.logger.debug { e.message }
 
         raise ActiveRecord::RecordNotFound
       rescue Faraday::ConnectionFailed
-        Federails.logger.debug { "Failed to reach server for GET #{url}" }
+        Fedipub.logger.debug { "Failed to reach server for GET #{url}" }
 
         raise ActiveRecord::RecordNotFound
       rescue JSON::ParserError
-        Federails.logger.debug { "Invalid JSON response for GET #{url}" }
+        Fedipub.logger.debug { "Invalid JSON response for GET #{url}" }
 
         raise ActiveRecord::RecordNotFound
       rescue URI::InvalidURIError
-        Federails.logger.debug { "Invalid URI for GET #{url}" }
+        Fedipub.logger.debug { "Invalid URI for GET #{url}" }
 
         raise ActiveRecord::RecordNotFound
       end

@@ -1,9 +1,9 @@
 ---
-title: Federails
+title: Fedipub
 #email: your-email@example.com
 description: >-
-  Federails is an engine that brings ActivityPub to Ruby on Rails application.
-baseurl: "/federails" # the subpath of your site, e.g. /blog
+  Fedipub is an engine that brings ActivityPub to Ruby on Rails application.
+baseurl: "/fedipub" # the subpath of your site, e.g. /blog
 url: "https://experimentslabs.gitlab.io/"
 
 # Build settings
@@ -78,8 +78,8 @@ callouts:
 # Aux links for the upper right navigation
 aux_links:
   Community chat:
-    - https://matrix.to/#/#federails:matrix.org
+    - https://matrix.to/#/#fedipub:matrix.org
   Code repository/issues:
-    - https://gitlab.com/experimentslabs/federails
+    - https://gitlab.com/experimentslabs/fedipub
 # Makes Aux links open in a new tab. Default is false
 aux_links_new_tab: true

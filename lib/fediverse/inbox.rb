@@ -12,8 +12,8 @@ module Fediverse
     class << self
       # Registers a handler for incoming data
       #
-      # Unless a specific type is not implemented in Federails, you should leave the 'Delete' activity to Federails:
-      # it will dispatch a `on_federails_delete_requested` event on the right objects.
+      # Unless a specific type is not implemented in Fedipub, you should leave the 'Delete' activity to Fedipub:
+      # it will dispatch a `on_fedipub_delete_requested` event on the right objects.
       #
       # @param activity_type [String] Target activity type ('Create', 'Follow', 'Like', ...)
       #   See https://www.w3.org/TR/activitystreams-vocabulary/#activity-types for a list of common ones
@@ -38,7 +38,7 @@ module Fediverse
       # @return [:duplicate] when the activity has already been processed
       # @return [false] when no handler matched or verification failed
       def dispatch_request(payload)
-        return :duplicate if payload['id'].present? && Federails::Activity.exists?(federated_url: payload['id'])
+        return :duplicate if payload['id'].present? && Fedipub::Activity.exists?(federated_url: payload['id'])
 
         dispatched_at = Time.current
 
@@ -55,7 +55,7 @@ module Fediverse
 
         object_id = payload['object'].is_a?(Hash) ? payload['object']['id'] : payload['object']
         if (payload['type'] == 'Update') && !(payload['actor'].present? && object_id.present? && same_origin?(payload['actor'], object_id))
-          Federails.logger.warn do
+          Fedipub.logger.warn do
             "Rejected Update: origin verification failed (actor: #{payload['actor']}, object: #{object_id})"
           end
           return false
@@ -68,7 +68,7 @@ module Fediverse
         end
 
         if handlers.empty?
-          Federails.logger.debug { "Unhandled activity type: #{payload['type']}" }
+          Fedipub.logger.debug { "Unhandled activity type: #{payload['type']}" }
           return false
         end
 
@@ -102,13 +102,13 @@ module Fediverse
         federated_url = payload['id']
         return if federated_url.blank?
 
-        actor = Federails::Actor.find_or_create_by_object(payload['actor'])
+        actor = Fedipub::Actor.find_or_create_by_object(payload['actor'])
         return unless actor
 
-        existing_activity = Federails::Activity.find_by(federated_url: federated_url)
+        existing_activity = Fedipub::Activity.find_by(federated_url: federated_url)
         return update_processed_activity!(existing_activity, payload) if existing_activity
 
-        recent_activity = Federails::Activity.where(actor: actor, action: payload['type'], federated_url: nil)
+        recent_activity = Fedipub::Activity.where(actor: actor, action: payload['type'], federated_url: nil)
                                              .where(created_at: dispatched_at..)
                                              .order(created_at: :asc) # oldest = most likely ours
                                              .first
@@ -118,7 +118,7 @@ module Fediverse
         entity = entity_for_processed_activity(payload, actor)
         return unless entity
 
-        Federails::Activity.create!(
+        Fedipub::Activity.create!(
           actor:         actor,
           action:        payload['type'],
           entity:        entity,
@@ -130,7 +130,7 @@ module Fediverse
           audience:      payload['audience']
         )
       rescue StandardError => e
-        Federails.logger.warn { "Failed to record processed activity #{federated_url}: #{e.message}" }
+        Fedipub.logger.warn { "Failed to record processed activity #{federated_url}: #{e.message}" }
       end
 
       # Returns merged handlers matching the given activity and object types,
@@ -185,26 +185,26 @@ module Fediverse
       # AP Section 7.1.2: forwarding targets followers collections only, not following.
       #: (String) -> bool
       def local_collection_url?(url)
-        route = Federails::Utils::Host.local_route(url)
-        route.present? && route[:controller] == 'federails/server/actors' && route[:action] == 'followers'
+        route = Fedipub::Utils::Host.local_route(url)
+        route.present? && route[:controller] == 'fedipub/server/actors' && route[:action] == 'followers'
       rescue URI::InvalidURIError, ActionController::RoutingError
         false
       end
 
-      # Checks if a URL resolves to any local Federails resource via route recognition.
+      # Checks if a URL resolves to any local Fedipub resource via route recognition.
       #: (String) -> bool
       def local_object_reference?(url)
-        route = Federails::Utils::Host.local_route(url)
+        route = Fedipub::Utils::Host.local_route(url)
         return false if route.blank?
 
-        %w[federails/server/actors federails/server/followings federails/server/activities federails/server/published].include?(route[:controller])
+        %w[fedipub/server/actors fedipub/server/followings fedipub/server/activities fedipub/server/published].include?(route[:controller])
       rescue URI::InvalidURIError, ActionController::RoutingError
         false
       end
 
       # Resolves the entity (polymorphic object) for a processed activity record.
       # Falls back to actor when the actual object cannot be resolved.
-      #: (Hash[String, untyped], Federails::Actor) -> untyped
+      #: (Hash[String, untyped], Fedipub::Actor) -> untyped
       def entity_for_processed_activity(payload, actor)
         object = payload['object']
         return actor if payload['type'] == 'Delete' && object == actor.federated_url
@@ -212,13 +212,13 @@ module Fediverse
         return actor if object.nil?
 
         if object.is_a?(String) || (object.is_a?(Hash) && object['id'].present?)
-          Federails::Utils::Object.find_or_initialize(object) || actor
+          Fedipub::Utils::Object.find_or_initialize(object) || actor
         else
           actor
         end
       end
 
-      #: (Federails::Activity, Hash[String, untyped]) -> void
+      #: (Fedipub::Activity, Hash[String, untyped]) -> void
       def update_processed_activity!(activity, payload)
         addressing_fields = %w[to cc bto bcc audience]
         updates = addressing_fields.each_with_object({}) do |field, hash|

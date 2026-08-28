@@ -34,9 +34,9 @@ module Jekyll
     def self.ignore_path?(path)
       return false unless path
 
-      path.match?(%r{federails/(client|server|application-).*(controller|policy|policy/scope|job|mailer|record)(.md)?$}) ||
-        path.match?(%r{federails/[^/]+(generator|policy|job)(.md)?$}) ||
-        path.match?(%r{federails/(engine|server|client)(.md)?$})
+      path.match?(%r{fedipub/(client|server|application-).*(controller|policy|policy/scope|job|mailer|record)(.md)?$}) ||
+        path.match?(%r{fedipub/[^/]+(generator|policy|job)(.md)?$}) ||
+        path.match?(%r{fedipub/(engine|server|client)(.md)?$})
     end
 
     private

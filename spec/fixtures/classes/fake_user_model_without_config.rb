@@ -1,9 +1,9 @@
 module Fixtures
   module Classes
-    # User model with an incomplete Federails::ActorEntity configuration
+    # User model with an incomplete Fedipub::ActorEntity configuration
     class FakeUserModelWithoutConfig < ApplicationRecord
       self.table_name = 'users'
-      include Federails::ActorEntity
+      include Fedipub::ActorEntity
     end
   end
 end

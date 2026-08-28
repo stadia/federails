@@ -23,26 +23,26 @@ RSpec.describe '/federation/activities', type: :request do
     end
 
     it 'renders a successful response' do
-      get federails.server_actor_outbox_url(local_actor), headers: { accept: Mime[:activitypub] }
+      get fedipub.server_actor_outbox_url(local_actor), headers: { accept: Mime[:activitypub] }
       expect(response).to be_successful
     end
 
     ACTIVITYPUB_CONTENT_TYPES.each do |accept|
       it "responds with LD in response to a #{accept} request" do
-        get federails.server_actor_outbox_url(local_actor), headers: { accept: accept }
+        get fedipub.server_actor_outbox_url(local_actor), headers: { accept: accept }
         expect(response.content_type).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"; charset=utf-8'
       end
     end
 
     context 'without page param' do
       it 'returns an OrderedCollection' do
-        get federails.server_actor_outbox_url(local_actor), headers: { accept: Mime[:activitypub] }
+        get fedipub.server_actor_outbox_url(local_actor), headers: { accept: Mime[:activitypub] }
         json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
         expect(json['type']).to eq 'OrderedCollection'
       end
 
       it 'includes id, totalItems, first, last' do
-        get federails.server_actor_outbox_url(local_actor), headers: { accept: Mime[:activitypub] }
+        get fedipub.server_actor_outbox_url(local_actor), headers: { accept: Mime[:activitypub] }
         json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
         aggregate_failures do
           expect(json['id']).to eq local_actor.outbox_url
@@ -53,7 +53,7 @@ RSpec.describe '/federation/activities', type: :request do
       end
 
       it 'does not embed orderedItems directly' do
-        get federails.server_actor_outbox_url(local_actor), headers: { accept: Mime[:activitypub] }
+        get fedipub.server_actor_outbox_url(local_actor), headers: { accept: Mime[:activitypub] }
         json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
         expect(json.keys).not_to include('orderedItems', 'current')
       end
@@ -61,19 +61,19 @@ RSpec.describe '/federation/activities', type: :request do
 
     context 'with page param' do
       it 'returns an OrderedCollectionPage' do
-        get federails.server_actor_outbox_url(local_actor, page: 1), headers: { accept: Mime[:activitypub] }
+        get fedipub.server_actor_outbox_url(local_actor, page: 1), headers: { accept: Mime[:activitypub] }
         json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
         expect(json['type']).to eq 'OrderedCollectionPage'
       end
 
       it 'includes partOf pointing to the collection' do
-        get federails.server_actor_outbox_url(local_actor, page: 1), headers: { accept: Mime[:activitypub] }
+        get fedipub.server_actor_outbox_url(local_actor, page: 1), headers: { accept: Mime[:activitypub] }
         json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
         expect(json['partOf']).to eq local_actor.outbox_url
       end
 
       it 'includes orderedItems' do
-        get federails.server_actor_outbox_url(local_actor, page: 1), headers: { accept: Mime[:activitypub] }
+        get fedipub.server_actor_outbox_url(local_actor, page: 1), headers: { accept: Mime[:activitypub] }
         json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
         expect(json['orderedItems']).to be_an(Array)
       end
@@ -87,13 +87,13 @@ RSpec.describe '/federation/activities', type: :request do
         after { Pagy::OPTIONS.delete(:limit) }
 
         it 'includes next on first page' do
-          get federails.server_actor_outbox_url(local_actor, page: 1), headers: { accept: Mime[:activitypub] }
+          get fedipub.server_actor_outbox_url(local_actor, page: 1), headers: { accept: Mime[:activitypub] }
           json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
           expect(json['next']).to be_present
         end
 
         it 'includes prev on second page' do
-          get federails.server_actor_outbox_url(local_actor, page: 2), headers: { accept: Mime[:activitypub] }
+          get fedipub.server_actor_outbox_url(local_actor, page: 2), headers: { accept: Mime[:activitypub] }
           json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
           expect(json['prev']).to be_present
         end
@@ -106,22 +106,22 @@ RSpec.describe '/federation/activities', type: :request do
       FactoryBot.create :following, :to_distant
     end
 
-    let(:activity) { Federails::Activity.last }
+    let(:activity) { Fedipub::Activity.last }
 
     it 'renders a successful response' do
-      get federails.server_actor_activity_url(activity.actor.to_param, activity.to_param), headers: { accept: Mime[:activitypub] }
+      get fedipub.server_actor_activity_url(activity.actor.to_param, activity.to_param), headers: { accept: Mime[:activitypub] }
       expect(response).to be_successful
     end
 
     ACTIVITYPUB_CONTENT_TYPES.each do |accept|
       it "responds with LD in response to a #{accept} request" do
-        get federails.server_actor_activity_url(activity.actor.to_param, activity.to_param), headers: { accept: accept }
+        get fedipub.server_actor_activity_url(activity.actor.to_param, activity.to_param), headers: { accept: accept }
         expect(response.content_type).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"; charset=utf-8'
       end
     end
 
     it 'returns an activity object with required fields' do
-      get federails.server_actor_activity_url(activity.actor.to_param, activity.to_param), headers: { accept: Mime[:activitypub] }
+      get fedipub.server_actor_activity_url(activity.actor.to_param, activity.to_param), headers: { accept: Mime[:activitypub] }
       json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
       aggregate_failures do
         expect(json['type']).to eq activity.action

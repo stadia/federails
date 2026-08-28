@@ -13,12 +13,12 @@
 ## File Map
 
 ### Task 1: G1 — Shared Inbox 로컬 수신자 검증
-- Modify: `app/controllers/federails/server/shared_inbox_controller.rb`
+- Modify: `app/controllers/fedipub/server/shared_inbox_controller.rb`
 - Modify: `spec/requests/federation/shared_inbox_spec.rb`
 
 ### Task 2: G2 — Delivery Reliability 백오프 스케줄 보정
-- Modify: `app/jobs/federails/notify_inbox_job.rb`
-- Modify: `spec/jobs/federails/notify_inbox_job_spec.rb`
+- Modify: `app/jobs/fedipub/notify_inbox_job.rb`
+- Modify: `spec/jobs/fedipub/notify_inbox_job_spec.rb`
 
 ### Task 3: G3 — Announce Object 조건부 Fetch/캐시
 - Modify: `lib/fediverse/inbox/announce_handler.rb`
@@ -37,7 +37,7 @@
 ## Task 1: G1 — Shared Inbox 로컬 수신자 검증
 
 **Files:**
-- Modify: `app/controllers/federails/server/shared_inbox_controller.rb`
+- Modify: `app/controllers/fedipub/server/shared_inbox_controller.rb`
 - Modify: `spec/requests/federation/shared_inbox_spec.rb`
 
 - [ ] **Step 1: Write failing test — activity with no local recipients returns 422**
@@ -59,7 +59,7 @@ context 'when to/cc contains no local actors' do
   end
 
   it 'returns 422' do
-    post federails.server_shared_inbox_path, params: payload, headers: { 'Content-Type' => 'application/activity+json' }
+    post fedipub.server_shared_inbox_path, params: payload, headers: { 'Content-Type' => 'application/activity+json' }
 
     expect(response).to have_http_status(:unprocessable_entity).or have_http_status(:unprocessable_content)
   end
@@ -93,7 +93,7 @@ context 'when to/cc contains a local actor' do
     allow(Fediverse::Inbox).to receive(:dispatch_request).and_return(true)
     allow(Fediverse::Inbox).to receive(:maybe_forward)
 
-    post federails.server_shared_inbox_path, params: payload, headers: { 'Content-Type' => 'application/activity+json' }
+    post fedipub.server_shared_inbox_path, params: payload, headers: { 'Content-Type' => 'application/activity+json' }
 
     expect(response).to have_http_status(:created)
   end
@@ -107,25 +107,25 @@ Expected: 'no local actors' test FAILS, 'local actor' test PASSES
 
 - [ ] **Step 5: Implement local recipient resolution in SharedInboxController**
 
-Replace the entire `create` method and add `resolve_local_recipients` private method in `app/controllers/federails/server/shared_inbox_controller.rb`:
+Replace the entire `create` method and add `resolve_local_recipients` private method in `app/controllers/fedipub/server/shared_inbox_controller.rb`:
 
 ```ruby
 # POST /federation/inbox
 def create
   payload = payload_from_params
-  return head Federails::Utils::ResponseCodes::UNPROCESSABLE_CONTENT unless payload
+  return head Fedipub::Utils::ResponseCodes::UNPROCESSABLE_CONTENT unless payload
   return head :unauthorized unless actor_match?(payload)
 
   local_recipients = resolve_local_recipients(payload)
   if local_recipients.empty?
-    Federails.logger.info { "[SharedInbox] No local recipients for activity #{payload['id']}" }
-    return head Federails::Utils::ResponseCodes::UNPROCESSABLE_CONTENT
+    Fedipub.logger.info { "[SharedInbox] No local recipients for activity #{payload['id']}" }
+    return head Fedipub::Utils::ResponseCodes::UNPROCESSABLE_CONTENT
   end
 
-  Federails.logger.info { "[SharedInbox] Local recipients: #{local_recipients.map(&:federated_url).join(', ')}" }
+  Fedipub.logger.info { "[SharedInbox] Local recipients: #{local_recipients.map(&:federated_url).join(', ')}" }
 
   result = Fediverse::Inbox.dispatch_request(payload)
-  Federails.logger.info { "[SharedInbox] dispatch_request result: #{result.inspect} for activity #{payload['id']}" }
+  Fedipub.logger.info { "[SharedInbox] dispatch_request result: #{result.inspect} for activity #{payload['id']}" }
 
   case result
   when true
@@ -134,7 +134,7 @@ def create
   when :duplicate
     head :ok
   else
-    head Federails::Utils::ResponseCodes::UNPROCESSABLE_CONTENT
+    head Fedipub::Utils::ResponseCodes::UNPROCESSABLE_CONTENT
   end
 end
 ```
@@ -145,10 +145,10 @@ Add the private method:
 def resolve_local_recipients(payload)
   urls = [payload['to'], payload['cc']].flatten.compact.uniq
   urls.filter_map do |url|
-    route = Federails::Utils::Host.local_route(url)
-    next unless route && route[:controller] == 'federails/server/actors'
+    route = Fedipub::Utils::Host.local_route(url)
+    next unless route && route[:controller] == 'fedipub/server/actors'
 
-    Federails::Actor.find_param(route[:id])
+    Fedipub::Actor.find_param(route[:id])
   rescue ActiveRecord::RecordNotFound
     nil
   end
@@ -163,7 +163,7 @@ Expected: ALL PASS
 - [ ] **Step 7: Commit**
 
 ```bash
-git add app/controllers/federails/server/shared_inbox_controller.rb spec/requests/federation/shared_inbox_spec.rb
+git add app/controllers/fedipub/server/shared_inbox_controller.rb spec/requests/federation/shared_inbox_spec.rb
 git commit -m "feat: shared inbox에서 to/cc 로컬 수신자 검증 추가
 
 로컬 수신자가 없는 activity를 422로 거부하고,
@@ -177,16 +177,16 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
 ## Task 2: G2 — Delivery Reliability 백오프 스케줄 보정
 
 **Files:**
-- Modify: `app/jobs/federails/notify_inbox_job.rb`
-- Modify: `spec/jobs/federails/notify_inbox_job_spec.rb`
+- Modify: `app/jobs/fedipub/notify_inbox_job.rb`
+- Modify: `spec/jobs/fedipub/notify_inbox_job_spec.rb`
 
 - [ ] **Step 1: Write failing test — verify fixed backoff schedule**
 
-In `spec/jobs/federails/notify_inbox_job_spec.rb`, add inside the `context 'when a TemporaryDeliveryError is raised'` block:
+In `spec/jobs/fedipub/notify_inbox_job_spec.rb`, add inside the `context 'when a TemporaryDeliveryError is raised'` block:
 
 ```ruby
 it 'uses fixed backoff schedule: 30s, 1m, 5m, 30m, 2h, 12h' do
-  error = Federails::TemporaryDeliveryError.new('Server error', response_code: 500, inbox_url: inbox_url)
+  error = Fedipub::TemporaryDeliveryError.new('Server error', response_code: 500, inbox_url: inbox_url)
   allow(Fediverse::Notifier).to receive(:deliver_to_inbox).and_raise(error)
 
   expected_waits = [30, 60, 300, 1800, 7200, 43200]
@@ -199,23 +199,23 @@ it 'uses fixed backoff schedule: 30s, 1m, 5m, 30m, 2h, 12h' do
     expect(job).to receive(:retry_job).with(hash_including(wait: wait))
 
     job.perform(activity, inbox_url)
-  rescue Federails::TemporaryDeliveryError
+  rescue Fedipub::TemporaryDeliveryError
     # 6회 초과시 raise됨 — 여기선 해당 안 됨
   end
 end
 
 it 'raises after 6 retries' do
-  error = Federails::TemporaryDeliveryError.new('Server error', response_code: 500, inbox_url: inbox_url)
+  error = Fedipub::TemporaryDeliveryError.new('Server error', response_code: 500, inbox_url: inbox_url)
   allow(Fediverse::Notifier).to receive(:deliver_to_inbox).and_raise(error)
 
   job = described_class.new(activity, inbox_url)
   allow(job).to receive(:executions).and_return(7)
 
-  expect { job.perform(activity, inbox_url) }.to raise_error(Federails::TemporaryDeliveryError)
+  expect { job.perform(activity, inbox_url) }.to raise_error(Fedipub::TemporaryDeliveryError)
 end
 
 it 'uses Retry-After value when present for 429 responses' do
-  error = Federails::TemporaryDeliveryError.new('Rate limited', response_code: 429, inbox_url: inbox_url, retry_after: 120)
+  error = Fedipub::TemporaryDeliveryError.new('Rate limited', response_code: 429, inbox_url: inbox_url, retry_after: 120)
   allow(Fediverse::Notifier).to receive(:deliver_to_inbox).and_raise(error)
 
   job = described_class.new(activity, inbox_url)
@@ -229,21 +229,21 @@ end
 
 - [ ] **Step 2: Run tests to verify they fail**
 
-Run: `bundle exec rspec spec/jobs/federails/notify_inbox_job_spec.rb`
+Run: `bundle exec rspec spec/jobs/fedipub/notify_inbox_job_spec.rb`
 Expected: FAIL — current implementation uses `(executions**3)+5` instead of fixed schedule
 
 - [ ] **Step 3: Implement fixed backoff schedule**
 
-Replace the entire `app/jobs/federails/notify_inbox_job.rb`:
+Replace the entire `app/jobs/fedipub/notify_inbox_job.rb`:
 
 ```ruby
 require 'fediverse/notifier'
 
-module Federails
+module Fedipub
   class NotifyInboxJob < ApplicationJob
     BACKOFF_SCHEDULE = [30, 60, 300, 1800, 7200, 43200].freeze
 
-    rescue_from Federails::TemporaryDeliveryError do |exception|
+    rescue_from Fedipub::TemporaryDeliveryError do |exception|
       current_attempt = executions
 
       if current_attempt <= BACKOFF_SCHEDULE.length
@@ -258,7 +258,7 @@ module Federails
         raise exception
       end
     end
-    discard_on Federails::PermanentDeliveryError
+    discard_on Fedipub::PermanentDeliveryError
 
     def perform(activity, inbox_url = nil)
       activity = Activity.includes(:entity, actor: :entity).find(activity.id)
@@ -275,13 +275,13 @@ end
 
 - [ ] **Step 4: Run tests**
 
-Run: `bundle exec rspec spec/jobs/federails/notify_inbox_job_spec.rb`
+Run: `bundle exec rspec spec/jobs/fedipub/notify_inbox_job_spec.rb`
 Expected: ALL PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add app/jobs/federails/notify_inbox_job.rb spec/jobs/federails/notify_inbox_job_spec.rb
+git add app/jobs/fedipub/notify_inbox_job.rb spec/jobs/fedipub/notify_inbox_job_spec.rb
 git commit -m "fix: NotifyInboxJob 백오프 스케줄을 고정 값으로 교체
 
 (n³)+5 기반에서 30s, 1m, 5m, 30m, 2h, 12h 고정 스케줄로 변경.
@@ -311,10 +311,10 @@ context 'when object is not found locally' do
   let(:activity) { { 'type' => 'Announce', 'actor' => 'https://remote.example/actor', 'object' => remote_object_url } }
 
   it 'fetches the object from remote and resolves the entity' do
-    allow(Federails::Utils::Object).to receive(:find_or_initialize).with(remote_object_url).and_return(nil)
+    allow(Fedipub::Utils::Object).to receive(:find_or_initialize).with(remote_object_url).and_return(nil)
     allow(Fediverse::Request).to receive(:dereference).with(remote_object_url).and_return(fetched_json)
-    allow(Federails::Utils::Object).to receive(:find_or_initialize).with(fetched_json).and_return(entity)
-    allow(entity).to receive(:run_callbacks).with(:on_federails_announce_received).and_yield
+    allow(Fedipub::Utils::Object).to receive(:find_or_initialize).with(fetched_json).and_return(entity)
+    allow(entity).to receive(:run_callbacks).with(:on_fedipub_announce_received).and_yield
 
     expect(described_class.handle_announce(activity)).to be true
     expect(Fediverse::Request).to have_received(:dereference).with(remote_object_url)
@@ -326,7 +326,7 @@ context 'when remote fetch fails' do
   let(:activity) { { 'type' => 'Announce', 'actor' => 'https://remote.example/actor', 'object' => remote_object_url } }
 
   it 'returns true without raising' do
-    allow(Federails::Utils::Object).to receive(:find_or_initialize).with(remote_object_url).and_return(nil)
+    allow(Fedipub::Utils::Object).to receive(:find_or_initialize).with(remote_object_url).and_return(nil)
     allow(Fediverse::Request).to receive(:dereference).with(remote_object_url).and_return(nil)
 
     expect(described_class.handle_announce(activity)).to be true
@@ -347,16 +347,16 @@ Replace `resolve_target_entity` and add `fetch_remote_object` in `lib/fediverse/
 private
 
 def dispatch_callback(entity, callback_name, actor)
-  previous_actor = entity.current_federails_activity_actor
-  entity.current_federails_activity_actor = actor
+  previous_actor = entity.current_fedipub_activity_actor
+  entity.current_fedipub_activity_actor = actor
   entity.run_callbacks(callback_name) { true }
 ensure
-  entity.current_federails_activity_actor = previous_actor
+  entity.current_fedipub_activity_actor = previous_actor
 end
 
 def resolve_target_entity(object)
-  entity = Federails::Utils::Object.find_or_initialize(object)
-  return entity if entity.is_a?(Federails::DataEntity) && entity.persisted?
+  entity = Fedipub::Utils::Object.find_or_initialize(object)
+  return entity if entity.is_a?(Fedipub::DataEntity) && entity.persisted?
 
   fetch_remote_object(object)
 rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid
@@ -370,12 +370,12 @@ def fetch_remote_object(object)
   fetched = Fediverse::Request.dereference(url)
   return nil unless fetched.is_a?(Hash)
 
-  entity = Federails::Utils::Object.find_or_initialize(fetched)
-  return entity if entity.is_a?(Federails::DataEntity) && entity.persisted?
+  entity = Fedipub::Utils::Object.find_or_initialize(fetched)
+  return entity if entity.is_a?(Fedipub::DataEntity) && entity.persisted?
 
   nil
 rescue StandardError => e
-  Federails.logger.warn { "[AnnounceHandler] Remote fetch failed for #{url}: #{e.message}" }
+  Fedipub.logger.warn { "[AnnounceHandler] Remote fetch failed for #{url}: #{e.message}" }
   nil
 end
 ```
@@ -427,9 +427,9 @@ context 'when object has an LD signature' do
   let(:activity) { { 'type' => 'Announce', 'actor' => 'https://remote.example/actor', 'object' => signed_object } }
 
   it 'calls LinkedDataSignature.verify and passes result to callback' do
-    allow(Federails::Utils::Object).to receive(:find_or_initialize).with(signed_object).and_return(entity)
+    allow(Fedipub::Utils::Object).to receive(:find_or_initialize).with(signed_object).and_return(entity)
     allow(Fediverse::LinkedDataSignature).to receive(:verify).with(signed_object).and_return({ verified: true, actor: nil })
-    allow(entity).to receive(:run_callbacks).with(:on_federails_announce_received).and_yield
+    allow(entity).to receive(:run_callbacks).with(:on_fedipub_announce_received).and_yield
 
     described_class.handle_announce(activity)
 
@@ -454,9 +454,9 @@ context 'when object has a failed LD signature' do
   let(:activity) { { 'type' => 'Announce', 'actor' => 'https://remote.example/actor', 'object' => signed_object } }
 
   it 'still processes the activity (does not reject)' do
-    allow(Federails::Utils::Object).to receive(:find_or_initialize).with(signed_object).and_return(entity)
+    allow(Fedipub::Utils::Object).to receive(:find_or_initialize).with(signed_object).and_return(entity)
     allow(Fediverse::LinkedDataSignature).to receive(:verify).with(signed_object).and_return({ verified: false, error: 'bad sig' })
-    allow(entity).to receive(:run_callbacks).with(:on_federails_announce_received).and_yield
+    allow(entity).to receive(:run_callbacks).with(:on_fedipub_announce_received).and_yield
 
     expect(described_class.handle_announce(activity)).to be true
   end
@@ -466,8 +466,8 @@ context 'when object has no LD signature' do
   let(:activity) { { 'type' => 'Announce', 'object' => entity.federated_url } }
 
   it 'does not call LinkedDataSignature.verify' do
-    allow(Federails::Utils::Object).to receive(:find_or_initialize).with(entity.federated_url).and_return(entity)
-    allow(entity).to receive(:run_callbacks).with(:on_federails_announce_received).and_yield
+    allow(Fedipub::Utils::Object).to receive(:find_or_initialize).with(entity.federated_url).and_return(entity)
+    allow(entity).to receive(:run_callbacks).with(:on_fedipub_announce_received).and_yield
 
     described_class.handle_announce(activity)
 
@@ -501,7 +501,7 @@ module Fediverse
 
           return true unless entity
 
-          dispatch_callback(entity, :on_federails_announce_received, activity['actor'])
+          dispatch_callback(entity, :on_fedipub_announce_received, activity['actor'])
         end
 
         def handle_undo_announce(activity)
@@ -511,7 +511,7 @@ module Fediverse
           entity = resolve_target_entity(original_activity&.dig('object'))
           return true unless entity
 
-          dispatch_callback(entity, :on_federails_undo_announce_received, activity['actor'])
+          dispatch_callback(entity, :on_fedipub_undo_announce_received, activity['actor'])
         end
 
         private
@@ -519,24 +519,24 @@ module Fediverse
         def verify_ld_signature(object)
           result = Fediverse::LinkedDataSignature.verify(object)
           if result[:verified]
-            Federails.logger.info { "[AnnounceHandler] LD Signature verified for #{object['id']}" }
+            Fedipub.logger.info { "[AnnounceHandler] LD Signature verified for #{object['id']}" }
           else
-            Federails.logger.warn { "[AnnounceHandler] LD Signature verification failed for #{object['id']}: #{result[:error]}" }
+            Fedipub.logger.warn { "[AnnounceHandler] LD Signature verification failed for #{object['id']}: #{result[:error]}" }
           end
           result
         end
 
         def dispatch_callback(entity, callback_name, actor)
-          previous_actor = entity.current_federails_activity_actor
-          entity.current_federails_activity_actor = actor
+          previous_actor = entity.current_fedipub_activity_actor
+          entity.current_fedipub_activity_actor = actor
           entity.run_callbacks(callback_name) { true }
         ensure
-          entity.current_federails_activity_actor = previous_actor
+          entity.current_fedipub_activity_actor = previous_actor
         end
 
         def resolve_target_entity(object)
-          entity = Federails::Utils::Object.find_or_initialize(object)
-          return entity if entity.is_a?(Federails::DataEntity) && entity.persisted?
+          entity = Fedipub::Utils::Object.find_or_initialize(object)
+          return entity if entity.is_a?(Fedipub::DataEntity) && entity.persisted?
 
           fetch_remote_object(object)
         rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid
@@ -550,12 +550,12 @@ module Fediverse
           fetched = Fediverse::Request.dereference(url)
           return nil unless fetched.is_a?(Hash)
 
-          entity = Federails::Utils::Object.find_or_initialize(fetched)
-          return entity if entity.is_a?(Federails::DataEntity) && entity.persisted?
+          entity = Fedipub::Utils::Object.find_or_initialize(fetched)
+          return entity if entity.is_a?(Fedipub::DataEntity) && entity.persisted?
 
           nil
         rescue StandardError => e
-          Federails.logger.warn { "[AnnounceHandler] Remote fetch failed for #{url}: #{e.message}" }
+          Fedipub.logger.warn { "[AnnounceHandler] Remote fetch failed for #{url}: #{e.message}" }
           nil
         end
       end
@@ -618,7 +618,7 @@ describe '.dispatch_request bto/bcc stripping' do
     result = described_class.dispatch_request(payload)
     expect(result).to be true
 
-    recorded = Federails::Activity.find_by(federated_url: payload['id'])
+    recorded = Fedipub::Activity.find_by(federated_url: payload['id'])
     next unless recorded
 
     expect(recorded.bto).to be_blank
@@ -634,11 +634,11 @@ Expected: FAIL — current code persists bto/bcc as-is
 
 - [ ] **Step 3: Implement bto/bcc stripping in record_processed_activity**
 
-In `lib/fediverse/inbox.rb`, modify the `Federails::Activity.create!` call inside `record_processed_activity` (around line 116-126):
+In `lib/fediverse/inbox.rb`, modify the `Fedipub::Activity.create!` call inside `record_processed_activity` (around line 116-126):
 
 Replace:
 ```ruby
-        Federails::Activity.create!(
+        Fedipub::Activity.create!(
           actor:         actor,
           action:        payload['type'],
           entity:        entity,
@@ -653,7 +653,7 @@ Replace:
 
 With:
 ```ruby
-        Federails::Activity.create!(
+        Fedipub::Activity.create!(
           actor:         actor,
           action:        payload['type'],
           entity:        entity,

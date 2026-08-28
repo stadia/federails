@@ -18,7 +18,7 @@ RSpec.describe '/app/activities', type: :request do
   describe 'GET /index' do
     it 'renders a successful response' do
       FactoryBot.create :following
-      get federails.client_activities_url
+      get fedipub.client_activities_url
       expect(response).to be_successful
     end
   end
@@ -26,7 +26,7 @@ RSpec.describe '/app/activities', type: :request do
   describe 'GET /feed' do
     context 'with unauthenticated user' do
       it 'redirects to the login page' do
-        get federails.client_feed_url
+        get fedipub.client_feed_url
         expect(response).to redirect_to(new_user_session_url)
       end
     end
@@ -36,7 +36,7 @@ RSpec.describe '/app/activities', type: :request do
 
       it 'renders a successful response' do
         FactoryBot.create :following
-        get federails.client_feed_url
+        get fedipub.client_feed_url
         expect(response).to be_successful
       end
     end

@@ -1,0 +1,9 @@
+# Generated from lib/fedipub/utils/response_codes.rb with RBS::Inline
+
+module Fedipub
+  module Utils
+    module ResponseCodes
+      UNPROCESSABLE_CONTENT: untyped
+    end
+  end
+end

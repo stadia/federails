@@ -1,0 +1,33 @@
+# Generated from app/controllers/fedipub/server/activities_controller.rb with RBS::Inline
+
+module Fedipub
+  module Server
+    class ActivitiesController < Fedipub::ServerController
+      include Fedipub::Server::RenderCollections
+
+      include Fedipub::Server::VerifySignature
+
+      include Fedipub::Server::InboxPayload
+
+      # GET /federation/activities
+      # GET /federation/actors/1/outbox.json
+      def outbox: () -> untyped
+
+      # GET /federation/actors/1/activities/1.json
+      def show: () -> untyped
+
+      # POST /federation/actors/1/inbox
+      def create: () -> untyped
+
+      private
+
+      # Use callbacks to share common setup or constraints between actions.
+      def set_activity: () -> untyped
+
+      # Only allow a list of trusted parameters through.
+      def activity_params: () -> untyped
+
+      def log_social_activity_payload: (untyped payload) -> untyped
+    end
+  end
+end

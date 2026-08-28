@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Close Federails' critical ActivityPub gaps (inbound signature verification, shared inbox, collection containers) and add mid-term features (delivery reliability, Like/Announce/Block, LD Signatures verification, bto/bcc handling, missing collections).
+**Goal:** Close Fedipub' critical ActivityPub gaps (inbound signature verification, shared inbox, collection containers) and add mid-term features (delivery reliability, Like/Announce/Block, LD Signatures verification, bto/bcc handling, missing collections).
 
 **Architecture:** Extend existing patterns — `Fediverse::Signature` for verification, new controller for shared inbox reusing `Fediverse::Inbox` dispatch, `OrderedCollectionResource` container mode, retry/discard handling in `NotifyInboxJob`, new inbox handlers for Like/Announce/Block via `register_handler`, `Fediverse::LinkedDataSignature` module for LD sig verification.
 
@@ -14,33 +14,33 @@
 
 ### P0-1: Inbound HTTP Signature Verification
 - Modify: `lib/fediverse/signature.rb` — add `verify_request`, `parse_signature_header`, `verify_digest` class methods
-- Modify: `app/controllers/federails/server/activities_controller.rb` — add `verify_http_signature!` before_action on `create`
-- Modify: `lib/federails/configuration.rb` — add `verify_signatures` setting
+- Modify: `app/controllers/fedipub/server/activities_controller.rb` — add `verify_http_signature!` before_action on `create`
+- Modify: `lib/fedipub/configuration.rb` — add `verify_signatures` setting
 - Create: `spec/lib/fediverse/signature_verification_spec.rb`
-- Modify: `spec/acceptance/federails/server/activities_controller_spec.rb` — update inbox tests to include signatures
+- Modify: `spec/acceptance/fedipub/server/activities_controller_spec.rb` — update inbox tests to include signatures
 
 ### P0-2: Shared Inbox
-- Create: `app/controllers/federails/server/shared_inbox_controller.rb`
+- Create: `app/controllers/fedipub/server/shared_inbox_controller.rb`
 - Modify: `config/routes.rb` — add shared inbox route
-- Modify: `app/serializers/federails/server/actor_resource.rb` — add `endpoints.sharedInbox`
+- Modify: `app/serializers/fedipub/server/actor_resource.rb` — add `endpoints.sharedInbox`
 - Modify: `lib/fediverse/notifier.rb` — group deliveries by shared inbox
-- Modify: `app/models/federails/actor.rb` — add `shared_inbox_url` accessor
-- Create: `db/migrate/XXXXXX_add_shared_inbox_url_to_federails_actors.rb`
-- Create: `spec/controllers/federails/server/shared_inbox_controller_spec.rb`
+- Modify: `app/models/fedipub/actor.rb` — add `shared_inbox_url` accessor
+- Create: `db/migrate/XXXXXX_add_shared_inbox_url_to_fedipub_actors.rb`
+- Create: `spec/controllers/fedipub/server/shared_inbox_controller_spec.rb`
 - Create: `spec/requests/federation/shared_inbox_spec.rb`
 
 ### P0-3: OrderedCollection Container
-- Modify: `app/controllers/federails/server/activities_controller.rb` — container vs page branching in `outbox`
-- Modify: `app/controllers/federails/server/actors_controller.rb` — container vs page branching in `followers`/`following`
-- Modify: `app/controllers/concerns/federails/server/render_collections.rb` — add `render_collection_or_container`
-- Modify: `app/serializers/federails/server/ordered_collection_resource.rb` — container payload support
-- Modify: `spec/acceptance/federails/server/activities_controller_spec.rb`
-- Modify: `spec/acceptance/federails/server/actors_controller_spec.rb`
+- Modify: `app/controllers/fedipub/server/activities_controller.rb` — container vs page branching in `outbox`
+- Modify: `app/controllers/fedipub/server/actors_controller.rb` — container vs page branching in `followers`/`following`
+- Modify: `app/controllers/concerns/fedipub/server/render_collections.rb` — add `render_collection_or_container`
+- Modify: `app/serializers/fedipub/server/ordered_collection_resource.rb` — container payload support
+- Modify: `spec/acceptance/fedipub/server/activities_controller_spec.rb`
+- Modify: `spec/acceptance/fedipub/server/actors_controller_spec.rb`
 
 ### P1-1: Delivery Reliability
-- Modify: `app/jobs/federails/notify_inbox_job.rb` — retry logic, error classification, ordering
-- Create: `lib/federails/delivery_errors.rb` — error classes for HTTP status classification
-- Create: `spec/jobs/federails/notify_inbox_job_spec.rb`
+- Modify: `app/jobs/fedipub/notify_inbox_job.rb` — retry logic, error classification, ordering
+- Create: `lib/fedipub/delivery_errors.rb` — error classes for HTTP status classification
+- Create: `spec/jobs/fedipub/notify_inbox_job_spec.rb`
 
 ### P1-2: Like Activity
 - Create: `lib/fediverse/inbox/like_handler.rb`
@@ -56,10 +56,10 @@
 - Create: `lib/fediverse/inbox/block_handler.rb`
 - Modify: `lib/fediverse/inbox.rb` — register Block + Undo(Block) handlers
 - Modify: `lib/fediverse/notifier.rb` — filter blocked actors from delivery
-- Create: `app/models/federails/block.rb`
-- Create: `db/migrate/XXXXXX_create_federails_blocks.rb`
+- Create: `app/models/fedipub/block.rb`
+- Create: `db/migrate/XXXXXX_create_fedipub_blocks.rb`
 - Create: `spec/lib/fediverse/inbox/block_handler_spec.rb`
-- Create: `spec/models/federails/block_spec.rb`
+- Create: `spec/models/fedipub/block_spec.rb`
 
 ### P1-5: LD Signatures Verification
 - Create: `lib/fediverse/linked_data_signature.rb`
@@ -68,17 +68,17 @@
 
 ### P1-6: bto/bcc Strip + Audience
 - Modify: `lib/fediverse/notifier.rb` — strip bto/bcc from payload, include in delivery targets
-- Modify: `app/serializers/federails/server/activity_resource.rb` — ensure bto/bcc omitted in serialization
+- Modify: `app/serializers/fedipub/server/activity_resource.rb` — ensure bto/bcc omitted in serialization
 - Create: `spec/lib/fediverse/notifier_bto_bcc_spec.rb`
 
 ### P1-7: Missing Collections (liked, featured, featured_tags)
-- Create: `app/models/federails/featured_item.rb`
-- Create: `app/models/federails/featured_tag.rb`
-- Create: `db/migrate/XXXXXX_create_federails_featured_items.rb`
-- Create: `db/migrate/XXXXXX_create_federails_featured_tags.rb`
-- Modify: `app/controllers/federails/server/actors_controller.rb` — add `liked`, `featured`, `featured_tags` actions
+- Create: `app/models/fedipub/featured_item.rb`
+- Create: `app/models/fedipub/featured_tag.rb`
+- Create: `db/migrate/XXXXXX_create_fedipub_featured_items.rb`
+- Create: `db/migrate/XXXXXX_create_fedipub_featured_tags.rb`
+- Modify: `app/controllers/fedipub/server/actors_controller.rb` — add `liked`, `featured`, `featured_tags` actions
 - Modify: `config/routes.rb` — add collection routes
-- Modify: `app/serializers/federails/server/actor_resource.rb` — add collection URLs
+- Modify: `app/serializers/fedipub/server/actor_resource.rb` — add collection URLs
 - Create: `spec/requests/federation/collections_spec.rb`
 
 ---
@@ -87,12 +87,12 @@
 
 **Files:**
 - Modify: `lib/fediverse/signature.rb`
-- Modify: `lib/federails/configuration.rb`
+- Modify: `lib/fedipub/configuration.rb`
 - Create: `spec/lib/fediverse/signature_verification_spec.rb`
 
 - [ ] **Step 1: Add `verify_signatures` config option**
 
-In `lib/federails/configuration.rb`, add:
+In `lib/fedipub/configuration.rb`, add:
 
 ```ruby
 mattr_accessor :verify_signatures
@@ -174,7 +174,7 @@ Expected: PASS
 - [ ] **Step 6: Commit**
 
 ```bash
-git add lib/fediverse/signature.rb lib/federails/configuration.rb spec/lib/fediverse/signature_verification_spec.rb
+git add lib/fediverse/signature.rb lib/fedipub/configuration.rb spec/lib/fediverse/signature_verification_spec.rb
 git commit -m "feat: add HTTP Signature header parsing and verify_signatures config"
 ```
 
@@ -302,7 +302,7 @@ describe '.verify_request!' do
     unknown_actor = build(:distant_actor, federated_url: 'https://unknown.example/actor')
     request = build_signed_request(actor: unknown_actor)
 
-    allow(Federails::Actor).to receive(:find_or_create_by_federation_url).and_return(nil)
+    allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url).and_return(nil)
     expect { described_class.verify_request!(request) }.to raise_error(Fediverse::Signature::SignatureVerificationError, /actor/i)
   end
 end
@@ -324,7 +324,7 @@ def self.verify_request!(request)
 
   # Extract actor URI from keyId (strip #main-key fragment)
   actor_uri = sig[:key_id].sub(/#.*\z/, '')
-  actor = Federails::Actor.find_or_create_by_federation_url(actor_uri)
+  actor = Fedipub::Actor.find_or_create_by_federation_url(actor_uri)
   raise SignatureVerificationError, 'Could not resolve signing actor' unless actor
 
   comparison_string = signature_payload(request: request, headers: sig[:headers])
@@ -361,12 +361,12 @@ git commit -m "feat: implement inbound HTTP Signature and Digest verification"
 ## Task 3: Inbound HTTP Signature — Controller Integration
 
 **Files:**
-- Modify: `app/controllers/federails/server/activities_controller.rb`
-- Modify: `spec/acceptance/federails/server/activities_controller_spec.rb`
+- Modify: `app/controllers/fedipub/server/activities_controller.rb`
+- Modify: `spec/acceptance/fedipub/server/activities_controller_spec.rb`
 
 - [ ] **Step 1: Write failing test for unsigned inbox POST rejection**
 
-Add to the inbox POST tests in `spec/acceptance/federails/server/activities_controller_spec.rb` (or create a new focused spec `spec/requests/federation/inbox_signature_spec.rb`):
+Add to the inbox POST tests in `spec/acceptance/fedipub/server/activities_controller_spec.rb` (or create a new focused spec `spec/requests/federation/inbox_signature_spec.rb`):
 
 ```ruby
 # frozen_string_literal: true
@@ -378,22 +378,22 @@ RSpec.describe 'Inbox HTTP Signature Verification', type: :request do
   let(:payload) { { '@context' => 'https://www.w3.org/ns/activitystreams', 'id' => 'https://remote.example/activity/1', 'type' => 'Follow', 'actor' => 'https://remote.example/actor', 'object' => actor.federated_url }.to_json }
 
   context 'when verify_signatures is true' do
-    before { Federails.verify_signatures = true }
-    after { Federails.verify_signatures = true }
+    before { Fedipub.verify_signatures = true }
+    after { Fedipub.verify_signatures = true }
 
     it 'rejects unsigned POST with 401' do
-      post federails.server_actor_inbox_path(actor), params: payload, headers: { 'Content-Type' => 'application/activity+json' }
+      post fedipub.server_actor_inbox_path(actor), params: payload, headers: { 'Content-Type' => 'application/activity+json' }
       expect(response).to have_http_status(:unauthorized)
     end
   end
 
   context 'when verify_signatures is false' do
-    before { Federails.verify_signatures = false }
-    after { Federails.verify_signatures = true }
+    before { Fedipub.verify_signatures = false }
+    after { Fedipub.verify_signatures = true }
 
     it 'accepts unsigned POST' do
       allow(Fediverse::Inbox).to receive(:dispatch_request).and_return(true)
-      post federails.server_actor_inbox_path(actor), params: payload, headers: { 'Content-Type' => 'application/activity+json' }
+      post fedipub.server_actor_inbox_path(actor), params: payload, headers: { 'Content-Type' => 'application/activity+json' }
       expect(response).to have_http_status(:created)
     end
   end
@@ -407,7 +407,7 @@ Expected: FAIL — unsigned POST currently returns 201, not 401
 
 - [ ] **Step 3: Add `verify_http_signature!` before_action**
 
-In `app/controllers/federails/server/activities_controller.rb`, add:
+In `app/controllers/fedipub/server/activities_controller.rb`, add:
 
 ```ruby
 before_action :verify_http_signature!, only: :create
@@ -415,11 +415,11 @@ before_action :verify_http_signature!, only: :create
 private
 
 def verify_http_signature!
-  return unless Federails.verify_signatures
+  return unless Fedipub.verify_signatures
 
   @signed_actor = Fediverse::Signature.verify_request!(request)
 rescue Fediverse::Signature::SignatureVerificationError => e
-  Federails.logger.warn "Signature verification failed: #{e.message}"
+  Fedipub.logger.warn "Signature verification failed: #{e.message}"
   head :unauthorized
 end
 ```
@@ -432,7 +432,7 @@ Expected: PASS
 - [ ] **Step 5: Run full test suite to check for regressions**
 
 Run: `bundle exec rspec`
-Expected: Existing inbox tests may fail because they don't sign requests. Fix by setting `Federails.verify_signatures = false` in existing specs or by adding signature headers.
+Expected: Existing inbox tests may fail because they don't sign requests. Fix by setting `Fedipub.verify_signatures = false` in existing specs or by adding signature headers.
 
 - [ ] **Step 6: Fix existing tests — disable verification in existing inbox specs**
 
@@ -443,11 +443,11 @@ In `spec/support/signature_helper.rb`, create:
 
 RSpec.configure do |config|
   config.before(:each) do
-    Federails.verify_signatures = false
+    Fedipub.verify_signatures = false
   end
 
   config.after(:each) do
-    Federails.verify_signatures = true
+    Fedipub.verify_signatures = true
   end
 end
 ```
@@ -456,7 +456,7 @@ Then in `spec/requests/federation/inbox_signature_spec.rb`, override:
 
 ```ruby
 context 'when verify_signatures is true' do
-  before { Federails.verify_signatures = true }
+  before { Fedipub.verify_signatures = true }
   # ...
 end
 ```
@@ -469,7 +469,7 @@ Expected: All PASS
 - [ ] **Step 8: Commit**
 
 ```bash
-git add app/controllers/federails/server/activities_controller.rb spec/requests/federation/inbox_signature_spec.rb spec/support/signature_helper.rb
+git add app/controllers/fedipub/server/activities_controller.rb spec/requests/federation/inbox_signature_spec.rb spec/support/signature_helper.rb
 git commit -m "feat: enforce inbound HTTP Signature verification on inbox POST"
 ```
 
@@ -478,19 +478,19 @@ git commit -m "feat: enforce inbound HTTP Signature verification on inbox POST"
 ## Task 4: Shared Inbox — Migration and Actor Model
 
 **Files:**
-- Create: `db/migrate/XXXXXX_add_shared_inbox_url_to_federails_actors.rb`
-- Modify: `app/models/federails/actor.rb`
+- Create: `db/migrate/XXXXXX_add_shared_inbox_url_to_fedipub_actors.rb`
+- Modify: `app/models/fedipub/actor.rb`
 
 - [ ] **Step 1: Generate migration**
 
-Run: `bundle exec rails generate migration AddSharedInboxUrlToFederailsActors shared_inbox_url:string --no-test-framework`
+Run: `bundle exec rails generate migration AddSharedInboxUrlToFedipubActors shared_inbox_url:string --no-test-framework`
 
 Edit the generated file to:
 
 ```ruby
-class AddSharedInboxUrlToFederailsActors < ActiveRecord::Migration[7.0]
+class AddSharedInboxUrlToFedipubActors < ActiveRecord::Migration[7.0]
   def change
-    add_column :federails_actors, :shared_inbox_url, :string
+    add_column :fedipub_actors, :shared_inbox_url, :string
   end
 end
 ```
@@ -501,7 +501,7 @@ Run: `cd spec/dummy && bundle exec rails db:migrate && cd ../..`
 
 - [ ] **Step 3: Write failing test for shared_inbox_url on Actor**
 
-Add to `spec/models/federails/actor_spec.rb`:
+Add to `spec/models/fedipub/actor_spec.rb`:
 
 ```ruby
 describe '#shared_inbox_url' do
@@ -509,7 +509,7 @@ describe '#shared_inbox_url' do
     let(:actor) { create(:local_actor) }
 
     it 'returns the shared inbox URL from routes' do
-      expect(actor.shared_inbox_url).to eq(Federails::Engine.routes.url_helpers.server_shared_inbox_url)
+      expect(actor.shared_inbox_url).to eq(Fedipub::Engine.routes.url_helpers.server_shared_inbox_url)
     end
   end
 
@@ -533,12 +533,12 @@ end
 
 - [ ] **Step 4: Run test to verify it fails**
 
-Run: `bundle exec rspec spec/models/federails/actor_spec.rb`
+Run: `bundle exec rspec spec/models/fedipub/actor_spec.rb`
 Expected: FAIL — route helper `server_shared_inbox_url` not defined yet, local actor doesn't override `shared_inbox_url`
 
 - [ ] **Step 5: Add `shared_inbox_url` method to Actor**
 
-In `app/models/federails/actor.rb`, add within the dynamic attribute methods section:
+In `app/models/fedipub/actor.rb`, add within the dynamic attribute methods section:
 
 ```ruby
 def shared_inbox_url
@@ -555,7 +555,7 @@ Note: The route doesn't exist yet — this will be created in Task 5. Skip this 
 - [ ] **Step 6: Commit migration and model change**
 
 ```bash
-git add db/migrate/*_add_shared_inbox_url_to_federails_actors.rb app/models/federails/actor.rb spec/models/federails/actor_spec.rb
+git add db/migrate/*_add_shared_inbox_url_to_fedipub_actors.rb app/models/fedipub/actor.rb spec/models/fedipub/actor_spec.rb
 git commit -m "feat: add shared_inbox_url to Actor model"
 ```
 
@@ -564,7 +564,7 @@ git commit -m "feat: add shared_inbox_url to Actor model"
 ## Task 5: Shared Inbox — Controller and Routes
 
 **Files:**
-- Create: `app/controllers/federails/server/shared_inbox_controller.rb`
+- Create: `app/controllers/fedipub/server/shared_inbox_controller.rb`
 - Modify: `config/routes.rb`
 - Create: `spec/requests/federation/shared_inbox_spec.rb`
 
@@ -595,7 +595,7 @@ RSpec.describe 'Shared Inbox', type: :request do
   it 'accepts a valid activity' do
     allow(Fediverse::Inbox).to receive(:dispatch_request).and_return(true)
 
-    post federails.server_shared_inbox_path,
+    post fedipub.server_shared_inbox_path,
       params: payload,
       headers: { 'Content-Type' => 'application/activity+json' }
 
@@ -603,7 +603,7 @@ RSpec.describe 'Shared Inbox', type: :request do
   end
 
   it 'returns 415 for unsupported content type' do
-    post federails.server_shared_inbox_path,
+    post fedipub.server_shared_inbox_path,
       params: payload,
       headers: { 'Content-Type' => 'application/json' }
 
@@ -627,17 +627,17 @@ post 'inbox', to: 'shared_inbox#create', as: :server_shared_inbox
 
 - [ ] **Step 4: Create SharedInboxController**
 
-Create `app/controllers/federails/server/shared_inbox_controller.rb`:
+Create `app/controllers/fedipub/server/shared_inbox_controller.rb`:
 
 ```ruby
 # frozen_string_literal: true
 
-module Federails
+module Fedipub
   module Server
-    class SharedInboxController < Federails::ServerController
+    class SharedInboxController < Fedipub::ServerController
       skip_after_action :verify_authorized
 
-      before_action :verify_http_signature!, if: -> { Federails.verify_signatures }
+      before_action :verify_http_signature!, if: -> { Fedipub.verify_signatures }
       before_action :validate_content_type!
 
       def create
@@ -660,7 +660,7 @@ module Federails
       def verify_http_signature!
         @signed_actor = Fediverse::Signature.verify_request!(request)
       rescue Fediverse::Signature::SignatureVerificationError => e
-        Federails.logger.warn "Shared inbox signature verification failed: #{e.message}"
+        Fedipub.logger.warn "Shared inbox signature verification failed: #{e.message}"
         head :unauthorized
       end
 
@@ -684,7 +684,7 @@ module Federails
       def compact_payload(payload)
         JSON::LD::API.compact(payload, payload['@context'] || 'https://www.w3.org/ns/activitystreams')
       rescue StandardError => e
-        Federails.logger.warn "JSON-LD compaction failed in shared inbox: #{e.message}"
+        Fedipub.logger.warn "JSON-LD compaction failed in shared inbox: #{e.message}"
         payload
       end
     end
@@ -699,13 +699,13 @@ Expected: PASS
 
 - [ ] **Step 6: Run the shared_inbox_url actor test from Task 4**
 
-Run: `bundle exec rspec spec/models/federails/actor_spec.rb`
+Run: `bundle exec rspec spec/models/fedipub/actor_spec.rb`
 Expected: PASS (route now exists)
 
 - [ ] **Step 7: Commit**
 
 ```bash
-git add app/controllers/federails/server/shared_inbox_controller.rb config/routes.rb spec/requests/federation/shared_inbox_spec.rb
+git add app/controllers/fedipub/server/shared_inbox_controller.rb config/routes.rb spec/requests/federation/shared_inbox_spec.rb
 git commit -m "feat: add shared inbox endpoint with signature verification"
 ```
 
@@ -714,13 +714,13 @@ git commit -m "feat: add shared inbox endpoint with signature verification"
 ## Task 6: Shared Inbox — Actor Serialization and Outbound Optimization
 
 **Files:**
-- Modify: `app/serializers/federails/server/actor_resource.rb`
+- Modify: `app/serializers/fedipub/server/actor_resource.rb`
 - Modify: `lib/fediverse/notifier.rb`
-- Modify: `spec/acceptance/federails/server/actors_controller_spec.rb`
+- Modify: `spec/acceptance/fedipub/server/actors_controller_spec.rb`
 
 - [ ] **Step 1: Write failing test for endpoints.sharedInbox in actor JSON**
 
-Add to `spec/acceptance/federails/server/actors_controller_spec.rb` or create `spec/serializers/federails/server/actor_resource_shared_inbox_spec.rb`:
+Add to `spec/acceptance/fedipub/server/actors_controller_spec.rb` or create `spec/serializers/fedipub/server/actor_resource_shared_inbox_spec.rb`:
 
 ```ruby
 # frozen_string_literal: true
@@ -729,10 +729,10 @@ require 'rails_helper'
 
 RSpec.describe 'Actor JSON endpoints.sharedInbox', type: :request do
   let(:user) { create(:user) }
-  let(:actor) { user.federails_actor }
+  let(:actor) { user.fedipub_actor }
 
   it 'includes endpoints.sharedInbox' do
-    get federails.server_actor_path(actor), headers: { 'Accept' => 'application/activity+json' }
+    get fedipub.server_actor_path(actor), headers: { 'Accept' => 'application/activity+json' }
 
     json = JSON.parse(response.body)
     expect(json['endpoints']).to be_a(Hash)
@@ -744,12 +744,12 @@ end
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `bundle exec rspec spec/serializers/federails/server/actor_resource_shared_inbox_spec.rb`
+Run: `bundle exec rspec spec/serializers/fedipub/server/actor_resource_shared_inbox_spec.rb`
 Expected: FAIL — no `endpoints` in actor JSON
 
 - [ ] **Step 3: Add `endpoints` to ActorResource**
 
-In `app/serializers/federails/server/actor_resource.rb`, add:
+In `app/serializers/fedipub/server/actor_resource.rb`, add:
 
 ```ruby
 attribute :endpoints do |actor|
@@ -761,7 +761,7 @@ end
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `bundle exec rspec spec/serializers/federails/server/actor_resource_shared_inbox_spec.rb`
+Run: `bundle exec rspec spec/serializers/fedipub/server/actor_resource_shared_inbox_spec.rb`
 Expected: PASS
 
 - [ ] **Step 5: Write failing test for shared inbox delivery grouping**
@@ -848,7 +848,7 @@ Expected: All PASS
 - [ ] **Step 10: Commit**
 
 ```bash
-git add app/serializers/federails/server/actor_resource.rb lib/fediverse/notifier.rb spec/serializers/federails/server/actor_resource_shared_inbox_spec.rb spec/lib/fediverse/notifier_shared_inbox_spec.rb
+git add app/serializers/fedipub/server/actor_resource.rb lib/fediverse/notifier.rb spec/serializers/fedipub/server/actor_resource_shared_inbox_spec.rb spec/lib/fediverse/notifier_shared_inbox_spec.rb
 git commit -m "feat: add endpoints.sharedInbox to actor JSON and optimize outbound delivery"
 ```
 
@@ -857,10 +857,10 @@ git commit -m "feat: add endpoints.sharedInbox to actor JSON and optimize outbou
 ## Task 7: OrderedCollection Container
 
 **Files:**
-- Modify: `app/controllers/concerns/federails/server/render_collections.rb`
-- Modify: `app/serializers/federails/server/ordered_collection_resource.rb`
-- Modify: `app/controllers/federails/server/activities_controller.rb`
-- Modify: `app/controllers/federails/server/actors_controller.rb`
+- Modify: `app/controllers/concerns/fedipub/server/render_collections.rb`
+- Modify: `app/serializers/fedipub/server/ordered_collection_resource.rb`
+- Modify: `app/controllers/fedipub/server/activities_controller.rb`
+- Modify: `app/controllers/fedipub/server/actors_controller.rb`
 - Create: `spec/requests/federation/ordered_collection_container_spec.rb`
 
 - [ ] **Step 1: Write failing test for collection container response**
@@ -874,13 +874,13 @@ require 'rails_helper'
 
 RSpec.describe 'OrderedCollection Container', type: :request do
   let(:user) { create(:user) }
-  let(:actor) { user.federails_actor }
+  let(:actor) { user.fedipub_actor }
 
   describe 'GET outbox without page param' do
     before { create_list(:activity, 3, actor: actor) }
 
     it 'returns an OrderedCollection container' do
-      get federails.outbox_server_actor_path(actor), headers: { 'Accept' => 'application/activity+json' }
+      get fedipub.outbox_server_actor_path(actor), headers: { 'Accept' => 'application/activity+json' }
 
       json = JSON.parse(response.body)
       expect(json['type']).to eq('OrderedCollection')
@@ -894,7 +894,7 @@ RSpec.describe 'OrderedCollection Container', type: :request do
     before { create_list(:activity, 3, actor: actor) }
 
     it 'returns an OrderedCollectionPage' do
-      get federails.outbox_server_actor_path(actor, page: 'true'), headers: { 'Accept' => 'application/activity+json' }
+      get fedipub.outbox_server_actor_path(actor, page: 'true'), headers: { 'Accept' => 'application/activity+json' }
 
       json = JSON.parse(response.body)
       expect(json['type']).to eq('OrderedCollectionPage')
@@ -904,7 +904,7 @@ RSpec.describe 'OrderedCollection Container', type: :request do
 
   describe 'GET followers without page param' do
     it 'returns an OrderedCollection container' do
-      get federails.followers_server_actor_path(actor), headers: { 'Accept' => 'application/activity+json' }
+      get fedipub.followers_server_actor_path(actor), headers: { 'Accept' => 'application/activity+json' }
 
       json = JSON.parse(response.body)
       expect(json['type']).to eq('OrderedCollection')
@@ -915,7 +915,7 @@ RSpec.describe 'OrderedCollection Container', type: :request do
 
   describe 'GET following without page param' do
     it 'returns an OrderedCollection container' do
-      get federails.following_server_actor_path(actor), headers: { 'Accept' => 'application/activity+json' }
+      get fedipub.following_server_actor_path(actor), headers: { 'Accept' => 'application/activity+json' }
 
       json = JSON.parse(response.body)
       expect(json['type']).to eq('OrderedCollection')
@@ -933,11 +933,11 @@ Expected: FAIL — currently returns OrderedCollectionPage regardless
 
 - [ ] **Step 3: Add container rendering to RenderCollections concern**
 
-Read `app/controllers/concerns/federails/server/render_collections.rb` first, then add a `render_collection_container` method:
+Read `app/controllers/concerns/fedipub/server/render_collections.rb` first, then add a `render_collection_container` method:
 
 ```ruby
 def render_collection_container(scope, url:)
-  payload = Federails::Server::OrderedCollectionResource::OrderedCollectionPayload.new(
+  payload = Fedipub::Server::OrderedCollectionResource::OrderedCollectionPayload.new(
     id: url,
     type: 'OrderedCollection',
     totalItems: scope.count,
@@ -950,8 +950,8 @@ def render_collection_container(scope, url:)
     context: true
   )
 
-  render_serialized Federails::Server::OrderedCollectionResource, payload,
-    content_type: Federails::ACTIVITYPUB_CONTENT_TYPE
+  render_serialized Fedipub::Server::OrderedCollectionResource, payload,
+    content_type: Fedipub::ACTIVITYPUB_CONTENT_TYPE
 end
 ```
 
@@ -959,7 +959,7 @@ And modify the existing `render_collection` calls in controllers to branch:
 
 ```ruby
 def outbox
-  authorize actor, policy_class: Federails::Server::ActivityPolicy
+  authorize actor, policy_class: Fedipub::Server::ActivityPolicy
 
   if params[:page].present?
     # existing paginated response
@@ -985,7 +985,7 @@ Expected: All PASS (existing tests that don't pass `page` param will now get con
 - [ ] **Step 6: Commit**
 
 ```bash
-git add app/controllers/concerns/federails/server/render_collections.rb app/controllers/federails/server/activities_controller.rb app/controllers/federails/server/actors_controller.rb spec/requests/federation/ordered_collection_container_spec.rb
+git add app/controllers/concerns/fedipub/server/render_collections.rb app/controllers/fedipub/server/activities_controller.rb app/controllers/fedipub/server/actors_controller.rb spec/requests/federation/ordered_collection_container_spec.rb
 git commit -m "feat: return OrderedCollection container for outbox/followers/following"
 ```
 
@@ -999,7 +999,7 @@ git commit -m "feat: return OrderedCollection container for outbox/followers/fol
 - `NotifyInboxJob`은 `TemporaryDeliveryError`만 재시도하고 `PermanentDeliveryError`는 discard 한다.
 - dead letter 모델, 마이그레이션, rake task, 전용 테스트는 유지하지 않는다.
 
-관련 검증은 `spec/jobs/federails/notify_inbox_job_spec.rb`에서 현재 동작 기준으로 수행한다.
+관련 검증은 `spec/jobs/fedipub/notify_inbox_job_spec.rb`에서 현재 동작 기준으로 수행한다.
 
 ---
 
@@ -1036,13 +1036,13 @@ RSpec.describe Fediverse::Inbox::LikeHandler do
 
     it 'creates an activity record' do
       remote_actor = create(:distant_actor, federated_url: 'https://remote.example/actor')
-      allow(Federails::Actor).to receive(:find_or_create_by_federation_url).with('https://remote.example/actor').and_return(remote_actor)
+      allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url).with('https://remote.example/actor').and_return(remote_actor)
 
       expect {
         Fediverse::Inbox.dispatch_request(payload)
-      }.to change(Federails::Activity, :count).by(1)
+      }.to change(Fedipub::Activity, :count).by(1)
 
-      activity = Federails::Activity.last
+      activity = Fedipub::Activity.last
       expect(activity.action).to eq('Like')
       expect(activity.actor).to eq(remote_actor)
     end
@@ -1051,7 +1051,7 @@ RSpec.describe Fediverse::Inbox::LikeHandler do
   describe '.handle_undo_like' do
     it 'removes the like activity' do
       remote_actor = create(:distant_actor, federated_url: 'https://remote.example/actor')
-      like_activity = Federails::Activity.create!(
+      like_activity = Fedipub::Activity.create!(
         action: 'Like',
         actor: remote_actor,
         entity: post,
@@ -1071,11 +1071,11 @@ RSpec.describe Fediverse::Inbox::LikeHandler do
         }
       }
 
-      allow(Federails::Actor).to receive(:find_or_create_by_federation_url).with('https://remote.example/actor').and_return(remote_actor)
+      allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url).with('https://remote.example/actor').and_return(remote_actor)
 
       expect {
         Fediverse::Inbox.dispatch_request(undo_payload)
-      }.to change(Federails::Activity, :count).by(-1)
+      }.to change(Fedipub::Activity, :count).by(-1)
     end
   end
 end
@@ -1100,12 +1100,12 @@ module Fediverse
         def handle_like(activity)
           actor_url = activity['actor']
           object_url = activity.dig('object').is_a?(Hash) ? activity['object']['id'] : activity['object']
-          actor = Federails::Actor.find_or_create_by_federation_url(actor_url)
+          actor = Fedipub::Actor.find_or_create_by_federation_url(actor_url)
           return false unless actor
 
-          entity = Federails::Utils::Object.find_or_initialize(object_url)
+          entity = Fedipub::Utils::Object.find_or_initialize(object_url)
 
-          Federails::Activity.create!(
+          Fedipub::Activity.create!(
             action: 'Like',
             actor: actor,
             entity: entity,
@@ -1119,7 +1119,7 @@ module Fediverse
           object = activity['object']
           like_url = object.is_a?(Hash) ? object['id'] : object
 
-          like = Federails::Activity.find_by(federated_url: like_url, action: 'Like')
+          like = Fedipub::Activity.find_by(federated_url: like_url, action: 'Like')
           return false unless like
 
           like.destroy!
@@ -1178,7 +1178,7 @@ RSpec.describe Fediverse::Inbox::AnnounceHandler do
   let(:remote_actor) { create(:distant_actor, federated_url: 'https://remote.example/actor') }
 
   before do
-    allow(Federails::Actor).to receive(:find_or_create_by_federation_url)
+    allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url)
       .with('https://remote.example/actor').and_return(remote_actor)
   end
 
@@ -1196,9 +1196,9 @@ RSpec.describe Fediverse::Inbox::AnnounceHandler do
     it 'creates an Announce activity record' do
       expect {
         Fediverse::Inbox.dispatch_request(payload)
-      }.to change(Federails::Activity, :count).by(1)
+      }.to change(Fedipub::Activity, :count).by(1)
 
-      activity = Federails::Activity.last
+      activity = Fedipub::Activity.last
       expect(activity.action).to eq('Announce')
       expect(activity.actor).to eq(remote_actor)
     end
@@ -1206,7 +1206,7 @@ RSpec.describe Fediverse::Inbox::AnnounceHandler do
 
   describe '.handle_undo_announce' do
     it 'removes the announce activity' do
-      Federails::Activity.create!(
+      Fedipub::Activity.create!(
         action: 'Announce',
         actor: remote_actor,
         entity: post,
@@ -1226,7 +1226,7 @@ RSpec.describe Fediverse::Inbox::AnnounceHandler do
 
       expect {
         Fediverse::Inbox.dispatch_request(undo_payload)
-      }.to change(Federails::Activity, :count).by(-1)
+      }.to change(Fedipub::Activity, :count).by(-1)
     end
   end
 end
@@ -1251,12 +1251,12 @@ module Fediverse
         def handle_announce(activity)
           actor_url = activity['actor']
           object_url = activity['object'].is_a?(Hash) ? activity['object']['id'] : activity['object']
-          actor = Federails::Actor.find_or_create_by_federation_url(actor_url)
+          actor = Fedipub::Actor.find_or_create_by_federation_url(actor_url)
           return false unless actor
 
-          entity = Federails::Utils::Object.find_or_initialize(object_url)
+          entity = Fedipub::Utils::Object.find_or_initialize(object_url)
 
-          Federails::Activity.create!(
+          Fedipub::Activity.create!(
             action: 'Announce',
             actor: actor,
             entity: entity,
@@ -1270,7 +1270,7 @@ module Fediverse
           object = activity['object']
           announce_url = object.is_a?(Hash) ? object['id'] : object
 
-          announce = Federails::Activity.find_by(federated_url: announce_url, action: 'Announce')
+          announce = Fedipub::Activity.find_by(federated_url: announce_url, action: 'Announce')
           return false unless announce
 
           announce.destroy!
@@ -1310,26 +1310,26 @@ git commit -m "feat: add Announce and Undo(Announce) inbox handlers"
 ## Task 13: Block Activity — Model and Handler
 
 **Files:**
-- Create: `db/migrate/XXXXXX_create_federails_blocks.rb`
-- Create: `app/models/federails/block.rb`
+- Create: `db/migrate/XXXXXX_create_fedipub_blocks.rb`
+- Create: `app/models/fedipub/block.rb`
 - Create: `lib/fediverse/inbox/block_handler.rb`
 - Modify: `lib/fediverse/inbox.rb`
 - Modify: `lib/fediverse/notifier.rb`
-- Create: `spec/models/federails/block_spec.rb`
+- Create: `spec/models/fedipub/block_spec.rb`
 - Create: `spec/lib/fediverse/inbox/block_handler_spec.rb`
 
 - [ ] **Step 1: Create migration**
 
 ```ruby
-class CreateFederailsBlocks < ActiveRecord::Migration[7.0]
+class CreateFedipubBlocks < ActiveRecord::Migration[7.0]
   def change
-    create_table :federails_blocks do |t|
-      t.references :actor, null: false, foreign_key: { to_table: :federails_actors }
-      t.references :target_actor, null: false, foreign_key: { to_table: :federails_actors }
+    create_table :fedipub_blocks do |t|
+      t.references :actor, null: false, foreign_key: { to_table: :fedipub_actors }
+      t.references :target_actor, null: false, foreign_key: { to_table: :fedipub_actors }
       t.timestamps
     end
 
-    add_index :federails_blocks, [:actor_id, :target_actor_id], unique: true
+    add_index :fedipub_blocks, [:actor_id, :target_actor_id], unique: true
   end
 end
 ```
@@ -1340,14 +1340,14 @@ Run: `cd spec/dummy && bundle exec rails db:migrate && cd ../..`
 
 - [ ] **Step 3: Write failing test for Block model**
 
-Create `spec/models/federails/block_spec.rb`:
+Create `spec/models/fedipub/block_spec.rb`:
 
 ```ruby
 # frozen_string_literal: true
 
 require 'rails_helper'
 
-RSpec.describe Federails::Block do
+RSpec.describe Fedipub::Block do
   let(:actor) { create(:local_actor) }
   let(:target) { create(:distant_actor) }
 
@@ -1366,15 +1366,15 @@ end
 
 - [ ] **Step 4: Create Block model**
 
-Create `app/models/federails/block.rb`:
+Create `app/models/fedipub/block.rb`:
 
 ```ruby
 # frozen_string_literal: true
 
-module Federails
+module Fedipub
   class Block < ApplicationRecord
     belongs_to :actor
-    belongs_to :target_actor, class_name: 'Federails::Actor'
+    belongs_to :target_actor, class_name: 'Fedipub::Actor'
 
     validates :target_actor_id, uniqueness: { scope: :actor_id }
   end
@@ -1383,7 +1383,7 @@ end
 
 - [ ] **Step 5: Run model test**
 
-Run: `bundle exec rspec spec/models/federails/block_spec.rb`
+Run: `bundle exec rspec spec/models/fedipub/block_spec.rb`
 Expected: PASS
 
 - [ ] **Step 6: Write failing test for Block handler**
@@ -1400,7 +1400,7 @@ RSpec.describe Fediverse::Inbox::BlockHandler do
   let(:remote_actor) { create(:distant_actor, federated_url: 'https://remote.example/actor') }
 
   before do
-    allow(Federails::Actor).to receive(:find_or_create_by_federation_url)
+    allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url)
       .with('https://remote.example/actor').and_return(remote_actor)
   end
 
@@ -1418,21 +1418,21 @@ RSpec.describe Fediverse::Inbox::BlockHandler do
     it 'creates a block record' do
       expect {
         Fediverse::Inbox.dispatch_request(payload)
-      }.to change(Federails::Block, :count).by(1)
+      }.to change(Fedipub::Block, :count).by(1)
     end
 
     it 'removes existing following relationships' do
-      Federails::Following.create!(actor: local_actor, target_actor: remote_actor, status: :accepted)
+      Fedipub::Following.create!(actor: local_actor, target_actor: remote_actor, status: :accepted)
 
       Fediverse::Inbox.dispatch_request(payload)
 
-      expect(Federails::Following.where(actor: local_actor, target_actor: remote_actor)).not_to exist
+      expect(Fedipub::Following.where(actor: local_actor, target_actor: remote_actor)).not_to exist
     end
   end
 
   describe '.handle_undo_block' do
     it 'removes the block record' do
-      Federails::Block.create!(actor: remote_actor, target_actor: local_actor)
+      Fedipub::Block.create!(actor: remote_actor, target_actor: local_actor)
 
       undo_payload = {
         '@context' => 'https://www.w3.org/ns/activitystreams',
@@ -1448,7 +1448,7 @@ RSpec.describe Fediverse::Inbox::BlockHandler do
 
       expect {
         Fediverse::Inbox.dispatch_request(undo_payload)
-      }.to change(Federails::Block, :count).by(-1)
+      }.to change(Fedipub::Block, :count).by(-1)
     end
   end
 end
@@ -1469,15 +1469,15 @@ module Fediverse
           actor_url = activity['actor']
           object_url = activity['object'].is_a?(Hash) ? activity['object']['id'] : activity['object']
 
-          actor = Federails::Actor.find_or_create_by_federation_url(actor_url)
-          target = Federails::Actor.find_by_federation_url(object_url)
+          actor = Fedipub::Actor.find_or_create_by_federation_url(actor_url)
+          target = Fedipub::Actor.find_by_federation_url(object_url)
           return false unless actor && target
 
-          Federails::Block.find_or_create_by!(actor: actor, target_actor: target)
+          Fedipub::Block.find_or_create_by!(actor: actor, target_actor: target)
 
           # Remove existing following relationships in both directions
-          Federails::Following.where(actor: actor, target_actor: target).destroy_all
-          Federails::Following.where(actor: target, target_actor: actor).destroy_all
+          Fedipub::Following.where(actor: actor, target_actor: target).destroy_all
+          Fedipub::Following.where(actor: target, target_actor: actor).destroy_all
 
           true
         end
@@ -1490,11 +1490,11 @@ module Fediverse
 
           return false unless target_url
 
-          actor = Federails::Actor.find_by_federation_url(actor_url)
-          target = Federails::Actor.find_by_federation_url(target_url)
+          actor = Fedipub::Actor.find_by_federation_url(actor_url)
+          target = Fedipub::Actor.find_by_federation_url(target_url)
           return false unless actor && target
 
-          block = Federails::Block.find_by(actor: actor, target_actor: target)
+          block = Fedipub::Block.find_by(actor: actor, target_actor: target)
           return false unless block
 
           block.destroy!
@@ -1519,7 +1519,7 @@ register_handler 'Undo', 'Block', Fediverse::Inbox::BlockHandler, :handle_undo_b
 
 - [ ] **Step 9: Run tests**
 
-Run: `bundle exec rspec spec/models/federails/block_spec.rb spec/lib/fediverse/inbox/block_handler_spec.rb`
+Run: `bundle exec rspec spec/models/fedipub/block_spec.rb spec/lib/fediverse/inbox/block_handler_spec.rb`
 Expected: PASS
 
 - [ ] **Step 10: Add block filtering to Notifier**
@@ -1532,7 +1532,7 @@ def self.inboxes_for(activity)
   actors.reject! { |a| a.federated_url == activity.actor.federated_url }
 
   # Filter out actors who have blocked the sender
-  blocked_actor_ids = Federails::Block.where(target_actor: activity.actor).pluck(:actor_id)
+  blocked_actor_ids = Fedipub::Block.where(target_actor: activity.actor).pluck(:actor_id)
   actors.reject! { |a| blocked_actor_ids.include?(a.id) }
 
   inboxes = Set.new
@@ -1553,7 +1553,7 @@ Expected: All PASS
 - [ ] **Step 12: Commit**
 
 ```bash
-git add db/migrate/*_create_federails_blocks.rb app/models/federails/block.rb lib/fediverse/inbox/block_handler.rb lib/fediverse/inbox.rb lib/fediverse/notifier.rb spec/models/federails/block_spec.rb spec/lib/fediverse/inbox/block_handler_spec.rb
+git add db/migrate/*_create_fedipub_blocks.rb app/models/fedipub/block.rb lib/fediverse/inbox/block_handler.rb lib/fediverse/inbox.rb lib/fediverse/notifier.rb spec/models/fedipub/block_spec.rb spec/lib/fediverse/inbox/block_handler_spec.rb
 git commit -m "feat: add Block/Undo(Block) with delivery filtering"
 ```
 
@@ -1609,7 +1609,7 @@ RSpec.describe Fediverse::LinkedDataSignature do
       }
 
       signed = sign_document(doc, key: keypair, creator: actor.key_id)
-      allow(Federails::Actor).to receive(:find_or_create_by_federation_url).and_return(actor)
+      allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url).and_return(actor)
 
       result = described_class.verify(signed)
       expect(result[:verified]).to be true
@@ -1627,7 +1627,7 @@ RSpec.describe Fediverse::LinkedDataSignature do
       signed = sign_document(doc, key: keypair, creator: actor.key_id)
       signed['type'] = 'Delete'  # tamper
 
-      allow(Federails::Actor).to receive(:find_or_create_by_federation_url).and_return(actor)
+      allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url).and_return(actor)
 
       result = described_class.verify(signed)
       expect(result[:verified]).to be false
@@ -1663,7 +1663,7 @@ module Fediverse
         creator_uri = signature['creator']&.sub(/#.*\z/, '')
         return { verified: false, error: 'No creator in signature' } unless creator_uri
 
-        actor = Federails::Actor.find_or_create_by_federation_url(creator_uri)
+        actor = Fedipub::Actor.find_or_create_by_federation_url(creator_uri)
         return { verified: false, error: 'Could not resolve signing actor' } unless actor
 
         options_hash = hash_options(signature.except('type', 'id', 'signatureValue'))
@@ -1695,7 +1695,7 @@ module Fediverse
       def normalize(document)
         JSON::LD::API.toRdf(document).map(&:to_s).sort.join
       rescue StandardError => e
-        Federails.logger.warn "JSON-LD normalization failed: #{e.message}"
+        Fedipub.logger.warn "JSON-LD normalization failed: #{e.message}"
         document.to_json
       end
     end
@@ -1722,17 +1722,17 @@ def handle_announce(activity)
   if object_data.is_a?(Hash) && object_data['signature']
     ld_result = Fediverse::LinkedDataSignature.verify(object_data)
     if ld_result && !ld_result[:verified]
-      Federails.logger.warn "LD Signature verification failed for Announce inner object: #{ld_result[:error]}"
+      Fedipub.logger.warn "LD Signature verification failed for Announce inner object: #{ld_result[:error]}"
     end
   end
 
   object_url = object_data.is_a?(Hash) ? object_data['id'] : object
-  actor = Federails::Actor.find_or_create_by_federation_url(actor_url)
+  actor = Fedipub::Actor.find_or_create_by_federation_url(actor_url)
   return false unless actor
 
-  entity = Federails::Utils::Object.find_or_initialize(object_url)
+  entity = Fedipub::Utils::Object.find_or_initialize(object_url)
 
-  Federails::Activity.create!(
+  Fedipub::Activity.create!(
     action: 'Announce',
     actor: actor,
     entity: entity,
@@ -1761,7 +1761,7 @@ git commit -m "feat: add LD Signatures verification (verify-only) with Announce 
 
 **Files:**
 - Modify: `lib/fediverse/notifier.rb`
-- Modify: `app/serializers/federails/server/activity_resource.rb`
+- Modify: `app/serializers/fedipub/server/activity_resource.rb`
 - Create: `spec/lib/fediverse/notifier_bto_bcc_spec.rb`
 
 - [ ] **Step 1: Write failing test for bto/bcc stripping in outbound payload**
@@ -1822,7 +1822,7 @@ In `lib/fediverse/notifier.rb`, modify the `payload` method:
 
 ```ruby
 def self.payload(activity)
-  json = Federails::Server::ActivityResource.new(activity).serializable_hash
+  json = Fedipub::Server::ActivityResource.new(activity).serializable_hash
   json.delete(:bto)
   json.delete(:bcc)
   json.delete('bto')
@@ -1865,13 +1865,13 @@ git commit -m "feat: strip bto/bcc from outbound payloads while including in del
 ## Task 16: Missing Collections — liked, featured, featured_tags
 
 **Files:**
-- Create: `db/migrate/XXXXXX_create_federails_featured_items.rb`
-- Create: `db/migrate/XXXXXX_create_federails_featured_tags.rb`
-- Create: `app/models/federails/featured_item.rb`
-- Create: `app/models/federails/featured_tag.rb`
-- Modify: `app/controllers/federails/server/actors_controller.rb`
+- Create: `db/migrate/XXXXXX_create_fedipub_featured_items.rb`
+- Create: `db/migrate/XXXXXX_create_fedipub_featured_tags.rb`
+- Create: `app/models/fedipub/featured_item.rb`
+- Create: `app/models/fedipub/featured_tag.rb`
+- Modify: `app/controllers/fedipub/server/actors_controller.rb`
 - Modify: `config/routes.rb`
-- Modify: `app/serializers/federails/server/actor_resource.rb`
+- Modify: `app/serializers/fedipub/server/actor_resource.rb`
 - Create: `spec/requests/federation/collections_spec.rb`
 
 - [ ] **Step 1: Create migrations**
@@ -1879,15 +1879,15 @@ git commit -m "feat: strip bto/bcc from outbound payloads while including in del
 `featured_items`:
 
 ```ruby
-class CreateFederailsFeaturedItems < ActiveRecord::Migration[7.0]
+class CreateFedipubFeaturedItems < ActiveRecord::Migration[7.0]
   def change
-    create_table :federails_featured_items do |t|
-      t.references :actor, null: false, foreign_key: { to_table: :federails_actors }
+    create_table :fedipub_featured_items do |t|
+      t.references :actor, null: false, foreign_key: { to_table: :fedipub_actors }
       t.string :federated_url, null: false
       t.timestamps
     end
 
-    add_index :federails_featured_items, [:actor_id, :federated_url], unique: true
+    add_index :fedipub_featured_items, [:actor_id, :federated_url], unique: true
   end
 end
 ```
@@ -1895,15 +1895,15 @@ end
 `featured_tags`:
 
 ```ruby
-class CreateFederailsFeaturedTags < ActiveRecord::Migration[7.0]
+class CreateFedipubFeaturedTags < ActiveRecord::Migration[7.0]
   def change
-    create_table :federails_featured_tags do |t|
-      t.references :actor, null: false, foreign_key: { to_table: :federails_actors }
+    create_table :fedipub_featured_tags do |t|
+      t.references :actor, null: false, foreign_key: { to_table: :fedipub_actors }
       t.string :name, null: false
       t.timestamps
     end
 
-    add_index :federails_featured_tags, [:actor_id, :name], unique: true
+    add_index :fedipub_featured_tags, [:actor_id, :name], unique: true
   end
 end
 ```
@@ -1914,12 +1914,12 @@ Run: `cd spec/dummy && bundle exec rails db:migrate && cd ../..`
 
 - [ ] **Step 3: Create models**
 
-Create `app/models/federails/featured_item.rb`:
+Create `app/models/fedipub/featured_item.rb`:
 
 ```ruby
 # frozen_string_literal: true
 
-module Federails
+module Fedipub
   class FeaturedItem < ApplicationRecord
     belongs_to :actor
 
@@ -1929,12 +1929,12 @@ module Federails
 end
 ```
 
-Create `app/models/federails/featured_tag.rb`:
+Create `app/models/fedipub/featured_tag.rb`:
 
 ```ruby
 # frozen_string_literal: true
 
-module Federails
+module Fedipub
   class FeaturedTag < ApplicationRecord
     belongs_to :actor
 
@@ -1946,7 +1946,7 @@ end
 
 - [ ] **Step 4: Add associations to Actor**
 
-In `app/models/federails/actor.rb`:
+In `app/models/fedipub/actor.rb`:
 
 ```ruby
 has_many :featured_items, dependent: :destroy
@@ -1984,25 +1984,25 @@ end
 
 - [ ] **Step 6: Add controller actions**
 
-In `app/controllers/federails/server/actors_controller.rb`:
+In `app/controllers/fedipub/server/actors_controller.rb`:
 
 ```ruby
 def liked
-  authorize actor, policy_class: Federails::Server::ActorPolicy
+  authorize actor, policy_class: Fedipub::Server::ActorPolicy
 
   if params[:page].present?
-    liked_activities = Federails::Activity.where(actor: actor, action: 'Like')
+    liked_activities = Fedipub::Activity.where(actor: actor, action: 'Like')
     render_collection(liked_activities, url: liked_server_actor_url(actor)) do |activity|
-      Federails::Server::ActivityResource.new(activity, params: { context: false }).serializable_hash
+      Fedipub::Server::ActivityResource.new(activity, params: { context: false }).serializable_hash
     end
   else
-    count = Federails::Activity.where(actor: actor, action: 'Like').count
-    render_collection_container(Federails::Activity.where(actor: actor, action: 'Like'), url: liked_server_actor_url(actor))
+    count = Fedipub::Activity.where(actor: actor, action: 'Like').count
+    render_collection_container(Fedipub::Activity.where(actor: actor, action: 'Like'), url: liked_server_actor_url(actor))
   end
 end
 
 def featured
-  authorize actor, policy_class: Federails::Server::ActorPolicy
+  authorize actor, policy_class: Fedipub::Server::ActorPolicy
 
   if params[:page].present?
     items = actor.featured_items
@@ -2015,7 +2015,7 @@ def featured
 end
 
 def featured_tags
-  authorize actor, policy_class: Federails::Server::ActorPolicy
+  authorize actor, policy_class: Fedipub::Server::ActorPolicy
 
   if params[:page].present?
     tags = actor.featured_tags
@@ -2030,7 +2030,7 @@ end
 
 - [ ] **Step 7: Add collection URLs to ActorResource**
 
-In `app/serializers/federails/server/actor_resource.rb`:
+In `app/serializers/fedipub/server/actor_resource.rb`:
 
 ```ruby
 attribute :liked do |actor|
@@ -2057,11 +2057,11 @@ require 'rails_helper'
 
 RSpec.describe 'Actor Collections', type: :request do
   let(:user) { create(:user) }
-  let(:actor) { user.federails_actor }
+  let(:actor) { user.fedipub_actor }
 
   describe 'GET liked' do
     it 'returns an OrderedCollection container' do
-      get federails.liked_server_actor_path(actor), headers: { 'Accept' => 'application/activity+json' }
+      get fedipub.liked_server_actor_path(actor), headers: { 'Accept' => 'application/activity+json' }
 
       json = JSON.parse(response.body)
       expect(json['type']).to eq('OrderedCollection')
@@ -2071,7 +2071,7 @@ RSpec.describe 'Actor Collections', type: :request do
 
   describe 'GET featured' do
     it 'returns an OrderedCollection container' do
-      get federails.featured_server_actor_path(actor), headers: { 'Accept' => 'application/activity+json' }
+      get fedipub.featured_server_actor_path(actor), headers: { 'Accept' => 'application/activity+json' }
 
       json = JSON.parse(response.body)
       expect(json['type']).to eq('OrderedCollection')
@@ -2080,7 +2080,7 @@ RSpec.describe 'Actor Collections', type: :request do
 
   describe 'GET featured_tags' do
     it 'returns an OrderedCollection container' do
-      get federails.featured_tags_server_actor_path(actor), headers: { 'Accept' => 'application/activity+json' }
+      get fedipub.featured_tags_server_actor_path(actor), headers: { 'Accept' => 'application/activity+json' }
 
       json = JSON.parse(response.body)
       expect(json['type']).to eq('OrderedCollection')
@@ -2089,7 +2089,7 @@ RSpec.describe 'Actor Collections', type: :request do
 
   describe 'Actor JSON includes collection URLs' do
     it 'includes liked, featured, featuredTags' do
-      get federails.server_actor_path(actor), headers: { 'Accept' => 'application/activity+json' }
+      get fedipub.server_actor_path(actor), headers: { 'Accept' => 'application/activity+json' }
 
       json = JSON.parse(response.body)
       expect(json['liked']).to be_present
@@ -2113,7 +2113,7 @@ Expected: All PASS
 - [ ] **Step 11: Commit**
 
 ```bash
-git add db/migrate/*_create_federails_featured_items.rb db/migrate/*_create_federails_featured_tags.rb app/models/federails/featured_item.rb app/models/federails/featured_tag.rb app/models/federails/actor.rb app/controllers/federails/server/actors_controller.rb config/routes.rb app/serializers/federails/server/actor_resource.rb spec/requests/federation/collections_spec.rb
+git add db/migrate/*_create_fedipub_featured_items.rb db/migrate/*_create_fedipub_featured_tags.rb app/models/fedipub/featured_item.rb app/models/fedipub/featured_tag.rb app/models/fedipub/actor.rb app/controllers/fedipub/server/actors_controller.rb config/routes.rb app/serializers/fedipub/server/actor_resource.rb spec/requests/federation/collections_spec.rb
 git commit -m "feat: add liked, featured, featured_tags collections"
 ```
 
@@ -2135,10 +2135,10 @@ require 'rails_helper'
 
 RSpec.describe 'ActivityPub Compliance', type: :request do
   let(:user) { create(:user) }
-  let(:actor) { user.federails_actor }
+  let(:actor) { user.fedipub_actor }
 
   describe 'Actor JSON' do
-    before { get federails.server_actor_path(actor), headers: { 'Accept' => 'application/activity+json' } }
+    before { get fedipub.server_actor_path(actor), headers: { 'Accept' => 'application/activity+json' } }
     let(:json) { JSON.parse(response.body) }
 
     it 'includes required properties' do
@@ -2156,7 +2156,7 @@ RSpec.describe 'ActivityPub Compliance', type: :request do
 
   describe 'Collection containers' do
     it 'outbox returns OrderedCollection with totalItems and first' do
-      get federails.outbox_server_actor_path(actor), headers: { 'Accept' => 'application/activity+json' }
+      get fedipub.outbox_server_actor_path(actor), headers: { 'Accept' => 'application/activity+json' }
       json = JSON.parse(response.body)
 
       expect(json['type']).to eq('OrderedCollection')
@@ -2165,7 +2165,7 @@ RSpec.describe 'ActivityPub Compliance', type: :request do
     end
 
     it 'followers returns OrderedCollection with totalItems and first' do
-      get federails.followers_server_actor_path(actor), headers: { 'Accept' => 'application/activity+json' }
+      get fedipub.followers_server_actor_path(actor), headers: { 'Accept' => 'application/activity+json' }
       json = JSON.parse(response.body)
 
       expect(json['type']).to eq('OrderedCollection')
@@ -2175,23 +2175,23 @@ RSpec.describe 'ActivityPub Compliance', type: :request do
 
   describe 'Inbox signature enforcement' do
     it 'rejects unsigned POST when verify_signatures is enabled' do
-      Federails.verify_signatures = true
+      Fedipub.verify_signatures = true
 
       payload = { '@context' => 'https://www.w3.org/ns/activitystreams', 'id' => 'https://remote.example/1', 'type' => 'Follow', 'actor' => 'https://remote.example/actor', 'object' => actor.federated_url }.to_json
 
-      post federails.server_actor_inbox_path(actor), params: payload, headers: { 'Content-Type' => 'application/activity+json' }
+      post fedipub.server_actor_inbox_path(actor), params: payload, headers: { 'Content-Type' => 'application/activity+json' }
       expect(response).to have_http_status(:unauthorized)
     end
   end
 
   describe 'Shared inbox' do
     it 'accepts POST at shared inbox endpoint' do
-      Federails.verify_signatures = false
+      Fedipub.verify_signatures = false
       allow(Fediverse::Inbox).to receive(:dispatch_request).and_return(true)
 
       payload = { '@context' => 'https://www.w3.org/ns/activitystreams', 'id' => 'https://remote.example/2', 'type' => 'Create', 'actor' => 'https://remote.example/actor', 'object' => { 'type' => 'Note', 'content' => 'test' }, 'to' => [actor.federated_url] }.to_json
 
-      post federails.server_shared_inbox_path, params: payload, headers: { 'Content-Type' => 'application/activity+json' }
+      post fedipub.server_shared_inbox_path, params: payload, headers: { 'Content-Type' => 'application/activity+json' }
       expect(response).to have_http_status(:created)
     end
   end

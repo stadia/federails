@@ -4,7 +4,7 @@ require 'fediverse/request'
 
 module Fediverse
   RSpec.describe Inbox do
-    let(:local_actor) { FactoryBot.create(:user).federails_actor }
+    let(:local_actor) { FactoryBot.create(:user).fedipub_actor }
     let(:distant_actor) { FactoryBot.create :distant_actor }
 
     describe 'registered handlers' do
@@ -75,12 +75,12 @@ module Fediverse
 
       context 'when the activity has not been seen before' do
         it 'processes the activity' do
-          expect { described_class.dispatch_request(payload) }.to change(Federails::Following, :count).by(1)
+          expect { described_class.dispatch_request(payload) }.to change(Fedipub::Following, :count).by(1)
         end
 
         it 'records the federated_url on the created activity' do
           described_class.dispatch_request(payload)
-          expect(Federails::Activity.find_by(federated_url: 'http://example.com/activities/1')).to be_present
+          expect(Fedipub::Activity.find_by(federated_url: 'http://example.com/activities/1')).to be_present
         end
       end
 
@@ -94,7 +94,7 @@ module Fediverse
         end
 
         it 'does not process the activity again' do
-          expect { described_class.dispatch_request(payload) }.not_to change(Federails::Following, :count)
+          expect { described_class.dispatch_request(payload) }.not_to change(Fedipub::Following, :count)
         end
       end
 
@@ -110,7 +110,7 @@ module Fediverse
         end
 
         before do
-          allow(Federails::Utils::Actor).to receive(:tombstone!)
+          allow(Fedipub::Utils::Actor).to receive(:tombstone!)
           described_class.dispatch_request(delete_payload)
         end
 
@@ -119,7 +119,7 @@ module Fediverse
         end
 
         it 'records the delete federated_url on a stored activity' do
-          activity = Federails::Activity.find_by(federated_url: delete_payload['id'])
+          activity = Fedipub::Activity.find_by(federated_url: delete_payload['id'])
           expect(activity).to be_present
           expect(activity.action).to eq('Delete')
         end
@@ -213,7 +213,7 @@ module Fediverse
         end
 
         it 'processes the activity normally' do
-          expect { described_class.dispatch_request(payload) }.to change(Federails::Following, :count).by(1)
+          expect { described_class.dispatch_request(payload) }.to change(Fedipub::Following, :count).by(1)
         end
       end
 
@@ -260,10 +260,10 @@ module Fediverse
     end
 
     describe '.maybe_forward' do
-      let(:local_follower_actor) { FactoryBot.create(:user).federails_actor }
+      let(:local_follower_actor) { FactoryBot.create(:user).fedipub_actor }
 
       before do
-        Federails::Following.create! actor: local_follower_actor, target_actor: local_actor, status: :accepted
+        Fedipub::Following.create! actor: local_follower_actor, target_actor: local_actor, status: :accepted
       end
 
       context 'when activity references a local collection and local object' do

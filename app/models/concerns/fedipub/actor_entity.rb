@@ -1,0 +1,210 @@
+# typed: false
+# rbs_inline: enabled
+
+module Fedipub
+  # Concern to include in models that acts as actors.
+  #
+  # Actors can be anything; they authors content _via_ their _outbox_ and receive content in their _inbox_.
+  # Actors can follow and be followed by each other
+  #
+  # By default, when an entry is created on models using this concern, a _local_ `Fedipub::Actor` will be created.
+  #
+  # See also:
+  #  - https://www.w3.org/TR/activitypub/#actor-objects
+  #
+  # ## Usage
+  #
+  # Include the concern in an existing model:
+  #
+  # ```rb
+  # class User < ApplicationRecord
+  #   include Fedipub::ActorEntity
+  #   acts_as_fedipub_actor options
+  # end
+  # ```
+  module ActorEntity
+    extend ActiveSupport::Concern
+
+    # Class methods automatically included in the concern.
+    module ClassMethods
+      # Parameter kinds that can receive the `follow_activity` keyword argument.
+      FOLLOW_ACTIVITY_KWARG_TYPES = [:keyreq, :key].freeze
+      private_constant :FOLLOW_ACTIVITY_KWARG_TYPES
+
+      # Configures the mapping between entity and actor
+      #
+      # @param username_field [Symbol] The method or attribute name that returns the preferred username for ActivityPub
+      # @param name_field [Symbol] The method or attribute name that returns the preferred name for ActivityPub
+      # @param profile_url_method [Symbol] The route method name that will generate the profile URL for ActivityPub
+      # @param actor_type [String] The ActivityStreams Actor type for this entity; defaults to 'Person'
+      # @param user_count_method [Symbol] A class method to call to count active users. Leave unspecified to leave this
+      #   entity out of user counts. Method signature should accept a single parameter which will specify a date range
+      #   If parameter is nil, the total user count should be returned. If the parameter is specified, the number of users
+      #   active during the time period should be returned.
+      # @param auto_create_actors [Boolean] Whether to automatically create an actor when the entity is created
+      #
+      # @example
+      #   acts_as_fedipub_actor username_field: :username, name_field: :display_name, profile_url_method: :url_for, actor_type: 'Person'
+      #: (name_field: Symbol, username_field: Symbol, ?profile_url_method: Symbol?, ?actor_type: String, ?user_count_method: Symbol?, ?auto_create_actors: bool) -> void
+      def acts_as_fedipub_actor(
+        name_field:,
+        username_field:,
+        profile_url_method: nil,
+        actor_type: 'Person',
+        user_count_method: nil,
+        auto_create_actors: true
+      )
+        Fedipub::Configuration.register_actor_class(
+          self,
+          username_field:     username_field,
+          name_field:         name_field,
+          profile_url_method: profile_url_method,
+          actor_type:         actor_type,
+          user_count_method:  user_count_method,
+          auto_create_actors: auto_create_actors
+        )
+      end
+
+      # Define a method that will be called after the entity receives a follow request.
+      # The follow request will be passed as an argument to the method.
+      #
+      # @param method_name [Symbol] The name of the method to call, or a block that will be called directly
+      #
+      # @example
+      #   after_followed :accept_follow
+      #: (Symbol) -> Symbol
+      def after_followed(method_name)
+        @after_followed = method_name
+      end
+
+      # Define a method that will be called after a follow request made by the entity is accepted
+      # The accepted follow request will be passed as an argument to the method.
+      #
+      # @param method_name [Symbol] The name of the method to call, or a block that will be called directly
+      #
+      # @example
+      #   after_follow_accepted :follow_accepted
+      #: (Symbol) -> Symbol
+      def after_follow_accepted(method_name)
+        @after_follow_accepted = method_name
+      end
+
+      # Define a method that will be called after an activity has been received
+      #
+      # @param activity_type [String] The activity action to handle, e.g. 'Create'. If you specify '*', the handler will be called for any activity type.
+      # @param object_type [String] The object type to handle, e.g. 'Note'. If you specify '*', the handler will be called for any object type.
+      # @param method_name [Symbol] The name of the class method to call. The method will receive the complete activity payload as a parameter.
+      #
+      # @example
+      #   after_activity_received 'Create', 'Note', :create_note
+      #: (String, String, Symbol) -> void
+      def after_activity_received(activity_type, object_type, method_name)
+        Fediverse::Inbox.register_handler(activity_type, object_type, self, method_name)
+      end
+
+      private
+
+      #: (Symbol, untyped, *untyped) -> void
+      def dispatch_callback(name, instance, *)
+        case name
+        when :after_follow_accepted
+          instance.send(@after_follow_accepted, *) if @after_follow_accepted
+        end
+      end
+
+      #: (untyped, Fedipub::Following, follow_activity: Fedipub::Activity) -> void
+      def dispatch_followed_callback(instance, follow, follow_activity:)
+        return unless @after_followed
+
+        raise NoMethodError, "Callback method #{@after_followed} is not defined on #{instance.class.name}" unless instance.respond_to?(@after_followed, true)
+
+        # Use instance.class.instance_method (not instance.method) so that
+        # RSpec stubs / other proxies on the singleton class do not alter the
+        # detected parameter signature of the real callback definition.
+        params = instance.class.instance_method(@after_followed).parameters
+        accepts_kwarg = params.any? { |type, name| FOLLOW_ACTIVITY_KWARG_TYPES.include?(type) && name == :follow_activity } ||
+                        params.any? { |type, _| type == :keyrest }
+        if accepts_kwarg
+          instance.send(@after_followed, follow, follow_activity: follow_activity)
+        else
+          Fedipub.logger.warn do
+            "Callback #{@after_followed} uses legacy single-argument signature. " \
+              'Please update to accept follow_activity: keyword argument.'
+          end
+          instance.send(@after_followed, follow)
+        end
+      end
+    end
+
+    included do
+      has_one :fedipub_actor, class_name: 'Fedipub::Actor', as: :entity, dependent: false
+
+      after_create :create_fedipub_actor, if: lambda {
+        raise("Entity not configured for #{self.class.name}. Did you use \"acts_as_fedipub_actor\"?") unless Fedipub.actor_entity? self
+
+        Fedipub.actor_entity(self)[:auto_create_actors]
+      }
+      after_update :create_fedipub_update_activity
+      before_destroy :tombstone_fedipub_actor!
+    end
+
+    # Add custom data to actor responses.
+    #
+    # Override in your own model to add extra data, which will be merged into the actor response
+    # generated by Fedipub. You can include extra `@context` for activitypub extensions and it will
+    # be merged with the main response context.
+    #
+    # @example
+    #   def to_activitypub_object
+    #     {
+    #       "@context": {
+    #         toot: "http://joinmastodon.org/ns#",
+    #         attributionDomains: {
+    #           "@id": "toot:attributionDomains",
+    #           "@type": "@id"
+    #         }
+    #       },
+    #       attributionDomains: [
+    #         "example.com"
+    #       ]
+    #     }
+    #   end
+    #: () -> Hash[Symbol | String, untyped]
+    def to_activitypub_object
+      {}
+    end
+
+    private
+
+    # Result is used to determine if an actor related to this entity should be created as local actor or not
+    #
+    # Override it in your models if you need distant actors to be related to another entity.
+    #: () -> bool
+    def create_fedipub_actor_as_local?
+      true
+    end
+
+    #: () -> Fedipub::Actor
+    def create_fedipub_actor
+      Fedipub::Actor.create_with(local: create_fedipub_actor_as_local?).find_or_create_by!(entity: self)
+    end
+
+    #: () -> Fedipub::Activity?
+    def create_fedipub_update_activity
+      return unless fedipub_actor&.local?
+      return if fedipub_actor.tombstoned?
+
+      Fedipub::Activity.create!(actor: fedipub_actor, action: 'Update', entity: fedipub_actor)
+    end
+
+    #: () -> Fedipub::Actor?
+    def tombstone_fedipub_actor!
+      fedipub_actor.presence&.tombstone!
+    end
+
+    #: () -> void
+    def untombstone_fedipub_actor!
+      fedipub_actor.presence&.untombstone!
+    end
+  end
+end

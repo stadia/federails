@@ -1,0 +1,8 @@
+# Generated from app/serializers/fedipub/client/actor_resource.rb with RBS::Inline
+
+module Fedipub
+  module Client
+    class ActorResource < BaseResource
+    end
+  end
+end

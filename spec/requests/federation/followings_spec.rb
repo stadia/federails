@@ -14,24 +14,24 @@ require 'rails_helper'
 
 RSpec.describe '/federation/followings', type: :request do
   describe 'GET /show' do
-    let(:actor) { FactoryBot.create(:user).federails_actor }
-    let(:target_actor) { FactoryBot.create(:user).federails_actor }
+    let(:actor) { FactoryBot.create(:user).fedipub_actor }
+    let(:target_actor) { FactoryBot.create(:user).fedipub_actor }
     let(:following) { FactoryBot.create :following, actor: actor, target_actor: target_actor }
 
     it 'renders a successful response' do
-      get federails.server_actor_following_url(actor, following), headers: { accept: Mime[:activitypub] }
+      get fedipub.server_actor_following_url(actor, following), headers: { accept: Mime[:activitypub] }
       expect(response).to be_successful
     end
 
     ACTIVITYPUB_CONTENT_TYPES.each do |accept|
       it "responds with LD in response to a #{accept} request" do
-        get federails.server_actor_following_url(actor, following), headers: { accept: accept }
+        get fedipub.server_actor_following_url(actor, following), headers: { accept: accept }
         expect(response.content_type).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"; charset=utf-8'
       end
     end
 
     it 'returns a Follow object with required fields' do
-      get federails.server_actor_following_url(actor, following), headers: { accept: Mime[:activitypub] }
+      get fedipub.server_actor_following_url(actor, following), headers: { accept: Mime[:activitypub] }
       json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
       aggregate_failures do
         expect(json['type']).to eq 'Follow'
