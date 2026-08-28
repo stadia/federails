@@ -32,6 +32,9 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ### Fixed
 
+- `Fedipub::Actor.find_by_account` documented `@return [Fedipub::Actor, nil]` while every failure path raises
+  `ActiveRecord::RecordNotFound`. Documentation now matches the RBS signature; same for `Fediverse::Webfinger.fetch_actor`
+  and `.fetch_actor_url`.
 - Backfill `fedipub_activities.entity_type` on upgrade. The 0.9.0 rename migration only renamed tables and indexes, so
   activities stored before the rename kept `Federails::Actor` / `Federails::Activity` and their `entity` silently
   resolved to `nil`.

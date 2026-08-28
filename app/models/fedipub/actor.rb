@@ -226,7 +226,8 @@ module Fedipub
       # Searches for an actor from account URI
       #
       # @param account [String] Account URI (username@host)
-      # @return [Fedipub::Actor, nil]
+      # @return [Fedipub::Actor] Never nil: every failure path raises instead
+      # @raise [ActiveRecord::RecordNotFound] when the account is malformed, unknown locally, or cannot be fetched remotely
       #: (String) -> Fedipub::Actor
       def find_by_account(account)
         parts = Fediverse::Webfinger.split_account account

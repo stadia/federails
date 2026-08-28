@@ -34,7 +34,8 @@ module Fediverse
       # @param username [String]
       # @param domain [String]
       #
-      # @return [Fedipub::Actor, nil] Fedipub actor or nothing when not found
+      # @return [Fedipub::Actor]
+      # @raise [ActiveRecord::RecordNotFound] when the actor cannot be resolved
       def fetch_actor(username, domain)
         fetch_actor_url webfinger(username, domain)
       end
@@ -43,7 +44,8 @@ module Fediverse
       #
       # @param url [String] Actor's federation URL
       #
-      # @return [Fedipub::Actor, nil] Fedipub actor or nothing when not found
+      # @return [Fedipub::Actor]
+      # @raise [ActiveRecord::RecordNotFound] when the actor cannot be resolved
       def fetch_actor_url(url)
         json = begin
           get_json url
