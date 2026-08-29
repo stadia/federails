@@ -66,13 +66,13 @@ module Fedipub
     #
     # @example
     #   puts "Follow #{some_actor.name}" if actor_entity? current_user
-    #: (String | Class | untyped) -> bool
+    #: (Object) -> bool
     def actor_entity?(class_or_instance)
       Configuration.actor_types.key? class_or_instance_name(class_or_instance)
     end
 
     # @return [Hash] The configuration for the given actor entity
-    #: (String | Class | untyped) -> Hash[Symbol, untyped]
+    #: (Object) -> Hash[Symbol, Object]
     def actor_entity(class_or_instance)
       klass = class_or_instance_name(class_or_instance)
       raise "#{klass} is not a configured actor entity" unless Configuration.actor_types.key?(klass)
@@ -81,7 +81,7 @@ module Fedipub
     end
 
     # @return [Boolean] True if the given model is a possible data entity
-    #: (String | Class | untyped) -> bool
+    #: (Object) -> bool
     def data_entity?(class_or_instance)
       Configuration.data_types.key? class_or_instance_name(class_or_instance)
     end
@@ -125,7 +125,7 @@ module Fedipub
     end
 
     # @return [Hash] The configuration for the given data entity
-    #: (String | Class | untyped) -> Hash[Symbol, untyped]
+    #: (Object) -> Hash[Symbol, Object]
     def data_entity_configuration(class_or_instance)
       klass = class_or_instance_name(class_or_instance)
       raise "#{klass} is not a configured data entity" unless Configuration.data_types.key?(klass)
@@ -136,7 +136,7 @@ module Fedipub
     private
 
     # @return [String] Class name of the provided class or instance
-    #: (String | Class | untyped) -> String
+    #: (Object) -> String?
     def class_or_instance_name(class_or_instance)
       case class_or_instance
       when String

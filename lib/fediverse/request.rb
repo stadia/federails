@@ -20,7 +20,7 @@ module Fediverse
 
       private
 
-      #: (String) -> Hash[String, untyped]?
+      #: (String) -> Hash[String, Object]?
       def get(id)
         json = Fedipub::Utils::JsonRequest.get_json(id)
         compact_json_ld(json)
@@ -29,7 +29,7 @@ module Fediverse
         nil
       end
 
-      #: (Hash[String, untyped]) -> Hash[String, untyped]
+      #: (Hash[String, Object]) -> Hash[String, Object]
       def compact_json_ld(json)
         JSON::LD::API.compact(json, json['@context'])
       rescue JSON::LD::JsonLdError => e

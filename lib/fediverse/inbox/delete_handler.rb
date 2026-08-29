@@ -9,7 +9,7 @@ module Fediverse
       class << self
         # Early-dispatch path invoked from Inbox.dispatch_request before dereferencing.
         # Handles the Delete case where the target object may already be gone remotely.
-        #: (Hash[String, untyped]) -> untyped
+        #: (Hash[String, untyped]) -> Object?
         def dispatch_delete_request(payload)
           object_ref = payload['object'].is_a?(String) ? payload['object'] : payload['object']['id']
           object = Fedipub::Utils::Object.find_distant_object_in_all(object_ref)

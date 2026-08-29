@@ -9,7 +9,7 @@ module Fediverse
       class << self
         # Creates a Following record from an incoming Follow activity.
         #: (Hash[String, untyped]) -> Fedipub::Following
-        # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+        # rubocop:disable-next Metrics/AbcSize, Metrics/MethodLength
         def handle_create_follow_request(activity)
           actor = Fedipub::Actor.find_or_create_by_object(activity['actor'])
           target_actor = Fedipub::Actor.find_or_create_by_object(activity['object'])
@@ -31,11 +31,10 @@ module Fediverse
 
           following
         end
-        # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
         # Marks a pending Following as accepted when the target actor confirms.
         #: (Hash[String, untyped]) -> Fedipub::Activity?
-        # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+        # rubocop:disable-next Metrics/AbcSize, Metrics/MethodLength
         def handle_accept_follow_request(activity)
           original_activity = Request.dereference(activity['object'])
           unless original_activity
@@ -67,7 +66,6 @@ module Fediverse
 
           follow.accept!(follow_activity: follow_activity)
         end
-        # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
         # Destroys a Following record when the follower undoes their Follow.
         #: (Hash[String, untyped]) -> Fedipub::Following?
@@ -122,7 +120,7 @@ module Fediverse
         end
 
         #: (actor: Fedipub::Actor, target_actor: Fedipub::Actor, activity: Hash[String, untyped]) -> Fedipub::Activity?
-        # rubocop:disable Metrics/AbcSize
+        # rubocop:disable-next Metrics/AbcSize
         def inbound_follow_activity(actor:, target_actor:, activity:)
           return Fedipub::Activity.find_by(actor: actor, action: 'Follow', entity: target_actor) if actor.local?
 
@@ -136,7 +134,6 @@ module Fediverse
             follow_activity.save! if follow_activity.new_record? || follow_activity.changed?
           end
         end
-        # rubocop:enable Metrics/AbcSize
 
         #: (Fedipub::Actor, Fedipub::Following, Fedipub::Activity?) -> void
         def dispatch_followed_callback(target_actor, following, follow_activity)

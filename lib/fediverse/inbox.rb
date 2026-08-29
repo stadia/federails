@@ -203,7 +203,7 @@ module Fediverse
 
       # Resolves the entity (polymorphic object) for a processed activity record.
       # Falls back to actor when the actual object cannot be resolved.
-      #: (Hash[String, untyped], Fedipub::Actor) -> untyped
+      #: (Hash[String, untyped], Fedipub::Actor) -> ActiveRecord::Base?
       def entity_for_processed_activity(payload, actor)
         object = payload['object']
         return actor if payload['type'] == 'Delete' && object == actor.federated_url

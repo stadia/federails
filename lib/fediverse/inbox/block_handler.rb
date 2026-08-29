@@ -4,7 +4,7 @@
 module Fediverse
   class Inbox
     module BlockHandler
-      # rubocop:disable Naming/PredicateMethod
+      # rubocop:disable-next Naming/PredicateMethod
       class << self
         def handle_block(activity)
           actor = Fedipub::Actor.find_or_create_by_federation_url(activity['actor'])
@@ -37,7 +37,6 @@ module Fediverse
           true
         end
       end
-      # rubocop:enable Naming/PredicateMethod
     end
   end
 end

@@ -51,7 +51,7 @@ module Fedipub
     # +NameError: uninitialized constant <Type>+, which takes down an entire
     # outbox/collection page instead of skipping the single dangling record.
     #
-    #: () -> untyped
+    #: () -> ActiveRecord::Base?
     def entity
       return if entity_type.present? && entity_type.safe_constantize.nil?
 

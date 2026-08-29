@@ -6,7 +6,7 @@ module Fediverse
     class SignatureVerificationError < StandardError; end
 
     class << self
-      #: (sender: Fedipub::Actor, request: untyped) -> String
+      #: (sender: Fedipub::Actor, request: Faraday::Request) -> String
       def sign(sender:, request:)
         private_key = OpenSSL::PKey::RSA.new sender.private_key, Rails.application.credentials.secret_key_base
         headers = '(request-target) host date digest'
@@ -54,7 +54,7 @@ module Fediverse
         JSON.parse(response.body)
       end
 
-      #: (sender: Fedipub::Actor, request: untyped) -> bool
+      #: (sender: Fedipub::Actor, request: ActionDispatch::Request) -> bool
       def verify(sender:, request:)
         raise 'Unsigned headers' unless request.headers['Signature']
 
@@ -93,7 +93,7 @@ module Fediverse
       end
 
       # Verify the Digest header matches the request body (cavage draft format)
-      #: (untyped) -> void
+      #: (ActionDispatch::Request) -> void
       def verify_digest!(request)
         digest_header = request.headers['Digest']
         raise SignatureVerificationError, 'Missing Digest header' if digest_header.blank?
@@ -110,7 +110,7 @@ module Fediverse
 
       # Verify an inbound request's HTTP Signature, returning the sending actor.
       # Supports both cavage draft and RFC 9421 formats.
-      #: (untyped) -> Fedipub::Actor
+      #: (ActionDispatch::Request) -> Fedipub::Actor
       def verify_request!(request)
         sig_header = request.headers['Signature']
         raise SignatureVerificationError, 'Missing Signature header' if sig_header.blank?

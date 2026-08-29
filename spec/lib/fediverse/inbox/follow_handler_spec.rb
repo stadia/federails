@@ -4,7 +4,7 @@ require 'fediverse/inbox/follow_handler'
 require 'fediverse/request'
 
 module Fediverse
-  # rubocop:disable Metrics/ClassLength
+  # rubocop:disable-next Metrics/ClassLength
   class Inbox
     RSpec.describe FollowHandler do
       let(:local_actor) { FactoryBot.create(:user).fedipub_actor }
@@ -440,5 +440,4 @@ module Fediverse
       end
     end
   end
-  # rubocop:enable Metrics/ClassLength
 end

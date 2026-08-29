@@ -11,7 +11,7 @@ module Fediverse
     ].freeze #: Array[String]
 
     class << self
-      #: (String) -> Hash[Symbol, untyped]
+      #: (String) -> Hash[Symbol, Object]
       def fetch(domain)
         url = nodeinfo_url(domain)
 

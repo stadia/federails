@@ -112,7 +112,7 @@ module Fedipub
           route
         end
 
-        #: (Hash[Symbol, String]) -> untyped
+        #: (Hash[Symbol, String]) -> ActiveRecord::Base?
         def from_local_route(route)
           config = Fedipub.data_entity_handled_on(route[:publishable_type]) || fallback_local_config(route[:publishable_type])
           return unless config
@@ -131,7 +131,7 @@ module Fedipub
           { class: klass, url_param: :id }
         end
 
-        #: (String | Hash[String, untyped]) -> untyped
+        #: (String | Hash[String, untyped]) -> ActiveRecord::Base?
         def from_distant_server(federated_url)
           hash = Fediverse::Request.dereference(federated_url)
           return unless hash
@@ -154,7 +154,7 @@ module Fedipub
         # Array of either — all valid per ActivityStreams. find_by_federation_url
         # expects a String, so normalize to the first URL. Passing the raw Array
         # would raise `NoMethodError: undefined method 'match?' for an Array`.
-        #: (untyped) -> String?
+        #: (Object) -> String?
         def attributed_to_url(attributed_to)
           Array.wrap(attributed_to).filter_map do |value|
             value.is_a?(Hash) ? value['id'] : value

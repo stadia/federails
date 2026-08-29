@@ -48,7 +48,7 @@ module Fedipub
     mattr_writer :nodeinfo_metadata
     @@nodeinfo_metadata = {}
 
-    #: () -> Hash[String, untyped]
+    #: () -> Hash[String, Object]
     def self.nodeinfo_metadata
       @@nodeinfo_metadata.is_a?(Proc) ? @@nodeinfo_metadata.call : @@nodeinfo_metadata
     end
@@ -131,7 +131,7 @@ module Fedipub
     mattr_reader :actor_types
     @@actor_types = {}
 
-    #: (Class, ?Hash[Symbol, untyped]) -> void
+    #: (Class, ?Hash[Symbol, Object]) -> void
     def self.register_actor_class(klass, config = {})
       @@actor_types[klass.name] = config.merge(class: klass)
     end
@@ -140,7 +140,7 @@ module Fedipub
     mattr_reader :data_types
     @@data_types = {}
 
-    #: (Class, ?Hash[Symbol, untyped]) -> void
+    #: (Class, ?Hash[Symbol, Object]) -> void
     def self.register_data_type(klass, config = {})
       @@data_types[klass.name] = config.merge(class: klass)
     end

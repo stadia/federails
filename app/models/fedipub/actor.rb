@@ -286,7 +286,7 @@ module Fedipub
       end
 
       # Find or create actor from a given actor hash or actor id (actor's URL)
-      #: (String | Hash[String, untyped]) -> Fedipub::Actor
+      #: (Object) -> Fedipub::Actor
       def find_or_create_by_object(object)
         case object
         when String

@@ -146,9 +146,8 @@ module Fedipub
           existing_distant_actor
           described_class.find_by_account(distant_account)
         end
-        # rubocop:disable RSpec/PredicateMatcher
+        # rubocop:disable-next RSpec/PredicateMatcher
         expect(File.exist?(error_cassette_file)).to be_falsey
-        # rubocop:enable RSpec/PredicateMatcher
       end
     end
 
@@ -199,9 +198,8 @@ module Fedipub
           existing_distant_actor
           described_class.find_by_federation_url(distant_url)
         end
-        # rubocop:disable RSpec/PredicateMatcher
+        # rubocop:disable-next RSpec/PredicateMatcher
         expect(File.exist?(error_cassette_file)).to be_falsey
-        # rubocop:enable RSpec/PredicateMatcher
       end
     end
 

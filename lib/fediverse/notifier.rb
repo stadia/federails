@@ -166,7 +166,7 @@ module Fediverse
         json.to_json
       end
 
-      #: (inbox_url: String, message: String, ?from: Fedipub::Actor?) -> untyped
+      #: (inbox_url: String, message: String, ?from: Fedipub::Actor?) -> Faraday::Response
       def post_to_inbox(inbox_url:, message:, from: nil)
         conn = Faraday.default_connection
         resp = conn.builder.build_response(
@@ -196,14 +196,14 @@ module Fediverse
         )
       end
 
-      #: (url: String, message: String, from: Fedipub::Actor?) -> untyped
+      #: (url: String, message: String, from: Fedipub::Actor?) -> Faraday::Request
       def signed_request(url:, message:, from:)
         req = request(url: url, message: message)
         req.headers['Signature'] = Fediverse::Signature.sign(sender: from, request: req) if from
         req
       end
 
-      #: (url: String, message: String) -> untyped
+      #: (url: String, message: String) -> Faraday::Request
       def request(url:, message:)
         Faraday.default_connection.build_request(:post) do |req|
           req.url url
@@ -228,7 +228,7 @@ module Fediverse
         PERMANENT_DELIVERY_STATUS_CODES.include?(status) && status != 429
       end
 
-      #: (inbox_url: String, status: Integer, body: untyped, retry_after: String?, permanent: bool) -> String
+      #: (inbox_url: String, status: Integer, body: String, retry_after: String?, permanent: bool) -> String
       def delivery_error_message(inbox_url:, status:, body:, retry_after:, permanent:)
         message = "Delivery to #{inbox_url} failed"
         message += ' permanently' if permanent
