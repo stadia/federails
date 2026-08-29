@@ -1,6 +1,9 @@
 # typed: true
 # rbs_inline: enabled
 
+require 'rails/engine'
+require 'action_dispatch'
+
 require 'fedipub/delivery_errors'
 
 module Fedipub

@@ -1390,10 +1390,13 @@ ActiveStorage::VERSION::MAJOR = T.let(T.unsafe(nil), Integer)
 ActiveStorage::VERSION::MINOR = T.let(T.unsafe(nil), Integer)
 
 # pkg:gem/activestorage#lib/active_storage/gem_version.rb:13
-ActiveStorage::VERSION::PRE = T.let(T.unsafe(nil), T.untyped)
+ActiveStorage::VERSION::PRE = T.let(T.unsafe(nil), String)
 
 # pkg:gem/activestorage#lib/active_storage/gem_version.rb:15
 ActiveStorage::VERSION::STRING = T.let(T.unsafe(nil), String)
 
 # pkg:gem/activestorage#lib/active_storage/gem_version.rb:12
 ActiveStorage::VERSION::TINY = T.let(T.unsafe(nil), Integer)
+
+# pkg:gem/activestorage#lib/active_storage/vips.rb:21
+ActiveStorage::VIPS_AVAILABLE = T.let(T.unsafe(nil), FalseClass)

@@ -8,93 +8,164 @@
 # pkg:gem/rubocop-rbs_inline#lib/rubocop/rbs_inline/version.rb:3
 module RuboCop; end
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/ast_utils.rb:4
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/annotation_keywords.rb:4
 module RuboCop::Cop; end
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/ast_utils.rb:5
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/annotation_keywords.rb:5
 module RuboCop::Cop::Style; end
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/ast_utils.rb:6
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/annotation_keywords.rb:6
 module RuboCop::Cop::Style::RbsInline; end
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/ast_utils.rb:7
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/ast_utils.rb:7
 module RuboCop::Cop::Style::RbsInline::ASTUtils
+  # Returns the arguments node of a method definition.
+  # @rbs node: RuboCop::AST::DefNode
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/ast_utils.rb:17
+  def args_node_for(node); end
+
+  # Returns the name of the constant `node` is assigned to, or `nil` when the name
+  # is not statically determinable (e.g. `self::Foo = ...`).
+  # @rbs node: RuboCop::AST::Node
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/ast_utils.rb:45
+  def assigned_constant_name(node); end
+
   # @rbs node: RuboCop::AST::Node
   # @rbs default: Integer
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/ast_utils.rb:10
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/ast_utils.rb:10
   def end_line(node, default:); end
+
+  # Returns the last line of the method parameter list (the closing ) line, or the def line if no parens).
+  # @rbs node: RuboCop::AST::DefNode
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/ast_utils.rb:27
+  def method_parameter_list_end_line(node); end
 
   # @rbs node: RuboCop::AST::Node
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/ast_utils.rb:16
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/ast_utils.rb:32
   def name_location(node); end
 
   # @rbs node: RuboCop::AST::Node
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/ast_utils.rb:22
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/ast_utils.rb:38
   def source!(node); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/ast_utils.rb:29
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/ast_utils.rb:58
   def value_to_sym(node); end
+end
+
+# Provides the list of keywords that may follow `# @rbs` in an annotation comment.
+#
+# refs: https://github.com/soutaro/rbs-inline/blob/main/lib/rbs/inline/annotation_parser/tokenizer.rb
+#
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/annotation_keywords.rb:10
+module RuboCop::Cop::Style::RbsInline::AnnotationKeywords; end
+
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/annotation_keywords.rb:11
+RuboCop::Cop::Style::RbsInline::AnnotationKeywords::RBS_INLINE_KEYWORDS = T.let(T.unsafe(nil), Array)
+
+# Shared behavior for cops that ensure `#:` inline type annotations on
+# struct-like class attributes (`Data.define` / `Struct.new`) are aligned.
+#
+# The including cop matches the definition node (e.g. via `struct_like_class?`)
+# and calls {#check_comment_alignment}.
+#
+# @rbs module-self RuboCop::Cop::Base
+#
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/class_comment_alignment.rb:14
+module RuboCop::Cop::Style::RbsInline::ClassCommentAlignment
+  include ::RuboCop::Cop::Style::RbsInline::ASTUtils
+  include ::RuboCop::Cop::RangeHelp
+  include ::RuboCop::Cop::Style::RbsInline::SourceCodeHelper
+  include ::RuboCop::Cop::Style::RbsInline::DataStructHelper
+
+  # @rbs node: RuboCop::AST::SendNode
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/class_comment_alignment.rb:18
+  def check_comment_alignment(node); end
+
+  private
+
+  # @rbs node: RuboCop::AST::SendNode
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/class_comment_alignment.rb:27
+  def check_annotation_alignment(node); end
+
+  # @rbs corrector: RuboCop::Cop::Corrector
+  # @rbs arg: RuboCop::AST::Node
+  # @rbs comment: Parser::Source::Comment
+  # @rbs expected_col: Integer
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/class_comment_alignment.rb:49
+  def correct_alignment(corrector, arg, comment, expected_col); end
 end
 
 # Utility module for parsing RBS inline comments
 # @rbs module-self RuboCop::Cop::Base
 #
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/comment_parser.rb:13
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/comment_parser.rb:13
 module RuboCop::Cop::Style::RbsInline::CommentParser
   # Find @rbs parameter annotations before a method definition
   # @rbs def_line: Integer
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/comment_parser.rb:84
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/comment_parser.rb:92
   def find_doc_style_param_annotations(def_line); end
 
   # Find @rbs return annotation before a method definition
   # @rbs def_line: Integer
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/comment_parser.rb:102
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/comment_parser.rb:110
   def find_doc_style_return_annotation(def_line); end
 
   # Find the last comment in a consecutive block starting from start_comment
   # @rbs start_comment: Parser::Source::Comment
   # @rbs &block: (Parser::Source::Comment) -> bool
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/comment_parser.rb:25
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/comment_parser.rb:33
   def find_last_consecutive_comment(start_comment, &block); end
 
   # Find the leading annotation comment before the given line
   # @rbs def_line: Integer
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/comment_parser.rb:45
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/comment_parser.rb:53
   def find_leading_annotation(def_line); end
 
   # Find method type signature comments (#:) before a method definition
   # @rbs def_line: Integer
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/comment_parser.rb:58
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/comment_parser.rb:66
   def find_method_type_signature_comments(def_line); end
 
   # Find trailing comment on the same line as the method definition
   # @rbs line: Integer
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/comment_parser.rb:75
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/comment_parser.rb:83
   def find_trailing_comment(line); end
 
   # Returns true if there are 2 or more leading #: method type signature lines (overloads).
   # Overloads cannot be expressed in doc_style format, so they take precedence over style config.
   # @rbs def_line: Integer
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/comment_parser.rb:116
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/comment_parser.rb:124
   def overload_type_signatures?(def_line); end
 
   # Parse comments from the source code
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/comment_parser.rb:17
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/comment_parser.rb:23
   def parse_comments; end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/comment_parser.rb:14
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/comment_parser.rb:14
   def parsed_comments; end
+
+  # Fallback for cops that include CommentParser without prepending FileFilter;
+  # `FileFilter` overrides this to return the real per-file decision.
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/comment_parser.rb:18
+  def rbs_inline_file_skipped?; end
 end
 
 # Checks that `#:` inline type annotations in `Data.define` blocks are aligned.
@@ -120,64 +191,37 @@ end
 #
 # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/data_class_comment_alignment.rb:28
 class RuboCop::Cop::Style::RbsInline::DataClassCommentAlignment < ::RuboCop::Cop::Base
+  include ::RuboCop::Cop::Style::RbsInline::ModeConfig
+  include ::RuboCop::Cop::Style::RbsInline::FileFilter
   include ::RuboCop::Cop::Style::RbsInline::ASTUtils
   include ::RuboCop::Cop::RangeHelp
   include ::RuboCop::Cop::Style::RbsInline::SourceCodeHelper
+  include ::RuboCop::Cop::Style::RbsInline::DataStructHelper
+  include ::RuboCop::Cop::Style::RbsInline::ClassCommentAlignment
+  include ::RuboCop::Cop::Style::RbsInline::DataClassMatcher
   extend ::RuboCop::Cop::AutoCorrector
 
   # @rbs node: RuboCop::AST::SendNode
   #
   # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/data_class_comment_alignment.rb:37
   def on_send(node); end
-
-  private
-
-  # @rbs node: RuboCop::AST::SendNode
-  #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/data_class_comment_alignment.rb:103
-  def annotation_column(node); end
-
-  # @rbs node: RuboCop::AST::SendNode
-  #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/data_class_comment_alignment.rb:78
-  def check_annotation_alignment(node); end
-
-  # @rbs corrector: RuboCop::Cop::Corrector
-  # @rbs arg: RuboCop::AST::Node
-  # @rbs comment: Parser::Source::Comment
-  # @rbs expected_col: Integer
-  #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/data_class_comment_alignment.rb:117
-  def correct_alignment(corrector, arg, comment, expected_col); end
-
-  # @rbs arg: RuboCop::AST::Node
-  #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/data_class_comment_alignment.rb:59
-  def data_attribute?(arg); end
-
-  # @rbs node: RuboCop::AST::SendNode
-  #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/data_class_comment_alignment.rb:64
-  def data_attributes(node); end
-
-  # @rbs node: RuboCop::AST::SendNode
-  #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/data_class_comment_alignment.rb:47
-  def data_define?(node); end
-
-  # @rbs node: RuboCop::AST::SendNode
-  #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/data_class_comment_alignment.rb:69
-  def folded_data_class?(node); end
-
-  # @rbs line: Integer
-  #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/data_class_comment_alignment.rb:97
-  def inline_type_comment(line); end
 end
 
 # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/data_class_comment_alignment.rb:34
 RuboCop::Cop::Style::RbsInline::DataClassCommentAlignment::MSG = T.let(T.unsafe(nil), String)
+
+# Matcher for `Data.define` calls, shared by the cops that check
+# `Data.define` class definitions.
+#
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/data_class_matcher.rb:9
+module RuboCop::Cop::Style::RbsInline::DataClassMatcher
+  private
+
+  # @rbs node: RuboCop::AST::SendNode
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/data_class_matcher.rb:13
+  def struct_like_class?(node); end
+end
 
 # Checks for `Data.define` calls with a block.
 #
@@ -204,21 +248,96 @@ RuboCop::Cop::Style::RbsInline::DataClassCommentAlignment::MSG = T.let(T.unsafe(
 #
 # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/data_define_with_block.rb:30
 class RuboCop::Cop::Style::RbsInline::DataDefineWithBlock < ::RuboCop::Cop::Base
+  include ::RuboCop::Cop::Style::RbsInline::ModeConfig
+  include ::RuboCop::Cop::Style::RbsInline::FileFilter
+  include ::RuboCop::Cop::Style::RbsInline::DataClassMatcher
+  include ::RuboCop::Cop::Style::RbsInline::ASTUtils
+
   # @rbs node: RuboCop::AST::SendNode
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/data_define_with_block.rb:36
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/data_define_with_block.rb:40
   def on_send(node); end
 
   private
 
-  # @rbs node: RuboCop::AST::SendNode
+  # The constant the definition is assigned to is the class to reopen.
+  # @rbs node: RuboCop::AST::Node
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/data_define_with_block.rb:48
-  def data_define?(node); end
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/data_define_with_block.rb:53
+  def destination(node); end
 end
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/data_define_with_block.rb:31
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/data_define_with_block.rb:35
 RuboCop::Cop::Style::RbsInline::DataDefineWithBlock::MSG = T.let(T.unsafe(nil), String)
+
+# Shared logic for cops that check inline type annotations on struct-like
+# class definitions such as `Data.define` and `Struct.new`.
+#
+# Including cops decide which nodes to check by defining their own matcher
+# (e.g. `struct_like_class?`); this module only provides helpers that operate
+# on an already-matched definition node. Cops may override {#attr_argument?}
+# when the set of attribute arguments differs from the default (e.g.
+# `Struct.new` treats a leading string argument as the struct name rather than
+# an attribute).
+#
+# @rbs module-self RuboCop::Cop::Base
+#
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/data_struct_helper.rb:18
+module RuboCop::Cop::Style::RbsInline::DataStructHelper
+  include ::RuboCop::Cop::Style::RbsInline::ASTUtils
+  include ::RuboCop::Cop::RangeHelp
+  include ::RuboCop::Cop::Style::RbsInline::SourceCodeHelper
+
+  # The column is determined by the attribute arguments only; non-attribute
+  # arguments (e.g. the `Struct.new` name or a `keyword_init:` keyword argument)
+  # never carry an annotation and so must not influence the alignment.
+  # @rbs node: RuboCop::AST::SendNode
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/data_struct_helper.rb:64
+  def annotation_column(node); end
+
+  # @rbs arg: RuboCop::AST::Node
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/data_struct_helper.rb:24
+  def attr_argument?(arg); end
+
+  # @rbs node: RuboCop::AST::SendNode
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/data_struct_helper.rb:29
+  def attr_arguments(node); end
+
+  # @rbs node: RuboCop::AST::SendNode
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/data_struct_helper.rb:84
+  def build_multiline_replacement(node); end
+
+  # @rbs line: Integer
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/data_struct_helper.rb:55
+  def find_regular_comment(line); end
+
+  # @rbs node: RuboCop::AST::SendNode
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/data_struct_helper.rb:34
+  def folded?(node); end
+
+  # @rbs line: Integer
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/data_struct_helper.rb:43
+  def inline_type_annotation?(line); end
+
+  # @rbs line: Integer
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/data_struct_helper.rb:49
+  def inline_type_comment(line); end
+
+  # Only attribute arguments are considered, for the same reason as
+  # {#annotation_column}.
+  # @rbs node: RuboCop::AST::SendNode
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/data_struct_helper.rb:77
+  def longest_argname(node); end
+end
 
 # Checks that `@rbs!` comments (embedded RBS) are followed by a blank line.
 #
@@ -240,32 +359,91 @@ RuboCop::Cop::Style::RbsInline::DataDefineWithBlock::MSG = T.let(T.unsafe(nil), 
 #
 # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/embedded_rbs_spacing.rb:28
 class RuboCop::Cop::Style::RbsInline::EmbeddedRbsSpacing < ::RuboCop::Cop::Base
+  include ::RuboCop::Cop::Style::RbsInline::ModeConfig
+  include ::RuboCop::Cop::Style::RbsInline::FileFilter
   include ::RuboCop::Cop::RangeHelp
   include ::RuboCop::Cop::Style::RbsInline::SourceCodeHelper
   include ::RuboCop::Cop::Style::RbsInline::CommentParser
   extend ::RuboCop::Cop::AutoCorrector
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/embedded_rbs_spacing.rb:35
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/embedded_rbs_spacing.rb:36
   def on_new_investigation; end
 
   private
 
   # @rbs line_number: Integer
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/embedded_rbs_spacing.rb:65
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/embedded_rbs_spacing.rb:66
   def block_end_line?(line_number); end
 
   # @rbs annotation: RBS::Inline::AST::Annotations::Embedded
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/embedded_rbs_spacing.rb:52
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/embedded_rbs_spacing.rb:53
   def check_embedded_annotation(annotation); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/embedded_rbs_spacing.rb:41
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/embedded_rbs_spacing.rb:42
   def check_embedded_rbs_spacing; end
 end
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/embedded_rbs_spacing.rb:33
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/embedded_rbs_spacing.rb:34
 RuboCop::Cop::Style::RbsInline::EmbeddedRbsSpacing::MSG = T.let(T.unsafe(nil), String)
+
+# Filters files a cop reports offenses on, based on `Mode` configuration.
+#
+# When `Mode` is `opt_in`, offenses are only reported for files that contain
+# a `# rbs_inline: enabled` magic comment. When `Mode` is `opt_out`, all files
+# are checked unless they contain `# rbs_inline: disabled`.
+#
+# This module is designed to be `prepend`ed to a cop so that it can short-circuit
+# the cop's heavy work (annotation parsing via `parse_comments`) and suppress any
+# residual offense reporting for files that should be skipped.
+#
+# @rbs module-self RuboCop::Cop::Base
+#
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/file_filter.rb:18
+module RuboCop::Cop::Style::RbsInline::FileFilter
+  include ::RuboCop::Cop::Style::RbsInline::ModeConfig
+
+  # @rbs *args: untyped
+  # @rbs **kwargs: untyped
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/file_filter.rb:33
+  def add_offense(*args, **kwargs, &_arg2); end
+
+  # @rbs @rbs_inline_skip_file: bool
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/file_filter.rb:26
+  def on_new_investigation; end
+
+  # Exposes the FileFilter's per-file skip decision as a proper method so
+  # helper modules (e.g. `CommentParser`) can consult it explicitly instead
+  # of poking at `@rbs_inline_skip_file` directly.
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/file_filter.rb:42
+  def rbs_inline_file_skipped?; end
+
+  private
+
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/file_filter.rb:65
+  def rbs_inline_disabled?; end
+
+  # Iterate the already-materialized `processed_source.comments` so this
+  # matches RequireRbsInlineComment's detection exactly (line endings,
+  # indented comments, heredoc/string content are all handled correctly
+  # by the parser).
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/file_filter.rb:61
+  def rbs_inline_enabled?; end
+
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/file_filter.rb:48
+  def skip_by_mode?; end
+end
+
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/file_filter.rb:22
+RuboCop::Cop::Style::RbsInline::FileFilter::MAGIC_COMMENT_DISABLED = T.let(T.unsafe(nil), Regexp)
+
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/file_filter.rb:21
+RuboCop::Cop::Style::RbsInline::FileFilter::MAGIC_COMMENT_ENABLED = T.let(T.unsafe(nil), Regexp)
 
 # IRB::Inline expects annotations comments to start with `#:` or `# @rbs`.
 # This cop checks for comments that do not match the expected pattern.
@@ -282,6 +460,9 @@ RuboCop::Cop::Style::RbsInline::EmbeddedRbsSpacing::MSG = T.let(T.unsafe(nil), S
 #
 # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/invalid_comment.rb:22
 class RuboCop::Cop::Style::RbsInline::InvalidComment < ::RuboCop::Cop::Base
+  include ::RuboCop::Cop::Style::RbsInline::ModeConfig
+  include ::RuboCop::Cop::Style::RbsInline::FileFilter
+  include ::RuboCop::Cop::Style::RbsInline::AnnotationKeywords
   extend ::RuboCop::Cop::AutoCorrector
 
   # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/invalid_comment.rb:38
@@ -314,13 +495,8 @@ RuboCop::Cop::Style::RbsInline::InvalidComment::MISSING_HASH_COLON = T.let(T.uns
 # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/invalid_comment.rb:35
 RuboCop::Cop::Style::RbsInline::InvalidComment::MIXED_ANNOTATION = T.let(T.unsafe(nil), Regexp)
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/invalid_comment.rb:25
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/invalid_comment.rb:27
 RuboCop::Cop::Style::RbsInline::InvalidComment::MSG = T.let(T.unsafe(nil), String)
-
-# refs: https://github.com/soutaro/rbs-inline/blob/main/lib/rbs/inline/annotation_parser/tokenizer.rb
-#
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/invalid_comment.rb:28
-RuboCop::Cop::Style::RbsInline::InvalidComment::RBS_INLINE_KEYWORDS = T.let(T.unsafe(nil), Array)
 
 # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/invalid_comment.rb:29
 RuboCop::Cop::Style::RbsInline::InvalidComment::RBS_INLINE_KEYWORD_PATTERN = T.let(T.unsafe(nil), String)
@@ -347,29 +523,31 @@ RuboCop::Cop::Style::RbsInline::InvalidComment::SPACE_BEFORE_COLON = T.let(T.uns
 #
 # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/invalid_types.rb:23
 class RuboCop::Cop::Style::RbsInline::InvalidTypes < ::RuboCop::Cop::Base
+  include ::RuboCop::Cop::Style::RbsInline::ModeConfig
+  include ::RuboCop::Cop::Style::RbsInline::FileFilter
   include ::RuboCop::Cop::Style::RbsInline::CommentParser
   include ::RuboCop::Cop::RangeHelp
   include ::RuboCop::Cop::Style::RbsInline::SourceCodeHelper
   include ::RBS::Inline::AST::Annotations
   include ::RBS::Inline::AST::Members
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/invalid_types.rb:32
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/invalid_types.rb:33
   def on_new_investigation; end
 
   private
 
   # @rbs annotation: RBS::Inline::AST::Annotations::t
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/invalid_types.rb:46
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/invalid_types.rb:47
   def invalid_annotation?(annotation); end
 
   # @rbs annotation: RBS::Inline::AST::Annotations::Embedded
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/invalid_types.rb:59
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/invalid_types.rb:60
   def invalid_embedded?(annotation); end
 end
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/invalid_types.rb:30
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/invalid_types.rb:31
 RuboCop::Cop::Style::RbsInline::InvalidTypes::MSG = T.let(T.unsafe(nil), String)
 
 # IRB::Inline expects annotations comments for keywords are not separeted with `:`.
@@ -384,6 +562,9 @@ RuboCop::Cop::Style::RbsInline::InvalidTypes::MSG = T.let(T.unsafe(nil), String)
 #
 # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/keyword_separator.rb:17
 class RuboCop::Cop::Style::RbsInline::KeywordSeparator < ::RuboCop::Cop::Base
+  include ::RuboCop::Cop::Style::RbsInline::ModeConfig
+  include ::RuboCop::Cop::Style::RbsInline::FileFilter
+  include ::RuboCop::Cop::Style::RbsInline::AnnotationKeywords
   include ::RuboCop::Cop::Style::RbsInline::CommentParser
   include ::RuboCop::Cop::RangeHelp
   extend ::RuboCop::Cop::AutoCorrector
@@ -436,7 +617,7 @@ class RuboCop::Cop::Style::RbsInline::KeywordSeparator < ::RuboCop::Cop::Base
   def valid_method_annotation?(comment); end
 end
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/keyword_separator.rb:22
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/keyword_separator.rb:24
 RuboCop::Cop::Style::RbsInline::KeywordSeparator::MSG = T.let(T.unsafe(nil), String)
 
 # `override` and `skip` are standalone markers that take no arguments.
@@ -446,11 +627,6 @@ RuboCop::Cop::Style::RbsInline::KeywordSeparator::MSG = T.let(T.unsafe(nil), Str
 #
 # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/keyword_separator.rb:30
 RuboCop::Cop::Style::RbsInline::KeywordSeparator::NO_ARGUMENT_KEYWORDS = T.let(T.unsafe(nil), Array)
-
-# refs: https://github.com/soutaro/rbs-inline/blob/main/lib/rbs/inline/annotation_parser/tokenizer.rb
-#
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/keyword_separator.rb:25
-RuboCop::Cop::Style::RbsInline::KeywordSeparator::RBS_INLINE_KEYWORDS = T.let(T.unsafe(nil), Array)
 
 # Checks that method-related `@rbs` annotations are placed immediately before method definitions.
 #
@@ -502,15 +678,17 @@ RuboCop::Cop::Style::RbsInline::KeywordSeparator::RBS_INLINE_KEYWORDS = T.let(T.
 #
 # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/method_comment_spacing.rb:58
 class RuboCop::Cop::Style::RbsInline::MethodCommentSpacing < ::RuboCop::Cop::Base
+  include ::RuboCop::Cop::Style::RbsInline::ModeConfig
+  include ::RuboCop::Cop::Style::RbsInline::FileFilter
   include ::RuboCop::Cop::RangeHelp
   include ::RuboCop::Cop::Style::RbsInline::SourceCodeHelper
   include ::RuboCop::Cop::Style::RbsInline::CommentParser
   extend ::RuboCop::Cop::AutoCorrector
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/method_comment_spacing.rb:71
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/method_comment_spacing.rb:72
   def on_new_investigation; end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/method_comment_spacing.rb:69
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/method_comment_spacing.rb:70
   def processed_comments; end
 
   private
@@ -518,58 +696,105 @@ class RuboCop::Cop::Style::RbsInline::MethodCommentSpacing < ::RuboCop::Cop::Bas
   # @rbs comment: Prism::Comment
   # @rbs blank_line_number: Integer
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/method_comment_spacing.rb:148
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/method_comment_spacing.rb:149
   def check_blank_line_case(comment, blank_line_number); end
 
   # @rbs comment: RBS::Inline::AnnotationParser::ParsingResult
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/method_comment_spacing.rb:101
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/method_comment_spacing.rb:102
   def check_method_annotation(comment); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/method_comment_spacing.rb:79
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/method_comment_spacing.rb:80
   def check_method_comment_spacing; end
 
   # @rbs comment: RBS::Inline::AnnotationParser::ParsingResult
   # @rbs next_line_number: Integer
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/method_comment_spacing.rb:135
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/method_comment_spacing.rb:136
   def check_spacing_after_annotation(comment, next_line_number); end
 
   # @rbs line_number: Integer
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/method_comment_spacing.rb:174
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/method_comment_spacing.rb:175
   def method_definition_line?(line_number); end
 
   # @rbs comment: RBS::Inline::AnnotationParser::ParsingResult
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/method_comment_spacing.rb:112
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/method_comment_spacing.rb:113
   def method_related_annotation?(comment); end
 
   # @rbs blank_line_number: Integer
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/method_comment_spacing.rb:159
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/method_comment_spacing.rb:160
   def register_blank_line_offense(blank_line_number); end
 
   # @rbs comment: RBS::Inline::AnnotationParser::ParsingResult
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/method_comment_spacing.rb:167
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/method_comment_spacing.rb:168
   def skip_only_annotation?(comment); end
 
   # Check if this is a trailing comment after Ruby code on the same line
   # @rbs comment: RBS::Inline::AnnotationParser::ParsingResult
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/method_comment_spacing.rb:90
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/method_comment_spacing.rb:91
   def trailing_comment?(comment); end
 end
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/method_comment_spacing.rb:66
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/method_comment_spacing.rb:67
 RuboCop::Cop::Style::RbsInline::MethodCommentSpacing::METHOD_DEFINITION_PATTERN = T.let(T.unsafe(nil), Regexp)
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/method_comment_spacing.rb:64
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/method_comment_spacing.rb:65
 RuboCop::Cop::Style::RbsInline::MethodCommentSpacing::MSG = T.let(T.unsafe(nil), String)
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/method_comment_spacing.rb:65
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/method_comment_spacing.rb:66
 RuboCop::Cop::Style::RbsInline::MethodCommentSpacing::MSG_WITH_BLANK_LINE = T.let(T.unsafe(nil), String)
+
+# Shared behavior for cops that ensure struct-like class attributes have
+# inline type annotations (`Data.define` / `Struct.new`).
+#
+# The including cop matches the definition node (e.g. via `struct_like_class?`)
+# and calls {#check_missing_annotations}.
+#
+# @rbs module-self RuboCop::Cop::Base
+#
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/missing_class_annotation.rb:14
+module RuboCop::Cop::Style::RbsInline::MissingClassAnnotation
+  include ::RuboCop::Cop::Style::RbsInline::ASTUtils
+  include ::RuboCop::Cop::RangeHelp
+  include ::RuboCop::Cop::Style::RbsInline::SourceCodeHelper
+  include ::RuboCop::Cop::Style::RbsInline::DataStructHelper
+
+  # @rbs node: RuboCop::AST::SendNode
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/missing_class_annotation.rb:18
+  def check_missing_annotations(node); end
+
+  private
+
+  # @rbs node: RuboCop::AST::SendNode
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/missing_class_annotation.rb:29
+  def add_offenses_for_folded(node); end
+
+  # @rbs node: RuboCop::AST::SendNode
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/missing_class_annotation.rb:46
+  def check_multiline(node); end
+
+  # @rbs corrector: RuboCop::Cop::Corrector
+  # @rbs node: RuboCop::AST::SendNode
+  # @rbs arg: RuboCop::AST::Node
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/missing_class_annotation.rb:57
+  def correct_multiline(corrector, node, arg); end
+
+  # @rbs corrector: RuboCop::Cop::Corrector
+  # @rbs node: RuboCop::AST::SendNode
+  # @rbs arg: RuboCop::AST::Node
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/missing_class_annotation.rb:71
+  def insert_annotation(corrector, node, arg); end
+end
 
 # Checks that `Data.define` attributes have inline type annotations.
 #
@@ -589,90 +814,62 @@ RuboCop::Cop::Style::RbsInline::MethodCommentSpacing::MSG_WITH_BLANK_LINE = T.le
 #
 # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_data_class_annotation.rb:23
 class RuboCop::Cop::Style::RbsInline::MissingDataClassAnnotation < ::RuboCop::Cop::Base
+  include ::RuboCop::Cop::Style::RbsInline::ModeConfig
+  include ::RuboCop::Cop::Style::RbsInline::FileFilter
   include ::RuboCop::Cop::Style::RbsInline::ASTUtils
   include ::RuboCop::Cop::RangeHelp
   include ::RuboCop::Cop::Style::RbsInline::SourceCodeHelper
+  include ::RuboCop::Cop::Style::RbsInline::DataStructHelper
+  include ::RuboCop::Cop::Style::RbsInline::MissingClassAnnotation
+  include ::RuboCop::Cop::Style::RbsInline::DataClassMatcher
   extend ::RuboCop::Cop::AutoCorrector
 
   # @rbs node: RuboCop::AST::SendNode
   #
   # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_data_class_annotation.rb:32
   def on_send(node); end
-
-  private
-
-  # @rbs node: RuboCop::AST::SendNode
-  #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_data_class_annotation.rb:82
-  def add_offenses_for_folded_data_class(node); end
-
-  # @rbs node: RuboCop::AST::SendNode
-  #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_data_class_annotation.rb:159
-  def annotation_column(node); end
-
-  # @rbs node: RuboCop::AST::SendNode
-  #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_data_class_annotation.rb:106
-  def build_multiline_replacement(node); end
-
-  # @rbs node: RuboCop::AST::SendNode
-  #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_data_class_annotation.rb:122
-  def check_multiline_data_class(node); end
-
-  # @rbs corrector: RuboCop::Cop::Corrector
-  # @rbs node: RuboCop::AST::SendNode
-  # @rbs arg: RuboCop::AST::Node
-  #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_data_class_annotation.rb:133
-  def correct_multiline(corrector, node, arg); end
-
-  # @rbs arg: RuboCop::AST::Node
-  #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_data_class_annotation.rb:57
-  def data_attribute?(arg); end
-
-  # @rbs node: RuboCop::AST::SendNode
-  #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_data_class_annotation.rb:62
-  def data_attributes(node); end
-
-  # @rbs node: RuboCop::AST::SendNode
-  #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_data_class_annotation.rb:45
-  def data_define?(node); end
-
-  # @rbs line: Integer
-  #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_data_class_annotation.rb:170
-  def find_regular_comment(line); end
-
-  # @rbs node: RuboCop::AST::SendNode
-  #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_data_class_annotation.rb:73
-  def folded_data_class?(node); end
-
-  # @rbs line: Integer
-  #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_data_class_annotation.rb:67
-  def inline_type_annotation?(line); end
-
-  # @rbs corrector: RuboCop::Cop::Corrector
-  # @rbs node: RuboCop::AST::SendNode
-  # @rbs arg: RuboCop::AST::Node
-  #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_data_class_annotation.rb:147
-  def insert_annotation(corrector, node, arg); end
-
-  # @rbs node: RuboCop::AST::SendNode
-  #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_data_class_annotation.rb:99
-  def longest_argname(node); end
 end
 
 # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_data_class_annotation.rb:29
 RuboCop::Cop::Style::RbsInline::MissingDataClassAnnotation::MSG = T.let(T.unsafe(nil), String)
+
+# Checks that `Struct.new` attributes have inline type annotations.
+#
+# Each attribute passed to `Struct.new` should have a trailing `#:` type
+# annotation comment on the same line. A leading string argument (the struct
+# name) and the `keyword_init:` keyword argument are not attributes and are
+# ignored.
+#
+# @example
+#   # bad
+#   Point = Struct.new(:x, :y)
+#
+#   # good
+#   Point = Struct.new(
+#     :x,  #: Integer
+#     :y   #: Integer
+#   )
+#
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_struct_class_annotation.rb:24
+class RuboCop::Cop::Style::RbsInline::MissingStructClassAnnotation < ::RuboCop::Cop::Base
+  include ::RuboCop::Cop::Style::RbsInline::ModeConfig
+  include ::RuboCop::Cop::Style::RbsInline::FileFilter
+  include ::RuboCop::Cop::Style::RbsInline::ASTUtils
+  include ::RuboCop::Cop::RangeHelp
+  include ::RuboCop::Cop::Style::RbsInline::SourceCodeHelper
+  include ::RuboCop::Cop::Style::RbsInline::DataStructHelper
+  include ::RuboCop::Cop::Style::RbsInline::MissingClassAnnotation
+  include ::RuboCop::Cop::Style::RbsInline::StructClassMatcher
+  extend ::RuboCop::Cop::AutoCorrector
+
+  # @rbs node: RuboCop::AST::SendNode
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_struct_class_annotation.rb:33
+  def on_send(node); end
+end
+
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_struct_class_annotation.rb:30
+RuboCop::Cop::Style::RbsInline::MissingStructClassAnnotation::MSG = T.let(T.unsafe(nil), String)
 
 # Checks that method definitions and `attr_*` declarations have
 # RBS inline type annotations.
@@ -690,7 +887,8 @@ RuboCop::Cop::Style::RbsInline::MissingDataClassAnnotation::MSG = T.let(T.unsafe
 # - `all`: Checks all methods regardless of visibility (default)
 # - `public`: Only checks public methods and `attr_*` declarations
 #
-# Methods annotated with `# @rbs skip` are always excluded from inspection.
+# Methods annotated with `# @rbs skip` or `# @rbs override`, parameters with a leading
+# `_`, and the `...` parameter are always excluded.
 #
 # @example EnforcedStyle: doc_style
 #   # bad
@@ -783,8 +981,10 @@ RuboCop::Cop::Style::RbsInline::MissingDataClassAnnotation::MSG = T.let(T.unsafe
 #   # good - attr with trailing type
 #   attr_reader :name #: String
 #
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:118
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:119
 class RuboCop::Cop::Style::RbsInline::MissingTypeAnnotation < ::RuboCop::Cop::Base
+  include ::RuboCop::Cop::Style::RbsInline::ModeConfig
+  include ::RuboCop::Cop::Style::RbsInline::FileFilter
   include ::RuboCop::Cop::Style::RbsInline::ASTUtils
   include ::RuboCop::Cop::Style::RbsInline::CommentParser
   include ::RuboCop::Cop::ConfigurableEnforcedStyle
@@ -792,225 +992,238 @@ class RuboCop::Cop::Style::RbsInline::MissingTypeAnnotation < ::RuboCop::Cop::Ba
 
   # @rbs _node: RuboCop::AST::Node
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:168
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:170
   def after_class(_node); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:174
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:176
   def after_module(_node); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:175
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:177
   def after_sclass(_node); end
 
   # @rbs _node: RuboCop::AST::Node
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:159
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:161
   def on_class(_node); end
 
   # @rbs node: RuboCop::AST::DefNode
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:178
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:180
   def on_def(node); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:184
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:186
   def on_defs(node); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:153
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:155
   def on_investigation_end; end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:164
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:166
   def on_module(_node); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:146
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:148
   def on_new_investigation; end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:165
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:167
   def on_sclass(_node); end
 
   # @rbs node: RuboCop::AST::SendNode
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:187
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:189
   def on_send(node); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:144
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:146
   def unannotated_methods_stack; end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:143
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:145
   def visibility_stack; end
 
   private
 
   # @rbs line: Integer
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:371
-  def annotated_attribute_method?(line); end
-
-  # @rbs node: RuboCop::AST::DefNode
-  #
   # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:358
-  def args_node_for(node); end
+  def annotated_attribute_method?(line); end
 
   # @rbs node: RuboCop::AST::SendNode
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:344
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:346
   def check_attribute_method(node); end
 
   # @rbs node: RuboCop::AST::DefNode
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:260
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:262
   def check_def(node); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:246
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:248
   def check_method_entries; end
 
   # @rbs node: RuboCop::AST::DefNode
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:308
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:310
   def check_method_parameters_in_doc_style(node); end
 
   # @rbs node: RuboCop::AST::DefNode
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:282
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:284
   def check_method_type_signature(node); end
 
   # @rbs node: RuboCop::AST::DefNode
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:299
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:301
   def check_method_type_signature_or_return_annotation(node); end
 
   # @rbs node: RuboCop::AST::DefNode
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:290
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:292
   def check_method_type_signature_or_return_annotation_style(node); end
 
   # @rbs node: RuboCop::AST::DefNode
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:330
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:332
   def check_return_type_in_doc_style(node); end
 
   # @rbs node: RuboCop::AST::DefNode
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:337
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:339
   def check_return_type_in_return_annotation(node); end
 
   # Returns the method entries for the current scope (class/module)
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:201
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:203
   def current_method_entries; end
 
   # @rbs node: RuboCop::AST::Node
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:227
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:229
   def current_visibility(node); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:377
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:364
   def doc_style_annotation_name(annotation); end
 
   # @rbs node: RuboCop::AST::DefNode
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:366
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:353
   def method_has_arguments?(node); end
 
-  # Returns the last line of the method parameter list (the closing ) line, or the def line if no parens).
   # @rbs node: RuboCop::AST::DefNode
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:352
-  def method_parameter_list_end_line(node); end
-
-  # @rbs node: RuboCop::AST::DefNode
-  #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:431
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:418
   def offense_range_for_def(node); end
 
   # @rbs node: RuboCop::AST::SendNode
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:219
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:221
   def on_attribute_method(node); end
 
   # @rbs node: RuboCop::AST::SendNode
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:206
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:208
   def on_visibility_modifier(node); end
 
   # Returns acceptable annotation name variants for the parameter, or nil for unrecognized types.
   # @rbs argument: RuboCop::AST::Node
   # @rbs name: String
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:409
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:396
   def param_candidate_names(argument, name); end
 
   # Returns the display name for a parameter node, used in offense messages.
   # @rbs argument: RuboCop::AST::Node
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:420
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:407
   def param_display_name(argument); end
 
   # @rbs line: Integer
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:399
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:386
   def rbs_method_type_annotation?(line); end
 
   # @rbs line: Integer
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:391
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:378
   def skip_annotation?(line); end
 
   # @rbs visibility: visibility
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:240
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:242
   def target_node?(visibility); end
 end
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:130
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:132
 RuboCop::Cop::Style::RbsInline::MissingTypeAnnotation::ATTRIBUTE_METHOD_MESSAGE = T.let(T.unsafe(nil), String)
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:132
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:134
 RuboCop::Cop::Style::RbsInline::MissingTypeAnnotation::ATTR_METHODS = T.let(T.unsafe(nil), Array)
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:127
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:129
 RuboCop::Cop::Style::RbsInline::MissingTypeAnnotation::DOC_STYLE_PARAM_MESSAGE = T.let(T.unsafe(nil), String)
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:128
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:130
 RuboCop::Cop::Style::RbsInline::MissingTypeAnnotation::DOC_STYLE_RETURN_MESSAGE = T.let(T.unsafe(nil), String)
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:129
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:131
 RuboCop::Cop::Style::RbsInline::MissingTypeAnnotation::DOC_STYLE_TRAILING_RETURN_MESSAGE = T.let(T.unsafe(nil), String)
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:124
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:126
 RuboCop::Cop::Style::RbsInline::MissingTypeAnnotation::METHOD_TYPE_SIGNATURE_MESSAGE = T.let(T.unsafe(nil), String)
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:125
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:127
 RuboCop::Cop::Style::RbsInline::MissingTypeAnnotation::METHOD_TYPE_SIGNATURE_OR_RETURN_ANNOTATION_MESSAGE = T.let(T.unsafe(nil), String)
 
 # @rbs! type visibility = :public | :protected | :private
 #
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:137
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:139
 class RuboCop::Cop::Style::RbsInline::MissingTypeAnnotation::MethodEntry < ::Data
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:137
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:139
   def name; end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:137
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:139
   def node; end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:137
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:139
   def visibility; end
 
   class << self
-    # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:137
+    # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:139
     def [](*_arg0); end
 
-    # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:137
+    # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:139
     def inspect; end
 
-    # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:137
+    # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:139
     def members; end
 
-    # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:137
+    # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:139
     def new(*_arg0); end
   end
 end
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:133
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/missing_type_annotation.rb:135
 RuboCop::Cop::Style::RbsInline::MissingTypeAnnotation::VISIBILITY_MODIFIERS = T.let(T.unsafe(nil), Array)
+
+# Resolves the `Mode` setting shared by every cop in the `Style/RbsInline`
+# department.
+#
+# @rbs module-self RuboCop::Cop::Base
+#
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/mode_config.rb:11
+module RuboCop::Cop::Style::RbsInline::ModeConfig
+  # Hook RuboCop calls while mobilizing its cops, so an unsupported `Mode`
+  # fails the run as a config error instead of an error on every file.
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/mode_config.rb:18
+  def validate_config; end
+
+  private
+
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/mode_config.rb:24
+  def configured_mode; end
+end
+
+# @rbs! type mode = :opt_in | :opt_out
+#
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/mode_config.rb:14
+RuboCop::Cop::Style::RbsInline::ModeConfig::SUPPORTED_MODES = T.let(T.unsafe(nil), Array)
 
 # IRB::Inline expects annotations comments for parameters are separated with `:`or allows annotation comments.
 # This cop checks for comments that do not match the expected pattern.
@@ -1030,6 +1243,9 @@ RuboCop::Cop::Style::RbsInline::MissingTypeAnnotation::VISIBILITY_MODIFIERS = T.
 #
 # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/parameters_separator.rb:22
 class RuboCop::Cop::Style::RbsInline::ParametersSeparator < ::RuboCop::Cop::Base
+  include ::RuboCop::Cop::Style::RbsInline::ModeConfig
+  include ::RuboCop::Cop::Style::RbsInline::FileFilter
+  include ::RuboCop::Cop::Style::RbsInline::AnnotationKeywords
   include ::RuboCop::Cop::RangeHelp
   extend ::RuboCop::Cop::AutoCorrector
 
@@ -1061,13 +1277,8 @@ class RuboCop::Cop::Style::RbsInline::ParametersSeparator < ::RuboCop::Cop::Base
   def valid_rbs_inline_comment?(matched); end
 end
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/parameters_separator.rb:26
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/parameters_separator.rb:28
 RuboCop::Cop::Style::RbsInline::ParametersSeparator::MSG = T.let(T.unsafe(nil), String)
-
-# refs: https://github.com/soutaro/rbs-inline/blob/main/lib/rbs/inline/annotation_parser/tokenizer.rb
-#
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/parameters_separator.rb:29
-RuboCop::Cop::Style::RbsInline::ParametersSeparator::RBS_INLINE_KEYWORDS = T.let(T.unsafe(nil), Array)
 
 # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/parameters_separator.rb:30
 RuboCop::Cop::Style::RbsInline::ParametersSeparator::RBS_INLINE_REGEXP_KEYWORDS = T.let(T.unsafe(nil), Array)
@@ -1125,6 +1336,9 @@ RuboCop::Cop::Style::RbsInline::ParametersSeparator::RBS_INLINE_REGEXP_KEYWORDS 
 #
 # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:60
 class RuboCop::Cop::Style::RbsInline::RedundantAnnotationWithSkip < ::RuboCop::Cop::Base
+  include ::RuboCop::Cop::Style::RbsInline::ModeConfig
+  include ::RuboCop::Cop::Style::RbsInline::FileFilter
+  include ::RuboCop::Cop::Style::RbsInline::ASTUtils
   include ::RuboCop::Cop::Style::RbsInline::CommentParser
   include ::RuboCop::Cop::RangeHelp
   include ::RuboCop::Cop::Style::RbsInline::SourceCodeHelper
@@ -1132,76 +1346,70 @@ class RuboCop::Cop::Style::RbsInline::RedundantAnnotationWithSkip < ::RuboCop::C
 
   # @rbs node: RuboCop::AST::DefNode
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:82
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:84
   def on_def(node); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:86
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:88
   def on_defs(node); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:76
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:78
   def on_new_investigation; end
 
   private
 
   # @rbs def_line: Integer
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:147
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:149
   def check_doc_style_annotations(def_line); end
 
   # @rbs def_line: Integer
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:115
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:117
   def check_skip_override(def_line); end
 
   # @rbs param_list_end_line: Integer
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:176
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:178
   def check_trailing_return(param_list_end_line); end
 
   # @rbs annotation: untyped
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:163
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:165
   def doc_style_annotation_message(annotation); end
 
-  # Returns the last line of the method parameter list (the closing ) line, or the def line if no parens).
   # @rbs node: RuboCop::AST::DefNode
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:188
-  def method_parameter_list_end_line(node); end
-
-  # @rbs node: RuboCop::AST::DefNode
-  #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:91
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:93
   def process(node); end
 
   # @rbs line: Integer
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:101
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:103
   def skip_or_override_annotation?(line); end
 
   # @rbs first: RBS::Inline::AST::Annotations::Skip | RBS::Inline::AST::Annotations::Override
   # @rbs current: RBS::Inline::AST::Annotations::Skip | RBS::Inline::AST::Annotations::Override
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:138
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:140
   def skip_override_message(first, current); end
 end
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:74
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:76
 RuboCop::Cop::Style::RbsInline::RedundantAnnotationWithSkip::MSG_CONFLICTING_SKIP_OVERRIDE = T.let(T.unsafe(nil), String)
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:68
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:70
 RuboCop::Cop::Style::RbsInline::RedundantAnnotationWithSkip::MSG_DOC_STYLE_ANNOTATION = T.let(T.unsafe(nil), String)
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:73
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:75
 RuboCop::Cop::Style::RbsInline::RedundantAnnotationWithSkip::MSG_DUPLICATE_OVERRIDE = T.let(T.unsafe(nil), String)
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:72
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:74
 RuboCop::Cop::Style::RbsInline::RedundantAnnotationWithSkip::MSG_DUPLICATE_SKIP = T.let(T.unsafe(nil), String)
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:66
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:68
 RuboCop::Cop::Style::RbsInline::RedundantAnnotationWithSkip::MSG_METHOD_TYPE_SIGNATURE = T.let(T.unsafe(nil), String)
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:70
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_annotation_with_skip.rb:72
 RuboCop::Cop::Style::RbsInline::RedundantAnnotationWithSkip::MSG_TRAILING_RETURN = T.let(T.unsafe(nil), String)
 
 # Checks for redundant `@rbs` instance variable type annotation when
@@ -1227,6 +1435,8 @@ RuboCop::Cop::Style::RbsInline::RedundantAnnotationWithSkip::MSG_TRAILING_RETURN
 #
 # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:30
 class RuboCop::Cop::Style::RbsInline::RedundantInstanceVariableAnnotation < ::RuboCop::Cop::Base
+  include ::RuboCop::Cop::Style::RbsInline::ModeConfig
+  include ::RuboCop::Cop::Style::RbsInline::FileFilter
   include ::RuboCop::Cop::Style::RbsInline::ASTUtils
   include ::RuboCop::Cop::Style::RbsInline::CommentParser
   include ::RuboCop::Cop::RangeHelp
@@ -1235,84 +1445,84 @@ class RuboCop::Cop::Style::RbsInline::RedundantInstanceVariableAnnotation < ::Ru
 
   # @rbs node: RuboCop::AST::Node
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:65
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:66
   def after_class(node); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:72
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:73
   def after_module(node); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:40
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:41
   def attributes_scope_stack; end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:41
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:42
   def ivar_annotations; end
 
   # @rbs _node: RuboCop::AST::Node
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:58
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:59
   def on_class(_node); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:51
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:52
   def on_investigation_end; end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:62
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:63
   def on_module(_node); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:43
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:44
   def on_new_investigation; end
 
   # @rbs node: RuboCop::AST::SendNode
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:75
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:76
   def on_send(node); end
 
   private
 
   # @rbs annotation: RBS::Inline::AST::Annotations::IvarType
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:141
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:142
   def add_ivar_offense(annotation); end
 
   # @rbs node: RuboCop::AST::SendNode
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:151
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:152
   def attribute_names_from(node); end
 
   # @rbs start_line: Integer
   # @rbs end_line: Integer | Float
   # @rbs attributes: Set[Symbol]
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:134
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:135
   def check_offenses(start_line, end_line, attributes); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:96
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:97
   def collect_ivar_annotations; end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:92
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:93
   def current_attributes_scope; end
 
   # @rbs start_line: Integer
   # @rbs end_line: Integer | Float
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:111
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:112
   def extract_ivar_annotations(start_line, end_line); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:88
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:89
   def pop_attributes_scope; end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:84
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:85
   def push_attributes_scope; end
 
   # @rbs node: RuboCop::AST::SendNode
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:123
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:124
   def register_attribute_method(node); end
 end
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:38
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:39
 RuboCop::Cop::Style::RbsInline::RedundantInstanceVariableAnnotation::ATTRIBUTE_METHODS = T.let(T.unsafe(nil), Array)
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:37
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_instance_variable_annotation.rb:38
 RuboCop::Cop::Style::RbsInline::RedundantInstanceVariableAnnotation::MSG = T.let(T.unsafe(nil), String)
 
 # Checks for redundant type annotations when multiple type specifications
@@ -1390,6 +1600,9 @@ RuboCop::Cop::Style::RbsInline::RedundantInstanceVariableAnnotation::MSG = T.let
 #
 # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_type_annotation.rb:82
 class RuboCop::Cop::Style::RbsInline::RedundantTypeAnnotation < ::RuboCop::Cop::Base
+  include ::RuboCop::Cop::Style::RbsInline::ModeConfig
+  include ::RuboCop::Cop::Style::RbsInline::FileFilter
+  include ::RuboCop::Cop::Style::RbsInline::ASTUtils
   include ::RuboCop::Cop::Style::RbsInline::CommentParser
   include ::RuboCop::Cop::ConfigurableEnforcedStyle
   include ::RuboCop::Cop::RangeHelp
@@ -1398,13 +1611,13 @@ class RuboCop::Cop::Style::RbsInline::RedundantTypeAnnotation < ::RuboCop::Cop::
 
   # @rbs node: RuboCop::AST::DefNode
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_type_annotation.rb:100
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_type_annotation.rb:102
   def on_def(node); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_type_annotation.rb:103
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_type_annotation.rb:105
   def on_defs(node); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_type_annotation.rb:94
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_type_annotation.rb:96
   def on_new_investigation; end
 
   private
@@ -1415,63 +1628,57 @@ class RuboCop::Cop::Style::RbsInline::RedundantTypeAnnotation < ::RuboCop::Cop::
   #   RBS::Inline::AST::Annotations::SplatParamType |
   #   RBS::Inline::AST::Annotations::DoubleSplatParamType
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_type_annotation.rb:178
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_type_annotation.rb:169
   def add_offense_for_doc_style_param(annotation); end
 
   # @rbs annotation: RBS::Inline::AST::Annotations::ReturnType
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_type_annotation.rb:209
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_type_annotation.rb:200
   def add_offense_for_doc_style_return(annotation); end
 
   # @rbs comments: Array[Parser::Source::Comment]
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_type_annotation.rb:163
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_type_annotation.rb:154
   def add_offense_for_method_type_signature(comments); end
 
   # @rbs type: Symbol
   # @rbs value: untyped
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_type_annotation.rb:188
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_type_annotation.rb:179
   def add_offense_for_return(type, value); end
 
   # @rbs comment: Parser::Source::Comment
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_type_annotation.rb:200
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_type_annotation.rb:191
   def add_offense_for_trailing_return(comment); end
 
   # @rbs def_line: Integer
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_type_annotation.rb:115
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_type_annotation.rb:117
   def check_parameter_redundancy(def_line); end
 
   # @rbs def_line: Integer
   # @rbs parameter_list_end_line: Integer
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_type_annotation.rb:145
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_type_annotation.rb:136
   def check_return_type_redundancy(def_line, parameter_list_end_line); end
 
-  # Returns the last line of the method parameter list (the closing ) line, or the def line if no parens).
   # @rbs node: RuboCop::AST::DefNode
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_type_annotation.rb:134
-  def method_parameter_list_end_line(node); end
-
-  # @rbs node: RuboCop::AST::DefNode
-  #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_type_annotation.rb:108
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_type_annotation.rb:110
   def process(node); end
 end
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_type_annotation.rb:89
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_type_annotation.rb:91
 RuboCop::Cop::Style::RbsInline::RedundantTypeAnnotation::MSG_DOC_STYLE_PARAM = T.let(T.unsafe(nil), String)
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_type_annotation.rb:90
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_type_annotation.rb:92
 RuboCop::Cop::Style::RbsInline::RedundantTypeAnnotation::MSG_DOC_STYLE_RETURN = T.let(T.unsafe(nil), String)
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_type_annotation.rb:92
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_type_annotation.rb:94
 RuboCop::Cop::Style::RbsInline::RedundantTypeAnnotation::MSG_METHOD_TYPE_SIGNATURE = T.let(T.unsafe(nil), String)
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_type_annotation.rb:91
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/redundant_type_annotation.rb:93
 RuboCop::Cop::Style::RbsInline::RedundantTypeAnnotation::MSG_TRAILING_RETURN = T.let(T.unsafe(nil), String)
 
 # Checks for the presence or absence of `# rbs_inline:` magic comment.
@@ -1480,7 +1687,7 @@ RuboCop::Cop::Style::RbsInline::RedundantTypeAnnotation::MSG_TRAILING_RETURN = T
 # opt-out (processes all files by default). This cop enforces consistency in which
 # mode your codebase uses.
 #
-# @example EnforcedStyle: always (default)
+# @example Mode: opt_in
 #   # bad
 #   # (no rbs_inline comment)
 #   class Foo
@@ -1496,7 +1703,17 @@ RuboCop::Cop::Style::RbsInline::RedundantTypeAnnotation::MSG_TRAILING_RETURN = T
 #   class Foo
 #   end
 #
-# @example EnforcedStyle: never
+# @example Mode: opt_in, AllowMissingComment: true
+#   # good - the cop does not enforce the magic comment
+#   class Foo
+#   end
+#
+#   # good
+#   # rbs_inline: enabled
+#   class Foo
+#   end
+#
+# @example Mode: opt_out
 #   # bad
 #   # rbs_inline: enabled
 #   class Foo
@@ -1512,109 +1729,224 @@ RuboCop::Cop::Style::RbsInline::RedundantTypeAnnotation::MSG_TRAILING_RETURN = T
 #   class Foo
 #   end
 #
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/require_rbs_inline_comment.rb:45
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/require_rbs_inline_comment.rb:55
 class RuboCop::Cop::Style::RbsInline::RequireRbsInlineComment < ::RuboCop::Cop::Base
+  include ::RuboCop::Cop::Style::RbsInline::ModeConfig
   include ::RuboCop::Cop::RangeHelp
   extend ::RuboCop::Cop::AutoCorrector
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/require_rbs_inline_comment.rb:52
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/require_rbs_inline_comment.rb:63
   def on_new_investigation; end
 
   private
 
-  # @rbs magic_comment: Parser::Source::Comment?
-  #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/require_rbs_inline_comment.rb:79
-  def check_always_style(magic_comment); end
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/require_rbs_inline_comment.rb:144
+  def allow_missing_comment?; end
 
   # @rbs magic_comment: Parser::Source::Comment?
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/require_rbs_inline_comment.rb:93
-  def check_never_style(magic_comment); end
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/require_rbs_inline_comment.rb:89
+  def check_opt_in(magic_comment); end
 
   # @rbs magic_comment: Parser::Source::Comment?
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/require_rbs_inline_comment.rb:74
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/require_rbs_inline_comment.rb:101
+  def check_opt_out(magic_comment); end
+
+  # @rbs magic_comment: Parser::Source::Comment?
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/require_rbs_inline_comment.rb:84
   def disabled?(magic_comment); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/require_rbs_inline_comment.rb:105
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/require_rbs_inline_comment.rb:110
   def find_insert_position; end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/require_rbs_inline_comment.rb:116
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/require_rbs_inline_comment.rb:130
   def find_last_comment_in_first_block; end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/require_rbs_inline_comment.rb:67
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/require_rbs_inline_comment.rb:77
   def find_rbs_inline_magic_comment; end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/require_rbs_inline_comment.rb:134
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/require_rbs_inline_comment.rb:148
   def first_line_range; end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/require_rbs_inline_comment.rb:130
-  def style; end
+  # The insert position lands at the end of the buffer when the file has no trailing
+  # newline. The magic comment then needs its own newline to stay on a separate line.
+  # @rbs insert_position: Integer
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/require_rbs_inline_comment.rb:123
+  def insertion_text(insert_position); end
 end
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/require_rbs_inline_comment.rb:50
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/require_rbs_inline_comment.rb:61
 RuboCop::Cop::Style::RbsInline::RequireRbsInlineComment::MSG_FORBIDDEN = T.let(T.unsafe(nil), String)
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/require_rbs_inline_comment.rb:49
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/require_rbs_inline_comment.rb:60
 RuboCop::Cop::Style::RbsInline::RequireRbsInlineComment::MSG_MISSING = T.let(T.unsafe(nil), String)
 
 # Utility module for accessing processed source code information
 # @rbs module-self RuboCop::Cop::Base
 #
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/source_code_helper.rb:9
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/source_code_helper.rb:9
 module RuboCop::Cop::Style::RbsInline::SourceCodeHelper
   include ::RuboCop::Cop::RangeHelp
 
   # Convert RBS::Inline annotation to Parser::Source::Range
   # @rbs annotation: RBS::Inline::AST::Annotations::t
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/source_code_helper.rb:62
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/source_code_helper.rb:60
   def annotation_range(annotation); end
 
   # @rbs line_number: Integer
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/source_code_helper.rb:38
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/source_code_helper.rb:36
   def blank_line?(line_number); end
 
   # @rbs pos: Integer
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/source_code_helper.rb:23
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/source_code_helper.rb:21
   def char_at(pos); end
 
   # Convert byte offset to character offset
   # @rbs byte_offset: Integer
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/source_code_helper.rb:14
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/source_code_helper.rb:14
   def character_offset(byte_offset); end
 
   # @rbs line: Integer
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/source_code_helper.rb:28
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/source_code_helper.rb:26
   def comment_at(line); end
 
   # Convert Prism::Comment to Parser::Source::Range
   # @rbs comment: Prism::Comment
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/source_code_helper.rb:56
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/source_code_helper.rb:54
   def comment_range(comment); end
 
   # @rbs line_number: Integer
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/source_code_helper.rb:44
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/source_code_helper.rb:42
   def line_range(line_number); end
 
   # Convert Prism::Location to Parser::Source::Range
   # @rbs location: Prism::Location
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/source_code_helper.rb:50
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/source_code_helper.rb:48
   def location_to_range(location); end
 
   # @rbs line_number: Integer
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/source_code_helper.rb:33
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/source_code_helper.rb:31
   def source_code_at(line_number); end
 end
+
+# Checks that `#:` inline type annotations in `Struct.new` blocks are aligned.
+#
+# Each `#:` annotation comment should start at the same column, determined by
+# the longest attribute name (plus trailing comma). Folded `Struct.new` calls
+# (where attributes are not one per line) are excluded.
+#
+# @example
+#   # bad
+#   Point = Struct.new(
+#     :x, #: Integer
+#     :y   #: Integer
+#   )
+#
+#   # good
+#   Point = Struct.new(
+#     :x,  #: Integer
+#     :y   #: Integer
+#   )
+#
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/struct_class_comment_alignment.rb:26
+class RuboCop::Cop::Style::RbsInline::StructClassCommentAlignment < ::RuboCop::Cop::Base
+  include ::RuboCop::Cop::Style::RbsInline::ModeConfig
+  include ::RuboCop::Cop::Style::RbsInline::FileFilter
+  include ::RuboCop::Cop::Style::RbsInline::ASTUtils
+  include ::RuboCop::Cop::RangeHelp
+  include ::RuboCop::Cop::Style::RbsInline::SourceCodeHelper
+  include ::RuboCop::Cop::Style::RbsInline::DataStructHelper
+  include ::RuboCop::Cop::Style::RbsInline::ClassCommentAlignment
+  include ::RuboCop::Cop::Style::RbsInline::StructClassMatcher
+  extend ::RuboCop::Cop::AutoCorrector
+
+  # @rbs node: RuboCop::AST::SendNode
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/struct_class_comment_alignment.rb:35
+  def on_send(node); end
+end
+
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/struct_class_comment_alignment.rb:32
+RuboCop::Cop::Style::RbsInline::StructClassCommentAlignment::MSG = T.let(T.unsafe(nil), String)
+
+# Matcher for `Struct.new` calls, shared by the cops that check `Struct.new`
+# class definitions.
+#
+# Also overrides {DataStructHelper#attr_argument?} for `Struct.new` semantics,
+# so cops that include both must include this module last.
+#
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/struct_class_matcher.rb:12
+module RuboCop::Cop::Style::RbsInline::StructClassMatcher
+  private
+
+  # `Struct.new` treats a leading string argument as the struct name, so only
+  # symbol arguments are attributes.
+  # @rbs arg: RuboCop::AST::Node
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/struct_class_matcher.rb:25
+  def attr_argument?(arg); end
+
+  # @rbs node: RuboCop::AST::SendNode
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/mixin/struct_class_matcher.rb:16
+  def struct_like_class?(node); end
+end
+
+# Checks for `Struct.new` calls with a block.
+#
+# RBS::Inline does not parse the contents of `Struct.new` blocks, so any
+# methods defined inside will not be recognized for type checking. Instead,
+# call `Struct.new` without a block and define additional methods by
+# reopening the class separately.
+#
+# @example
+#   # bad
+#   User = Struct.new(:name, :role) do
+#     def admin? = role == :admin #: bool
+#   end
+#
+#   # good
+#   User = Struct.new(:name, :role)
+#
+#   class User
+#     def admin? = role == :admin #: bool
+#   end
+#
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/struct_new_with_block.rb:27
+class RuboCop::Cop::Style::RbsInline::StructNewWithBlock < ::RuboCop::Cop::Base
+  include ::RuboCop::Cop::Style::RbsInline::ModeConfig
+  include ::RuboCop::Cop::Style::RbsInline::FileFilter
+  include ::RuboCop::Cop::Style::RbsInline::StructClassMatcher
+  include ::RuboCop::Cop::Style::RbsInline::ASTUtils
+
+  # @rbs node: RuboCop::AST::SendNode
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/struct_new_with_block.rb:37
+  def on_send(node); end
+
+  private
+
+  # The constant the definition is assigned to is the class to reopen.
+  # @rbs node: RuboCop::AST::Node
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/struct_new_with_block.rb:50
+  def destination(node); end
+end
+
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/struct_new_with_block.rb:32
+RuboCop::Cop::Style::RbsInline::StructNewWithBlock::MSG = T.let(T.unsafe(nil), String)
 
 # IRB::Inline annotations comments for parameters should be matched to the parameters.
 #
@@ -1629,25 +1961,30 @@ end
 #
 # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/unmatched_annotations.rb:20
 class RuboCop::Cop::Style::RbsInline::UnmatchedAnnotations < ::RuboCop::Cop::Base
+  include ::RuboCop::Cop::Style::RbsInline::ModeConfig
+  include ::RuboCop::Cop::Style::RbsInline::FileFilter
   include ::RuboCop::Cop::Style::RbsInline::CommentParser
   include ::RuboCop::Cop::RangeHelp
   include ::RuboCop::Cop::Style::RbsInline::SourceCodeHelper
 
   # @rbs node: RuboCop::AST::DefNode
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/unmatched_annotations.rb:33
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/unmatched_annotations.rb:37
   def on_def(node); end
 
   # @rbs node: RuboCop::AST::DefNode
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/unmatched_annotations.rb:38
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/unmatched_annotations.rb:42
   def on_defs(node); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/unmatched_annotations.rb:42
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/unmatched_annotations.rb:46
   def on_investigation_end; end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/unmatched_annotations.rb:27
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/unmatched_annotations.rb:30
   def on_new_investigation; end
+
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/unmatched_annotations.rb:28
+  def processed_comments; end
 
   private
 
@@ -1656,7 +1993,7 @@ class RuboCop::Cop::Style::RbsInline::UnmatchedAnnotations < ::RuboCop::Cop::Bas
   #                  RBS::Inline::AST::Annotations::ReturnType |
   #                  RBS::Inline::AST::Annotations::VarType
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/unmatched_annotations.rb:141
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/unmatched_annotations.rb:166
   def add_offense_for(annotation); end
 
   # @rbs annotation: RBS::Inline::AST::Annotations::BlockType |
@@ -1664,26 +2001,41 @@ class RuboCop::Cop::Style::RbsInline::UnmatchedAnnotations < ::RuboCop::Cop::Bas
   #                  RBS::Inline::AST::Annotations::ReturnType |
   #                  RBS::Inline::AST::Annotations::VarType
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/unmatched_annotations.rb:126
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/unmatched_annotations.rb:151
   def annotation_name(annotation); end
 
   # @rbs node: RuboCop::AST::DefNode
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/unmatched_annotations.rb:113
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/unmatched_annotations.rb:138
   def args_for(node); end
 
   # @rbs node: RuboCop::AST::DefNode
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/unmatched_annotations.rb:80
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/unmatched_annotations.rb:103
   def arguments_for(node); end
 
   # @rbs node: RuboCop::AST::DefNode
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/unmatched_annotations.rb:60
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/unmatched_annotations.rb:84
+  def leading_comment_for(node); end
+
+  # @rbs comment: RBS::Inline::AnnotationParser::ParsingResult
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/unmatched_annotations.rb:93
+  def mark_processed(comment); end
+
+  # @rbs node: RuboCop::AST::DefNode
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/unmatched_annotations.rb:66
   def process(node); end
+
+  # @rbs comment: RBS::Inline::AnnotationParser::ParsingResult
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/unmatched_annotations.rb:98
+  def processed?(comment); end
 end
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/unmatched_annotations.rb:25
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/unmatched_annotations.rb:26
 RuboCop::Cop::Style::RbsInline::UnmatchedAnnotations::MSG = T.let(T.unsafe(nil), String)
 
 # Checks that instance variables in classes/modules have RBS type annotations.
@@ -1740,62 +2092,64 @@ RuboCop::Cop::Style::RbsInline::UnmatchedAnnotations::MSG = T.let(T.unsafe(nil),
 #
 # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:61
 class RuboCop::Cop::Style::RbsInline::UntypedInstanceVariable < ::RuboCop::Cop::Base
+  include ::RuboCop::Cop::Style::RbsInline::ModeConfig
+  include ::RuboCop::Cop::Style::RbsInline::FileFilter
   include ::RuboCop::Cop::Style::RbsInline::ASTUtils
   include ::RuboCop::Cop::Style::RbsInline::CommentParser
   include ::RuboCop::Cop::RangeHelp
 
   # @rbs node: RuboCop::AST::Node
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:107
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:108
   def after_class(node); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:125
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:126
   def after_defs(_node); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:113
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:114
   def after_module(node); end
 
   # @rbs _node: RuboCop::AST::Node
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:122
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:123
   def after_sclass(_node); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:83
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:84
   def civar_type_annotations; end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:82
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:83
   def ivar_type_annotations; end
 
   # @rbs _node: RuboCop::AST::Node
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:100
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:101
   def on_class(_node); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:119
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:120
   def on_defs(_node); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:92
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:93
   def on_investigation_end; end
 
   # @rbs node: RuboCop::AST::Node
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:128
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:129
   def on_ivasgn(node); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:104
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:105
   def on_module(_node); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:85
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:86
   def on_new_investigation; end
 
   # @rbs _node: RuboCop::AST::Node
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:116
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:117
   def on_sclass(_node); end
 
   # @rbs node: RuboCop::AST::SendNode
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:138
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:139
   def on_send(node); end
 
   # @rbs! type scope = {
@@ -1806,63 +2160,72 @@ class RuboCop::Cop::Style::RbsInline::UntypedInstanceVariable < ::RuboCop::Cop::
   #     singleton_depth: Integer
   #   }
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:81
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:82
   def scope_stack; end
 
   private
 
   # @rbs ann: RBS::Inline::AST::Annotations::IvarType
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:212
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:222
   def annotation_line(ann); end
 
   # @rbs node: RuboCop::AST::SendNode
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:147
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:148
   def attr_method?(node); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:196
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:206
   def collect_ivar_type_annotations; end
 
   # @rbs node: RuboCop::AST::Node
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:185
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:186
   def collect_typed_ivars_for_scope(node); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:176
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:177
   def current_scope; end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:172
+  # Moves the annotations placed within +lines+ from +annotations+ into +typed+
+  # so that outer scopes no longer see them.
+  #
+  # @rbs annotations: Hash[Integer, Symbol]
+  # @rbs lines: Range[Integer]
+  #
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:200
+  def move_annotations(annotations, typed, lines); end
+
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:173
   def pop_scope; end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:162
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:163
   def push_scope; end
 
   # @rbs node: RuboCop::AST::SendNode
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:152
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:153
   def register_attr_ivars(node); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:216
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:226
   def report_offenses; end
 
   # @rbs assigned: Hash[Symbol, RuboCop::AST::Node]
   # @rbs message_template: String
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:224
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:234
   def report_untyped(assigned, typed, message_template); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:180
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:181
   def singleton_context?; end
 end
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:71
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:72
 RuboCop::Cop::Style::RbsInline::UntypedInstanceVariable::ATTR_METHODS = T.let(T.unsafe(nil), Array)
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:68
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:69
 RuboCop::Cop::Style::RbsInline::UntypedInstanceVariable::MSG_CIVAR = T.let(T.unsafe(nil), String)
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:66
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/untyped_instance_variable.rb:67
 RuboCop::Cop::Style::RbsInline::UntypedInstanceVariable::MSG_IVAR = T.let(T.unsafe(nil), String)
 
 # Checks that `@rbs` variable comments are followed by a blank line.
@@ -1890,29 +2253,31 @@ RuboCop::Cop::Style::RbsInline::UntypedInstanceVariable::MSG_IVAR = T.let(T.unsa
 #
 # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/variable_comment_spacing.rb:33
 class RuboCop::Cop::Style::RbsInline::VariableCommentSpacing < ::RuboCop::Cop::Base
+  include ::RuboCop::Cop::Style::RbsInline::ModeConfig
+  include ::RuboCop::Cop::Style::RbsInline::FileFilter
   include ::RuboCop::Cop::RangeHelp
   include ::RuboCop::Cop::Style::RbsInline::SourceCodeHelper
   include ::RuboCop::Cop::Style::RbsInline::CommentParser
   extend ::RuboCop::Cop::AutoCorrector
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/variable_comment_spacing.rb:41
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/variable_comment_spacing.rb:42
   def on_new_investigation; end
 
   private
 
   # @rbs comment: Parser::Source::Comment
   #
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/variable_comment_spacing.rb:54
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/variable_comment_spacing.rb:55
   def check_variable_comment(comment); end
 
-  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/variable_comment_spacing.rb:47
+  # pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/variable_comment_spacing.rb:48
   def check_variable_comment_spacing; end
 end
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/variable_comment_spacing.rb:38
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/variable_comment_spacing.rb:39
 RuboCop::Cop::Style::RbsInline::VariableCommentSpacing::MSG = T.let(T.unsafe(nil), String)
 
-# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/variable_comment_spacing.rb:39
+# pkg:gem/rubocop-rbs_inline#lib/rubocop/cop/style/rbs_inline/variable_comment_spacing.rb:40
 RuboCop::Cop::Style::RbsInline::VariableCommentSpacing::VARIABLE_COMMENT_PATTERN = T.let(T.unsafe(nil), Regexp)
 
 # pkg:gem/rubocop-rbs_inline#lib/rubocop/rbs_inline/version.rb:4

@@ -312,7 +312,7 @@ class Sprockets::Base
   #
   #     environment['application.js']
   #
-  # pkg:gem/sprockets#lib/sprockets/base.rb:118
+  # pkg:gem/sprockets#lib/sprockets/base.rb:122
   def [](*args, **options); end
 
   # Get persistent cache store
@@ -334,10 +334,10 @@ class Sprockets::Base
   # pkg:gem/sprockets#lib/sprockets/base.rb:53
   def cached; end
 
-  # pkg:gem/sprockets#lib/sprockets/base.rb:139
+  # pkg:gem/sprockets#lib/sprockets/base.rb:143
   def compress_from_root(uri); end
 
-  # pkg:gem/sprockets#lib/sprockets/base.rb:143
+  # pkg:gem/sprockets#lib/sprockets/base.rb:147
   def expand_from_root(uri); end
 
   # Internal: Compute digest for path.
@@ -349,19 +349,19 @@ class Sprockets::Base
   # pkg:gem/sprockets#lib/sprockets/base.rb:63
   def file_digest(path); end
 
-  # pkg:gem/sprockets#lib/sprockets/base.rb:85
+  # pkg:gem/sprockets#lib/sprockets/base.rb:89
   def find_all_linked_assets(*args); end
 
   # Find asset by logical path or expanded path.
   #
-  # pkg:gem/sprockets#lib/sprockets/base.rb:78
+  # pkg:gem/sprockets#lib/sprockets/base.rb:82
   def find_asset(*args, **options); end
 
   # Find asset by logical path or expanded path.
   #
   # If the asset is not found an error will be raised.
   #
-  # pkg:gem/sprockets#lib/sprockets/base.rb:125
+  # pkg:gem/sprockets#lib/sprockets/base.rb:129
   def find_asset!(*args); end
 
   # pkg:gem/sprockets#lib/sprockets/base.rb:56
@@ -369,7 +369,7 @@ class Sprockets::Base
 
   # Pretty inspect
   #
-  # pkg:gem/sprockets#lib/sprockets/base.rb:133
+  # pkg:gem/sprockets#lib/sprockets/base.rb:137
   def inspect; end
 end
 
@@ -600,7 +600,7 @@ class Sprockets::Cache::FileStore
   #
   # root     - A String path to a directory to persist cached values to.
   # max_size - A Integer of the maximum size the store will hold (in bytes).
-  #            (default: 25MB).
+  #            (default: 25MB). Can be set to +false+ for no limit.
   # logger   - The logger to which some info will be printed.
   #            (default logger level is FATAL and won't output anything).
   #
@@ -617,7 +617,7 @@ class Sprockets::Cache::FileStore
   #
   # Returns true
   #
-  # pkg:gem/sprockets#lib/sprockets/cache/file_store.rb:139
+  # pkg:gem/sprockets#lib/sprockets/cache/file_store.rb:141
   def clear(options = T.unsafe(nil)); end
 
   # Public: Retrieve value from cache.
@@ -635,7 +635,7 @@ class Sprockets::Cache::FileStore
   #
   # Returns String.
   #
-  # pkg:gem/sprockets#lib/sprockets/cache/file_store.rb:126
+  # pkg:gem/sprockets#lib/sprockets/cache/file_store.rb:128
   def inspect; end
 
   # Public: Set a key and value in the cache.
@@ -652,7 +652,7 @@ class Sprockets::Cache::FileStore
 
   private
 
-  # pkg:gem/sprockets#lib/sprockets/cache/file_store.rb:166
+  # pkg:gem/sprockets#lib/sprockets/cache/file_store.rb:168
   def compute_size(caches); end
 
   # Internal: Get all cache files along with stats.
@@ -660,19 +660,19 @@ class Sprockets::Cache::FileStore
   # Returns an Array of [String filename, File::Stat] pairs sorted by
   # mtime.
   #
-  # pkg:gem/sprockets#lib/sprockets/cache/file_store.rb:152
+  # pkg:gem/sprockets#lib/sprockets/cache/file_store.rb:154
   def find_caches; end
 
-  # pkg:gem/sprockets#lib/sprockets/cache/file_store.rb:183
+  # pkg:gem/sprockets#lib/sprockets/cache/file_store.rb:185
   def gc!; end
 
-  # pkg:gem/sprockets#lib/sprockets/cache/file_store.rb:176
+  # pkg:gem/sprockets#lib/sprockets/cache/file_store.rb:178
   def safe_open(path, &block); end
 
-  # pkg:gem/sprockets#lib/sprockets/cache/file_store.rb:170
+  # pkg:gem/sprockets#lib/sprockets/cache/file_store.rb:172
   def safe_stat(fn); end
 
-  # pkg:gem/sprockets#lib/sprockets/cache/file_store.rb:162
+  # pkg:gem/sprockets#lib/sprockets/cache/file_store.rb:164
   def size; end
 
   class << self
@@ -735,7 +735,7 @@ class Sprockets::Cache::MemoryStore
   # Public: Initialize the cache store.
   #
   # max_size - A Integer of the maximum number of keys the store will hold.
-  #            (default: 1000).
+  #            (default: 1000). Can be set to +false+ for no limit.
   #
   # pkg:gem/sprockets#lib/sprockets/cache/memory_store.rb:22
   def initialize(max_size = T.unsafe(nil)); end
@@ -1007,7 +1007,7 @@ module Sprockets::Compressing
   #
   #     environment.gzip = false
   #
-  # To enable set to a truthy value. By default zlib wil
+  # To enable set to a truthy value. By default zlib will
   # be used to gzip assets. If you have the Zopfli gem
   # installed you can specify the zopfli algorithm to be used
   # instead:
@@ -1092,7 +1092,7 @@ module Sprockets::Configuration
   #       def asset_url; end
   #     end
   #
-  # pkg:gem/sprockets#lib/sprockets/configuration.rb:77
+  # pkg:gem/sprockets#lib/sprockets/configuration.rb:90
   def context_class; end
 
   # Public: Returns a `Digest` implementation class.
@@ -1110,6 +1110,18 @@ module Sprockets::Configuration
   #
   # pkg:gem/sprockets#lib/sprockets/configuration.rb:66
   def digest_class=(klass); end
+
+  # pkg:gem/sprockets#lib/sprockets/configuration.rb:70
+  def ignore_mtime; end
+
+  # By default sprockets tries to quickly revalidate the cache for a source file
+  # by comparing its last modified time.
+  # This is efficient in development, but in some CI or producton environments
+  # where the source files are restored from version control, the last modified time
+  # tend to be somewhat random, and checking it is just needless overhead.
+  #
+  # pkg:gem/sprockets#lib/sprockets/configuration.rb:79
+  def ignore_mtime=(ignore_mtime); end
 
   # pkg:gem/sprockets#lib/sprockets/configuration.rb:15
   def initialize_configuration(parent); end
@@ -1962,7 +1974,7 @@ module Sprockets::EncodingUtils
   #
   # Returns a encoded String
   #
-  # pkg:gem/sprockets#lib/sprockets/encoding_utils.rb:72
+  # pkg:gem/sprockets#lib/sprockets/encoding_utils.rb:74
   def base64(str); end
 
   # Internal: Use Charlock Holmes to detect encoding.
@@ -1971,7 +1983,7 @@ module Sprockets::EncodingUtils
   #
   # Returns encoded String.
   #
-  # pkg:gem/sprockets#lib/sprockets/encoding_utils.rb:121
+  # pkg:gem/sprockets#lib/sprockets/encoding_utils.rb:123
   def charlock_detect(str); end
 
   # Public: Use deflate to compress data.
@@ -1992,7 +2004,7 @@ module Sprockets::EncodingUtils
   #
   # Returns encoded String.
   #
-  # pkg:gem/sprockets#lib/sprockets/encoding_utils.rb:99
+  # pkg:gem/sprockets#lib/sprockets/encoding_utils.rb:101
   def detect(str); end
 
   # Public: Detect and strip @charset from CSS style sheet.
@@ -2001,7 +2013,7 @@ module Sprockets::EncodingUtils
   #
   # Returns a encoded String.
   #
-  # pkg:gem/sprockets#lib/sprockets/encoding_utils.rb:177
+  # pkg:gem/sprockets#lib/sprockets/encoding_utils.rb:179
   def detect_css(str); end
 
   # Public: Detect charset from HTML document.
@@ -2013,7 +2025,7 @@ module Sprockets::EncodingUtils
   #
   # Returns a encoded String.
   #
-  # pkg:gem/sprockets#lib/sprockets/encoding_utils.rb:244
+  # pkg:gem/sprockets#lib/sprockets/encoding_utils.rb:246
   def detect_html(str); end
 
   # Public: Detect Unicode string.
@@ -2024,7 +2036,7 @@ module Sprockets::EncodingUtils
   #
   # Returns encoded String.
   #
-  # pkg:gem/sprockets#lib/sprockets/encoding_utils.rb:138
+  # pkg:gem/sprockets#lib/sprockets/encoding_utils.rb:140
   def detect_unicode(str); end
 
   # Public: Detect and strip BOM from possible unicode string.
@@ -2034,7 +2046,7 @@ module Sprockets::EncodingUtils
   # Returns UTF 8/16/32 encoded String without BOM or the original String if
   # no BOM was present.
   #
-  # pkg:gem/sprockets#lib/sprockets/encoding_utils.rb:156
+  # pkg:gem/sprockets#lib/sprockets/encoding_utils.rb:158
   def detect_unicode_bom(str); end
 
   # Public: Use gzip to compress data.
@@ -2043,7 +2055,7 @@ module Sprockets::EncodingUtils
   #
   # Returns a compressed String
   #
-  # pkg:gem/sprockets#lib/sprockets/encoding_utils.rb:58
+  # pkg:gem/sprockets#lib/sprockets/encoding_utils.rb:60
   def gzip(str); end
 
   # Internal: Scan binary CSS string for @charset encoding name.
@@ -2052,7 +2064,7 @@ module Sprockets::EncodingUtils
   #
   # Returns encoding String name or nil.
   #
-  # pkg:gem/sprockets#lib/sprockets/encoding_utils.rb:207
+  # pkg:gem/sprockets#lib/sprockets/encoding_utils.rb:209
   def scan_css_charset(str); end
 
   # Internal: Unmarshal optionally deflated data.
@@ -2071,21 +2083,24 @@ end
 
 # Internal: Mapping unicode encodings to byte order markers.
 #
-# pkg:gem/sprockets#lib/sprockets/encoding_utils.rb:83
+# pkg:gem/sprockets#lib/sprockets/encoding_utils.rb:85
 Sprockets::EncodingUtils::BOM = T.let(T.unsafe(nil), Hash)
 
 # Internal: Shorthand aliases for detecter functions.
 #
-# pkg:gem/sprockets#lib/sprockets/encoding_utils.rb:80
+# pkg:gem/sprockets#lib/sprockets/encoding_utils.rb:82
 Sprockets::EncodingUtils::CHARSET_DETECT = T.let(T.unsafe(nil), Hash)
 
-# pkg:gem/sprockets#lib/sprockets/encoding_utils.rb:200
+# pkg:gem/sprockets#lib/sprockets/encoding_utils.rb:202
 Sprockets::EncodingUtils::CHARSET_SIZE = T.let(T.unsafe(nil), Integer)
 
 # Internal: @charset bytes
 #
-# pkg:gem/sprockets#lib/sprockets/encoding_utils.rb:199
+# pkg:gem/sprockets#lib/sprockets/encoding_utils.rb:201
 Sprockets::EncodingUtils::CHARSET_START = T.let(T.unsafe(nil), Array)
+
+# pkg:gem/sprockets#lib/sprockets/encoding_utils.rb:53
+Sprockets::EncodingUtils::GZIP_MTIME = T.let(T.unsafe(nil), Integer)
 
 # pkg:gem/sprockets#lib/sprockets/environment.rb:7
 class Sprockets::Environment < ::Sprockets::Base
@@ -2892,7 +2907,7 @@ end
 # The returned dependency set can be passed to resolve_dependencies(deps)
 # to check if the returned result is still fresh. In this case, entry always
 # returns a single path, but multiple calls should accumulate dependencies
-# into a single set thats saved off and checked later.
+# into a single set that's saved off and checked later.
 #
 #     resolve_dependencies(deps)
 #     # => "\x01\x02\x03"
@@ -3005,7 +3020,7 @@ module Sprockets::PathUtils
   #
   # Returns nothing.
   #
-  # pkg:gem/sprockets#lib/sprockets/path_utils.rb:348
+  # pkg:gem/sprockets#lib/sprockets/path_utils.rb:350
   def atomic_write(filename); end
 
   # Public: Like `File.directory?`.
@@ -3050,7 +3065,7 @@ module Sprockets::PathUtils
   #
   # Returns an Array of [String path, Object value] matches.
   #
-  # pkg:gem/sprockets#lib/sprockets/path_utils.rb:231
+  # pkg:gem/sprockets#lib/sprockets/path_utils.rb:233
   def find_matching_path_for_extensions(path, basename, extensions); end
 
   # Internal: Find target basename checking upwards from path.
@@ -3061,7 +3076,7 @@ module Sprockets::PathUtils
   #
   # Returns String filename or nil.
   #
-  # pkg:gem/sprockets#lib/sprockets/path_utils.rb:273
+  # pkg:gem/sprockets#lib/sprockets/path_utils.rb:275
   def find_upwards(basename, path, root = T.unsafe(nil)); end
 
   # Public: Joins path to base path.
@@ -3076,7 +3091,7 @@ module Sprockets::PathUtils
   #
   # Returns string path starting from base and ending at path
   #
-  # pkg:gem/sprockets#lib/sprockets/path_utils.rb:127
+  # pkg:gem/sprockets#lib/sprockets/path_utils.rb:129
   def join(base, path); end
 
   # Internal: Match path extnames against available extensions.
@@ -3086,7 +3101,7 @@ module Sprockets::PathUtils
   #
   # Returns [String extname, Object value] or nil nothing matched.
   #
-  # pkg:gem/sprockets#lib/sprockets/path_utils.rb:202
+  # pkg:gem/sprockets#lib/sprockets/path_utils.rb:204
   def match_path_extname(path, extensions); end
 
   # Internal: Get path's extensions.
@@ -3095,7 +3110,7 @@ module Sprockets::PathUtils
   #
   # Returns an Array of String extnames.
   #
-  # pkg:gem/sprockets#lib/sprockets/path_utils.rb:192
+  # pkg:gem/sprockets#lib/sprockets/path_utils.rb:194
   def path_extnames(path); end
 
   # Internal: Returns all parents for path
@@ -3105,7 +3120,7 @@ module Sprockets::PathUtils
   #
   # Returns an Array of String paths.
   #
-  # pkg:gem/sprockets#lib/sprockets/path_utils.rb:252
+  # pkg:gem/sprockets#lib/sprockets/path_utils.rb:254
   def path_parents(path, root = T.unsafe(nil)); end
 
   # Internal: Detect root path and base for file in a set of paths.
@@ -3115,7 +3130,7 @@ module Sprockets::PathUtils
   #
   # Returns [String root, String path]
   #
-  # pkg:gem/sprockets#lib/sprockets/path_utils.rb:178
+  # pkg:gem/sprockets#lib/sprockets/path_utils.rb:180
   def paths_split(paths, filename); end
 
   # Public: Check if path is explicitly relative.
@@ -3125,7 +3140,7 @@ module Sprockets::PathUtils
   #
   # Returns true if path is relative, otherwise false.
   #
-  # pkg:gem/sprockets#lib/sprockets/path_utils.rb:100
+  # pkg:gem/sprockets#lib/sprockets/path_utils.rb:102
   def relative_path?(path); end
 
   # Public: Get relative path from `start` to `dest`.
@@ -3135,7 +3150,7 @@ module Sprockets::PathUtils
   #
   # Returns relative String path from `start` to `dest`
   #
-  # pkg:gem/sprockets#lib/sprockets/path_utils.rb:110
+  # pkg:gem/sprockets#lib/sprockets/path_utils.rb:112
   def relative_path_from(start, dest); end
 
   # Public: Sets pipeline for path
@@ -3154,7 +3169,7 @@ module Sprockets::PathUtils
   #
   # Returns string path with pipeline parsed in
   #
-  # pkg:gem/sprockets#lib/sprockets/path_utils.rb:146
+  # pkg:gem/sprockets#lib/sprockets/path_utils.rb:148
   def set_pipeline(path, mime_exts, pipeline_exts, pipeline); end
 
   # Internal: Get relative path for root path and subpath.
@@ -3165,7 +3180,7 @@ module Sprockets::PathUtils
   # Returns relative String path if subpath is a subpath of path, or nil if
   # subpath is outside of path.
   #
-  # pkg:gem/sprockets#lib/sprockets/path_utils.rb:162
+  # pkg:gem/sprockets#lib/sprockets/path_utils.rb:164
   def split_subpath(path, subpath); end
 
   # Public: Like `File.stat`.
@@ -3183,7 +3198,7 @@ module Sprockets::PathUtils
   #
   # Returns an Enumerator of [path, stat].
   #
-  # pkg:gem/sprockets#lib/sprockets/path_utils.rb:286
+  # pkg:gem/sprockets#lib/sprockets/path_utils.rb:288
   def stat_directory(dir); end
 
   # Public: Recursive stat all the files under a directory in alphabetical
@@ -3193,7 +3208,7 @@ module Sprockets::PathUtils
   #
   # Returns an Enumerator of [path, stat].
   #
-  # pkg:gem/sprockets#lib/sprockets/path_utils.rb:324
+  # pkg:gem/sprockets#lib/sprockets/path_utils.rb:326
   def stat_sorted_tree(dir, &block); end
 
   # Public: Recursive stat all the files under a directory.
@@ -3202,9 +3217,12 @@ module Sprockets::PathUtils
   #
   # Returns an Enumerator of [path, stat].
   #
-  # pkg:gem/sprockets#lib/sprockets/path_utils.rb:304
+  # pkg:gem/sprockets#lib/sprockets/path_utils.rb:306
   def stat_tree(dir, &block); end
 end
+
+# pkg:gem/sprockets#lib/sprockets/path_utils.rb:94
+Sprockets::PathUtils::RELATIVE_PATH_PATTERN = T.let(T.unsafe(nil), Regexp)
 
 # pkg:gem/sprockets#lib/sprockets/path_utils.rb:91
 Sprockets::PathUtils::SEPARATOR_PATTERN = T.let(T.unsafe(nil), String)
@@ -5065,10 +5083,10 @@ end
 class Sprockets::Utils::Gzip
   # Private: Generates a gzipped file based off of reference file.
   #
-  # pkg:gem/sprockets#lib/sprockets/utils/gzip.rb:43
+  # pkg:gem/sprockets#lib/sprockets/utils/gzip.rb:45
   def initialize(asset, archiver: T.unsafe(nil)); end
 
-  # pkg:gem/sprockets#lib/sprockets/utils/gzip.rb:40
+  # pkg:gem/sprockets#lib/sprockets/utils/gzip.rb:42
   def archiver; end
 
   # Private: Returns whether or not an asset can be compressed.
@@ -5080,17 +5098,17 @@ class Sprockets::Utils::Gzip
   #
   # Return Boolean.
   #
-  # pkg:gem/sprockets#lib/sprockets/utils/gzip.rb:68
+  # pkg:gem/sprockets#lib/sprockets/utils/gzip.rb:70
   def can_compress?; end
 
   # Private: Opposite of `can_compress?`.
   #
   # Returns Boolean.
   #
-  # pkg:gem/sprockets#lib/sprockets/utils/gzip.rb:80
+  # pkg:gem/sprockets#lib/sprockets/utils/gzip.rb:82
   def cannot_compress?; end
 
-  # pkg:gem/sprockets#lib/sprockets/utils/gzip.rb:40
+  # pkg:gem/sprockets#lib/sprockets/utils/gzip.rb:42
   def charset; end
 
   # Private: Generates a gzipped file based off of reference asset.
@@ -5101,21 +5119,21 @@ class Sprockets::Utils::Gzip
   #
   # Returns nothing.
   #
-  # pkg:gem/sprockets#lib/sprockets/utils/gzip.rb:91
+  # pkg:gem/sprockets#lib/sprockets/utils/gzip.rb:93
   def compress(file, target); end
 
-  # pkg:gem/sprockets#lib/sprockets/utils/gzip.rb:40
+  # pkg:gem/sprockets#lib/sprockets/utils/gzip.rb:42
   def content_type; end
 
-  # pkg:gem/sprockets#lib/sprockets/utils/gzip.rb:40
+  # pkg:gem/sprockets#lib/sprockets/utils/gzip.rb:42
   def source; end
 end
 
 # What non-text mime types should we compress? This list comes from:
 # https://www.fastly.com/blog/new-gzip-settings-and-deciding-what-compress
 #
-# pkg:gem/sprockets#lib/sprockets/utils/gzip.rb:52
-Sprockets::Utils::Gzip::COMPRESSABLE_MIME_TYPES = T.let(T.unsafe(nil), Hash)
+# pkg:gem/sprockets#lib/sprockets/utils/gzip.rb:54
+Sprockets::Utils::Gzip::COMPRESSIBLE_MIME_TYPES = T.let(T.unsafe(nil), Hash)
 
 # Private: Generates a gzipped file based off of reference asset.
 #
@@ -5128,10 +5146,13 @@ Sprockets::Utils::Gzip::COMPRESSABLE_MIME_TYPES = T.let(T.unsafe(nil), Hash)
 # pkg:gem/sprockets#lib/sprockets/utils/gzip.rb:12
 module Sprockets::Utils::Gzip::ZlibArchiver
   class << self
-    # pkg:gem/sprockets#lib/sprockets/utils/gzip.rb:13
-    def call(file, source, mtime); end
+    # pkg:gem/sprockets#lib/sprockets/utils/gzip.rb:15
+    def call(file, source); end
   end
 end
+
+# pkg:gem/sprockets#lib/sprockets/utils/gzip.rb:13
+Sprockets::Utils::Gzip::ZlibArchiver::MTIME = T.let(T.unsafe(nil), Integer)
 
 # Private: Generates a gzipped file based off of reference asset.
 #
@@ -5141,11 +5162,11 @@ end
 # writes contents to the `file` passed in. Sets `mtime` of
 # written file to passed in `mtime`
 #
-# pkg:gem/sprockets#lib/sprockets/utils/gzip.rb:30
+# pkg:gem/sprockets#lib/sprockets/utils/gzip.rb:32
 module Sprockets::Utils::Gzip::ZopfliArchiver
   class << self
-    # pkg:gem/sprockets#lib/sprockets/utils/gzip.rb:31
-    def call(file, source, mtime); end
+    # pkg:gem/sprockets#lib/sprockets/utils/gzip.rb:33
+    def call(file, source); end
   end
 end
 

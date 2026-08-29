@@ -1,6 +1,7 @@
 # typed: true
 # rbs_inline: enabled
 
+require 'active_support/core_ext/integer/time'
 require 'logger'
 
 module Fedipub

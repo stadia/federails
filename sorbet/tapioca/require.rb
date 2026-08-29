@@ -3,7 +3,8 @@
 
 # Add your extra requires here (`bin/tapioca require` can be used to bootstrap this list)
 
-# fedipub is a Rails engine: framework pieces must be loaded before the gem is required.
+# Eager-load the framework pieces fedipub builds on so tapioca sees their constants
+# when generating RBIs. The engine itself requires what it needs (see lib/fedipub/engine.rb).
 require 'rails'
 require 'rails/generators'
 require 'active_record'

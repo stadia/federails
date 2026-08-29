@@ -15103,7 +15103,7 @@ ActiveSupport::VERSION::MAJOR = T.let(T.unsafe(nil), Integer)
 ActiveSupport::VERSION::MINOR = T.let(T.unsafe(nil), Integer)
 
 # pkg:gem/activesupport#lib/active_support/gem_version.rb:13
-ActiveSupport::VERSION::PRE = T.let(T.unsafe(nil), T.untyped)
+ActiveSupport::VERSION::PRE = T.let(T.unsafe(nil), String)
 
 # pkg:gem/activesupport#lib/active_support/gem_version.rb:15
 ActiveSupport::VERSION::STRING = T.let(T.unsafe(nil), String)
@@ -17910,8 +17910,6 @@ class Integer < ::Numeric
   # pkg:gem/activesupport#lib/active_support/core_ext/integer/time.rb:18
   def years; end
 end
-
-Integer::GMP_VERSION = T.let(T.unsafe(nil), String)
 
 # pkg:gem/activesupport#lib/active_support/core_ext/kernel/reporting.rb:3
 module Kernel
