@@ -22,12 +22,10 @@ module Fedipub
 
     # Class methods automatically included in the concern.
     module ClassMethods
-      #: (*untyped) -> untyped
       def on_fedipub_delete_requested(*)
         set_callback(:on_fedipub_delete_requested, *)
       end
 
-      #: (*untyped) -> untyped
       def on_fedipub_undelete_requested(*)
         set_callback(:on_fedipub_undelete_requested, *)
       end

@@ -8,22 +8,18 @@ module Fedipub
 
     # Class methods automatically included in the concern.
     module ClassMethods
-      #: (?Symbol?, **untyped) ?{ (untyped) -> void } -> untyped
       def on_fedipub_like_received(method_name = nil, **, &)
         register_social_callback(:on_fedipub_like_received, method_name, **, &)
       end
 
-      #: (?Symbol?, **untyped) ?{ (untyped) -> void } -> untyped
       def on_fedipub_undo_like_received(method_name = nil, **, &)
         register_social_callback(:on_fedipub_undo_like_received, method_name, **, &)
       end
 
-      #: (?Symbol?, **untyped) ?{ (untyped) -> void } -> untyped
       def on_fedipub_announce_received(method_name = nil, **, &)
         register_social_callback(:on_fedipub_announce_received, method_name, **, &)
       end
 
-      #: (?Symbol?, **untyped) ?{ (untyped) -> void } -> untyped
       def on_fedipub_undo_announce_received(method_name = nil, **, &)
         register_social_callback(:on_fedipub_undo_announce_received, method_name, **, &)
       end

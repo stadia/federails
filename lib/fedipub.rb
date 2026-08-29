@@ -28,7 +28,6 @@ module Fedipub
   @@configuration = Configuration
 
   class << self
-    #: () { (Fedipub::Configuration) -> void } -> void
     def configure(&)
       yield @@configuration
     end

@@ -104,7 +104,6 @@ module Fedipub
 
       private
 
-      #: (Symbol, untyped, *untyped) -> void
       def dispatch_callback(name, instance, *)
         case name
         when :after_follow_accepted
