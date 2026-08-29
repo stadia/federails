@@ -1,4 +1,4 @@
-# typed: false
+# typed: true
 # rbs_inline: enabled
 
 module Fedipub
@@ -9,7 +9,7 @@ module Fedipub
         def run(cache_interval: nil)
           cache_interval ||= Fedipub::Configuration.remote_entities_cache_duration
 
-          domains = Fedipub::Actor.distant.distinct(:server).pluck(:server) + Fedipub::Host.pluck(:domain)
+          domains = Fedipub::Actor.distant.distinct.pluck(:server) + Fedipub::Host.pluck(:domain)
           domains.uniq!
 
           domains.each do |domain|

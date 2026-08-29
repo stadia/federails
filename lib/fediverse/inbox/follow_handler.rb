@@ -1,4 +1,4 @@
-# typed: false
+# typed: true
 # rbs_inline: enabled
 
 require 'fediverse/request'
@@ -110,11 +110,14 @@ module Fediverse
         def resend_accept_for_duplicate_follow(following, follow_activity)
           return unless follow_activity
 
+          follower = following.actor
+          return unless follower
+
           Fedipub::Activity.create!(
             actor:  following.target_actor,
             action: 'Accept',
             entity: follow_activity,
-            to:     [following.actor.federated_url]
+            to:     [follower.federated_url]
           )
         end
 
@@ -137,7 +140,7 @@ module Fediverse
 
         #: (Fedipub::Actor, Fedipub::Following, Fedipub::Activity?) -> void
         def dispatch_followed_callback(target_actor, following, follow_activity)
-          return unless target_actor&.entity
+          return unless target_actor.entity
 
           target_actor.entity.class.send(:dispatch_followed_callback, target_actor.entity, following, follow_activity: follow_activity)
         end

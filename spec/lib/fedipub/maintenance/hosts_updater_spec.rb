@@ -8,7 +8,7 @@ RSpec.describe Fedipub::Maintenance::HostsUpdater do
 
       allow(Fedipub::Configuration).to receive(:remote_entities_cache_duration).and_return(12.hours)
       allow(Fedipub::Actor).to receive(:distant).and_return(distinct_relation)
-      allow(distinct_relation).to receive(:distinct).with(:server).and_return(distinct_relation)
+      allow(distinct_relation).to receive(:distinct).with(no_args).and_return(distinct_relation)
       allow(distinct_relation).to receive(:pluck).with(:server).and_return(['remote.example', 'shared.example'])
       allow(Fedipub::Host).to receive(:pluck).with(:domain).and_return(['shared.example', 'host.example'])
       allow(Fedipub::Host).to receive(:create_or_update)
@@ -26,7 +26,7 @@ RSpec.describe Fedipub::Maintenance::HostsUpdater do
       distinct_relation = instance_double(ActiveRecord::Relation)
 
       allow(Fedipub::Actor).to receive(:distant).and_return(distinct_relation)
-      allow(distinct_relation).to receive(:distinct).with(:server).and_return(distinct_relation)
+      allow(distinct_relation).to receive(:distinct).with(no_args).and_return(distinct_relation)
       allow(distinct_relation).to receive(:pluck).with(:server).and_return(['remote.example'])
       allow(Fedipub::Host).to receive(:pluck).with(:domain).and_return([])
       allow(Fedipub::Host).to receive(:create_or_update)

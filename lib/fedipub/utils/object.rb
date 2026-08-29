@@ -1,4 +1,4 @@
-# typed: false
+# typed: true
 # rbs_inline: enabled
 
 module Fedipub
@@ -31,21 +31,22 @@ module Fedipub
         # @return [Fedipub::Actor, Fedipub::DataEntity, Fedipub::Following, nil]
         def find_distant_object_in_all(federated_url)
           # Search in actors
-          object = Fedipub::Actor.find_by federated_url: federated_url
-          return object if object.present?
+          actor = Fedipub::Actor.find_by federated_url: federated_url
+          return actor if actor.present?
 
           # Search in followings
-          object = Fedipub::Following.find_by federated_url: federated_url
-          return object if object.present?
+          following = Fedipub::Following.find_by federated_url: federated_url
+          return following if following.present?
 
           # Search in data entities
+          entity = nil #: ActiveRecord::Base?
           Fedipub.configuration.data_types.keys.sort.each do |klass|
-            object = klass.constantize.find_by federated_url: federated_url
+            entity = klass.constantize.find_by federated_url: federated_url
 
-            break if object.present?
+            break if entity.present?
           end
 
-          object
+          entity
         end
 
         # Finds or initializes an entity from an ActivityPub object or id
@@ -144,7 +145,7 @@ module Fedipub
           entity = handler[:class].new_from_activitypub_object(hash)
           return unless entity
 
-          entity.fedipub_actor = Fedipub::Actor.find_by_federation_url attributed_to_url(hash['attributedTo']) if entity && !entity.fedipub_actor
+          entity.fedipub_actor = Fedipub::Actor.find_by_federation_url attributed_to_url(hash['attributedTo']) unless entity.fedipub_actor
 
           entity
         end

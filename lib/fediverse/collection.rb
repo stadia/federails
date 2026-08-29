@@ -1,4 +1,4 @@
-# typed: false
+# typed: true
 # rbs_inline: enabled
 
 module Fediverse
@@ -6,9 +6,14 @@ module Fediverse
     PUBLIC = 'https://www.w3.org/ns/activitystreams#Public'.freeze #: String
     DEFAULT_MAX_PAGES = 100 #: Integer
 
-    attr_reader :total_items #: Integer?
-    attr_reader :id #: String?
-    attr_reader :type #: String?
+    #: Integer?
+    attr_reader :total_items
+
+    #: String?
+    attr_reader :id
+
+    #: String?
+    attr_reader :type
 
     #: (String, ?max_pages: Integer) -> Fediverse::Collection
     def self.fetch(url, max_pages: DEFAULT_MAX_PAGES)

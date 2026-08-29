@@ -1,6 +1,3 @@
-# typed: true
-# rbs_inline: enabled
-
 module Fedipub
   class CopyClientPoliciesGenerator < Rails::Generators::Base
     source_root File.expand_path('../../../../app/policies/fedipub', __dir__)

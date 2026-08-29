@@ -32,9 +32,12 @@ module Fedipub
     included do
       before_validation :generate_uuid
       validates :uuid, presence: true, uniqueness: true
+    end
 
+    # Class methods automatically included in the concern.
+    module ClassMethods
       #: (String) -> untyped
-      def self.find_param(param)
+      def find_param(param)
         find_by!(uuid: param)
       end
     end

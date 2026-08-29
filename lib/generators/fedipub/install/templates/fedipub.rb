@@ -1,6 +1,3 @@
-# typed: true
-# rbs_inline: enabled
-
 Fedipub.config_from 'fedipub'
 
 Fedipub.configure do |config|

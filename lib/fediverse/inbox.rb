@@ -1,4 +1,4 @@
-# typed: false
+# typed: true
 # rbs_inline: enabled
 
 require 'fediverse/request'
@@ -103,7 +103,6 @@ module Fediverse
         return if federated_url.blank?
 
         actor = Fedipub::Actor.find_or_create_by_object(payload['actor'])
-        return unless actor
 
         existing_activity = Fedipub::Activity.find_by(federated_url: federated_url)
         return update_processed_activity!(existing_activity, payload) if existing_activity

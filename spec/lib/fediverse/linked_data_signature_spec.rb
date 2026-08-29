@@ -132,7 +132,8 @@ RSpec.describe Fediverse::LinkedDataSignature do
     context 'when actor cannot be resolved' do
       it 'returns verified false with error' do
         signed = sign_document(document)
-        allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url).and_return(nil)
+        allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url)
+          .and_raise(ActiveRecord::RecordNotFound, 'Could not resolve signing actor')
 
         result = described_class.verify(signed)
 

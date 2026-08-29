@@ -1,4 +1,4 @@
-# typed: false
+# typed: true
 # rbs_inline: enabled
 
 module Fediverse
@@ -25,7 +25,6 @@ module Fediverse
         return { verified: false, error: 'No creator in signature' } unless creator_uri
 
         actor = Fedipub::Actor.find_or_create_by_federation_url(creator_uri)
-        return { verified: false, error: 'Could not resolve signing actor' } unless actor
         return { verified: false, error: 'Actor has no public key' } if actor.public_key.blank?
 
         actor

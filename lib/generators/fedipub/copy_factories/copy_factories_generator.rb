@@ -1,6 +1,3 @@
-# typed: true
-# rbs_inline: enabled
-
 module Fedipub
   class CopyFactoriesGenerator < Rails::Generators::Base
     SOURCE_DIRECTORY = File.expand_path('../../../../spec/factories/fedipub', __dir__)

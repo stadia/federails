@@ -1,4 +1,4 @@
-# typed: false
+# typed: true
 # rbs_inline: enabled
 
 module Fediverse
@@ -77,7 +77,7 @@ module Fediverse
       def parse_signature_header(header)
         raise SignatureVerificationError, 'Missing Signature header' if header.blank?
 
-        params = header.scan(/(\w+)="((?:[^"\\]|\\.)*)"/).to_h.transform_values { |v| v.gsub('\\"', '"') }
+        params = header.scan(/(\w+)="((?:[^"\\]|\\.)*)"/).to_h { |key, value| [key.to_s, value.to_s.gsub('\\"', '"')] }
         key_id    = params['keyId']
         headers   = params['headers']
         signature = params['signature']
@@ -169,7 +169,7 @@ module Fediverse
         candidates = parse_rfc9421_candidates(request.headers['Signature'], request.headers['Signature-Input'])
         raise SignatureVerificationError, 'No valid RFC 9421 signatures' if candidates.empty?
 
-        last_error = nil
+        last_error = nil #: String?
         candidates.each do |parsed|
           actor = try_verify_rfc9421_candidate(request, parsed)
           return actor if actor

@@ -1,4 +1,4 @@
-# typed: false
+# typed: true
 # rbs_inline: enabled
 
 require 'fediverse/signature'
@@ -6,8 +6,8 @@ require 'fediverse/signature'
 module Fediverse
   class Notifier
     MAX_COLLECTION_DEPTH = 3 #: Integer
-    ACTIONS_REQUIRING_OBJECT = %w[Accept Add Announce Block Create Delete Flag Follow Like Move Reject Remove Undo Update].freeze
-    PERMANENT_DELIVERY_STATUS_CODES = (400..499).to_a.freeze
+    ACTIONS_REQUIRING_OBJECT = %w[Accept Add Announce Block Create Delete Flag Follow Like Move Reject Remove Undo Update].freeze #: Array[String]
+    PERMANENT_DELIVERY_STATUS_CODES = (400..499).to_a.freeze #: Array[Integer]
 
     class << self
       # Enqueues a separate delivery job for each recipient inbox.
@@ -15,7 +15,10 @@ module Fediverse
       # @param activity [Fedipub::Activity]
       def enqueue_deliveries(activity)
         inboxes = inboxes_for(activity)
-        Fedipub.logger.debug('Nobody to notice') && return if inboxes.none?
+        if inboxes.none?
+          Fedipub.logger.debug('Nobody to notice')
+          return
+        end
 
         ActiveJob.perform_all_later(inboxes.map { |url| Fedipub::NotifyInboxJob.new(activity, url) })
       end
@@ -37,7 +40,10 @@ module Fediverse
       # @param activity [Fedipub::Activity]
       def post_to_inboxes(activity)
         inboxes = inboxes_for(activity)
-        Fedipub.logger.debug('Nobody to notice') && return if inboxes.none?
+        if inboxes.none?
+          Fedipub.logger.debug('Nobody to notice')
+          return
+        end
 
         message = payload(activity)
         inboxes.each do |url|
@@ -95,7 +101,7 @@ module Fediverse
           [actor.shared_inbox_url.presence || actor.inbox_url]
         rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid
           collection_to_actors(url).map { |a| a.shared_inbox_url.presence || a.inbox_url }
-        end
+        end.compact
         # Filter out actors who have blocked the sender
         blocked_actor_ids = Fedipub::Block.where(target_actor: activity.actor).select(:actor_id)
         if blocked_actor_ids.exists?
@@ -105,7 +111,7 @@ module Fediverse
         end
 
         excluded = [actor_inbox, actor_shared_inbox].compact
-        inboxes.compact.uniq.reject { |url| excluded.include?(url) }
+        inboxes.uniq.reject { |url| excluded.include?(url) }
       end
 
       #: (String, ?max_depth: Integer) -> Array[Fedipub::Actor]

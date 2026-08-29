@@ -5,5 +5,7 @@
 --ignore=docs/
 --ignore=spec/
 --ignore=db/
+--ignore=templates/
 --parser=prism
 --enable-experimental-rbs-comments
+--enable-experimental-requires-ancestor

@@ -1,4 +1,4 @@
-# typed: false
+# typed: true
 # rbs_inline: enabled
 
 module Fediverse
@@ -10,7 +10,6 @@ module Fediverse
           actor = Fedipub::Actor.find_or_create_by_federation_url(activity['actor'])
           target_url = activity['object'].is_a?(Hash) ? activity['object']['id'] : activity['object']
           target_actor = Fedipub::Actor.find_or_create_by_federation_url(target_url)
-          return false unless actor && target_actor
 
           Fedipub::Block.find_or_create_by!(actor: actor, target_actor: target_actor)
 
@@ -27,10 +26,9 @@ module Fediverse
           target_url = if object.is_a?(Hash)
                          object['object'].is_a?(Hash) ? object['object']['id'] : object['object']
                        end
-          return false unless actor && target_url
+          return false unless target_url
 
           target_actor = Fedipub::Actor.find_or_create_by_federation_url(target_url)
-          return false unless target_actor
 
           block = Fedipub::Block.find_by(actor: actor, target_actor: target_actor)
           return false unless block
