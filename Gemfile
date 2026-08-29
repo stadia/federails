@@ -16,10 +16,10 @@ gem 'rubocop-faker'
 gem 'rubocop-performance'
 gem 'rubocop-rails'
 gem 'rubocop-rake'
-gem 'rubocop-rbs_inline'
+gem 'rubocop-rbs_inline', require: false
 gem 'rubocop-rspec'
 gem 'rubocop-rspec_rails'
-gem 'rubocop-sorbet'
+gem 'rubocop-sorbet', require: false
 
 # Type checking. Sorbet reads the inline RBS comments directly via
 # sorbet/config's --enable-experimental-rbs-comments; no .rbs files are generated.
@@ -56,3 +56,5 @@ group :doc do
   # plugins being hard to debug
   gem 'sass-embedded'
 end
+
+gem 'ruby-lsp', '~> 0.27.0.beta5'
