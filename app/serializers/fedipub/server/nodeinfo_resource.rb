@@ -4,14 +4,14 @@ module Fedipub
   module Server
     unless const_defined?(:NodeinfoPayload)
       NodeinfoPayload = Struct.new(
-        :software_name,
-        :software_version,
-        :open_registrations,
-        :has_user_counts,
-        :total,
-        :active_month,
-        :active_halfyear,
-        :metadata
+        :software_name,       #: untyped
+        :software_version,    #: untyped
+        :open_registrations,  #: untyped
+        :has_user_counts,     #: untyped
+        :total,               #: untyped
+        :active_month,        #: untyped
+        :active_halfyear,     #: untyped
+        :metadata             #: untyped
       )
     end
 

@@ -2,7 +2,11 @@
 
 module Fedipub
   module Server
-    NodeinfoIndexPayload = Struct.new(:href) unless const_defined?(:NodeinfoIndexPayload)
+    unless const_defined?(:NodeinfoIndexPayload)
+      NodeinfoIndexPayload = Struct.new(
+        :href #: untyped
+      )
+    end
 
     class NodeinfoIndexResource < BaseResource
       attribute :links do |payload|

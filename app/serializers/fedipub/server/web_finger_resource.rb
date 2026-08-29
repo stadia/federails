@@ -2,7 +2,14 @@
 
 module Fedipub
   module Server
-    WebFingerPayload = Struct.new(:subject, :self_href, :profile_href, :remote_follow_url) unless const_defined?(:WebFingerPayload)
+    unless const_defined?(:WebFingerPayload)
+      WebFingerPayload = Struct.new(
+        :subject,           #: untyped
+        :self_href,         #: untyped
+        :profile_href,      #: untyped
+        :remote_follow_url  #: untyped
+      )
+    end
 
     class WebFingerResource < BaseResource
       attributes :subject
