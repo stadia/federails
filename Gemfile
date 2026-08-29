@@ -19,6 +19,7 @@ gem 'rubocop-rake'
 gem 'rubocop-rbs_inline'
 gem 'rubocop-rspec'
 gem 'rubocop-rspec_rails'
+gem 'rubocop-sorbet'
 
 # Type checking. Sorbet reads the inline RBS comments directly via
 # sorbet/config's --enable-experimental-rbs-comments; no .rbs files are generated.

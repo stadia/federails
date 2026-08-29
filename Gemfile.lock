@@ -457,6 +457,11 @@ GEM
       lint_roller (~> 1.1)
       rubocop (~> 1.72, >= 1.72.1)
       rubocop-rspec (~> 3.5)
+    rubocop-sorbet (0.15.0)
+      lint_roller
+      rbi (~> 0.4)
+      rubocop (>= 1.75.2)
+      spoom (~> 1.8)
     ruby-progressbar (1.13.0)
     rubydex (0.3.0-aarch64-linux)
     rubydex (0.3.0-arm64-darwin)
@@ -580,6 +585,7 @@ DEPENDENCIES
   rubocop-rbs_inline
   rubocop-rspec
   rubocop-rspec_rails
+  rubocop-sorbet
   sass-embedded
   simplecov
   sleeping_king_studios-docs
