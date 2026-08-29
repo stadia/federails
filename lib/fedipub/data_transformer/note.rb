@@ -1,3 +1,4 @@
+# typed: true
 # rbs_inline: enabled
 
 require 'fedipub/utils/context'

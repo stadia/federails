@@ -30,7 +30,7 @@ module Fedipub
       attributes['federated_url'].presence || Fedipub::Engine.routes.url_helpers.server_actor_following_url(actor_id: actor.to_param, id: to_param)
     end
 
-    #: (follow_activity: Fedipub::Activity) -> void
+    #: (follow_activity: Fedipub::Activity) -> Fedipub::Activity
     def accept!(follow_activity:)
       raise ArgumentError, 'follow_activity is required' if follow_activity.nil?
 

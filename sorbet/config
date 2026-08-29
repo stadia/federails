@@ -4,5 +4,6 @@
 --ignore=vendor/
 --ignore=docs/
 --ignore=spec/
+--ignore=db/
 --parser=prism
 --enable-experimental-rbs-comments
