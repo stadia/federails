@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     fedipub (0.9.0)
-      alba (~> 3.0)
+      alba (>= 3, < 5)
       faraday
       faraday-follow_redirects
       json-ld (>= 3.2.0)
@@ -91,7 +91,7 @@ GEM
       uri (>= 0.13.1)
     addressable (2.9.0)
       public_suffix (>= 2.0.2, < 8.0)
-    alba (3.11.0)
+    alba (4.0.0)
     ast (2.4.3)
     base64 (0.3.0)
     bcp47_spec (0.2.1)
