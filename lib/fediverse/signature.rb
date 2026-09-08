@@ -1,3 +1,5 @@
+require 'fediverse/signature/draft_cavage12'
+
 module Fediverse
   module Signature
     def self.sign(sender:, request:)

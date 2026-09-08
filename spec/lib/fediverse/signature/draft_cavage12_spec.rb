@@ -1,5 +1,5 @@
 require 'rails_helper'
-require 'fediverse/signature/draft_cavage_12'
+require 'fediverse/signature/draft_cavage12'
 
 RSpec.describe Fediverse::Signature::DraftCavage12 do
   let(:actor) { FactoryBot.create(:user).fedipub_actor }
