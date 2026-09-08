@@ -18,7 +18,7 @@ RSpec.describe Fediverse::Signature::DraftCavage12 do
     let(:signature_parts) { signature.split(',') }
 
     context 'when generating signature payload' do
-      let(:payload) { described_class.send(:signature_payload, request: request, headers: '(request-target) host date digest') }
+      let(:payload) { described_class.send(:signature_payload, request: request) }
 
       it 'starts with request target' do
         expect(payload).to match(%r{\A\(request-target\): post /inbox$})

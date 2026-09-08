@@ -9,7 +9,7 @@ module Fediverse
           parts = {
             keyId:     sender.key_id,
             headers:   signature_headers,
-            signature: signature(private_key: private_key, request: request, headers: signature_headers),
+            signature: signature(private_key: private_key, request: request),
           }.map { |k, v| "#{k}=\"#{v}\"" }.join(',')
           request
         end
@@ -39,7 +39,8 @@ module Fediverse
           )}"
         end
 
-        def signature_payload(request:, headers:)
+        def signature_payload(request:)
+          headers = signature_headers
           headers.split.map do |signed_header_name|
             if signed_header_name == '(request-target)'
               "(request-target): #{request.http_method} #{URI.parse(request.path).path}"
@@ -53,11 +54,12 @@ module Fediverse
           '(request-target) host date digest'
         end
 
-        def signature(private_key:, request:, headers:)
+        def signature(sender:, request:)
+          private_key = OpenSSL::PKey::RSA.new sender.private_key, Rails.application.credentials.secret_key_base
           Base64.strict_encode64(
             private_key.sign(
               OpenSSL::Digest.new('SHA256'),
-              signature_payload(request: request, headers: headers)
+              signature_payload(request: request)
             )
           )
         end
