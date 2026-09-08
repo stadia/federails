@@ -9,11 +9,12 @@ module Fediverse::Signature
             OpenSSL::Digest.new('SHA256'), signature_payload(request: request, headers: headers)
           )
         )
-        {
-          keyId:     sender.key_id,
-          headers:   headers,
-          signature: sig,
-        }.map { |k, v| "#{k}=\"#{v}\"" }.join(',')
+        {'Signature' => {
+            keyId:     sender.key_id,
+            headers:   headers,
+            signature: sig,
+          }.map { |k, v| "#{k}=\"#{v}\"" }.join(',')
+        }
       end
 
       def verify(sender:, request:)

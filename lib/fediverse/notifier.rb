@@ -64,7 +64,7 @@ module Fediverse
 
       def signed_request(url:, message:, from:)
         req = request(url: url, message: message)
-        req.headers['Signature'] = Fediverse::Signature.sign(sender: from, request: req) if from
+        req.headers.merge! Fediverse::Signature.sign(sender: from, request: req) if from
         req
       end
 

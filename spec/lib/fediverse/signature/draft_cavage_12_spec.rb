@@ -14,7 +14,7 @@ RSpec.describe Fediverse::Signature::DraftCavage12 do
         req.headers['Digest'] = 'fakedigest'
       end
     end
-    let(:signature) { described_class.sign(sender: actor, request: request) }
+    let(:signature) { described_class.sign(sender: actor, request: request)['Signature'] }
     let(:signature_parts) { signature.split(',') }
 
     context 'when generating signature payload' do
