@@ -64,7 +64,7 @@ module Fediverse
 
       def signed_request(url:, message:, from:)
         req = request(url: url, message: message)
-        req.headers.merge! Fediverse::Signature.sign(sender: from, request: req) if from
+        req = Fediverse::Signature.sign(sender: from, request: req) if from
         req
       end
 
@@ -76,14 +76,7 @@ module Fediverse
           req.headers['Accept'] = Mime[:activitypub].to_s
           req.headers['Host'] = URI.parse(url).host
           req.headers['Date'] = Time.now.utc.httpdate
-          req.headers['Digest'] = digest(message)
         end
-      end
-
-      def digest(message)
-        "SHA-256=#{Base64.strict_encode64(
-          OpenSSL::Digest.new('SHA256').digest(message)
-        )}"
       end
     end
   end

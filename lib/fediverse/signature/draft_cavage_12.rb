@@ -1,21 +1,23 @@
-module Fediverse::Signature
-  class DraftCavage12
-    class << self
-      def sign(sender:, request:)
-        private_key = OpenSSL::PKey::RSA.new sender.private_key, Rails.application.credentials.secret_key_base
-        headers = '(request-target) host date digest'
-        sig = Base64.strict_encode64(
-          private_key.sign(
-            OpenSSL::Digest.new('SHA256'), signature_payload(request: request, headers: headers)
+module Fediverse
+  module Signature
+    class DraftCavage12
+      class << self
+        def sign(sender:, request:)
+          request.headers['Digest'] = digest(request.body)
+          private_key = OpenSSL::PKey::RSA.new sender.private_key, Rails.application.credentials.secret_key_base
+          headers = '(request-target) host date digest'
+          sig = Base64.strict_encode64(
+            private_key.sign(
+              OpenSSL::Digest.new('SHA256'), signature_payload(request: request, headers: headers)
+            )
           )
-        )
-        {'Signature' => {
+          request.headers['Signature'] = {
             keyId:     sender.key_id,
             headers:   headers,
             signature: sig,
           }.map { |k, v| "#{k}=\"#{v}\"" }.join(',')
-        }
-      end
+          request
+        end
 
         def verify(sender:, request:)
           raise 'No draft-cavage-12 signature found' unless request.headers['Signature']
@@ -36,14 +38,21 @@ module Fediverse::Signature
 
         private
 
-      def signature_payload(request:, headers:)
-        headers.split.map do |signed_header_name|
-          if signed_header_name == '(request-target)'
-            "(request-target): #{request.http_method} #{URI.parse(request.path).path}"
-          else
-            "#{signed_header_name}: #{request.headers[signed_header_name.capitalize]}"
-          end
-        end.join("\n")
+        def digest(message)
+          "SHA-256=#{Base64.strict_encode64(
+            OpenSSL::Digest.new('SHA256').digest(message)
+          )}"
+        end
+
+        def signature_payload(request:, headers:)
+          headers.split.map do |signed_header_name|
+            if signed_header_name == '(request-target)'
+              "(request-target): #{request.http_method} #{URI.parse(request.path).path}"
+            else
+              "#{signed_header_name}: #{request.headers[signed_header_name.capitalize]}"
+            end
+          end.join("\n")
+        end
       end
     end
   end
