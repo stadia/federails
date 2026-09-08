@@ -10,7 +10,7 @@ module Fediverse
       end
 
       def signature_payload(request:, headers:)
-        headers.split.map do |signed_header_name|
+        headers.map do |signed_header_name|
           if signed_header_name == '(request-target)'
             "(request-target): #{request.http_method} #{URI.parse(request.path).path}"
           else

@@ -8,9 +8,10 @@ module Fediverse
           request.headers['Digest'] = digest(request.body)
           parts = {
             keyId:     sender.key_id,
-            headers:   signature_headers,
-            signature: signature(private_key: private_key, request: request),
-          }.map { |k, v| "#{k}=\"#{v}\"" }.join(',')
+            headers:   signature_headers.join(' '),
+            signature: signature(sender: sender, request: request),
+          }
+          request.headers['Signature'] = parts.map { |k, v| "#{k}=\"#{v}\"" }.join(',')
           request
         end
 
@@ -44,7 +45,7 @@ module Fediverse
         end
 
         def signature_headers
-          '(request-target) host date digest'
+          %w[(request-target) host date digest]
         end
 
         def signature(sender:, request:)
