@@ -17,8 +17,8 @@ module Fediverse::Signature
         }
       end
 
-      def verify(sender:, request:)
-        raise 'Unsigned headers' unless request.headers['Signature']
+        def verify(sender:, request:)
+          raise 'No draft-cavage-12 signature found' unless request.headers['Signature']
 
           signature_header = request.headers['Signature'].split(',').to_h do |pair|
             /\A(?<key>\w+)="(?<value>.*)"\z/ =~ pair
