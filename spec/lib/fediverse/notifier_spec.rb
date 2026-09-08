@@ -82,12 +82,18 @@ module Fediverse
         expect(request.headers['Accept']).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"'
       end
 
-      it 'adds a signature to outgoing requests' do
-        expect(request.headers['Signature']).to be_present
-      end
+      context 'when signing with draft-cavage-12' do
+        it 'adds Signature header' do
+          expect(request.headers['Signature']).to be_present
+        end
 
-      it 'adds a verifiable signature to outgoing requests' do
-        expect(Fediverse::Signature.verify(sender: local_actor, request: request)).to be_truthy
+        it 'adds a verifiable signature' do
+          expect(Fediverse::Signature.verify(sender: local_actor, request: request)).to be_truthy
+        end
+
+        it 'adds a content digest in Digest header' do
+          expect(request.headers['Digest']).to eq 'SHA-256=n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg='
+        end
       end
     end
   end
