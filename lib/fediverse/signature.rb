@@ -10,11 +10,13 @@ module Fediverse
       end
 
       def signature_payload(request:, headers:)
-        headers.map do |signed_header_name|
-          if signed_header_name == '(request-target)'
+        headers = headers.split if headers.is_a?(String)
+        headers.map do |header|
+          case header
+          when '(request-target)'
             "(request-target): #{request.http_method} #{URI.parse(request.path).path}"
           else
-            "#{signed_header_name}: #{request.headers[signed_header_name.capitalize]}"
+            "#{header}: #{request.headers[header.capitalize]}"
           end
         end.join("\n")
       end
