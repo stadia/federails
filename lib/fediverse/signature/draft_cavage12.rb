@@ -6,12 +6,10 @@ module Fediverse
       class << self
         def sign(sender:, request:)
           request.headers['Digest'] = digest(request.body)
-          private_key = OpenSSL::PKey::RSA.new sender.private_key, Rails.application.credentials.secret_key_base
-          headers = '(request-target) host date digest'
-          request.headers['Signature'] = {
+          parts = {
             keyId:     sender.key_id,
-            headers:   headers,
-            signature: signature(private_key: private_key, request: request, headers: headers),
+            headers:   signature_headers,
+            signature: signature(private_key: private_key, request: request, headers: signature_headers),
           }.map { |k, v| "#{k}=\"#{v}\"" }.join(',')
           request
         end
@@ -49,6 +47,10 @@ module Fediverse
               "#{signed_header_name}: #{request.headers[signed_header_name.capitalize]}"
             end
           end.join("\n")
+        end
+
+        def signature_headers
+          '(request-target) host date digest'
         end
 
         def signature(private_key:, request:, headers:)
