@@ -1,3 +1,5 @@
+require 'fediverse/signature'
+
 module Fediverse
   module Signature
     class DraftCavage12

@@ -1,10 +1,15 @@
-require 'fediverse/signature/draft_cavage12'
-
 module Fediverse
   module Signature
     class << self
-      delegate :sign, to: Fediverse::Signature::DraftCavage12
-      delegate :verify, to: Fediverse::Signature::DraftCavage12
+      def sign(sender:, request:)
+        Fediverse::Signature::DraftCavage12.sign(sender: sender, request: request)
+      end
+
+      def verify(sender:, request:)
+        Fediverse::Signature::DraftCavage12.verify(sender: sender, request: request)
+      end
     end
   end
 end
+
+require 'fediverse/signature/draft_cavage12'
