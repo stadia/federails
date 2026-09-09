@@ -16,6 +16,11 @@ module Fediverse
         end
 
         def verify(sender:, request:)
+          Linzer.verify!(
+            request,
+            key: linzer_key(sender)
+          )
+        rescue Linzer::VerifyError
           false
         end
 
