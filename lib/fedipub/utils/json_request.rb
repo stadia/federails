@@ -45,9 +45,9 @@ module Fedipub
         )
       end
 
-      def self.signed_request(url:, message:, from:)
+      def self.signed_request(url:, message:, from:, legacy_signature: false)
         req = request(url: url, message: message)
-        req = Fediverse::Signature.sign(sender: from, request: req) if from
+        req = Fediverse::Signature.sign(sender: from, request: req, legacy_signature: legacy_signature) if from
         req
       end
 
