@@ -1,5 +1,6 @@
 require 'faraday'
 require 'faraday/follow_redirects'
+require 'fediverse/signature'
 
 module Fedipub
   module Utils
@@ -37,11 +38,17 @@ module Fedipub
         JSON.parse(response.body)
       end
 
-      def self.post(url:, message:, from: nil)
-        conn = Faraday.default_connection
-        conn.builder.build_response(
-          conn,
+      # POST to remote server with RFC9421 signature and double-knocking for draft-cavage-12 if that fails
+      def self.post(url:, message:, from: nil, connection: Faraday.default_connection)
+        response = connection.builder.build_response(
+          connection,
           signed_request(url: url, message: message, from: from)
+        )
+        return response unless response.status.in? [400, 401]
+
+        connection.builder.build_response(
+          connection,
+          signed_request(url: url, message: message, from: from, legacy_signature: true)
         )
       end
 

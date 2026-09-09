@@ -19,6 +19,44 @@ RSpec.describe Fedipub::Utils::JsonRequest do
     end
   end
 
+  describe '#post' do
+    let(:local_actor) { FactoryBot.create(:user).fedipub_actor }
+    let(:faraday) { instance_double(Faraday::Connection) }
+    let(:builder) { instance_double(Faraday::RackBuilder) }
+    let(:response) { instance_double(Faraday::Response) }
+
+    before do
+      allow(faraday).to receive(:builder).and_return(builder)
+      allow(builder).to receive(:build_response).and_return(response)
+      allow(Fediverse::Signature::Rfc9421).to receive(:sign)
+      allow(Fediverse::Signature::DraftCavage12).to receive(:sign)
+    end
+
+    it 'tries RFC9421 signing first' do # rubocop:disable RSpec/MultipleExpectations
+      allow(response).to receive(:status).and_return(201)
+      described_class.post(url: 'https://example.com', message: '{}', from: local_actor, connection: faraday)
+      expect(builder).to have_received(:build_response).once
+      expect(Fediverse::Signature::Rfc9421).to have_received(:sign).once
+      expect(Fediverse::Signature::DraftCavage12).not_to have_received(:sign)
+    end
+
+    it 'tries draft-cavage-12 signing if RFC9421 attempt returns a 400' do # rubocop:disable RSpec/MultipleExpectations
+      allow(response).to receive(:status).and_return(400)
+      described_class.post(url: 'https://example.com', message: '{}', from: local_actor, connection: faraday)
+      expect(builder).to have_received(:build_response).twice
+      expect(Fediverse::Signature::Rfc9421).to have_received(:sign).once
+      expect(Fediverse::Signature::DraftCavage12).to have_received(:sign).once
+    end
+
+    it 'tries draft-cavage-12 signing if RFC9421 attempt returns a 401' do # rubocop:disable RSpec/MultipleExpectations
+      allow(response).to receive(:status).and_return(401)
+      described_class.post(url: 'https://example.com', message: '{}', from: local_actor, connection: faraday)
+      expect(builder).to have_received(:build_response).twice
+      expect(Fediverse::Signature::Rfc9421).to have_received(:sign).once
+      expect(Fediverse::Signature::DraftCavage12).to have_received(:sign).once
+    end
+  end
+
   describe '#signed_request' do
     let(:local_actor) { FactoryBot.create(:user).fedipub_actor }
     let(:distant_target_actor) { FactoryBot.create :distant_actor }
