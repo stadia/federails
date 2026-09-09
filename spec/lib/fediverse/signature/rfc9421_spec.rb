@@ -21,5 +21,17 @@ RSpec.describe Fediverse::Signature::Rfc9421 do
     it 'adds Content-Digest header to request' do
       expect(signed_request.headers['Content-Digest']).to eq 'sha-256=:n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg=:'
     end
+
+    it 'adds Signature header to request' do
+      expect(signed_request.headers['Signature']).to be_present
+    end
+
+    it 'adds Signature-Input header to request' do
+      expect(signed_request.headers['Signature-Input']).to be_present
+    end
+
+    it 'includes signature' do
+      expect(signature).to match %r{^sig1=:[[[:alnum:]]-+/]*={0,3}:$}
+    end
   end
 end
