@@ -9,7 +9,8 @@ module Fediverse
           request.headers['Content-Digest'] = digest(request.body)
           Linzer.sign!(
             request,
-            key: linzer_key(sender)
+            key:        linzer_key(sender),
+            components: components
           )
           request
         end
@@ -24,6 +25,10 @@ module Fediverse
         def linzer_key(sender)
           private_key = OpenSSL::PKey::RSA.new sender.private_key, Rails.application.credentials.secret_key_base
           Linzer.new_rsa_pss_sha512_key(private_key.to_pem)
+        end
+
+        def components
+          %w[@method @target-uri content-digest]
         end
 
         def digest(message)
