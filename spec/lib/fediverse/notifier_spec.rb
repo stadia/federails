@@ -26,9 +26,9 @@ module Fediverse
         let(:fake_activity) { FakeActivity.new(id: 1, actor: local_actor, to: [distant_target_actor.federated_url], action: 'Create', entity: fake_entity) }
 
         it 'calls post_to_inbox for each recipient' do
-          allow(described_class).to receive(:post_to_inbox)
+          allow(Fedipub::Utils::JsonRequest).to receive(:post)
           described_class.post_to_inboxes(fake_activity)
-          expect(described_class).to have_received(:post_to_inbox).with(hash_including(inbox_url: distant_target_actor.inbox_url)).once
+          expect(Fedipub::Utils::JsonRequest).to have_received(:post).with(hash_including(url: distant_target_actor.inbox_url)).once
         end
       end
 
@@ -42,9 +42,9 @@ module Fediverse
 
         it 'calls post_to_inbox for each recipient' do
           VCR.use_cassette('fediverse/notifier/get_collection_200') do
-            allow(described_class).to receive(:post_to_inbox)
+            allow(Fedipub::Utils::JsonRequest).to receive(:post)
             described_class.post_to_inboxes(fake_activity)
-            expect(described_class).to have_received(:post_to_inbox).with(hash_including(inbox_url: 'https://3dp.chat/users/manyfold/inbox')).once
+            expect(Fedipub::Utils::JsonRequest).to have_received(:post).with(hash_including(url: 'https://3dp.chat/users/manyfold/inbox')).once
           end
         end
       end
@@ -54,45 +54,9 @@ module Fediverse
         let(:fake_activity) { FakeActivity.new(id: 1, actor: local_actor, to: [Fediverse::Collection::PUBLIC], action: 'Create', entity: fake_entity) }
 
         it 'does not post to any specific inboxes' do
-          allow(described_class).to receive(:post_to_inbox)
+          allow(Fedipub::Utils::JsonRequest).to receive(:post)
           described_class.post_to_inboxes(fake_activity)
-          expect(described_class).not_to have_received(:post_to_inbox)
-        end
-      end
-    end
-
-    describe '#signed_request' do
-      let(:request) do
-        described_class.send :signed_request,
-                             url:     distant_target_actor.inbox_url,
-                             from:    local_actor,
-                             message: 'test'
-      end
-
-      it 'posts to inbox URL' do
-        # Faraday::Request#path is badly named, it's the full URL without query params
-        expect(request.path).to eq distant_target_actor.inbox_url
-      end
-
-      it 'sends correct activitypub content type' do
-        expect(request.headers['Content-Type']).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"'
-      end
-
-      it 'accepts correct activitypub content type' do
-        expect(request.headers['Accept']).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"'
-      end
-
-      context 'when signing with draft-cavage-12' do
-        it 'adds Signature header' do
-          expect(request.headers['Signature']).to be_present
-        end
-
-        it 'adds a verifiable signature' do
-          expect(Fediverse::Signature.verify(sender: local_actor, request: request)).to be_truthy
-        end
-
-        it 'adds a content digest in Digest header' do
-          expect(request.headers['Digest']).to eq 'SHA-256=n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg='
+          expect(Fedipub::Utils::JsonRequest).not_to have_received(:post)
         end
       end
     end

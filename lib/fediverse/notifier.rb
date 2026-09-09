@@ -15,7 +15,7 @@ module Fediverse
         message = payload(activity)
         inboxes.each do |url|
           Rails.logger.debug { "Sending activity ##{activity.id} to inbox at #{url}" }
-          post_to_inbox(inbox_url: url, message: message, from: activity.actor)
+          Fedipub::Utils::JsonRequest.post(url: url, message: message, from: activity.actor)
         end
       end
 
@@ -52,31 +52,6 @@ module Fediverse
           assigns:  { activity: activity },
           format:   :json
         )
-      end
-
-      def post_to_inbox(inbox_url:, message:, from: nil)
-        conn = Faraday.default_connection
-        conn.builder.build_response(
-          conn,
-          signed_request(url: inbox_url, message: message, from: from)
-        )
-      end
-
-      def signed_request(url:, message:, from:)
-        req = request(url: url, message: message)
-        req = Fediverse::Signature.sign(sender: from, request: req) if from
-        req
-      end
-
-      def request(url:, message:) # rubocop:todo Metrics/AbcSize
-        Faraday.default_connection.build_request(:post) do |req|
-          req.url url
-          req.body = message
-          req.headers['Content-Type'] = Mime[:activitypub].to_s
-          req.headers['Accept'] = Mime[:activitypub].to_s
-          req.headers['Host'] = URI.parse(url).host
-          req.headers['Date'] = Time.now.utc.httpdate
-        end
       end
     end
   end
