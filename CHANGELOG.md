@@ -33,6 +33,7 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 ### Maintenance
 
 - Update rubocop annotation syntax
+- Refactor HTTP signature code
 
 ## [0.9.0] 2026-08-06
 
