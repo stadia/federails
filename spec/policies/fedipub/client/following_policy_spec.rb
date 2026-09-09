@@ -1,7 +1,7 @@
 require 'rails_helper'
 require 'pundit/rspec'
 
-# rubocop:disable RSpec/MultipleMemoizedHelpers
+# rubocop:disable-next RSpec/MultipleMemoizedHelpers
 RSpec.describe Fedipub::Client::FollowingPolicy, type: :policy do
   let(:user) { FactoryBot.create :user }
   let(:signed_in_user) { FactoryBot.create :user }
@@ -41,4 +41,3 @@ RSpec.describe Fedipub::Client::FollowingPolicy, type: :policy do
     end
   end
 end
-# rubocop:enable RSpec/MultipleMemoizedHelpers

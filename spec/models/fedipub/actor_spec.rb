@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 module Fedipub
-  # rubocop:disable RSpec/MultipleMemoizedHelpers
+  # rubocop:disable-next RSpec/MultipleMemoizedHelpers
   RSpec.describe Actor, type: :model do
     let(:distant_actor_attributes) { FactoryBot.build(:distant_actor).attributes }
     let(:distant_url) { 'https://mamot.fr/users/mtancoigne' }
@@ -147,9 +147,8 @@ module Fedipub
           existing_distant_actor
           described_class.find_by_account(distant_account)
         end
-        # rubocop:disable RSpec/PredicateMatcher
+        # rubocop:disable-next RSpec/PredicateMatcher
         expect(File.exist?(error_cassette_file)).to be_falsey
-        # rubocop:enable RSpec/PredicateMatcher
       end
     end
 
@@ -200,9 +199,8 @@ module Fedipub
           existing_distant_actor
           described_class.find_by_federation_url(distant_url)
         end
-        # rubocop:disable RSpec/PredicateMatcher
+        # rubocop:disable-next RSpec/PredicateMatcher
         expect(File.exist?(error_cassette_file)).to be_falsey
-        # rubocop:enable RSpec/PredicateMatcher
       end
     end
 
@@ -503,5 +501,4 @@ module Fedipub
       end
     end
   end
-  # rubocop:enable RSpec/MultipleMemoizedHelpers
 end

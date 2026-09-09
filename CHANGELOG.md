@@ -30,6 +30,10 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ## [Unreleased]
 
+### Maintenance
+
+- Update rubocop annotation syntax
+
 ## [0.9.0] 2026-08-06
 
 Renamed project from "Federails" to "Fedipub". See the migration guide for instructions on how to update your code.

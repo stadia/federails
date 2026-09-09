@@ -126,7 +126,7 @@ module Fedipub
       #
       # @example
       #   acts_as_fedipub_data handles: 'Note', with: :note_handler, route_path_segment: :articles, actor_entity_method: :user
-      # rubocop:disable Metrics/ParameterLists, Metrics/MethodLength
+      # rubocop:disable-next Metrics/ParameterLists, Metrics/MethodLength
       def acts_as_fedipub_data(
         handles:,
         with: :handle_incoming_fediverse_data,
@@ -155,7 +155,6 @@ module Fedipub
         Fediverse::Inbox.register_handler 'Create', handles, self, with
         Fediverse::Inbox.register_handler 'Update', handles, self, with
       end
-      # rubocop:enable Metrics/ParameterLists, Metrics/MethodLength
 
       # Instantiates a new instance from an ActivityPub object
       #

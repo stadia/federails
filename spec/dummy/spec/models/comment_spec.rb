@@ -9,7 +9,7 @@ RSpec.describe Comment, type: :model do
     end
   end
 
-  # rubocop:disable RSpec/MultipleMemoizedHelpers
+  # rubocop:disable-next RSpec/MultipleMemoizedHelpers
   describe '.handle_incoming_fediverse_data' do
     # Should be a Post in the end
     let(:parent_hash) do
@@ -118,7 +118,6 @@ RSpec.describe Comment, type: :model do
       end
     end
   end
-  # rubocop:enable RSpec/MultipleMemoizedHelpers
 
   describe 'Fedipub integration' do
     describe 'when creating a comment' do

@@ -38,7 +38,7 @@ module Fedipub
       #
       # @example
       #   acts_as_fedipub_actor username_field: :username, name_field: :display_name, profile_url_method: :url_for, actor_type: 'Person'
-      # rubocop:disable Metrics/ParameterLists
+      # rubocop:disable-next Metrics/ParameterLists
       def acts_as_fedipub_actor(
         name_field:,
         username_field:,
@@ -57,7 +57,6 @@ module Fedipub
           auto_create_actors: auto_create_actors
         )
       end
-      # rubocop:enable Metrics/ParameterLists
 
       # Define a method that will be called after the entity receives a follow request.
       # The follow request will be passed as an argument to the method.
