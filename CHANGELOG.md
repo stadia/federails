@@ -30,6 +30,10 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ## [Unreleased]
 
+### Added
+
+- Sign outgoing POST requests with RFC9421 signatures and fall back to draft-cavage-12 sig on failure
+
 ### Maintenance
 
 - CI is now interruptible on failure
