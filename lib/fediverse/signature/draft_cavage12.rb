@@ -18,13 +18,11 @@ module Fediverse
         def verify(sender:, request:)
           raise 'No draft-cavage-12 signature found' unless request.headers['Signature']
 
-          signature_header = request.headers['Signature'].split(',').to_h do |pair|
-            /\A(?<key>\w+)="(?<value>.*)"\z/ =~ pair
-            [key, value]
-          end
+          components = signature_components(request)
+          return false unless components['signature'] && components['headers']
 
-          headers   = signature_header['headers']
-          signature = Base64.decode64(signature_header['signature'])
+          headers   = components['headers']
+          signature = Base64.decode64(components['signature'])
           key       = OpenSSL::PKey::RSA.new(sender.public_key)
 
           comparison_string = Fediverse::Signature.signature_payload(request: request, headers: headers)
@@ -33,6 +31,13 @@ module Fediverse
         end
 
         private
+
+        def signature_components(request)
+          request.headers['Signature'].split(',').to_h do |pair|
+            /\A(?<key>\w+)="(?<value>.*)"\z/ =~ pair
+            [key, value]
+          end
+        end
 
         def digest(message)
           "SHA-256=#{Base64.strict_encode64(
