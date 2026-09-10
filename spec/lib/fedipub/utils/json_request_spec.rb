@@ -77,7 +77,7 @@ RSpec.describe Fedipub::Utils::JsonRequest do
     end
 
     it 'accepts correct activitypub content type' do
-      expect(request.headers['Accept']).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"'
+      expect(request.headers['Accept']).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams", application/activity+json, application/json;q=0.5'
     end
 
     context 'when signing with draft-cavage-12' do

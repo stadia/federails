@@ -10,9 +10,9 @@ http_interactions:
       User-Agent:
       - Faraday v2.9.0
       Content-Type:
-      - application/json
+      - application/ld+json;profile="https://www.w3.org/ns/activitystreams"
       Accept:
-      - application/json
+      - application/ld+json;profile="https://www.w3.org/ns/activitystreams", application/activity+json, application/json;q=0.5
   response:
     status:
       code: 200
@@ -82,9 +82,9 @@ http_interactions:
       User-Agent:
       - Faraday v2.9.0
       Content-Type:
-      - application/json
+      - application/ld+json;profile="https://www.w3.org/ns/activitystreams"
       Accept:
-      - application/json
+      - application/ld+json;profile="https://www.w3.org/ns/activitystreams", application/activity+json, application/json;q=0.5
   response:
     status:
       code: 200
