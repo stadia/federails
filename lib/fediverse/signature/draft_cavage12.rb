@@ -5,7 +5,8 @@ module Fediverse
     class DraftCavage12
       class << self
         def sign(sender:, request:)
-          request.headers['Digest'] = digest(request.body)
+          request = set_headers(request)
+
           parts = {
             keyId:     sender.key_id,
             headers:   signature_headers.join(' '),
@@ -31,6 +32,13 @@ module Fediverse
         end
 
         private
+
+        def set_headers(request) #  rubocop:disable Naming/AccessorMethodName
+          request.headers['Digest'] = digest(request.body)
+          request.headers['Host'] = URI.parse(request.path).host
+          request.headers['Date'] = Time.now.utc.httpdate
+          request
+        end
 
         def signature_components(request)
           request.headers['Signature'].split(',').to_h do |pair|

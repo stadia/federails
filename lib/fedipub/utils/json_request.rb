@@ -66,8 +66,6 @@ module Fedipub
           req.headers['Content-Type'] = Mime[:activitypub].to_s
           req.headers['Accept'] = [Mime[:activitypub].to_s, Mime[:activitypub].send(:synonyms), "#{Mime[:json]};q=0.5"].flatten.join(', ')
           req.headers['User-Agent'] ||= "Fedipub/#{Fedipub::VERSION}"
-          req.headers['Host'] = URI.parse(url).host
-          req.headers['Date'] = Time.now.utc.httpdate
         end
       end
     end

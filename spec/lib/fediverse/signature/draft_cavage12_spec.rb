@@ -7,10 +7,8 @@ RSpec.describe Fediverse::Signature::DraftCavage12 do
   context 'when signing requests' do
     let(:request) do
       Faraday.default_connection.build_request(:post) do |req|
-        req.url '/inbox'
+        req.url 'http://example.com/inbox'
         req.body = 'test'
-        req.headers['Host'] = 'example.com'
-        req.headers['Date'] = Time.now.utc.httpdate
       end
     end
     let(:signed_request) { described_class.sign(sender: actor, request: request) }
@@ -18,6 +16,14 @@ RSpec.describe Fediverse::Signature::DraftCavage12 do
 
     it 'adds Digest header to request' do
       expect(signed_request.headers['Digest']).to eq 'SHA-256=n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg='
+    end
+
+    it 'adds a Date header' do
+      expect(signed_request.headers['Date']).to be_present
+    end
+
+    it 'adds a Host header' do
+      expect(signed_request.headers['Host']).to eq 'example.com'
     end
 
     context 'when generating signature payload' do
@@ -28,6 +34,7 @@ RSpec.describe Fediverse::Signature::DraftCavage12 do
       end
 
       it 'includes host' do
+        request.headers['Host'] = 'example.com'
         expect(payload).to match(/^host: example.com$/)
       end
 
