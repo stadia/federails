@@ -45,7 +45,8 @@ module Fedipub
           connection,
           signed_request(url: url, message: message, from: from)
         )
-        return response unless response.status.in? [400, 401]
+        # If signature was present and rejected, try double-knocking
+        return response unless from && response.status.in?([400, 401])
 
         connection.builder.build_response(
           connection,
