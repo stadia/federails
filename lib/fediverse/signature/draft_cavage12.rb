@@ -26,7 +26,7 @@ module Fediverse
           signature = Base64.decode64(components['signature'])
           key       = OpenSSL::PKey::RSA.new(sender.public_key)
 
-          comparison_string = Fediverse::Signature.signature_payload(request: request, headers: headers)
+          comparison_string = signature_payload(request: request, headers: headers)
 
           key.verify(OpenSSL::Digest.new('SHA256'), signature, comparison_string)
         end
@@ -53,8 +53,16 @@ module Fediverse
           )}"
         end
 
-        def signature_payload(request:)
-          Fediverse::Signature.signature_payload(request: request, headers: signature_headers(request))
+        def signature_payload(request:, headers: signature_headers(request))
+          headers = headers.split if headers.is_a?(String)
+          headers.map do |header|
+            case header
+            when '(request-target)'
+              "(request-target): #{request.http_method} #{URI.parse(request.path).path}"
+            else
+              "#{header}: #{request.headers[header.capitalize]}"
+            end
+          end.join("\n")
         end
 
         def signature_headers(request)

@@ -12,18 +12,6 @@ module Fediverse
       def verify(sender:, request:)
         Fediverse::Signature::DraftCavage12.verify(sender: sender, request: request)
       end
-
-      def signature_payload(request:, headers:)
-        headers = headers.split if headers.is_a?(String)
-        headers.map do |header|
-          case header
-          when '(request-target)'
-            "(request-target): #{request.http_method} #{URI.parse(request.path).path}"
-          else
-            "#{header}: #{request.headers[header.capitalize]}"
-          end
-        end.join("\n")
-      end
     end
   end
 end
