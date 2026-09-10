@@ -27,6 +27,7 @@ RSpec.describe Fedipub::Utils::JsonRequest do
 
     before do
       allow(faraday).to receive(:builder).and_return(builder)
+      allow(faraday).to receive(:build_request)
       allow(builder).to receive(:build_response).and_return(response)
       allow(Fediverse::Signature::Rfc9421).to receive(:sign)
       allow(Fediverse::Signature::DraftCavage12).to receive(:sign)

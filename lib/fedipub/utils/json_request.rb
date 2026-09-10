@@ -49,7 +49,7 @@ module Fedipub
 
       # Send to remote server with RFC9421 signature and double-knocking for draft-cavage-12 if that fails
       def self.execute_request(method:, url:, params: {}, headers: {}, message: nil, from: nil, connection: Faraday.default_connection)
-        req = build_request(method: method, url: url, params: params, headers: headers, message: message)
+        req = build_request(method: method, url: url, params: params, headers: headers, message: message, connection: connection)
         response = connection.builder.build_response(
           connection,
           from ? Fediverse::Signature.sign(sender: from, request: req.dup) : req
@@ -63,8 +63,8 @@ module Fedipub
         )
       end
 
-      def self.build_request(method:, url:, params: {}, headers: {}, message: nil) # rubocop:todo Metrics/AbcSize
-        Faraday.default_connection.build_request(method) do |req|
+      def self.build_request(method:, url:, params: {}, headers: {}, message: nil, connection: Faraday.default_connection) # rubocop:todo Metrics/AbcSize
+        connection.build_request(method) do |req|
           req.url url
           req.body = message
           req.params = params
