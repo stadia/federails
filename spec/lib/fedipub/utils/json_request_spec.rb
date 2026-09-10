@@ -78,5 +78,27 @@ RSpec.describe Fedipub::Utils::JsonRequest do
         expect(request.headers['Accept']).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams", application/activity+json, application/json;q=0.5'
       end
     end
+
+    context 'when providing extra headers' do
+      let(:request) do
+        described_class.send :build_request, method: :post, url: 'https://fedipub.dev/inbox', message: 'test', headers: {
+          'X-Clacks-Overhead' => 'GNU Terry Pratchett',
+          'Content-Type'      => 'text/plain',
+          'Accept'            => 'text/html',
+        }
+      end
+
+      it 'adds arbitrary headers' do
+        expect(request.headers['X-Clacks-Overhead']).to eq 'GNU Terry Pratchett'
+      end
+
+      it 'overrides accept' do
+        expect(request.headers['Accept']).to eq 'text/html'
+      end
+
+      it 'overrides content type' do
+        expect(request.headers['Content-Type']).to eq 'text/plain'
+      end
+    end
   end
 end

@@ -39,9 +39,17 @@ module Fedipub
         JSON.parse(response.body)
       end
 
-      # POST to remote server with RFC9421 signature and double-knocking for draft-cavage-12 if that fails
-      def self.post(url:, message:, from: nil, connection: Faraday.default_connection)
-        req = build_request(method: :post, url: url, message: message)
+      def self.get(url:, headers: {}, message:, from: nil, connection: Faraday.default_connection)
+        execute_request method: :get, url: url, headers: headers, message: message, from: from, connection: connection
+      end
+
+      def self.post(url:, headers: {}, message:, from: nil, connection: Faraday.default_connection)
+        execute_request method: :post, url: url, headers: headers, message: message, from: from, connection: connection
+      end
+
+      # Send to remote server with RFC9421 signature and double-knocking for draft-cavage-12 if that fails
+      def self.execute_request(method:, url:, headers: {}, message:, from: nil, connection: Faraday.default_connection)
+        req = build_request(method: method, url: url, headers: headers, message: message)
         response = connection.builder.build_response(
           connection,
           from ? Fediverse::Signature.sign(sender: from, request: req.dup) : req
@@ -55,13 +63,15 @@ module Fedipub
         )
       end
 
-      def self.build_request(method:, url:, message:) # rubocop:todo Metrics/AbcSize
+      def self.build_request(method:, url:, headers: {}, message:) # rubocop:todo Metrics/AbcSize
         Faraday.default_connection.build_request(method) do |req|
           req.url url
           req.body = message
-          req.headers['Content-Type'] = Mime[:activitypub].to_s if message.present?
-          req.headers['Accept'] = [Mime[:activitypub].to_s, Mime[:activitypub].send(:synonyms), "#{Mime[:json]};q=0.5"].flatten.join(', ')
-          req.headers['User-Agent'] ||= "Fedipub/#{Fedipub::VERSION}"
+          req.headers = {
+            'Content-Type' => Mime[:activitypub].to_s,
+            'Accept'       => [Mime[:activitypub].to_s, Mime[:activitypub].send(:synonyms), "#{Mime[:json]};q=0.5"].flatten.join(', '),
+            'User-Agent'   => req.headers['User-Agent'] || "Fedipub/#{Fedipub::VERSION}",
+          }.compact.merge(headers)
         end
       end
     end
