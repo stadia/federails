@@ -34,6 +34,11 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 - Sign outgoing POST requests with RFC9421 signatures and fall back to draft-cavage-12 sig on failure
 
+### Changed
+
+- Set "Fedipub/{version}" as the default user agent
+- Change default Accept header in HTTP requests to proper ActivityPub content types
+
 ### Maintenance
 
 - CI is now interruptible on failure

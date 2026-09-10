@@ -11,6 +11,7 @@ module Fedipub
       BASE_HEADERS = {
         'Content-Type' => 'application/ld+json;profile="https://www.w3.org/ns/activitystreams"',
         'Accept'       => 'application/ld+json;profile="https://www.w3.org/ns/activitystreams", application/activity+json, application/json;q=0.5',
+        'User-Agent'   => "Fedipub/#{Fedipub::VERSION}",
       }.freeze
 
       # Makes a GET request and returns a +Hash+ from the parsed body
@@ -64,6 +65,7 @@ module Fedipub
           req.body = message
           req.headers['Content-Type'] = Mime[:activitypub].to_s
           req.headers['Accept'] = [Mime[:activitypub].to_s, Mime[:activitypub].send(:synonyms), "#{Mime[:json]};q=0.5"].flatten.join(', ')
+          req.headers['User-Agent'] ||= "Fedipub/#{Fedipub::VERSION}"
           req.headers['Host'] = URI.parse(url).host
           req.headers['Date'] = Time.now.utc.httpdate
         end

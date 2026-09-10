@@ -8,7 +8,7 @@ http_interactions:
       string: ''
     headers:
       User-Agent:
-      - Faraday v1.10.3
+      - Fedipub/0.9.0
       Content-Type:
       - application/ld+json;profile="https://www.w3.org/ns/activitystreams"
       Accept:
