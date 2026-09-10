@@ -17,6 +17,15 @@ RSpec.describe Fedipub::Utils::JsonRequest do
         end
       end
     end
+
+    it 'signs the request if a sender is specified' do # rubocop:todo RSpec/ExampleLength
+      sender = FactoryBot.create(:user).fedipub_actor
+      allow(Fediverse::Signature::Rfc9421).to receive(:sign).and_call_original
+      VCR.use_cassette 'fediverse/request/get_actor_200' do
+        described_class.get_json('https://mamot.fr/users/mtancoigne', from: sender)
+      end
+      expect(Fediverse::Signature::Rfc9421).to have_received(:sign).once
+    end
   end
 
   describe '#post' do

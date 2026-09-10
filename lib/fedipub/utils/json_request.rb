@@ -26,8 +26,8 @@ module Fedipub
       # @return The parsed JSON object
       #
       # @raise [UnhandledResponseStatus] when response status is not the expected_status
-      def get_json(url, params: {}, headers: {}, expected_status: 200)
-        response = get url: url, params: params, headers: headers
+      def get_json(url, params: {}, headers: {}, expected_status: 200, from: nil)
+        response = get url: url, params: params, headers: headers, from: from
         raise UnhandledResponseStatus, "Unhandled status code #{response.status} for GET #{url}" if expected_status && response.status != expected_status
 
         JSON.parse(response.body)
