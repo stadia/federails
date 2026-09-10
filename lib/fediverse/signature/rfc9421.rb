@@ -6,11 +6,11 @@ module Fediverse
     class Rfc9421
       class << self
         def sign(sender:, request:)
-          request.headers['Content-Digest'] = digest(request.body)
+          request.headers['Content-Digest'] = digest(request.body) if request.body
           Linzer.sign!(
             request,
             key:        linzer_key(sender),
-            components: components
+            components: components(request)
           )
           request
         end
@@ -32,8 +32,12 @@ module Fediverse
           Linzer.new_rsa_pss_sha512_key(private_key.to_pem)
         end
 
-        def components
-          %w[@method @target-uri content-digest]
+        def components(request)
+          if request.body
+            %w[@method @target-uri content-digest]
+          else
+            %w[@method @target-uri]
+          end
         end
 
         def digest(message)

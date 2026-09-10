@@ -4,7 +4,7 @@ require 'fediverse/signature/draft_cavage12'
 RSpec.describe Fediverse::Signature::DraftCavage12 do
   let(:actor) { FactoryBot.create(:user).fedipub_actor }
 
-  context 'when signing requests' do
+  context 'when signing POST requests' do
     let(:request) do
       Faraday.default_connection.build_request(:post) do |req|
         req.url 'http://example.com/inbox'
@@ -68,6 +68,45 @@ RSpec.describe Fediverse::Signature::DraftCavage12 do
       bad_request = signed_request
       bad_request.headers['Signature'] = 'sig1=::'
       expect(described_class.verify(sender: actor, request: bad_request)).to be false
+    end
+  end
+
+  context 'when signing GET requests' do
+    let(:request) do
+      Faraday.default_connection.build_request(:get) do |req|
+        req.url 'http://example.com/outbox'
+      end
+    end
+    let(:signed_request) { described_class.sign(sender: actor, request: request) }
+    let(:signature) { signed_request.headers['Signature'] }
+
+    it 'does not add Digest header' do
+      expect(signed_request.headers['Digest']).not_to be_present
+    end
+
+    context 'when generating signature payload' do
+      let(:payload) { described_class.send(:signature_payload, request: request) }
+
+      it 'starts with request target' do
+        expect(payload).to match(%r{\A\(request-target\): get /outbox$})
+      end
+
+      it 'includes host' do
+        request.headers['Host'] = 'example.com'
+        expect(payload).to match(/^host: example.com$/)
+      end
+
+      it 'includes date' do
+        expect(payload).to match(/^date: #{request.headers['Date']}$/)
+      end
+
+      it 'does not include digest' do
+        expect(payload).not_to include('digest:')
+      end
+    end
+
+    it 'is verifiable' do
+      expect(described_class.verify(sender: actor, request: signed_request)).to be true
     end
   end
 end

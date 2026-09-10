@@ -4,7 +4,7 @@ require 'fediverse/signature/rfc9421'
 RSpec.describe Fediverse::Signature::Rfc9421 do
   let(:actor) { FactoryBot.create(:user).fedipub_actor }
 
-  context 'when signing requests' do
+  context 'when signing POST requests' do
     let(:request) do
       Faraday.default_connection.build_request(:post) do |req|
         req.url '/inbox'
@@ -57,6 +57,28 @@ RSpec.describe Fediverse::Signature::Rfc9421 do
       bad_request = signed_request
       bad_request.headers['Signature-Input'] = "sig1=(\"@method\");created=#{Time.now.utc.to_i}"
       expect(described_class.verify(sender: actor, request: bad_request)).to be false
+    end
+  end
+
+  context 'when signing GET requests' do
+    let(:request) do
+      Faraday.default_connection.build_request(:get) do |req|
+        req.url 'http://example.com/outbox'
+      end
+    end
+    let(:signed_request) { described_class.sign(sender: actor, request: request) }
+    let(:signature) { signed_request.headers['Signature'] }
+
+    it 'does not add Digest header' do
+      expect(signed_request.headers['Content-Digest']).not_to be_present
+    end
+
+    it 'includes digest' do
+      expect(signed_request.headers['Signature-Input']).not_to include('"content-digest"')
+    end
+
+    it 'is verifiable' do
+      expect(described_class.verify(sender: actor, request: signed_request)).to be true
     end
   end
 end

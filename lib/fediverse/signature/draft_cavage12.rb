@@ -9,7 +9,7 @@ module Fediverse
 
           parts = {
             keyId:     sender.key_id,
-            headers:   signature_headers.join(' '),
+            headers:   signature_headers(request).join(' '),
             signature: signature(sender: sender, request: request),
           }
           request.headers['Signature'] = parts.map { |k, v| "#{k}=\"#{v}\"" }.join(',')
@@ -34,7 +34,7 @@ module Fediverse
         private
 
         def set_headers(request) #  rubocop:disable Naming/AccessorMethodName
-          request.headers['Digest'] = digest(request.body)
+          request.headers['Digest'] = digest(request.body) if request.body
           request.headers['Host'] = URI.parse(request.path).host
           request.headers['Date'] = Time.now.utc.httpdate
           request
@@ -54,11 +54,15 @@ module Fediverse
         end
 
         def signature_payload(request:)
-          Fediverse::Signature.signature_payload(request: request, headers: signature_headers)
+          Fediverse::Signature.signature_payload(request: request, headers: signature_headers(request))
         end
 
-        def signature_headers
-          %w[(request-target) host date digest]
+        def signature_headers(request)
+          if request.body
+            %w[(request-target) host date digest]
+          else
+            %w[(request-target) host date]
+          end
         end
 
         def signature(sender:, request:)
