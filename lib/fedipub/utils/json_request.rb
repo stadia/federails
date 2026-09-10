@@ -59,7 +59,7 @@ module Fedipub
         Faraday.default_connection.build_request(method) do |req|
           req.url url
           req.body = message
-          req.headers['Content-Type'] = Mime[:activitypub].to_s
+          req.headers['Content-Type'] = Mime[:activitypub].to_s if message.present?
           req.headers['Accept'] = [Mime[:activitypub].to_s, Mime[:activitypub].send(:synonyms), "#{Mime[:json]};q=0.5"].flatten.join(', ')
           req.headers['User-Agent'] ||= "Fedipub/#{Fedipub::VERSION}"
         end
