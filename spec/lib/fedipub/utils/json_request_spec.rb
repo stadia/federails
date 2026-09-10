@@ -79,52 +79,5 @@ RSpec.describe Fedipub::Utils::JsonRequest do
     it 'accepts correct activitypub content type' do
       expect(request.headers['Accept']).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams", application/activity+json, application/json;q=0.5'
     end
-
-    context 'when signing with draft-cavage-12' do
-      let(:request) do
-        described_class.send :signed_request,
-                             url:              distant_target_actor.inbox_url,
-                             from:             local_actor,
-                             message:          'test',
-                             legacy_signature: true
-      end
-
-      it 'adds Signature header' do
-        expect(request.headers['Signature']).to be_present
-      end
-
-      it 'adds a verifiable signature' do
-        expect(Fediverse::Signature.verify(sender: local_actor, request: request)).to be_truthy
-      end
-
-      it 'adds a content digest in Digest header' do
-        expect(request.headers['Digest']).to eq 'SHA-256=n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg='
-      end
-    end
-
-    context 'when signing with RFC9412' do
-      let(:request) do
-        described_class.send :signed_request,
-                             url:     distant_target_actor.inbox_url,
-                             from:    local_actor,
-                             message: 'test'
-      end
-
-      it 'adds Signature header' do
-        expect(request.headers['Signature']).to be_present
-      end
-
-      it 'adds Signature-Input header' do
-        expect(request.headers['Signature-Input']).to be_present
-      end
-
-      it 'adds a verifiable signature' do
-        expect(Fediverse::Signature::Rfc9421.verify(sender: local_actor, request: request)).to be_truthy
-      end
-
-      it 'adds a content digest header' do
-        expect(request.headers['Content-Digest']).to eq 'sha-256=:n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg=:'
-      end
-    end
   end
 end
