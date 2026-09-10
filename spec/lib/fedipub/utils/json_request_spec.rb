@@ -26,7 +26,7 @@ RSpec.describe Fedipub::Utils::JsonRequest do
     let(:response) { instance_double(Faraday::Response) }
 
     before do
-      allow(described_class).to receive(:connection).and_return(faraday)
+      allow(described_class.instance).to receive(:connection).and_return(faraday)
       allow(faraday).to receive(:builder).and_return(builder)
       allow(faraday).to receive(:build_request)
       allow(builder).to receive(:build_response).and_return(response)
@@ -61,7 +61,7 @@ RSpec.describe Fedipub::Utils::JsonRequest do
 
   describe '#build_request' do
     context 'when POSTing' do
-      let(:request) { described_class.send :build_request, method: :post, url: 'https://fedipub.dev/inbox', message: 'test' }
+      let(:request) { described_class.instance.send :build_request, method: :post, url: 'https://fedipub.dev/inbox', message: 'test' }
 
       it 'sets correct method' do
         expect(request.http_method).to eq :post
@@ -83,7 +83,7 @@ RSpec.describe Fedipub::Utils::JsonRequest do
 
     context 'when providing extra headers' do
       let(:request) do
-        described_class.send :build_request, method: :post, url: 'https://fedipub.dev/inbox', message: 'test', headers: {
+        described_class.instance.send :build_request, method: :post, url: 'https://fedipub.dev/inbox', message: 'test', headers: {
           'X-Clacks-Overhead' => 'GNU Terry Pratchett',
           'Content-Type'      => 'text/plain',
           'Accept'            => 'text/html',
@@ -104,7 +104,7 @@ RSpec.describe Fedipub::Utils::JsonRequest do
     end
 
     context 'when providing query params' do
-      let(:request) { described_class.send :build_request, method: :get, url: 'https://fedipub.dev/inbox', params: { 'q' => 'test' } }
+      let(:request) { described_class.instance.send :build_request, method: :get, url: 'https://fedipub.dev/inbox', params: { 'q' => 'test' } }
 
       it 'adds params to request' do
         expect(request.params['q']).to eq 'test'

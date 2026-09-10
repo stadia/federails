@@ -4,8 +4,16 @@ require 'fediverse/signature'
 
 module Fedipub
   module Utils
-    # Simple wrapper to make requests expecting JSON
-    module JsonRequest
+    # Wrapper around HTTP calls which ensures signatures etc are applied.
+    class JsonRequest
+      include Singleton
+
+      class << self
+        extend Forwardable
+
+        def_delegators :instance, :get_json, :get, :post
+      end
+
       class UnhandledResponseStatus < StandardError; end
 
       # Makes a GET request and returns a +Hash+ from the parsed body
@@ -19,23 +27,25 @@ module Fedipub
       # @return The parsed JSON object
       #
       # @raise [UnhandledResponseStatus] when response status is not the expected_status
-      def self.get_json(url, params: {}, headers: {}, follow_redirects: false, expected_status: 200)
+      def get_json(url, params: {}, headers: {}, follow_redirects: false, expected_status: 200)
         response = get url: url, params: params, headers: headers
         raise UnhandledResponseStatus, "Unhandled status code #{response.status} for GET #{url}" if expected_status && response.status != expected_status
 
         JSON.parse(response.body)
       end
 
-      def self.get(url:, params: {}, headers: {}, from: nil)
+      def get(url:, params: {}, headers: {}, from: nil)
         execute_request method: :get, url: url, params: params, headers: headers, from: from
       end
 
-      def self.post(url:, message:, headers: {}, from: nil)
+      def post(url:, message:, headers: {}, from: nil)
         execute_request method: :post, url: url, headers: headers, message: message, from: from
       end
 
+      private
+
       # Send to remote server with RFC9421 signature and double-knocking for draft-cavage-12 if that fails
-      def self.execute_request(method:, url:, params: {}, headers: {}, message: nil, from: nil)
+      def execute_request(method:, url:, params: {}, headers: {}, message: nil, from: nil) # rubocop:disable Metrics/ParameterLists
         req = build_request(method: method, url: url, params: params, headers: headers, message: message)
         response = connection.builder.build_response(
           connection,
@@ -50,7 +60,7 @@ module Fedipub
         )
       end
 
-      def self.build_request(method:, url:, params: {}, headers: {}, message: nil) # rubocop:todo Metrics/AbcSize
+      def build_request(method:, url:, params: {}, headers: {}, message: nil) # rubocop:todo Metrics/AbcSize
         # Extract params from URL string if they're in there instead of the hash
         params.merge! Rack::Utils.parse_nested_query(URI(url).query)
         # Build the request
@@ -66,8 +76,8 @@ module Fedipub
         end
       end
 
-      def self.connection
-        @@faraday ||= Faraday.new do |faraday|
+      def connection
+        @connection ||= Faraday.new do |faraday|
           faraday.response :follow_redirects
           faraday.adapter Faraday.default_adapter
         end
