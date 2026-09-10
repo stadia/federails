@@ -57,27 +57,26 @@ RSpec.describe Fedipub::Utils::JsonRequest do
     end
   end
 
-  describe '#signed_request' do
-    let(:local_actor) { FactoryBot.create(:user).fedipub_actor }
-    let(:distant_target_actor) { FactoryBot.create :distant_actor }
-    let(:request) do
-      described_class.send :signed_request,
-                           url:     distant_target_actor.inbox_url,
-                           from:    local_actor,
-                           message: 'test'
-    end
+  describe '#build_request' do
+    context 'when POSTing' do
+      let(:request) { described_class.send :build_request, method: :post, url: 'https://fedipub.dev/inbox', message: 'test' }
 
-    it 'posts to inbox URL' do
-      # Faraday::Request#path is badly named, it's the full URL without query params
-      expect(request.path).to eq distant_target_actor.inbox_url
-    end
+      it 'sets correct method' do
+        expect(request.http_method).to eq :post
+      end
 
-    it 'sends correct activitypub content type' do
-      expect(request.headers['Content-Type']).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"'
-    end
+      it 'sets correct URL' do
+        # Faraday::Request#path is badly named, it's the full URL without query params
+        expect(request.path).to eq 'https://fedipub.dev/inbox'
+      end
 
-    it 'accepts correct activitypub content type' do
-      expect(request.headers['Accept']).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams", application/activity+json, application/json;q=0.5'
+      it 'sends correct activitypub content type' do
+        expect(request.headers['Content-Type']).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"'
+      end
+
+      it 'accepts correct activitypub content type' do
+        expect(request.headers['Accept']).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams", application/activity+json, application/json;q=0.5'
+      end
     end
   end
 end
