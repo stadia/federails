@@ -26,6 +26,7 @@ RSpec.describe Fedipub::Utils::JsonRequest do
     let(:response) { instance_double(Faraday::Response) }
 
     before do
+      allow(described_class).to receive(:connection).and_return(faraday)
       allow(faraday).to receive(:builder).and_return(builder)
       allow(faraday).to receive(:build_request)
       allow(builder).to receive(:build_response).and_return(response)
@@ -35,7 +36,7 @@ RSpec.describe Fedipub::Utils::JsonRequest do
 
     it 'tries RFC9421 signing first' do # rubocop:disable RSpec/MultipleExpectations
       allow(response).to receive(:status).and_return(201)
-      described_class.post(url: 'https://example.com', message: '{}', from: local_actor, connection: faraday)
+      described_class.post(url: 'https://example.com', message: '{}', from: local_actor)
       expect(builder).to have_received(:build_response).once
       expect(Fediverse::Signature::Rfc9421).to have_received(:sign).once
       expect(Fediverse::Signature::DraftCavage12).not_to have_received(:sign)
@@ -43,7 +44,7 @@ RSpec.describe Fedipub::Utils::JsonRequest do
 
     it 'tries draft-cavage-12 signing if RFC9421 attempt returns a 400' do # rubocop:disable RSpec/MultipleExpectations
       allow(response).to receive(:status).and_return(400)
-      described_class.post(url: 'https://example.com', message: '{}', from: local_actor, connection: faraday)
+      described_class.post(url: 'https://example.com', message: '{}', from: local_actor)
       expect(builder).to have_received(:build_response).twice
       expect(Fediverse::Signature::Rfc9421).to have_received(:sign).once
       expect(Fediverse::Signature::DraftCavage12).to have_received(:sign).once
@@ -51,7 +52,7 @@ RSpec.describe Fedipub::Utils::JsonRequest do
 
     it 'tries draft-cavage-12 signing if RFC9421 attempt returns a 401' do # rubocop:disable RSpec/MultipleExpectations
       allow(response).to receive(:status).and_return(401)
-      described_class.post(url: 'https://example.com', message: '{}', from: local_actor, connection: faraday)
+      described_class.post(url: 'https://example.com', message: '{}', from: local_actor)
       expect(builder).to have_received(:build_response).twice
       expect(Fediverse::Signature::Rfc9421).to have_received(:sign).once
       expect(Fediverse::Signature::DraftCavage12).to have_received(:sign).once
