@@ -54,13 +54,13 @@ module Fedipub
       end
 
       def self.signed_request(url:, message:, from:, legacy_signature: false)
-        req = request(url: url, message: message)
+        req = build_request(method: :post, url: url, message: message)
         req = Fediverse::Signature.sign(sender: from, request: req, legacy_signature: legacy_signature) if from
         req
       end
 
-      def self.request(url:, message:) # rubocop:todo Metrics/AbcSize
-        Faraday.default_connection.build_request(:post) do |req|
+      def self.build_request(method:, url:, message:) # rubocop:todo Metrics/AbcSize
+        Faraday.default_connection.build_request(method) do |req|
           req.url url
           req.body = message
           req.headers['Content-Type'] = Mime[:activitypub].to_s
