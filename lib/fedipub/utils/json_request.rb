@@ -41,23 +41,18 @@ module Fedipub
 
       # POST to remote server with RFC9421 signature and double-knocking for draft-cavage-12 if that fails
       def self.post(url:, message:, from: nil, connection: Faraday.default_connection)
+        req = build_request(method: :post, url: url, message: message)
         response = connection.builder.build_response(
           connection,
-          signed_request(url: url, message: message, from: from)
+          from ? Fediverse::Signature.sign(sender: from, request: req.dup) : req
         )
         # If signature was present and rejected, try double-knocking
         return response unless from && response.status.in?([400, 401])
 
         connection.builder.build_response(
           connection,
-          signed_request(url: url, message: message, from: from, legacy_signature: true)
+          Fediverse::Signature.sign(sender: from, request: req, legacy_signature: true)
         )
-      end
-
-      def self.signed_request(url:, message:, from:, legacy_signature: false)
-        req = build_request(method: :post, url: url, message: message)
-        req = Fediverse::Signature.sign(sender: from, request: req, legacy_signature: legacy_signature) if from
-        req
       end
 
       def self.build_request(method:, url:, message:) # rubocop:todo Metrics/AbcSize
