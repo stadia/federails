@@ -100,5 +100,13 @@ RSpec.describe Fedipub::Utils::JsonRequest do
         expect(request.headers['Content-Type']).to eq 'text/plain'
       end
     end
+
+    context 'when providing query params' do
+      let(:request) { described_class.send :build_request, method: :get, url: 'https://fedipub.dev/inbox', params: { 'q' => 'test' } }
+
+      it 'adds params to request' do
+        expect(request.params['q']).to eq 'test'
+      end
+    end
   end
 end

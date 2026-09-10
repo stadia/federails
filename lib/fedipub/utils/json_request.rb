@@ -39,17 +39,17 @@ module Fedipub
         JSON.parse(response.body)
       end
 
-      def self.get(url:, headers: {}, message:, from: nil, connection: Faraday.default_connection)
-        execute_request method: :get, url: url, headers: headers, message: message, from: from, connection: connection
+      def self.get(url:, params: {}, headers: {}, message:, from: nil, connection: Faraday.default_connection)
+        execute_request method: :get, url: url, params: params, headers: headers, message: message, from: from, connection: connection
       end
 
-      def self.post(url:, headers: {}, message:, from: nil, connection: Faraday.default_connection)
-        execute_request method: :post, url: url, headers: headers, message: message, from: from, connection: connection
+      def self.post(url:, params: {}, headers: {}, message:, from: nil, connection: Faraday.default_connection)
+        execute_request method: :post, url: url, params: params, headers: headers, message: message, from: from, connection: connection
       end
 
       # Send to remote server with RFC9421 signature and double-knocking for draft-cavage-12 if that fails
-      def self.execute_request(method:, url:, headers: {}, message:, from: nil, connection: Faraday.default_connection)
-        req = build_request(method: method, url: url, headers: headers, message: message)
+      def self.execute_request(method:, url:, params: {}, headers: {}, message:, from: nil, connection: Faraday.default_connection)
+        req = build_request(method: method, url: url, params: params, headers: headers, message: message)
         response = connection.builder.build_response(
           connection,
           from ? Fediverse::Signature.sign(sender: from, request: req.dup) : req
@@ -63,10 +63,11 @@ module Fedipub
         )
       end
 
-      def self.build_request(method:, url:, headers: {}, message:) # rubocop:todo Metrics/AbcSize
+      def self.build_request(method:, url:, params: {}, headers: {}, message: nil) # rubocop:todo Metrics/AbcSize
         Faraday.default_connection.build_request(method) do |req|
           req.url url
           req.body = message
+          req.params = params
           req.headers = {
             'Content-Type' => Mime[:activitypub].to_s,
             'Accept'       => [Mime[:activitypub].to_s, Mime[:activitypub].send(:synonyms), "#{Mime[:json]};q=0.5"].flatten.join(', '),
