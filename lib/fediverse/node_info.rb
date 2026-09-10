@@ -28,7 +28,7 @@ module Fediverse
       end
 
       def nodeinfo_url(domain)
-        response = Fedipub::Utils::JsonRequest.get_json "#{base_url(domain)}/.well-known/nodeinfo", follow_redirects: true
+        response = Fedipub::Utils::JsonRequest.get_json "#{base_url(domain)}/.well-known/nodeinfo"
         entry = response['links']&.find { |link| link['rel'] == 'http://nodeinfo.diaspora.software/ns/schema/2.0' }
 
         entry['href']

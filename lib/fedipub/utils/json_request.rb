@@ -21,13 +21,12 @@ module Fedipub
       # @param url [String] Target URL
       # @param params [Hash] Querystring parameters
       # @param headers [Hash] Additional headers
-      # @param follow_redirects [Boolean] Whether to follow redirections
       # @param expected_status [Integer] Expected response status. Will raise a +UnhandledResponseStatus+ when status is different
       #
       # @return The parsed JSON object
       #
       # @raise [UnhandledResponseStatus] when response status is not the expected_status
-      def get_json(url, params: {}, headers: {}, follow_redirects: false, expected_status: 200)
+      def get_json(url, params: {}, headers: {}, expected_status: 200)
         response = get url: url, params: params, headers: headers
         raise UnhandledResponseStatus, "Unhandled status code #{response.status} for GET #{url}" if expected_status && response.status != expected_status
 

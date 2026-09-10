@@ -121,7 +121,7 @@ module Fediverse
       # @return [Hash]
       # @raise [ActiveRecord::RecordNotFound] when the response is invalid
       def get_json(url, params = {})
-        Fedipub::Utils::JsonRequest.get_json(url, params: params, follow_redirects: true, headers: { accept: 'application/json' })
+        Fedipub::Utils::JsonRequest.get_json(url, params: params, headers: { accept: 'application/json' })
       rescue Fedipub::Utils::JsonRequest::UnhandledResponseStatus => e
         Rails.logger.debug { e.message }
 
