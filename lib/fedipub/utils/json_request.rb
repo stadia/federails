@@ -39,8 +39,8 @@ module Fedipub
         JSON.parse(response.body)
       end
 
-      def self.get(url:, params: {}, headers: {}, message:, from: nil, connection: Faraday.default_connection)
-        execute_request method: :get, url: url, params: params, headers: headers, message: message, from: from, connection: connection
+      def self.get(url:, params: {}, headers: {}, from: nil, connection: Faraday.default_connection)
+        execute_request method: :get, url: url, params: params, headers: headers, from: from, connection: connection
       end
 
       def self.post(url:, params: {}, headers: {}, message:, from: nil, connection: Faraday.default_connection)
@@ -48,7 +48,7 @@ module Fedipub
       end
 
       # Send to remote server with RFC9421 signature and double-knocking for draft-cavage-12 if that fails
-      def self.execute_request(method:, url:, params: {}, headers: {}, message:, from: nil, connection: Faraday.default_connection)
+      def self.execute_request(method:, url:, params: {}, headers: {}, message: nil, from: nil, connection: Faraday.default_connection)
         req = build_request(method: method, url: url, params: params, headers: headers, message: message)
         response = connection.builder.build_response(
           connection,
