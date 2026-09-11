@@ -9,6 +9,17 @@ RSpec.describe '/well-known', type: :request do
       expect(response).to be_successful
     end
 
+    it 'rejects badly-signed requests' do
+      get fedipub.webfinger_url, params: { resource: "acct:#{user.id}@localhost" }, headers: { signature: 'poop' }
+      expect(response).to have_http_status :unauthorized
+    end
+
+    it 'rejects unsigned requests when signatures are required' do
+      allow(Fedipub::ServerController).to receive(:require_signature?).and_return(true)
+      get fedipub.webfinger_url, params: { resource: "acct:#{user.id}@localhost" }
+      expect(response).to have_http_status :unauthorized
+    end
+
     it 'renders a not found response given an @ address' do
       expect do
         get fedipub.webfinger_url, params: { resource: "@#{user.id}@localhost" }
@@ -90,6 +101,17 @@ RSpec.describe '/well-known', type: :request do
     it 'renders a successful response' do
       get fedipub.host_meta_url
       expect(response).to be_successful
+    end
+
+    it 'rejects badly-signed requests' do
+      get fedipub.host_meta_url, headers: { signature: 'poop' }
+      expect(response).to have_http_status :unauthorized
+    end
+
+    it 'rejects unsigned requests when signatures are required' do
+      allow(Fedipub::ServerController).to receive(:require_signature?).and_return(true)
+      get fedipub.host_meta_url
+      expect(response).to have_http_status :unauthorized
     end
 
     ['application/xrd+xml', 'application/xml'].each do |accept|

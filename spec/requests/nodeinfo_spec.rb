@@ -6,12 +6,34 @@ RSpec.describe '/nodeinfo', type: :request do
       get fedipub.node_info_url
       expect(response).to be_successful
     end
+
+    it 'rejects badly-signed requests' do
+      get fedipub.node_info_url, headers: { signature: 'poop' }
+      expect(response).to have_http_status :unauthorized
+    end
+
+    it 'rejects unsigned requests when signatures are required' do
+      allow(Fedipub::ServerController).to receive(:require_signature?).and_return(true)
+      get fedipub.node_info_url
+      expect(response).to have_http_status :unauthorized
+    end
   end
 
   describe 'GET /nodeinfo/2.0' do
     it 'renders a successful response' do
       get fedipub.show_node_info_url
       expect(response).to be_successful
+    end
+
+    it 'rejects badly-signed requests' do
+      get fedipub.show_node_info_url, headers: { signature: 'poop' }
+      expect(response).to have_http_status :unauthorized
+    end
+
+    it 'rejects unsigned requests when signatures are required' do
+      allow(Fedipub::ServerController).to receive(:require_signature?).and_return(true)
+      get fedipub.show_node_info_url
+      expect(response).to have_http_status :unauthorized
     end
 
     it 'include software name' do

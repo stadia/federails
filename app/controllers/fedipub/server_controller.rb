@@ -2,6 +2,7 @@ module Fedipub
   class ServerController < ::ActionController::Base # rubocop:disable Rails/ApplicationController
     include Pundit::Authorization
 
+    before_action :verify_request_signature!
     after_action :verify_authorized
 
     protect_from_forgery with: :null_session
@@ -12,7 +13,17 @@ module Fedipub
                 Fedipub::DataEntity::TombstonedError,
                 with: :error_gone
 
+    def self.require_signature?
+      false
+    end
+
     private
+
+    def verify_request_signature!
+      Fediverse::Signature.verify!(request: request, require_signature: ServerController.require_signature?)
+    rescue Fediverse::Signature::BadSignature
+      head :unauthorized
+    end
 
     def error_fallback(exception, fallback_message, status)
       message = exception&.message || fallback_message
