@@ -10,7 +10,8 @@ module Fediverse
       end
 
       def verify(sender:, request:, require_signature: false)
-        Fediverse::Signature::DraftCavage12.verify(sender: sender, request: request, require_signature: require_signature)
+        Fediverse::Signature::Rfc9421.verify(sender: sender, request: request, require_signature: require_signature) ||
+          Fediverse::Signature::DraftCavage12.verify(sender: sender, request: request, require_signature: require_signature)
       end
     end
   end

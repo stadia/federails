@@ -20,10 +20,34 @@ RSpec.describe Fediverse::Signature do
   end
 
   context 'when verifying' do
-    it 'delegates to DraftCavage12' do
-      allow(Fediverse::Signature::DraftCavage12).to receive(:verify)
+    it 'delegates to Rfc9421 first' do
+      allow(Fediverse::Signature::Rfc9421).to receive(:verify).and_return true
       described_class.verify(sender: sender, request: request, require_signature: true)
-      expect(Fediverse::Signature::DraftCavage12).to have_received(:verify).with(sender: sender, request: request, require_signature: true)
+      expect(Fediverse::Signature::Rfc9421).to have_received(:verify).with(sender: sender, request: request, require_signature: true).once
+    end
+
+    it 'delegates to DraftCavage12 if Rfc9421 fails' do
+      allow(Fediverse::Signature::Rfc9421).to receive(:verify).and_return false
+      allow(Fediverse::Signature::DraftCavage12).to receive(:verify).and_return true
+      described_class.verify(sender: sender, request: request, require_signature: true)
+      expect(Fediverse::Signature::DraftCavage12).to have_received(:verify).with(sender: sender, request: request, require_signature: true).once
+    end
+
+    it 'fails if both delegations fail' do
+      allow(Fediverse::Signature::Rfc9421).to receive(:verify).and_return false
+      allow(Fediverse::Signature::DraftCavage12).to receive(:verify).and_return false
+      expect(described_class.verify(sender: sender, request: request, require_signature: true)).to be false
+    end
+
+    it 'passes if RFC9421 passes' do
+      allow(Fediverse::Signature::Rfc9421).to receive(:verify).and_return true
+      expect(described_class.verify(sender: sender, request: request, require_signature: true)).to be true
+    end
+
+    it 'passes if Rfc9421 fails but DraftCavage12 passes' do
+      allow(Fediverse::Signature::Rfc9421).to receive(:verify).and_return false
+      allow(Fediverse::Signature::DraftCavage12).to receive(:verify).and_return true
+      expect(described_class.verify(sender: sender, request: request, require_signature: true)).to be true
     end
   end
 end
