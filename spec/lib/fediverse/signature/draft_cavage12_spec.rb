@@ -65,26 +65,22 @@ RSpec.describe Fediverse::Signature::DraftCavage12 do
     end
 
     it 'is verifiable' do
-      expect(described_class.verify(request: signed_request)).to be true
+      expect(described_class.verify!(request: signed_request)).to be true
     end
 
-    it 'passes verification if unsigned but signature is not required' do
-      expect(described_class.verify(request: request, require_signature: false)).to be true
+    it 'returns false if request is not signed' do
+      expect(described_class.verify!(request: request)).to be false
     end
 
-    it 'fails verification if unsigned but signature is required' do
-      expect(described_class.verify(request: request, require_signature: true)).to be false
-    end
-
-    it 'fails verification if sender could not be found' do
+    it 'throws signature error if sender could not be found' do
       allow(Fedipub::Actor).to receive(:find_by_federation_url).and_return(nil)
-      expect(described_class.verify(request: signed_request, require_signature: true)).to be false
+      expect { described_class.verify!(request: signed_request) }.to raise_error(Fediverse::Signature::BadSignature)
     end
 
     it 'fails verification if signature is bad' do
       bad_request = signed_request
       bad_request.headers['Signature'] = 'sig1=::'
-      expect(described_class.verify(request: bad_request, require_signature: true)).to be false
+      expect { described_class.verify!(request: bad_request) }.to raise_error(Fediverse::Signature::BadSignature)
     end
   end
 
@@ -123,7 +119,7 @@ RSpec.describe Fediverse::Signature::DraftCavage12 do
     end
 
     it 'is verifiable' do
-      expect(described_class.verify(request: signed_request)).to be true
+      expect(described_class.verify!(request: signed_request)).to be true
     end
   end
 end

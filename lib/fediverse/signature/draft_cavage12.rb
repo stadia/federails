@@ -16,22 +16,25 @@ module Fediverse
           request
         end
 
-        def verify(request:, require_signature: false)
+        def verify!(request:)
           # Do we have a signature to verify?
-          return !require_signature unless request.headers.key?('Signature')
+          return false unless request.headers.key?('Signature')
 
           # Find the sender
           components = signature_components(request)
           sender = find_sender_by_key_id(components['keyId'])
 
           # Have we got what we need?
-          return false unless sender && components['signature'] && components['headers']
+          raise Fediverse::Signature::BadSignature unless sender && components['signature'] && components['headers']
 
           # Build the expected payload
           comparison_string = signature_payload(request: request, headers: components['headers'])
 
-          # Verfify the payload against the signature
-          do_verification(components['signature'], sender, comparison_string)
+          # Verify the payload against the signature
+          result = do_verification(components['signature'], sender, comparison_string)
+          raise Fediverse::Signature::BadSignature unless result
+
+          result
         end
 
         private
