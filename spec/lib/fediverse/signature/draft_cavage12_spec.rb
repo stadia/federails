@@ -4,6 +4,10 @@ require 'fediverse/signature/draft_cavage12'
 RSpec.describe Fediverse::Signature::DraftCavage12 do
   let(:actor) { FactoryBot.create(:user).fedipub_actor }
 
+  before do
+    actor.send :ensure_key_pair_exists!
+  end
+
   context 'when signing POST requests' do
     let(:request) do
       Faraday.default_connection.build_request(:post) do |req|
@@ -73,7 +77,7 @@ RSpec.describe Fediverse::Signature::DraftCavage12 do
     end
 
     it 'fails verification if sender could not be found' do
-      actor.destroy
+      allow(Fedipub::Actor).to receive(:find_by_federation_url).and_return(nil)
       expect(described_class.verify(request: signed_request, require_signature: true)).to be false
     end
 

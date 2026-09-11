@@ -19,14 +19,12 @@ module Fediverse
           # Do we have a signature to verify?
           return !require_signature if !request.headers.key?('Signature-Input') || !request.headers.key?('Signature')
 
-          # Find the sender
-
           # Verify the signature
-          Linzer.verify!(
-            request,
-            key: linzer_key(sender)
-          )
-        rescue Linzer::VerifyError
+          Linzer.verify!(request) do |key_id|
+            sender = Fedipub::Actor.find_by_federation_url(key_id)
+            linzer_key(sender)
+          end
+        rescue Linzer::Error
           false
         end
 

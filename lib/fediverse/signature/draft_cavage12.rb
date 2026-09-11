@@ -20,23 +20,35 @@ module Fediverse
           # Do we have a signature to verify?
           return !require_signature unless request.headers.key?('Signature')
 
-          # Is the signature well-structured?
-          components = signature_components(request)
-          return false unless components['signature'] && components['headers']
-
           # Find the sender
+          components = signature_components(request)
+          sender = find_sender_by_key_id(components['keyId'])
+
+          # Have we got what we need?
+          return false unless sender && components['signature'] && components['headers']
 
           # Build the expected payload
-          headers   = components['headers']
-          signature = Base64.decode64(components['signature'])
-          key       = OpenSSL::PKey::RSA.new(sender.public_key)
-          comparison_string = signature_payload(request: request, headers: headers)
+          comparison_string = signature_payload(request: request, headers: components['headers'])
 
           # Verfify the payload against the signature
-          key.verify(OpenSSL::Digest.new('SHA256'), signature, comparison_string)
+          do_verification(components['signature'], sender, comparison_string)
         end
 
         private
+
+        def do_verification(signature, sender, comparison_string)
+          signature = Base64.decode64(signature)
+          key       = OpenSSL::PKey::RSA.new(sender.public_key)
+          key.verify(OpenSSL::Digest.new('SHA256'), signature, comparison_string)
+        end
+
+        def find_sender_by_key_id(key_id)
+          return unless key_id
+
+          Fedipub::Actor.find_by_federation_url(
+            key_id.split('#', 1).first
+          )
+        end
 
         def set_headers(request) #  rubocop:disable Naming/AccessorMethodName
           request.headers['Digest'] = digest(request.body) if request.body

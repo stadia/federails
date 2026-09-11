@@ -4,6 +4,10 @@ require 'fediverse/signature/rfc9421'
 RSpec.describe Fediverse::Signature::Rfc9421 do
   let(:actor) { FactoryBot.create(:user).fedipub_actor }
 
+  before do
+    actor.send :ensure_key_pair_exists!
+  end
+
   context 'when signing POST requests' do
     let(:request) do
       Faraday.default_connection.build_request(:post) do |req|
@@ -56,8 +60,8 @@ RSpec.describe Fediverse::Signature::Rfc9421 do
     end
 
     it 'fails verification if sender could not be found' do
-      actor.destroy
-      expect(described_class.verify(request: request)).to be false
+      allow(Fedipub::Actor).to receive(:find_by_federation_url).and_return(nil)
+      expect(described_class.verify(request: request, require_signature: true)).to be false
     end
 
     it 'fails verification if unsigned but signature is required' do
