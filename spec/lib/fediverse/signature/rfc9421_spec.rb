@@ -44,27 +44,32 @@ RSpec.describe Fediverse::Signature::Rfc9421 do
     end
 
     it 'is verifiable' do
-      expect(described_class.verify(sender: actor, request: signed_request)).to be true
+      expect(described_class.verify(request: signed_request)).to be true
     end
 
     it 'passes verification if unsigned but signature is not required' do
-      expect(described_class.verify(sender: actor, request: request)).to be true
+      expect(described_class.verify(request: request, require_signature: false)).to be true
+    end
+
+    it 'fails verification if sender could not be found' do
+      actor.destroy
+      expect(described_class.verify(request: request)).to be false
     end
 
     it 'fails verification if unsigned but signature is required' do
-      expect(described_class.verify(sender: actor, request: request, require_signature: true)).to be false
+      expect(described_class.verify(request: request, require_signature: true)).to be false
     end
 
     it 'fails verification if signature is bad' do
       bad_request = signed_request
       bad_request.headers['Signature'] = 'sig1=::'
-      expect(described_class.verify(sender: actor, request: bad_request)).to be false
+      expect(described_class.verify(request: bad_request)).to be false
     end
 
     it 'fails verification if input is wrong' do
       bad_request = signed_request
       bad_request.headers['Signature-Input'] = "sig1=(\"@method\");created=#{Time.now.utc.to_i}"
-      expect(described_class.verify(sender: actor, request: bad_request)).to be false
+      expect(described_class.verify(request: bad_request)).to be false
     end
   end
 
@@ -86,7 +91,7 @@ RSpec.describe Fediverse::Signature::Rfc9421 do
     end
 
     it 'is verifiable' do
-      expect(described_class.verify(sender: actor, request: signed_request)).to be true
+      expect(described_class.verify(request: signed_request)).to be true
     end
   end
 end

@@ -16,19 +16,23 @@ module Fediverse
           request
         end
 
-        def verify(sender:, request:, require_signature: false)
+        def verify(request:, require_signature: false)
           # Do we have a signature to verify?
           return !require_signature unless request.headers.key?('Signature')
 
+          # Is the signature well-structured?
           components = signature_components(request)
           return false unless components['signature'] && components['headers']
 
+          # Find the sender
+
+          # Build the expected payload
           headers   = components['headers']
           signature = Base64.decode64(components['signature'])
           key       = OpenSSL::PKey::RSA.new(sender.public_key)
-
           comparison_string = signature_payload(request: request, headers: headers)
 
+          # Verfify the payload against the signature
           key.verify(OpenSSL::Digest.new('SHA256'), signature, comparison_string)
         end
 
