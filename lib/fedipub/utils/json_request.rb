@@ -68,9 +68,10 @@ module Fedipub
           req.body = message
           req.params = params
           req.headers = {
-            'Content-Type' => Mime[:activitypub].to_s,
-            'Accept'       => [Mime[:activitypub].to_s, Mime[:activitypub].send(:synonyms), "#{Mime[:json]};q=0.5"].flatten.join(', '),
-            'User-Agent'   => req.headers['User-Agent'] || "Fedipub/#{Fedipub::VERSION}",
+            'Content-Type'     => Mime[:activitypub].to_s,
+            'Accept'           => [Mime[:activitypub].to_s, Mime[:activitypub].send(:synonyms), "#{Mime[:json]};q=0.5"].flatten.join(', '),
+            'User-Agent'       => req.headers['User-Agent'] || "Fedipub/#{Fedipub::VERSION}",
+            'Accept-Signature' => 'sig1=()',
           }.compact.merge(headers)
         end
       end

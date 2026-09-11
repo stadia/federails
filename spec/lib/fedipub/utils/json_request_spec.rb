@@ -88,6 +88,10 @@ RSpec.describe Fedipub::Utils::JsonRequest do
       it 'accepts correct activitypub content type' do
         expect(request.headers['Accept']).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams", application/activity+json, application/json;q=0.5'
       end
+
+      it 'advertises RFC9421 signature support' do
+        expect(request.headers['Accept-Signature']).to eq 'sig1=()'
+      end
     end
 
     context 'when providing extra headers' do

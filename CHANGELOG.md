@@ -35,6 +35,7 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 - Sign outgoing POST requests with RFC9421 signatures and fall back to draft-cavage-12 sig on failure
 - Sign outgoing GET requests if a sender is provided
 - Verify signatures on all incoming requests, if they are signed; RFC9421 is checked first, then draft-cavage-12
+- Advertise RFC9421 support via `Accept-Signature` header
 
 ### Changed
 
