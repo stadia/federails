@@ -43,6 +43,10 @@ RSpec.describe Fediverse::Signature::Rfc9421 do
       expect(signed_request.headers['Signature']).to match %r{^sig1=:[[[:alnum:]]-+/]*={0,3}:$}
     end
 
+    it 'includes key ID in signature' do
+      expect(signed_request.headers['Signature-Input']).to include "keyid=\"#{actor.federated_url}#main-key\""
+    end
+
     it 'is verifiable' do
       expect(described_class.verify(request: signed_request)).to be true
     end

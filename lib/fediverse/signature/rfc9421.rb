@@ -35,7 +35,7 @@ module Fediverse
         # Converts key to right structure for Linzer to use
         def linzer_key(sender)
           private_key = OpenSSL::PKey::RSA.new sender.private_key, Rails.application.credentials.secret_key_base
-          Linzer.new_rsa_pss_sha512_key(private_key.to_pem)
+          Linzer.new_rsa_pss_sha512_key(private_key.to_pem, sender.key_id)
         end
 
         def components(request)
