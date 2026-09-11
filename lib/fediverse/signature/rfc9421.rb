@@ -15,7 +15,10 @@ module Fediverse
           request
         end
 
-        def verify(sender:, request:)
+        def verify(sender:, request:, require_signature: false)
+          # Do we have a signature to verify?
+          return !require_signature if !request.headers.has_key?('Signature-Input') || !request.headers.has_key?('Signature')
+
           Linzer.verify!(
             request,
             key: linzer_key(sender)

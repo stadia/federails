@@ -47,6 +47,14 @@ RSpec.describe Fediverse::Signature::Rfc9421 do
       expect(described_class.verify(sender: actor, request: signed_request)).to be true
     end
 
+    it 'passes verification if unsigned but signature is not required' do
+      expect(described_class.verify(sender: actor, request: request)).to be true
+    end
+
+    it 'fails verification if unsigned but signature is required' do
+      expect(described_class.verify(sender: actor, request: request, require_signature: true)).to be false
+    end
+
     it 'fails verification if signature is bad' do
       bad_request = signed_request
       bad_request.headers['Signature'] = 'sig1=::'

@@ -22,8 +22,8 @@ RSpec.describe Fediverse::Signature do
   context 'when verifying' do
     it 'delegates to DraftCavage12' do
       allow(Fediverse::Signature::DraftCavage12).to receive(:verify)
-      described_class.verify(sender: sender, request: request)
-      expect(Fediverse::Signature::DraftCavage12).to have_received(:verify).with(sender: sender, request: request)
+      described_class.verify(sender: sender, request: request, require_signature: true)
+      expect(Fediverse::Signature::DraftCavage12).to have_received(:verify).with(sender: sender, request: request, require_signature: true)
     end
   end
 end

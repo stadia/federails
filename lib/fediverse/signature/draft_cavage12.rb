@@ -16,8 +16,9 @@ module Fediverse
           request
         end
 
-        def verify(sender:, request:)
-          raise 'No draft-cavage-12 signature found' unless request.headers['Signature']
+        def verify(sender:, request:, require_signature: false)
+          # Do we have a signature to verify?
+          return !require_signature unless request.headers.key?('Signature')
 
           components = signature_components(request)
           return false unless components['signature'] && components['headers']
