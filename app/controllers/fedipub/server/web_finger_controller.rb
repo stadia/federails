@@ -9,14 +9,12 @@ module Fedipub
         resource = params.require(:resource)
         case resource
         when %r{^https?://.+}
-          @user = Fedipub::Actor.find_by_federation_url!(resource).entity # rubocop:disable Rails/DynamicFindBy
+          @actor = Fedipub::Actor.find_by_federation_url!(resource) # rubocop:disable Rails/DynamicFindBy
         when /^acct:.+/
-          actor = Fedipub::Actor.find_local_by_username(username)
-          raise Fedipub::Actor::TombstonedError if actor&.tombstoned?
-
-          @user = actor&.entity
+          @actor = Fedipub::Actor.find_local_by_username(username)
+          raise Fedipub::Actor::TombstonedError if @actor&.tombstoned?
         end
-        raise ActiveRecord::RecordNotFound if @user.nil?
+        raise ActiveRecord::RecordNotFound if @actor.nil?
 
         render formats: [:jrd]
       end
