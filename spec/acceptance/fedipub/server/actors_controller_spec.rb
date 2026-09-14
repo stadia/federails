@@ -37,7 +37,8 @@ RSpec.describe Fedipub::Server::ActorsController, type: :acceptance do
          following:          { type: :string, description: 'URL to the followings list' },
          url:                { type: :string, required: false, description: 'URL to a human readable profile' },
          publicKey:          { type: :object, required: false, description: 'Public key used for signing messages', attributes: :public_key },
-         attributionDomains: { type: :array, required: false, description: 'Extension used to test custom data' }
+         attributionDomains: { type: :array, required: false, description: 'Extension used to test custom data' },
+         generator:          { type: :string, required: false, description: 'URL of the server\'s application actor' }
 
   entity :actors_ordered_collection_page,
          '@context':   { type: :string, description: 'JSON-LD context' },
