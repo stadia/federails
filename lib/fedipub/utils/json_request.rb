@@ -59,12 +59,14 @@ module Fedipub
         )
       end
 
-      def build_request(method:, url:, params: {}, headers: {}, message: nil) # rubocop:todo Metrics/AbcSize
+      def build_request(method:, url:, params: {}, headers: {}, message: nil) # rubocop:todo Metrics/AbcSize, Metrics/MethodLength
         # Extract params from URL string if they're in there instead of the hash
-        params.merge! Rack::Utils.parse_nested_query(URI(url).query)
+        uri = URI(url)
+        params.merge! Rack::Utils.parse_nested_query(uri.query)
+        uri.query = nil
         # Build the request
         connection.build_request(method) do |req|
-          req.url url
+          req.url uri
           req.body = message
           req.params = params
           req.headers = {

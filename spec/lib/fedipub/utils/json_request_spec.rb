@@ -86,7 +86,7 @@ RSpec.describe Fedipub::Utils::JsonRequest do
 
       it 'sets correct URL' do
         # Faraday::Request#path is badly named, it's the full URL without query params
-        expect(request.path).to eq 'https://fedipub.dev/inbox'
+        expect(request.path.to_s).to eq 'https://fedipub.dev/inbox'
       end
 
       it 'sends correct activitypub content type' do
