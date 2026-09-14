@@ -170,5 +170,37 @@ RSpec.describe '/federation/actors', type: :request do
       get fedipub.server_actor_url(Fedipub::Actor.application_actor), headers: { accept: Mime[:activitypub] }
       expect(response).to be_successful
     end
+
+    context 'when checking "implements" information (FEP-844e)' do
+      let(:implemented_hrefs) { response.parsed_body['implements']&.pluck('href') }
+
+      before do
+        get fedipub.server_actor_url(Fedipub::Actor.application_actor), headers: { accept: Mime[:activitypub] }
+      end
+
+      it 'implements ActivityPub' do
+        expect(implemented_hrefs).to include 'https://www.w3.org/TR/activitypub/'
+      end
+
+      it 'implements RFC9421' do
+        expect(implemented_hrefs).to include 'https://datatracker.ietf.org/doc/html/rfc9421'
+      end
+
+      it 'implements draft-cavage-12' do
+        expect(implemented_hrefs).to include 'https://datatracker.ietf.org/doc/html/draft-cavage-http-signatures-12'
+      end
+
+      it 'implements FEP-844e (capability discovery)' do
+        expect(implemented_hrefs).to include 'https://w3id.org/fep/844e'
+      end
+
+      it 'implements FEP-2677 (application actor + nodeinfo discovery)' do
+        expect(implemented_hrefs).to include 'https://w3id.org/fep/2677'
+      end
+
+      it 'implements FEP-d556 (Server-Level Actor Discovery Using WebFinger)' do
+        expect(implemented_hrefs).to include 'https://w3id.org/fep/d556'
+      end
+    end
   end
 end

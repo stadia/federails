@@ -25,3 +25,15 @@ if actor.public_key
   end
 end
 json.merge! actor_data
+
+# FEP-844e capability discovery
+if actor.application_actor?
+  json.implements([
+    'https://www.w3.org/TR/activitypub/',
+    'https://datatracker.ietf.org/doc/html/rfc9421',
+    'https://datatracker.ietf.org/doc/html/draft-cavage-http-signatures-12',
+    'https://w3id.org/fep/844e',
+    'https://w3id.org/fep/2677',
+    'https://w3id.org/fep/d556',
+  ].map { |url| { 'href' => url } })
+end
