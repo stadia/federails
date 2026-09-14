@@ -3,7 +3,7 @@ json.subject params[:resource]
 links = [
   # Federation actor URL
   {
-    rel:  'self',
+    rel:  (@actor.application_actor? ? 'https://www.w3.org/ns/activitystreams#Service' : 'self'),
     type: Mime[:activitypub].to_s,
     href: @actor.federated_url,
   },

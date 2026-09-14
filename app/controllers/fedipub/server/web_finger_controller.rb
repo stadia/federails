@@ -6,8 +6,9 @@ module Fedipub
       def find
         skip_authorization
 
-        resource = params.require(:resource)
-        case resource
+        case resource = params.require(:resource)
+        when %r{^https?://#{Fedipub::Utils::Host.localhost}/?$}
+          @actor = Fedipub::Actor.application_actor
         when %r{^https?://.+}
           @actor = Fedipub::Actor.find_by_federation_url!(resource) # rubocop:disable Rails/DynamicFindBy
         when /^acct:.+/

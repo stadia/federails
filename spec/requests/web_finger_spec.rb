@@ -49,6 +49,30 @@ RSpec.describe '/well-known', type: :request do
       end
     end
 
+    context 'when looking up application actor in line with FEP-d556' do
+      before do
+        get fedipub.webfinger_url, params: { resource: 'http://localhost' }
+      end
+
+      it 'renders a successful response' do
+        expect(response).to be_successful
+      end
+
+      it 'confirms requested subject' do
+        expect(response.parsed_body['subject']).to eq 'http://localhost'
+      end
+
+      it 'has correct rel type' do
+        link = response.parsed_body['links'].first
+        expect(link['rel']).to eq 'https://www.w3.org/ns/activitystreams#Service'
+      end
+
+      it 'includes href to application actor' do
+        link = response.parsed_body['links'].first
+        expect(link['href']).to match(%r{http://localhost/federation/actors/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}})
+      end
+    end
+
     context 'with a tombstoned actor' do
       let(:actor) { user.fedipub_actor.tombstone! }
 
