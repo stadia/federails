@@ -26,6 +26,14 @@ RSpec.describe Fedipub::Utils::JsonRequest do
       end
       expect(Fediverse::Signature::Rfc9421).to have_received(:sign).once
     end
+
+    it 'signs the request with application actor if sender is not specified' do
+      allow(Fediverse::Signature::Rfc9421).to receive(:sign).and_call_original
+      VCR.use_cassette 'fediverse/request/get_actor_200' do
+        described_class.get_json('https://mamot.fr/users/mtancoigne')
+      end
+      expect(Fediverse::Signature::Rfc9421).to have_received(:sign).once.with(sender: Fedipub::Actor.application_actor, request: anything)
+    end
   end
 
   describe '#post' do

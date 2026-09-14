@@ -34,7 +34,7 @@ module Fedipub
       end
 
       def get(url:, params: {}, headers: {}, from: nil)
-        execute_request method: :get, url: url, params: params, headers: headers, from: from
+        execute_request method: :get, url: url, params: params, headers: headers, from: from || Fedipub::Actor.application_actor
       end
 
       def post(url:, message:, headers: {}, from: nil)
