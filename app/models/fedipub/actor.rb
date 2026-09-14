@@ -16,8 +16,9 @@ module Fedipub
     include Fedipub::HandlesDeleteRequests
     include Fedipub::Likeable
     include Fedipub::Announceable
+    include Fedipub::ApplicationActor
 
-    validates :federated_url, presence: { unless: :entity }, uniqueness: { unless: :local? }
+    validates :federated_url, presence: { unless: -> { entity || application_actor? } }, uniqueness: { unless: :local? }
     validates :username, presence: { unless: :local? }
     validates :server, presence: { unless: :local? }
     validates :inbox_url, presence: { unless: :local? }
@@ -25,9 +26,9 @@ module Fedipub
     validates :followers_url, presence: { unless: :local? }
     validates :followings_url, presence: { unless: :local? }
     validates :profile_url, presence: { unless: :local? }
-    validates :actor_type, presence: { unless: :local? }
+    validates :actor_type, presence: { unless: -> { local? && !application_actor? } }
     validates :entity_id, uniqueness: { scope: :entity_type }, if: :entity_type
-    validates :entity, presence: true, if: -> { local? && !tombstoned? }
+    validates :entity, presence: true, if: -> { local? && !tombstoned? && !application_actor? }
 
     belongs_to :entity, polymorphic: true, optional: true
     # FIXME: Handle this with something like undelete
@@ -59,7 +60,7 @@ module Fedipub
     end
 
     def federated_url
-      use_entity_attributes? ? Fedipub::Engine.routes.url_helpers.server_actor_url(self) : attributes['federated_url'].presence
+      use_entity_attributes? || application_actor? ? Fedipub::Engine.routes.url_helpers.server_actor_url(self) : attributes['federated_url'].presence
     end
 
     def username
