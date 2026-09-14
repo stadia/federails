@@ -7,6 +7,18 @@ RSpec.describe '/nodeinfo', type: :request do
       expect(response).to be_successful
     end
 
+    it 'includes a link to the nodeinfo details' do
+      get fedipub.node_info_url
+      link = response.parsed_body['links'].find { |link| link['rel'] == 'http://nodeinfo.diaspora.software/ns/schema/2.0' }
+      expect(link['href']).to match(%r{http://localhost:3000/nodeinfo/2.0})
+    end
+
+    it 'includes a FEP-2677 link to the application actor' do
+      get fedipub.node_info_url
+      link = response.parsed_body['links'].find { |link| link['rel'] == 'https://www.w3.org/ns/activitystreams#Application' }
+      expect(link['href']).to match(%r{http://localhost/federation/actors/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}})
+    end
+
     it 'rejects badly-signed requests' do
       get fedipub.node_info_url, headers: { signature: 'poop' }
       expect(response).to have_http_status :unauthorized

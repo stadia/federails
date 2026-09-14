@@ -37,6 +37,7 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 - Verify signatures on all incoming requests, if they are signed; RFC9421 is checked first, then draft-cavage-12
 - Advertise RFC9421 support via `Accept-Signature` header
 - Automatically create application actor to represent and sign requests the server as a whole
+- Include application actor link in nodeinfo (FEP-2677)
 
 ### Changed
 
