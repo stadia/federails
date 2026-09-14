@@ -32,11 +32,10 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ### Added
 
-- Sign outgoing POST requests with RFC9421 signatures and fall back to draft-cavage-12 sig on failure
-- Sign outgoing GET requests if a sender is provided
+- Sign outgoing POST and GET requests with RFC9421 signatures and fall back to draft-cavage-12 sig on failure
 - Verify signatures on all incoming requests, if they are signed; RFC9421 is checked first, then draft-cavage-12
 - Advertise RFC9421 support via `Accept-Signature` header
-- Automatically create application actor to represent and sign requests the server as a whole
+- Automatically create application actor to represent the server and sign outgoing GET requests
 - Dicover application actor via webfinger (FEP-d556) and nodeinfo (FEP-2677)
 
 ### Changed
