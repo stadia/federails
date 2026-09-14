@@ -37,6 +37,7 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 - Advertise RFC9421 support via `Accept-Signature` header
 - Automatically create application actor to represent the server and sign outgoing GET requests
 - Dicover application actor via webfinger (FEP-d556) and nodeinfo (FEP-2677)
+- Advertise capabilities via application actor (FEP-844e)
 
 ### Changed
 
