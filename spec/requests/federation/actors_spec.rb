@@ -142,4 +142,33 @@ RSpec.describe '/federation/actors', type: :request do
       end
     end
   end
+
+  describe 'when fetching Application actor' do
+    it 'renders a successful response' do
+      get fedipub.server_actor_url(Fedipub::Actor.application_actor), headers: { accept: Mime[:activitypub] }
+      expect(response).to be_successful
+    end
+
+    it 'fetches the correct application actor' do
+      get fedipub.server_actor_url(Fedipub::Actor.application_actor), headers: { accept: Mime[:activitypub] }
+      expect(response.parsed_body['preferredUsername']).to eq '__application'
+    end
+
+    it 'includes a proper id' do
+      get fedipub.server_actor_url(Fedipub::Actor.application_actor), headers: { accept: Mime[:activitypub] }
+      expect(response.parsed_body['id']).to match(%r{http://localhost/federation/actors/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}})
+    end
+
+    it 'fetches the application actor\'s public key' do
+      get fedipub.server_actor_url(Fedipub::Actor.application_actor), headers: { accept: Mime[:activitypub] }
+      expect(response.parsed_body['publicKey']['publicKeyPem']).to be_present
+    end
+
+    it 'allows unsigned requests' do
+      pending 'implementation of configuration option for requiring signatures'
+      allow(Fedipub::ServerController).to receive(:require_signature?).and_return(true)
+      get fedipub.server_actor_url(Fedipub::Actor.application_actor), headers: { accept: Mime[:activitypub] }
+      expect(response).to be_successful
+    end
+  end
 end
