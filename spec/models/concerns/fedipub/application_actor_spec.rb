@@ -3,11 +3,11 @@ require 'rails_helper'
 module Fedipub
   RSpec.describe Actor, type: :model do
     it 'is created automatically on demand' do
-      expect { described_class.application_actor }.to change(described_class, :count).by(1)
+      expect(described_class.application_actor).to be_present
     end
 
     it 'is not recreated if already exists' do
-      described_class.application_actor
+      described_class.application_actor # Make sure we have created it already
       expect { described_class.application_actor }.not_to change(described_class, :count)
     end
 

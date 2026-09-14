@@ -90,6 +90,7 @@ RSpec.describe 'POST federation/actors/:actor_id/inbox with a Note to become a C
         end
 
         it 'creates all the comments, post and actors' do
+          Fedipub::Actor.application_actor # Make sure application actor is created before we look for changes
           expect { make_request }.to change(Comment, :count).by(2)
                                  .and change(Post, :count).by(1)
                                  .and change(Fedipub::Actor, :count).by(2)
