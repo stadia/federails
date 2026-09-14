@@ -36,4 +36,6 @@ if actor.application_actor?
     'https://w3id.org/fep/2677',
     'https://w3id.org/fep/d556',
   ].map { |url| { 'href' => url } })
+else
+  json.generator Fedipub::Actor.application_actor.federated_url
 end

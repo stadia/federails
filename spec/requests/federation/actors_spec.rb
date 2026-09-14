@@ -64,6 +64,13 @@ RSpec.describe '/federation/actors', type: :request do
       )
     end
 
+    it 'links to generator (the application actor)' do
+      get fedipub.server_actor_url(user.fedipub_actor), headers: { accept: Mime[:activitypub] }
+      # We don't include the implements detail from the application actor,
+      # just provide the link. That's not strictly in line with FEP-844e, but it seems more efficient.
+      expect(response.parsed_body['generator']).to eq Fedipub::Actor.application_actor.federated_url
+    end
+
     ACTIVITYPUB_CONTENT_TYPES.each do |accept|
       it "responds with LD in response to a #{accept} request" do
         get fedipub.server_actor_url(user.fedipub_actor), headers: { accept: accept }
