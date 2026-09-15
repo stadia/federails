@@ -15,11 +15,16 @@ module Fediverse
         message = payload(activity)
         inboxes.each do |url|
           Rails.logger.debug { "Sending activity ##{activity.id} to inbox at #{url}" }
-          Fedipub::Utils::JsonRequest.post(url: url, message: message, from: activity.actor)
+          post_to_inbox(inbox_url: url, message: message, from: activity.actor)
         end
       end
 
       private
+
+      # Overridden by Fedipub::Moderation for filtering
+      def post_to_inbox(inbox_url:, message:, from: nil)
+        Fedipub::Utils::JsonRequest.post(url: inbox_url, message: message, from: from)
+      end
 
       # Determines the list of inboxes that the activity should be delivered to
       #
