@@ -18,13 +18,13 @@ module Fediverse
           request
         end
 
-        def verify!(request:) # rubocop:disable Metrics/CyclomaticComplexity, Metrics/AbcSize, Metrics/PerceivedComplexity
+        def verify!(request:)
           # Do we have a signature to verify?
-          return false if (!request.headers.key?('Signature-Input') || !request.headers.key?('Signature')) && (!request.headers.key?('Signature-Input') || (request.get_header('Signature-Input').blank? || request.get_header('Signature').blank?))
+          return false if !request.headers.key?('Signature-Input') || !request.headers.key?('Signature')
 
           # Verify the signature
           Linzer.verify!(request.try(:rack_request) || request) do |key_id|
-            sender = Fedipub::Actor.find_or_create_by_federation_url(key_id)
+            sender = Fedipub::Actor.find_or_create_by_federation_url(key_id.split('#', 2).first)
             raise Fediverse::Signature::BadSignature if sender.nil?
 
             linzer_key(sender)

@@ -49,7 +49,7 @@ module Fediverse
           return unless key_id
 
           Fedipub::Actor.find_or_create_by_federation_url(
-            key_id.split('#', 1).first
+            key_id.split('#', 2).first
           )
         end
 

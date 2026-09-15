@@ -124,21 +124,34 @@ RSpec.describe Fediverse::Signature::DraftCavage12 do
   end
 
   context 'when verifying incoming ActionDispatch::Requests' do
-    let(:request) { ActionDispatch::Request.new({}) }
+    let(:request) do
+      req = ActionDispatch::TestRequest.create
+      req.request_method = 'GET'
+      req.headers['Signature'] = 'keyId="http://activitypub.rocks/actor#mainKey",algorithm="rsa-sha256",headers="(request-target) host date digest",signature="SjWJWbWN7i0wzBvtPl8rbASWz5xQW6mcJmn+ibttBqtifLN7Sazz6m79cNfwwb8DMJ5cou1s7uEGKKCs+FLEEaDV5lp7q25WqS+lavg7T8hc0GppauB6hbgEKTwblDHYGEtbGmtdHgVCk9SuS13F0hZ8FD0k/5OxEPXe5WozsbM="'
+      req.headers['Digest'] = 'abc123'
+      req.headers['Date'] = 'date'
+      req
+    end
     let(:sender) { FactoryBot.create :distant_actor }
 
     before do
-      allow(described_class).to receive(:find_sender_by_key_id).and_return(sender)
-      allow(request).to receive(:headers).and_return({
-                                                       'Signature' => 'keyId="Test",algorithm="rsa-sha256",headers="(request-target) host date digest",signature="SjWJWbWN7i0wzBvtPl8rbASWz5xQW6mcJmn+ibttBqtifLN7Sazz6m79cNfwwb8DMJ5cou1s7uEGKKCs+FLEEaDV5lp7q25WqS+lavg7T8hc0GppauB6hbgEKTwblDHYGEtbGmtdHgVCk9SuS13F0hZ8FD0k/5OxEPXe5WozsbM="',
-                                                     })
+      allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url).and_return(sender)
+      allow(described_class).to receive(:do_verification).and_return(true)
+      described_class.verify!(request: request)
     end
 
+    it 'fetches sender details' do
+      expect(Fedipub::Actor).to have_received(:find_or_create_by_federation_url).with('http://activitypub.rocks/actor').once
+    end
+
+    # We don't do the actual verification here because the signature isn't valid, but this tests
+    # everything else, e.g. all our reading from the request object, etc
     it 'gets as far as verifying' do
-      # We don't do the actual verification here because the signature isn't valid, but this tests
-      # everything else, e.g. all the reading from the request object, etc
-      allow(described_class).to receive(:do_verification).and_return(true)
-      expect(described_class.verify!(request: request)).to be true
+      expect(described_class).to have_received(:do_verification).with(
+        'SjWJWbWN7i0wzBvtPl8rbASWz5xQW6mcJmn+ibttBqtifLN7Sazz6m79cNfwwb8DMJ5cou1s7uEGKKCs+FLEEaDV5lp7q25WqS+lavg7T8hc0GppauB6hbgEKTwblDHYGEtbGmtdHgVCk9SuS13F0hZ8FD0k/5OxEPXe5WozsbM=',
+        sender,
+        "(request-target): GET /\nhost: test.host\ndate: date\ndigest: abc123"
+      ).once
     end
   end
 end

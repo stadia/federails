@@ -101,21 +101,31 @@ RSpec.describe Fediverse::Signature::Rfc9421 do
 
   context 'when verifying incoming ActionDispatch::Requests' do
     let(:request) do
-      req = ActionDispatch::Request.new({})
-      req.add_header 'Signature', 'sig1=:e8UJ5wMiRaonlth5ERtE8GIiEH7Akcr493nQ07VPNo6y3qvjdKt0fo8VHO8xXDjmtYoatGYBGJVlMfIp06eVMEyNW2I4vN7XDAz7m5v1108vGzaDljrd0H8+SJ28g7bzn6h2xeL/8q+qUwahWA/JmC8aOC9iVnwbOKCc0WSrLgWQwTY6VLp42Qt7jjhYT5W7/wCvfK9A1VmHH1lJXsV873Z6hpxesd50PSmO+xaNeYvDLvVdZlhtw5PCtUYzKjHqwmaQ6DEuM8udRjYsoNqp2xZKcuCO1nKc0V3RjpqMZLuuyVbHDAbCzr0pg2d2VM/OC33JAU7meEjjaNz+d7LWPg==:'
-      req.add_header 'Signature-Input', 'sig1=("@method" "@authority" "@path" "@query" "content-digest" "content-type" "content-length");created=1618884475;keyid="test-key-rsa-pss"'
+      req = ActionDispatch::TestRequest.create
+      req.request_method = 'GET'
+      req.headers['Signature'] = 'sig1=:e8UJ5wMiRaonlth5ERtE8GIiEH7Akcr493nQ07VPNo6y3qvjdKt0fo8VHO8xXDjmtYoatGYBGJVlMfIp06eVMEyNW2I4vN7XDAz7m5v1108vGzaDljrd0H8+SJ28g7bzn6h2xeL/8q+qUwahWA/JmC8aOC9iVnwbOKCc0WSrLgWQwTY6VLp42Qt7jjhYT5W7/wCvfK9A1VmHH1lJXsV873Z6hpxesd50PSmO+xaNeYvDLvVdZlhtw5PCtUYzKjHqwmaQ6DEuM8udRjYsoNqp2xZKcuCO1nKc0V3RjpqMZLuuyVbHDAbCzr0pg2d2VM/OC33JAU7meEjjaNz+d7LWPg==:'
+      req.headers['Signature-Input'] = "sig1=(\"@method\" \"@target-uri\" \"content-digest\");created=#{Time.now.to_i};keyid=\"http://activitypub.rocks/actor#mainKey\""
+      req.headers['Content-Digest'] = 'abc123'
       req
     end
     let(:sender) { FactoryBot.create :distant_actor }
 
     before do
-      allow(Fedipub::Actor).to receive(:find_by_federation_url).and_return(sender)
+      allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url).and_return(sender)
     end
 
+    it 'fetches sender details' do
+      allow(described_class).to receive(:linzer_key).with(sender).and_return(double(verify: true))
+      described_class.verify!(request: request)
+      expect(Fedipub::Actor).to have_received(:find_or_create_by_federation_url).with('http://activitypub.rocks/actor').once
+    end
+
+    # We don't do the actual verification here because the signature isn't valid, but this tests
+    # everything else, e.g. all our reading from the request object, etc
     it 'gets as far as verifying' do
-      # We don't do the actual verification here because the signature isn't valid, but this tests
-      # everything else, e.g. all the reading from the request object, etc
-      expect(described_class.verify!(request: request)).to be false
+      allow(Linzer).to receive(:verify!).and_return(true)
+      described_class.verify!(request: request)
+      expect(Linzer).to have_received(:verify!).once
     end
   end
 end
