@@ -122,4 +122,23 @@ RSpec.describe Fediverse::Signature::DraftCavage12 do
       expect(described_class.verify!(request: signed_request)).to be true
     end
   end
+
+  context 'when verifying incoming ActionDispatch::Requests' do
+    let(:request) { ActionDispatch::Request.new({}) }
+    let(:sender) { FactoryBot.create :distant_actor }
+
+    before do
+      allow(described_class).to receive(:find_sender_by_key_id).and_return(sender)
+      allow(request).to receive(:headers).and_return({
+                                                       'Signature' => 'keyId="Test",algorithm="rsa-sha256",headers="(request-target) host date digest",signature="SjWJWbWN7i0wzBvtPl8rbASWz5xQW6mcJmn+ibttBqtifLN7Sazz6m79cNfwwb8DMJ5cou1s7uEGKKCs+FLEEaDV5lp7q25WqS+lavg7T8hc0GppauB6hbgEKTwblDHYGEtbGmtdHgVCk9SuS13F0hZ8FD0k/5OxEPXe5WozsbM="',
+                                                     })
+    end
+
+    it 'gets as far as verifying' do
+      # We don't do the actual verification here because the signature isn't valid, but this tests
+      # everything else, e.g. all the reading from the request object, etc
+      allow(described_class).to receive(:do_verification).and_return(true)
+      expect(described_class.verify!(request: request)).to be true
+    end
+  end
 end

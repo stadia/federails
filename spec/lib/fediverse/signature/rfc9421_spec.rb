@@ -98,4 +98,24 @@ RSpec.describe Fediverse::Signature::Rfc9421 do
       expect(described_class.verify!(request: signed_request)).to be true
     end
   end
+
+  context 'when verifying incoming ActionDispatch::Requests' do
+    let(:request) do
+      req = ActionDispatch::Request.new({})
+      req.add_header 'Signature', 'sig1=:e8UJ5wMiRaonlth5ERtE8GIiEH7Akcr493nQ07VPNo6y3qvjdKt0fo8VHO8xXDjmtYoatGYBGJVlMfIp06eVMEyNW2I4vN7XDAz7m5v1108vGzaDljrd0H8+SJ28g7bzn6h2xeL/8q+qUwahWA/JmC8aOC9iVnwbOKCc0WSrLgWQwTY6VLp42Qt7jjhYT5W7/wCvfK9A1VmHH1lJXsV873Z6hpxesd50PSmO+xaNeYvDLvVdZlhtw5PCtUYzKjHqwmaQ6DEuM8udRjYsoNqp2xZKcuCO1nKc0V3RjpqMZLuuyVbHDAbCzr0pg2d2VM/OC33JAU7meEjjaNz+d7LWPg==:'
+      req.add_header 'Signature-Input', 'sig1=("@method" "@authority" "@path" "@query" "content-digest" "content-type" "content-length");created=1618884475;keyid="test-key-rsa-pss"'
+      req
+    end
+    let(:sender) { FactoryBot.create :distant_actor }
+
+    before do
+      allow(Fedipub::Actor).to receive(:find_by_federation_url).and_return(sender)
+    end
+
+    it 'gets as far as verifying' do
+      # We don't do the actual verification here because the signature isn't valid, but this tests
+      # everything else, e.g. all the reading from the request object, etc
+      expect(described_class.verify!(request: request)).to be false
+    end
+  end
 end

@@ -78,7 +78,7 @@ module Fediverse
           headers.map do |header|
             case header
             when '(request-target)'
-              "(request-target): #{request.http_method} #{URI.parse(request.path).path}"
+              "(request-target): #{request.try(:http_method) || request.try(:method)} #{URI.parse(request.path).path}"
             else
               "#{header}: #{request.headers[header.capitalize]}"
             end

@@ -1,5 +1,8 @@
 require 'linzer'
 require 'linzer/faraday'
+require 'linzer/rack'
+
+# Linzer::Message.register_adapter ActionDispatch::Request, Linzer::Message::Adapter::Rack::Request
 
 module Fediverse
   module Signature
@@ -15,12 +18,12 @@ module Fediverse
           request
         end
 
-        def verify!(request:)
+        def verify!(request:) # rubocop:disable Metrics/CyclomaticComplexity, Metrics/AbcSize, Metrics/PerceivedComplexity
           # Do we have a signature to verify?
-          return false if !request.headers.key?('Signature-Input') || !request.headers.key?('Signature')
+          return false if (!request.headers.key?('Signature-Input') || !request.headers.key?('Signature')) && (!request.headers.key?('Signature-Input') || (request.get_header('Signature-Input').blank? || request.get_header('Signature').blank?))
 
           # Verify the signature
-          Linzer.verify!(request) do |key_id|
+          Linzer.verify!(request.try(:rack_request) || request) do |key_id|
             sender = Fedipub::Actor.find_or_create_by_federation_url(key_id)
             raise Fediverse::Signature::BadSignature if sender.nil?
 
