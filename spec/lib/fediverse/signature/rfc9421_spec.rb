@@ -60,7 +60,7 @@ RSpec.describe Fediverse::Signature::Rfc9421 do
     end
 
     it 'throws signature error if sender could not be found' do
-      allow(Fedipub::Actor).to receive(:find_by_federation_url).and_return(nil)
+      allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url).and_return(nil)
       expect { described_class.verify!(request: signed_request) }.to raise_error(Fediverse::Signature::BadSignature)
     end
 

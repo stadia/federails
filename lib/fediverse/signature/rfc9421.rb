@@ -21,7 +21,7 @@ module Fediverse
 
           # Verify the signature
           Linzer.verify!(request) do |key_id|
-            sender = Fedipub::Actor.find_by_federation_url(key_id)
+            sender = Fedipub::Actor.find_or_create_by_federation_url(key_id)
             raise Fediverse::Signature::BadSignature if sender.nil?
 
             linzer_key(sender)

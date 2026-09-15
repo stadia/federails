@@ -48,7 +48,7 @@ module Fediverse
         def find_sender_by_key_id(key_id)
           return unless key_id
 
-          Fedipub::Actor.find_by_federation_url(
+          Fedipub::Actor.find_or_create_by_federation_url(
             key_id.split('#', 1).first
           )
         end
