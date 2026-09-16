@@ -11,10 +11,12 @@ module Fediverse
         end
       end
 
-      def verify!(request:, require_signature: false)
-        Fediverse::Signature::Rfc9421.verify!(request: request) ||
-          Fediverse::Signature::DraftCavage12.verify!(request: request) ||
-          (require_signature ? raise(BadSignature) : true)
+      def verify!(request:, require_signature: false) # rubocop:disable Naming/PredicateMethod
+        success = Fediverse::Signature::Rfc9421.verify!(request: request) ||
+                  Fediverse::Signature::DraftCavage12.verify!(request: request)
+        raise(BadSignature) if require_signature && !success
+
+        true
       end
     end
   end
