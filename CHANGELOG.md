@@ -38,6 +38,7 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 - Automatically create application actor to represent the server and sign outgoing GET requests
 - Dicover application actor via webfinger (FEP-d556) and nodeinfo (FEP-2677)
 - Advertise capabilities via application actor (FEP-844e)
+- RFC9421 uses the `rsa-v1_5-sha256` key algorithm; others will be supported in future
 
 ### Changed
 
