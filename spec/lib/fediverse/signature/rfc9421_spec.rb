@@ -115,7 +115,7 @@ RSpec.describe Fediverse::Signature::Rfc9421 do
     end
 
     it 'fetches sender details' do
-      allow(described_class).to receive(:linzer_key).with(sender).and_return(double(verify: true))
+      allow(described_class).to receive(:linzer_public_key).with(sender).and_return(double(verify: true))
       described_class.verify!(request: request)
       expect(Fedipub::Actor).to have_received(:find_or_create_by_federation_url).with('http://activitypub.rocks/actor').once
     end

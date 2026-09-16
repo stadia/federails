@@ -12,7 +12,7 @@ module Fediverse
           request.headers['Content-Digest'] = digest(request.body) if request.body
           Linzer.sign!(
             request,
-            key:        linzer_key(sender),
+            key:        linzer_private_key(sender),
             components: components(request),
             params:     {
               created: Time.now.to_i,
@@ -31,7 +31,7 @@ module Fediverse
             sender = Fedipub::Actor.find_or_create_by_federation_url(key_id.split('#', 2).first)
             raise Fediverse::Signature::BadSignature if sender.nil?
 
-            linzer_key(sender)
+            linzer_public_key(sender)
           end
         rescue Linzer::Error
           raise Fediverse::Signature::BadSignature
@@ -40,9 +40,14 @@ module Fediverse
         private
 
         # Converts key to right structure for Linzer to use
-        def linzer_key(sender)
+        def linzer_private_key(sender)
           private_key = OpenSSL::PKey::RSA.new sender.private_key, Rails.application.credentials.secret_key_base
           Linzer.new_rsa_v1_5_sha256_key(private_key.to_pem, sender.key_id)
+        end
+
+        def linzer_public_key(sender)
+          public_key = OpenSSL::PKey::RSA.new(sender.public_key)
+          Linzer.new_rsa_v1_5_sha256_key(public_key.to_pem, sender.key_id)
         end
 
         def components(request)
