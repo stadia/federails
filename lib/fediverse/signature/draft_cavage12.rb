@@ -20,12 +20,13 @@ module Fediverse
           # Do we have a signature to verify?
           return false unless request.headers.key?('Signature')
 
-          # Find the sender
-          components = signature_components(request)
-          sender = find_sender_by_key_id(components['keyId'])
-
           # Have we got what we need?
-          raise Fediverse::Signature::BadSignature unless sender && components['signature'] && components['headers']
+          components = signature_components(request)
+          raise Fediverse::Signature::BadSignature, 'Malformed signature' unless components['signature'] && components['headers']
+
+          # Find the sender
+          sender = find_sender_by_key_id(components['keyId'])
+          raise Fediverse::Signature::BadSignature, "Couldn't find sender" unless sender
 
           # Build the expected payload
           comparison_string = signature_payload(request: request, headers: components['headers'])
