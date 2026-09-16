@@ -74,7 +74,7 @@ module Fedipub
     end
 
     def server
-      use_entity_attributes? ? Utils::Host.localhost : attributes['server']
+      use_entity_attributes? || application_actor? ? Utils::Host.localhost : attributes['server']
     end
 
     def actor_type
@@ -82,19 +82,19 @@ module Fedipub
     end
 
     def inbox_url
-      use_entity_attributes? ? Fedipub::Engine.routes.url_helpers.server_actor_inbox_url(self) : attributes['inbox_url']
+      use_entity_attributes? || application_actor? ? Fedipub::Engine.routes.url_helpers.server_actor_inbox_url(self) : attributes['inbox_url']
     end
 
     def outbox_url
-      use_entity_attributes? ? Fedipub::Engine.routes.url_helpers.server_actor_outbox_url(self) : attributes['outbox_url']
+      use_entity_attributes? || application_actor? ? Fedipub::Engine.routes.url_helpers.server_actor_outbox_url(self) : attributes['outbox_url']
     end
 
     def followers_url
-      use_entity_attributes? ? Fedipub::Engine.routes.url_helpers.followers_server_actor_url(self) : attributes['followers_url']
+      use_entity_attributes? || application_actor? ? Fedipub::Engine.routes.url_helpers.followers_server_actor_url(self) : attributes['followers_url']
     end
 
     def followings_url
-      use_entity_attributes? ? Fedipub::Engine.routes.url_helpers.following_server_actor_url(self) : attributes['followings_url']
+      use_entity_attributes? || application_actor? ? Fedipub::Engine.routes.url_helpers.following_server_actor_url(self) : attributes['followings_url']
     end
 
     def profile_url

@@ -166,6 +166,16 @@ RSpec.describe '/federation/actors', type: :request do
       expect(response.parsed_body['id']).to match(%r{http://localhost/federation/actors/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}})
     end
 
+    it 'has an inbox' do
+      get fedipub.server_actor_url(Fedipub::Actor.application_actor), headers: { accept: Mime[:activitypub] }
+      expect(response.parsed_body['inbox']).to be_present
+    end
+
+    it 'has an outbox' do
+      get fedipub.server_actor_url(Fedipub::Actor.application_actor), headers: { accept: Mime[:activitypub] }
+      expect(response.parsed_body['outbox']).to be_present
+    end
+
     it 'fetches the application actor\'s public key' do
       get fedipub.server_actor_url(Fedipub::Actor.application_actor), headers: { accept: Mime[:activitypub] }
       expect(response.parsed_body['publicKey']['publicKeyPem']).to be_present
