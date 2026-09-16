@@ -2,7 +2,7 @@ require 'linzer'
 require 'linzer/faraday'
 require 'linzer/rack'
 
-# Linzer::Message.register_adapter ActionDispatch::Request, Linzer::Message::Adapter::Rack::Request
+Linzer::Message.register_adapter ActionDispatch::Request, Linzer::Message::Adapter::Rack::Request
 
 module Fediverse
   module Signature
@@ -23,7 +23,7 @@ module Fediverse
           return false if !request.headers.key?('Signature-Input') || !request.headers.key?('Signature')
 
           # Verify the signature
-          Linzer.verify!(request.try(:rack_request) || request) do |key_id|
+          Linzer.verify!(request) do |key_id|
             sender = Fedipub::Actor.find_or_create_by_federation_url(key_id.split('#', 2).first)
             raise Fediverse::Signature::BadSignature if sender.nil?
 
