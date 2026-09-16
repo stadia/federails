@@ -43,6 +43,7 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 - Set "Fedipub/{version}" as the default user agent
 - Change default Accept header in HTTP requests to proper ActivityPub content types
+- Actor following/follower URLs are now optional - application actors often don't have them
 
 ### Maintenance
 
