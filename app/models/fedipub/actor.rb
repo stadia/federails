@@ -243,6 +243,10 @@ module Fedipub
         end
         return actor if actor
 
+        # Look for pure actors (e.g. the application actor)
+        actor = Fedipub::Actor.local.find_by username: username
+        return actor if actor
+
         # Last hope: Search for tombstoned actors
         Fedipub::Actor.local.tombstoned.find_by username: username
       end

@@ -49,6 +49,16 @@ RSpec.describe '/well-known', type: :request do
       end
     end
 
+    context 'when looking up application actor by acct: URI' do
+      before do
+        get fedipub.webfinger_url, params: { resource: Fedipub::Actor.application_actor.at_address(prefix: 'acct:') }
+      end
+
+      it 'renders a successful response' do
+        expect(response).to be_successful
+      end
+    end
+
     context 'when looking up application actor in line with FEP-d556' do
       before do
         get fedipub.webfinger_url, params: { resource: 'http://localhost' }
