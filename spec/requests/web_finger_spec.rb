@@ -73,8 +73,8 @@ RSpec.describe '/well-known', type: :request do
       end
 
       it 'has correct rel type' do
-        link = response.parsed_body['links'].first
-        expect(link['rel']).to eq 'https://www.w3.org/ns/activitystreams#Service'
+        link = response.parsed_body['links'].find { |link| link['rel'] == 'https://www.w3.org/ns/activitystreams#Service' }
+        expect(link).to be_present
       end
 
       it 'includes href to application actor' do

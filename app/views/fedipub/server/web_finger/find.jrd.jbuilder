@@ -3,11 +3,19 @@ json.subject params[:resource]
 links = [
   # Federation actor URL
   {
-    rel:  (@actor.application_actor? ? 'https://www.w3.org/ns/activitystreams#Service' : 'self'),
+    rel:  'self',
     type: Mime[:activitypub].to_s,
     href: @actor.federated_url,
   },
 ]
+
+if @actor.application_actor?
+  links << {
+    rel:  'https://www.w3.org/ns/activitystreams#Service',
+    type: Mime[:activitypub].to_s,
+    href: @actor.federated_url,
+  }
+end
 
 # User profile URL if configured
 # TODO: Add a profile controller/action in dummy to test this
