@@ -38,6 +38,12 @@ RSpec.describe '/federation/activities', type: :request do
       expect(response).to have_http_status :unauthorized
     end
 
+    it 'rejects unsigned requests when the concrete controller requires signatures' do
+      allow(Fedipub::Server::ActivitiesController).to receive(:require_signature?).and_return(true)
+      get fedipub.server_actor_outbox_url(local_actor), headers: { accept: Mime[:activitypub] }
+      expect(response).to have_http_status :unauthorized
+    end
+
     ACTIVITYPUB_CONTENT_TYPES.each do |accept|
       it "responds with LD in response to a #{accept} request" do
         get fedipub.server_actor_outbox_url(local_actor), headers: { accept: accept }

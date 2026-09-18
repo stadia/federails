@@ -27,7 +27,7 @@ module Fedipub
       return if defined?(Fedipub::Configuration) && Fedipub::Configuration.respond_to?(:verify_signatures) &&
                 Fedipub::Configuration.verify_signatures == false
 
-      Fediverse::Signature.verify!(request: request, require_signature: ServerController.require_signature?)
+      Fediverse::Signature.verify!(request: request, require_signature: self.class.require_signature?)
     rescue Fediverse::Signature::BadSignature => e
       Fedipub.logger.warn do
         {
