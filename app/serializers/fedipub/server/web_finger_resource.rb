@@ -16,38 +16,36 @@ module Fedipub
       attributes :subject
 
       attribute :links do |payload|
-        links = [
-          {
-            rel:  'self',
-            type: Mime[:activitypub].to_s,
-            href: payload.self_href,
-          },
-        ]
+        [
+          self_link(payload),
+          profile_link(payload),
+          subscribe_link(payload),
+          service_link(payload),
+        ].compact
+      end
 
-        if payload.profile_href
-          links << {
-            rel:  'https://webfinger.net/rel/profile-page',
-            type: 'text/html',
-            href: payload.profile_href,
-          }
-        end
+      private
 
-        if payload.remote_follow_url
-          links << {
-            rel:      'http://ostatus.org/schema/1.0/subscribe',
-            template: "#{payload.remote_follow_url}?uri={uri}",
-          }
-        end
+      def self_link(payload)
+        { rel: 'self', type: Mime[:activitypub].to_s, href: payload.self_href }
+      end
 
-        if payload.application_actor
-          links << {
-            rel:  'https://www.w3.org/ns/activitystreams#Service',
-            type: Mime[:activitypub].to_s,
-            href: payload.self_href,
-          }
-        end
+      def profile_link(payload)
+        return unless payload.profile_href
 
-        links
+        { rel: 'https://webfinger.net/rel/profile-page', type: 'text/html', href: payload.profile_href }
+      end
+
+      def subscribe_link(payload)
+        return unless payload.remote_follow_url
+
+        { rel: 'http://ostatus.org/schema/1.0/subscribe', template: "#{payload.remote_follow_url}?uri={uri}" }
+      end
+
+      def service_link(payload)
+        return unless payload.application_actor
+
+        { rel: 'https://www.w3.org/ns/activitystreams#Service', type: Mime[:activitypub].to_s, href: payload.self_href }
       end
     end
   end
