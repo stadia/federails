@@ -55,6 +55,23 @@ RSpec.describe Fediverse::Signature::Rfc9421 do
       expect(described_class.verify!(request: signed_request)).to be true
     end
 
+    it 'throws signature error if the body is changed after signing' do
+      signed_request.body = 'tampered'
+
+      expect { described_class.verify!(request: signed_request) }.to raise_error(Fediverse::Signature::BadSignature)
+    end
+
+    it 'throws signature error if Signature-Input is present without Signature' do
+      unsigned = Faraday.default_connection.build_request(:post) do |req|
+        req.url '/inbox'
+        req.body = 'test'
+        req.headers['Host'] = 'example.com'
+        req.headers['Signature-Input'] = signed_request.headers['Signature-Input']
+      end
+
+      expect { described_class.verify!(request: unsigned) }.to raise_error(Fediverse::Signature::BadSignature)
+    end
+
     it 'returns false if request is not signed' do
       expect(described_class.verify!(request: request)).to be false
     end

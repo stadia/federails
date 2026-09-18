@@ -28,16 +28,16 @@ module Fediverse
 
         #: (request: untyped) -> untyped
         def verify!(request:)
-          # Do we have a signature to verify?
-          return false if !request.headers.key?('Signature-Input') || !request.headers.key?('Signature')
+          return false unless complete_rfc9421_headers?(request)
 
-          # Verify the signature
           Linzer.verify!(request) do |key_id|
             sender = Fedipub::Actor.find_or_create_by_federation_url(key_id.split('#', 2).first) #: Fedipub::Actor?
             raise Fediverse::Signature::BadSignature if sender.nil?
 
             linzer_public_key(sender)
           end
+          verify_content_digest!(request)
+          true
         rescue Linzer::Error, ActiveRecord::RecordNotFound
           raise Fediverse::Signature::BadSignature
         end
@@ -61,6 +61,25 @@ module Fediverse
           else
             %w[@method @target-uri]
           end
+        end
+
+        def complete_rfc9421_headers?(request)
+          has_input = request.headers.key?('Signature-Input')
+          has_signature = request.headers.key?('Signature')
+          raise Fediverse::Signature::BadSignature if has_input && !has_signature
+
+          has_input && has_signature
+        end
+
+        def verify_content_digest!(request)
+          body = if request.respond_to?(:raw_post)
+                   request.raw_post
+                 else
+                   request.body
+                 end
+          return unless body && !body.to_s.empty?
+
+          raise Fediverse::Signature::BadSignature, 'Content-Digest mismatch' unless request.headers['Content-Digest'] == digest(body)
         end
 
         def digest(message)

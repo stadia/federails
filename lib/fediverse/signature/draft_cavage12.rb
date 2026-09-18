@@ -22,28 +22,36 @@ module Fediverse
 
         #: (request: untyped) -> untyped
         def verify!(request:)
-          # Do we have a signature to verify?
           return false unless request.headers.key?('Signature')
 
-          # Have we got what we need?
-          components = signature_components(request)
-          raise Fediverse::Signature::BadSignature, 'Malformed signature' unless components['signature'] && components['headers']
-
-          # Find the sender
-          sender = find_sender_by_key_id(components['keyId'])
-          raise Fediverse::Signature::BadSignature, "Couldn't find sender" unless sender
-
-          # Build the expected payload
-          comparison_string = signature_payload(request: request, headers: components['headers'])
-
-          # Verify the payload against the signature
-          result = do_verification(components['signature'], sender, comparison_string)
+          components = parsed_signature_components(request)
+          sender = sender_from!(components)
+          verify_digest!(request, components['headers'])
+          result = do_verification(
+            components['signature'],
+            sender,
+            signature_payload(request: request, headers: components['headers'])
+          )
           raise Fediverse::Signature::BadSignature unless result
 
           result
         end
 
         private
+
+        def parsed_signature_components(request)
+          components = signature_components(request)
+          raise Fediverse::Signature::BadSignature, 'Malformed signature' unless components['signature'] && components['headers']
+
+          components
+        end
+
+        def sender_from!(components)
+          sender = find_sender_by_key_id(components['keyId'])
+          raise Fediverse::Signature::BadSignature, "Couldn't find sender" unless sender
+
+          sender
+        end
 
         def do_verification(signature, sender, comparison_string)
           signature = Base64.decode64(signature)
@@ -70,7 +78,7 @@ module Fediverse
 
         def signature_components(request)
           request.headers['Signature'].split(',').to_h do |pair|
-            /\A(?<key>\w+)="(?<value>.*)"\z/ =~ pair
+            /\A(?<key>\w+)="(?<value>.*)"\z/ =~ pair.strip
             [key, value]
           end
         end
@@ -86,7 +94,7 @@ module Fediverse
           headers.map do |header|
             case header
             when '(request-target)'
-              "(request-target): #{(request.try(:http_method) || request.try(:method)).downcase} #{URI.parse(request.path).path}"
+              "(request-target): #{(request.try(:http_method) || request.try(:method)).downcase} #{request_target(request)}"
             else
               "#{header}: #{request.headers[header.capitalize]}"
             end
@@ -99,6 +107,43 @@ module Fediverse
           else
             %w[(request-target) host date]
           end
+        end
+
+        def verify_digest!(request, signed_headers)
+          body = request_body(request)
+          return unless body_present?(body)
+
+          names = signed_headers.to_s.split.map(&:downcase)
+          raise Fediverse::Signature::BadSignature, 'Unsigned digest' unless names.include?('digest')
+          raise Fediverse::Signature::BadSignature, 'Digest mismatch' unless request.headers['Digest'] == digest(body)
+        end
+
+        def request_body(request)
+          if request.respond_to?(:raw_post)
+            request.raw_post
+          else
+            request.body
+          end
+        end
+
+        def body_present?(body)
+          body && !body.to_s.empty?
+        end
+
+        def request_target(request)
+          return request.fullpath if request.respond_to?(:fullpath)
+
+          uri = URI.parse(request.path.to_s)
+          query = request_query(uri, request)
+          query.present? ? "#{uri.path}?#{query}" : uri.path
+        end
+
+        def request_query(uri, request)
+          return uri.query if uri.query.present?
+          return unless request.respond_to?(:params)
+
+          params = request.params
+          URI.encode_www_form(params) if params.respond_to?(:any?) && params.any?
         end
 
         def signature(sender:, request:)

@@ -26,7 +26,7 @@ RSpec.describe Fediverse::Signature do
       expect(Fediverse::Signature::Rfc9421).to have_received(:verify!).with(request: request).once
     end
 
-    it 'short-circuits draft-cavage-12 if Rfc9421 throws a bad signature error' do # rubocop:todo RSpec/ExampleLength
+    it 'short-circuits draft-cavage-12 if Rfc9421 throws a bad signature error' do
       allow(Fediverse::Signature::Rfc9421).to receive(:verify!).and_raise(Fediverse::Signature::BadSignature)
       allow(Fediverse::Signature::DraftCavage12).to receive(:verify!).and_return true
       begin

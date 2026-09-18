@@ -18,7 +18,7 @@ RSpec.describe Fedipub::Utils::JsonRequest do
       end
     end
 
-    it 'signs the request if a sender is specified' do # rubocop:todo RSpec/ExampleLength
+    it 'signs the request if a sender is specified' do
       sender = FactoryBot.create(:user).fedipub_actor
       allow(Fediverse::Signature::Rfc9421).to receive(:sign).and_call_original
       VCR.use_cassette 'fediverse/request/get_actor_200' do
@@ -51,7 +51,7 @@ RSpec.describe Fedipub::Utils::JsonRequest do
       allow(Fediverse::Signature::DraftCavage12).to receive(:sign)
     end
 
-    it 'tries RFC9421 signing first' do # rubocop:disable RSpec/MultipleExpectations
+    it 'tries RFC9421 signing first' do
       allow(response).to receive(:status).and_return(201)
       described_class.post(url: 'https://example.com', message: '{}', from: local_actor)
       expect(builder).to have_received(:build_response).once
@@ -59,7 +59,7 @@ RSpec.describe Fedipub::Utils::JsonRequest do
       expect(Fediverse::Signature::DraftCavage12).not_to have_received(:sign)
     end
 
-    it 'tries draft-cavage-12 signing if RFC9421 attempt returns a 400' do # rubocop:disable RSpec/MultipleExpectations
+    it 'tries draft-cavage-12 signing if RFC9421 attempt returns a 400' do
       allow(response).to receive(:status).and_return(400)
       described_class.post(url: 'https://example.com', message: '{}', from: local_actor)
       expect(builder).to have_received(:build_response).twice
@@ -67,7 +67,7 @@ RSpec.describe Fedipub::Utils::JsonRequest do
       expect(Fediverse::Signature::DraftCavage12).to have_received(:sign).once
     end
 
-    it 'tries draft-cavage-12 signing if RFC9421 attempt returns a 401' do # rubocop:disable RSpec/MultipleExpectations
+    it 'tries draft-cavage-12 signing if RFC9421 attempt returns a 401' do
       allow(response).to receive(:status).and_return(401)
       described_class.post(url: 'https://example.com', message: '{}', from: local_actor)
       expect(builder).to have_received(:build_response).twice

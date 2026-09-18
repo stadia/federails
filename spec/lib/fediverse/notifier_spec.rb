@@ -236,9 +236,9 @@ module Fediverse
           instance_double(Faraday::Response, status: 410, body: 'gone', headers: {})
         )
 
-        expect {
+        expect do
           described_class.deliver_to_inbox(activity, 'https://remote.example/inbox')
-        }.to raise_error(Fedipub::PermanentDeliveryError)
+        end.to raise_error(Fedipub::PermanentDeliveryError)
       end
 
       it 'refuses to send a Create activity when the serialized object is missing' do

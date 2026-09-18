@@ -4,8 +4,8 @@ module Fedipub
   module Server
     unless const_defined?(:NodeinfoIndexPayload)
       NodeinfoIndexPayload = Struct.new(
-        :href,                  #: untyped
-        :application_actor_href #: untyped
+        :href,                   #: untyped
+        :application_actor_href  #: untyped
       )
     end
 

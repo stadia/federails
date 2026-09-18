@@ -12,7 +12,7 @@ module Fedipub
         when %r{^https?://#{Regexp.escape(Fedipub::Utils::Host.localhost)}/?$}
           @actor = Fedipub::Actor.application_actor
         when %r{^https?://.+}
-          @actor = Fedipub::Actor.find_by_federation_url!(resource) # rubocop:disable Rails/DynamicFindBy
+          @actor = Fedipub::Actor.find_by_federation_url!(resource)
         when /^acct:.+/
           @actor = Fedipub::Actor.find_local_by_username(username)
           raise Fedipub::Actor::TombstonedError if @actor&.tombstoned?

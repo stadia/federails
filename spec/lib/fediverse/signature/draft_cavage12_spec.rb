@@ -68,6 +68,18 @@ RSpec.describe Fediverse::Signature::DraftCavage12 do
       expect(described_class.verify!(request: signed_request)).to be true
     end
 
+    it 'throws signature error if the body is changed after signing' do
+      signed_request.body = 'tampered'
+
+      expect { described_class.verify!(request: signed_request) }.to raise_error(Fediverse::Signature::BadSignature)
+    end
+
+    it 'parses Signature parameters that include spaces after commas' do
+      signed_request.headers['Signature'] = signed_request.headers['Signature'].gsub(',', ', ')
+
+      expect(described_class.verify!(request: signed_request)).to be true
+    end
+
     it 'returns false if request is not signed' do
       expect(described_class.verify!(request: request)).to be false
     end
@@ -108,6 +120,11 @@ RSpec.describe Fediverse::Signature::DraftCavage12 do
 
       it 'starts with request target' do
         expect(payload).to match(%r{\A\(request-target\): get /outbox$})
+      end
+
+      it 'includes the query string in the request target' do
+        request.params['page'] = '2'
+        expect(payload).to match(%r{\A\(request-target\): get /outbox\?page=2$})
       end
 
       it 'includes host' do
