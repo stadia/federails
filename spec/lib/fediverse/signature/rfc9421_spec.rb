@@ -23,6 +23,47 @@ RSpec.describe Fediverse::Signature::Rfc9421 do
       expect(signed_request.headers['Content-Digest']).to eq 'sha-256=:n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg=:'
     end
 
+    it 'throws signature error if the body is not bound by a signed content-digest' do
+      request.headers['Content-Digest'] = described_class.send(:digest, request.body)
+      Linzer.sign!(
+        request,
+        key:        described_class.send(:linzer_private_key, actor),
+        components: %w[@method @target-uri],
+        params:     { created: Time.now.to_i, alg: 'rsa-v1_5-sha256' }
+      )
+      request.body = 'tampered'
+      request.headers['Content-Digest'] = described_class.send(:digest, 'tampered')
+
+      expect { described_class.verify!(request: request) }.to raise_error(Fediverse::Signature::BadSignature)
+    end
+
+    it 'accepts a signed Content-Digest dictionary with extra algorithms' do
+      sha256 = Base64.strict_encode64(OpenSSL::Digest.new('SHA256').digest(request.body))
+      sha512 = Base64.strict_encode64(OpenSSL::Digest.new('SHA512').digest(request.body))
+      request.headers['Content-Digest'] = "sha-256=:#{sha256}:, sha-512=:#{sha512}:"
+      Linzer.sign!(
+        request,
+        key:        described_class.send(:linzer_private_key, actor),
+        components: %w[@method @target-uri content-digest],
+        params:     { created: Time.now.to_i, alg: 'rsa-v1_5-sha256' }
+      )
+
+      expect(described_class.verify!(request: request)).to be true
+    end
+
+    it 'accepts a signed sha-512 Content-Digest' do
+      sha512 = Base64.strict_encode64(OpenSSL::Digest.new('SHA512').digest(request.body))
+      request.headers['Content-Digest'] = "sha-512=:#{sha512}:"
+      Linzer.sign!(
+        request,
+        key:        described_class.send(:linzer_private_key, actor),
+        components: %w[@method @target-uri content-digest],
+        params:     { created: Time.now.to_i, alg: 'rsa-v1_5-sha256' }
+      )
+
+      expect(described_class.verify!(request: request)).to be true
+    end
+
     it 'adds Signature header to request' do
       expect(signed_request.headers['Signature']).to be_present
     end
@@ -57,6 +98,20 @@ RSpec.describe Fediverse::Signature::Rfc9421 do
 
     it 'throws signature error if the body is changed after signing' do
       signed_request.body = 'tampered'
+
+      expect { described_class.verify!(request: signed_request) }.to raise_error(Fediverse::Signature::BadSignature)
+    end
+
+    it 'throws signature error if sender public key is invalid' do
+      allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url).and_return(actor)
+      allow(actor).to receive(:public_key).and_return('not-a-pem')
+
+      expect { described_class.verify!(request: signed_request) }.to raise_error(Fediverse::Signature::BadSignature)
+    end
+
+    it 'throws signature error if sender public key is missing' do
+      allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url).and_return(actor)
+      allow(actor).to receive(:public_key).and_return(nil)
 
       expect { described_class.verify!(request: signed_request) }.to raise_error(Fediverse::Signature::BadSignature)
     end

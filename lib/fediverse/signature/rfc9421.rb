@@ -10,6 +10,11 @@ Linzer::Message.register_adapter ActionDispatch::Request, Linzer::Message::Adapt
 module Fediverse
   module Signature
     class Rfc9421
+      CONTENT_DIGESTS = {
+        'sha-256' => 'SHA256',
+        'sha-512' => 'SHA512',
+      }.freeze
+
       class << self
         #: (sender: Fedipub::Actor, request: untyped) -> untyped
         def sign(sender:, request:)
@@ -53,6 +58,8 @@ module Fediverse
         def linzer_public_key(sender)
           public_key = OpenSSL::PKey::RSA.new(sender.public_key)
           Linzer.new_rsa_v1_5_sha256_key(public_key.to_pem, sender.key_id)
+        rescue OpenSSL::PKey::PKeyError, ArgumentError, TypeError
+          raise Fediverse::Signature::BadSignature
         end
 
         def components(request)
@@ -72,14 +79,34 @@ module Fediverse
         end
 
         def verify_content_digest!(request)
-          body = if request.respond_to?(:raw_post)
-                   request.raw_post
-                 else
-                   request.body
-                 end
+          body = request_body(request)
           return unless body && !body.to_s.empty?
 
-          raise Fediverse::Signature::BadSignature, 'Content-Digest mismatch' unless request.headers['Content-Digest'] == digest(body)
+          raise Fediverse::Signature::BadSignature, 'Content-Digest not signed' unless signed_content_digest?(request)
+          raise Fediverse::Signature::BadSignature, 'Content-Digest mismatch' unless matching_content_digest?(request.headers['Content-Digest'], body)
+        end
+
+        def signed_content_digest?(request)
+          Linzer::Signature.build(
+            'signature-input' => request.headers['Signature-Input'].to_s,
+            'signature'       => request.headers['Signature'].to_s
+          ).components.include?('content-digest')
+        end
+
+        def matching_content_digest?(header, body)
+          return false if header.blank?
+
+          dict = Linzer::HTTP::StructuredField.parse_dictionary(header)
+          digest_body = body.to_s
+          CONTENT_DIGESTS.any? do |name, algorithm|
+            dict[name]&.value == OpenSSL::Digest.new(algorithm).digest(digest_body)
+          end
+        rescue Linzer::Error
+          false
+        end
+
+        def request_body(request)
+          request.respond_to?(:raw_post) ? request.raw_post : request.body
         end
 
         def digest(message)

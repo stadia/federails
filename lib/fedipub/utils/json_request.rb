@@ -56,7 +56,7 @@ module Fedipub
         req = build_request(method: method, url: url, params: params, headers: headers, message: message)
         response = connection.builder.build_response(
           connection,
-          from ? Fediverse::Signature.sign(sender: from, request: req.dup) : req
+          from ? Fediverse::Signature.sign(sender: from, request: duplicate_request(req)) : req
         )
         # If signature was present and rejected, try double-knocking
         return response unless from && response.status.in?([400, 401])
@@ -65,6 +65,12 @@ module Fedipub
           connection,
           Fediverse::Signature.sign(sender: from, request: req, legacy_signature: true)
         )
+      end
+
+      def duplicate_request(request)
+        # Faraday::Request is a Struct: Request#dup shares Headers, and headers=
+        # calls replace on that shared object. Assign a copy via member_set.
+        request.dup.tap { |copy| copy.send(:member_set, :headers, request.headers.dup) }
       end
 
       def build_request(method:, url:, params: {}, headers: {}, message: nil) # rubocop:todo Metrics/AbcSize, Metrics/MethodLength

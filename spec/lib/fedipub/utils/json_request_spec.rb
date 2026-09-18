@@ -45,7 +45,9 @@ RSpec.describe Fedipub::Utils::JsonRequest do
     before do
       allow(described_class.instance).to receive(:connection).and_return(faraday)
       allow(faraday).to receive(:builder).and_return(builder)
-      allow(faraday).to receive(:build_request)
+      allow(faraday).to receive(:build_request) do |method, &block|
+        Faraday.default_connection.build_request(method, &block)
+      end
       allow(builder).to receive(:build_response).and_return(response)
       allow(Fediverse::Signature::Rfc9421).to receive(:sign)
       allow(Fediverse::Signature::DraftCavage12).to receive(:sign)
@@ -73,6 +75,35 @@ RSpec.describe Fedipub::Utils::JsonRequest do
       expect(builder).to have_received(:build_response).twice
       expect(Fediverse::Signature::Rfc9421).to have_received(:sign).once
       expect(Fediverse::Signature::DraftCavage12).to have_received(:sign).once
+    end
+  end
+
+  describe 'double-knock header isolation' do
+    let(:local_actor) { FactoryBot.create(:user).fedipub_actor }
+
+    before do
+      local_actor.send :ensure_key_pair_exists!
+    end
+
+    it 'does not leak RFC9421 headers into the draft-cavage-12 retry' do
+      captured = []
+      conn = Faraday.new do |faraday|
+        faraday.adapter :test do |stub|
+          stub.post('/inbox') do |env|
+            captured << env.request_headers.dup
+            [401, {}, 'unauthorized']
+          end
+        end
+      end
+      allow(described_class.instance).to receive(:connection).and_return(conn)
+
+      VCR.turned_off do
+        described_class.post(url: 'https://example.com/inbox', message: '{}', from: local_actor)
+      end
+
+      expect(captured.map { |headers| headers['Signature-Input'].present? }).to eq [true, false]
+      expect(captured.last['Content-Digest']).to be_blank
+      expect(captured.last['Signature']).to be_present
     end
   end
 
