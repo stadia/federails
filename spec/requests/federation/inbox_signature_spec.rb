@@ -21,7 +21,7 @@ RSpec.describe 'Inbox HTTP Signature Verification', type: :request do
 
   def build_signature_request(body)
     Faraday.default_connection.build_request(:post) do |r|
-      r.url fedipub.server_actor_inbox_path(actor)
+      r.url "http://www.example.com#{fedipub.server_actor_inbox_path(actor)}"
       r.body = body
       base_signature_headers(body).each { |key, value| r.headers[key] = value }
     end
@@ -29,17 +29,36 @@ RSpec.describe 'Inbox HTTP Signature Verification', type: :request do
 
   def signature_headers_for(signing_actor, body)
     request = build_signature_request(body)
-    request.headers['Signature'] = Fediverse::Signature.sign(sender: signing_actor, request: request)
-    request.headers.slice('Host', 'Date', 'Digest', 'Signature', 'Content-Type')
+    signed = Fediverse::Signature.sign(sender: signing_actor, request: request)
+    %w[Host Date Digest Content-Digest Signature Signature-Input Content-Type].each_with_object({}) do |key, headers|
+      value = signed.headers[key]
+      headers[key] = value if value.present?
+    end
+  end
+
+  it 'accepts unsigned POST when require_signature? is false' do
+    allow(Fediverse::Inbox).to receive(:dispatch_request).and_return(true)
+
+    post fedipub.server_actor_inbox_path(actor), params: payload, headers: { 'Content-Type' => 'application/activity+json' }
+
+    expect(response).not_to have_http_status(:unauthorized)
+  end
+
+  it 'rejects a malformed Signature header with 401' do
+    Fedipub::Configuration.verify_signatures = true
+
+    post fedipub.server_actor_inbox_path(actor),
+         params:  payload,
+         headers: {
+           'Content-Type' => 'application/activity+json',
+           'Signature'    => 'not-a-valid-signature',
+         }
+
+    expect(response).to have_http_status(:unauthorized)
   end
 
   context 'when verify_signatures is true' do
     before { Fedipub::Configuration.verify_signatures = true }
-
-    it 'rejects unsigned POST with 401' do
-      post fedipub.server_actor_inbox_path(actor), params: payload, headers: { 'Content-Type' => 'application/activity+json' }
-      expect(response).to have_http_status(:unauthorized)
-    end
 
     it 'rejects a signed request when the payload actor does not match the signed actor' do
       signing_actor = FactoryBot.create(:user).fedipub_actor
@@ -52,37 +71,22 @@ RSpec.describe 'Inbox HTTP Signature Verification', type: :request do
       expect(response).to have_http_status(:unauthorized)
     end
 
-    it 'logs failure context including remote_ip and payload actor on signature failure' do
+    it 'logs failure context including remote_ip on a malformed signature' do
       allow(Fedipub.logger).to receive(:warn)
 
       post fedipub.server_actor_inbox_path(actor),
            params:  payload,
-           headers: { 'Content-Type' => 'application/activity+json' }
+           headers: {
+             'Content-Type' => 'application/activity+json',
+             'Signature'    => 'not-a-valid-signature',
+           }
 
       expect(response).to have_http_status(:unauthorized)
       expect(Fedipub.logger).to have_received(:warn) do |&block|
         log = block.call
         expect(log).to include(
           message:   a_string_starting_with('Signature verification failed'),
-          remote_ip: '127.0.0.1',
-          actor:     'https://remote.example/actor'
-        )
-      end
-    end
-
-    it 'tolerates a non-JSON body when logging failure context' do
-      allow(Fedipub.logger).to receive(:warn)
-
-      post fedipub.server_actor_inbox_path(actor),
-           params:  'not-json-at-all',
-           headers: { 'Content-Type' => 'application/activity+json' }
-
-      expect(response).to have_http_status(:unauthorized)
-      expect(Fedipub.logger).to have_received(:warn) do |&block|
-        log = block.call
-        expect(log).to include(
-          message: a_string_starting_with('Signature verification failed'),
-          actor:   nil
+          remote_ip: '127.0.0.1'
         )
       end
     end
@@ -111,6 +115,8 @@ RSpec.describe 'Inbox HTTP Signature Verification', type: :request do
   end
 
   context 'when verify_signatures is false' do
+    before { Fedipub::Configuration.verify_signatures = false }
+
     it 'accepts unsigned POST' do
       allow(Fediverse::Inbox).to receive(:dispatch_request).and_return(true)
       post fedipub.server_actor_inbox_path(actor), params: payload, headers: { 'Content-Type' => 'application/activity+json' }

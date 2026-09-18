@@ -24,8 +24,18 @@ module Fedipub
     private
 
     def verify_request_signature!
+      return if defined?(Fedipub::Configuration) && Fedipub::Configuration.respond_to?(:verify_signatures) &&
+                Fedipub::Configuration.verify_signatures == false
+
       Fediverse::Signature.verify!(request: request, require_signature: ServerController.require_signature?)
-    rescue Fediverse::Signature::BadSignature
+    rescue Fediverse::Signature::BadSignature => e
+      Fedipub.logger.warn do
+        {
+          message:         "Signature verification failed: #{e.message}",
+          remote_ip:       request.remote_ip,
+          signature_input: request.headers['Signature-Input'],
+        }
+      end
       head :unauthorized
     end
 

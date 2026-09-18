@@ -1,6 +1,7 @@
 module Fediverse
   module Signature
     class BadSignature < StandardError; end
+    SignatureVerificationError = BadSignature
 
     class << self
       def sign(sender:, request:, legacy_signature: false)
