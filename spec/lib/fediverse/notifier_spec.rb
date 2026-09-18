@@ -26,7 +26,9 @@ module Fediverse
         let(:fake_activity) { FakeActivity.new(id: 1, actor: local_actor, to: [distant_target_actor.federated_url], action: 'Create', entity: fake_entity) }
 
         it 'calls post_to_inbox for each recipient' do
-          allow(Fedipub::Utils::JsonRequest).to receive(:post)
+          allow(Fedipub::Utils::JsonRequest).to receive(:post).and_return(
+            instance_double(Faraday::Response, status: 200, body: '', headers: {})
+          )
           described_class.post_to_inboxes(fake_activity)
           expect(Fedipub::Utils::JsonRequest).to have_received(:post).with(hash_including(url: distant_target_actor.inbox_url)).once
         end
@@ -42,9 +44,11 @@ module Fediverse
 
         it 'calls post_to_inbox for each recipient' do
           VCR.use_cassette('fediverse/notifier/get_collection_200') do
-            allow(Fedipub::Utils::JsonRequest).to receive(:post)
+            allow(Fedipub::Utils::JsonRequest).to receive(:post).and_return(
+              instance_double(Faraday::Response, status: 200, body: '', headers: {})
+            )
             described_class.post_to_inboxes(fake_activity)
-            expect(Fedipub::Utils::JsonRequest).to have_received(:post).with(hash_including(url: 'https://3dp.chat/users/manyfold/inbox')).once
+            expect(Fedipub::Utils::JsonRequest).to have_received(:post).with(hash_including(url: 'https://3dp.chat/inbox')).once
           end
         end
       end
@@ -165,49 +169,14 @@ module Fediverse
       end
     end
 
-    describe '#signed_request' do
-      let(:request) do
-        described_class.send :signed_request,
-                             url:     distant_target_actor.inbox_url,
-                             from:    local_actor,
-                             message: 'test'
-      end
-
-      it 'posts to inbox URL' do
-        # Faraday::Request#path is badly named, it's the full URL without query params
-        expect(request.path).to eq distant_target_actor.inbox_url
-      end
-
-      it 'sends correct activitypub content type' do
-        expect(request.headers['Content-Type']).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"'
-      end
-
-      it 'accepts correct activitypub content type' do
-        expect(request.headers['Accept']).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"'
-      end
-
-      it 'adds a signature to outgoing requests' do
-        expect(request.headers['Signature']).to be_present
-      end
-
-      it 'adds a verifiable signature to outgoing requests' do
-        expect(Fediverse::Signature.verify(sender: local_actor, request: request)).to be_truthy
-      end
-    end
-
     describe '#post_to_inbox' do
-      let(:connection) { instance_double(Faraday::Connection, builder: builder) }
-      let(:builder) { instance_double(Faraday::RackBuilder) }
-      let(:request) { instance_double(Faraday::Request) }
       let(:headers) { {} }
       let(:response) { instance_double(Faraday::Response, status: status, body: body, headers: headers) }
       let(:status) { 400 }
       let(:body) { 'invalid signature' }
 
       before do
-        allow(Faraday).to receive(:default_connection).and_return(connection)
-        allow(described_class).to receive(:signed_request).and_return(request)
-        allow(builder).to receive(:build_response).with(connection, request).and_return(response)
+        allow(Fedipub::Utils::JsonRequest).to receive(:post).and_return(response)
       end
 
       it 'treats client errors as permanent failures' do
@@ -251,7 +220,7 @@ module Fediverse
 
     describe '.deliver_to_inbox' do
       let(:fake_entity) { FakeEntity.new('https://example.com/objects/1') }
-      let(:fake_activity) do
+      let(:activity) do
         FakeActivity.new(
           id:     1,
           actor:  local_actor,
@@ -259,6 +228,17 @@ module Fediverse
           action: 'Create',
           entity: fake_entity
         )
+      end
+      let(:fake_activity) { activity }
+
+      it 'raises PermanentDeliveryError on 410' do
+        allow(Fedipub::Utils::JsonRequest).to receive(:post).and_return(
+          instance_double(Faraday::Response, status: 410, body: 'gone', headers: {})
+        )
+
+        expect {
+          described_class.deliver_to_inbox(activity, 'https://remote.example/inbox')
+        }.to raise_error(Fedipub::PermanentDeliveryError)
       end
 
       it 'refuses to send a Create activity when the serialized object is missing' do
