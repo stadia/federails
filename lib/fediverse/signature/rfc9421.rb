@@ -38,7 +38,7 @@ module Fediverse
 
             linzer_public_key(sender)
           end
-        rescue Linzer::Error
+        rescue Linzer::Error, ActiveRecord::RecordNotFound
           raise Fediverse::Signature::BadSignature
         end
 

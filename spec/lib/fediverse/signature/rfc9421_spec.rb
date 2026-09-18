@@ -64,6 +64,12 @@ RSpec.describe Fediverse::Signature::Rfc9421 do
       expect { described_class.verify!(request: signed_request) }.to raise_error(Fediverse::Signature::BadSignature)
     end
 
+    it 'throws signature error if sender lookup raises RecordNotFound' do
+      allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url)
+        .and_raise(ActiveRecord::RecordNotFound)
+      expect { described_class.verify!(request: signed_request) }.to raise_error(Fediverse::Signature::BadSignature)
+    end
+
     it 'throws signature error if signature is bad' do
       bad_request = signed_request
       bad_request.headers['Signature'] = 'sig1=::'

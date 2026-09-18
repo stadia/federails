@@ -71,6 +71,19 @@ RSpec.describe 'Inbox HTTP Signature Verification', type: :request do
       expect(response).to have_http_status(:unauthorized)
     end
 
+    it 'rejects a signed request with 401 when the keyId actor cannot be fetched' do
+      signing_actor = FactoryBot.create(:user).fedipub_actor
+
+      allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url)
+        .and_raise(ActiveRecord::RecordNotFound)
+
+      post fedipub.server_actor_inbox_path(actor),
+           params:  payload,
+           headers: signature_headers_for(signing_actor, payload)
+
+      expect(response).to have_http_status(:unauthorized)
+    end
+
     it 'logs failure context including remote_ip on a malformed signature' do
       allow(Fedipub.logger).to receive(:warn)
 

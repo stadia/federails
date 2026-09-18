@@ -57,6 +57,8 @@ module Fediverse
           Fedipub::Actor.find_or_create_by_federation_url(
             key_id.split('#', 2).first
           )
+        rescue ActiveRecord::RecordNotFound
+          nil
         end
 
         def set_headers(request) #  rubocop:disable Naming/AccessorMethodName
