@@ -17,6 +17,7 @@
 - **application actor 공개 면은 FEP 전부.** 레코드+키, webfinger (FEP-d556), nodeinfo (FEP-2677), 다른 actor의 `generator`와 application actor의 `implements` (FEP-844e). Jbuilder 변경은 Alba로 포팅하되 **나가는 JSON 필드는 GitLab과 같게** 한다.
 - **GitLab 커밋 추적은 merge로 유지한다.** 파일 복사는 SHA가 끊기므로 `gitlab/main`을 한 번에 머지한다. 서명 스택 파일은 GitLab 쪽을 취하고, 로컬 어댑터·Alba FEP는 머지 이후 커밋으로 얹는다. `a175b75`부터 `6d4e661`까지 83커밋이 조상이 된다.
 - **이식 수단은 A(최종 동작) + merge(히스토리).** 83커밋을 손으로 하나씩 맞추지 않는다. 충돌 정책으로 GitLab 최종 계약을 취한다.
+- **`require_signature?` 기본값은 GitLab과 같이 false로 둔다.** RFC 9421은 깨진 서명만 거부하면 되고, ActivityPub S2S는 HTTP Signature를 MUST로 두지 않는다. unsigned inbox를 로컬에서 401로 조이지 않는다. 서명이 있으면 검증하고, 깨지면 401이다.
 
 ---
 
