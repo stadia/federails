@@ -19,18 +19,17 @@ module Fedipub
     include Fedipub::HandlesDeleteRequests
     include Fedipub::Likeable
     include Fedipub::Announceable
+    include Fedipub::ApplicationActor
 
-    validates :federated_url, presence: { unless: :entity }, uniqueness: { unless: :local? }
+    validates :federated_url, presence: { unless: -> { entity || application_actor? } }, uniqueness: { unless: :local? }
     validates :username, presence: { unless: :local? }
     validates :server, presence: { unless: :local? }
     validates :inbox_url, presence: { unless: :local? }
     validates :outbox_url, presence: { unless: :local? }
-    validates :followers_url, presence: { unless: :local? }
-    validates :followings_url, presence: { unless: :local? }
     validates :profile_url, presence: { unless: :local? }
-    validates :actor_type, presence: { unless: :local? }
+    validates :actor_type, presence: { unless: -> { local? && !application_actor? } }
     validates :entity_id, uniqueness: { scope: :entity_type }, if: :entity_type
-    validates :entity, presence: true, if: -> { local? && !tombstoned? }
+    validates :entity, presence: true, if: -> { local? && !tombstoned? && !application_actor? }
 
     belongs_to :entity, polymorphic: true, optional: true
     # FIXME: Handle this with something like undelete
@@ -75,7 +74,7 @@ module Fedipub
 
     #: () -> String?
     def federated_url
-      use_entity_attributes? ? Fedipub::Engine.routes.url_helpers.server_actor_url(self) : attributes['federated_url'].presence
+      use_entity_attributes? || application_actor? ? Fedipub::Engine.routes.url_helpers.server_actor_url(self) : attributes['federated_url'].presence
     end
 
     #: () -> String?
@@ -94,7 +93,7 @@ module Fedipub
 
     #: () -> String?
     def server
-      use_entity_attributes? ? Utils::Host.localhost : attributes['server']
+      use_entity_attributes? || application_actor? ? Utils::Host.localhost : attributes['server']
     end
 
     #: () -> String?
@@ -104,22 +103,22 @@ module Fedipub
 
     #: () -> String?
     def inbox_url
-      use_entity_attributes? ? Fedipub::Engine.routes.url_helpers.server_actor_inbox_url(self) : attributes['inbox_url']
+      use_entity_attributes? || application_actor? ? Fedipub::Engine.routes.url_helpers.server_actor_inbox_url(self) : attributes['inbox_url']
     end
 
     #: () -> String?
     def outbox_url
-      use_entity_attributes? ? Fedipub::Engine.routes.url_helpers.server_actor_outbox_url(self) : attributes['outbox_url']
+      use_entity_attributes? || application_actor? ? Fedipub::Engine.routes.url_helpers.server_actor_outbox_url(self) : attributes['outbox_url']
     end
 
     #: () -> String?
     def followers_url
-      use_entity_attributes? ? Fedipub::Engine.routes.url_helpers.followers_server_actor_url(self) : attributes['followers_url']
+      use_entity_attributes? || application_actor? ? Fedipub::Engine.routes.url_helpers.followers_server_actor_url(self) : attributes['followers_url']
     end
 
     #: () -> String?
     def followings_url
-      use_entity_attributes? ? Fedipub::Engine.routes.url_helpers.following_server_actor_url(self) : attributes['followings_url']
+      use_entity_attributes? || application_actor? ? Fedipub::Engine.routes.url_helpers.following_server_actor_url(self) : attributes['followings_url']
     end
 
     #: () -> String?
@@ -306,6 +305,10 @@ module Fedipub
 
           actor = entity[:class].find_by(entity[:username_field] => username)&.fedipub_actor
         end
+        return actor if actor
+
+        # Look for pure actors (e.g. the application actor)
+        actor = Fedipub::Actor.local.find_by username: username
         return actor if actor
 
         # Last hope: Search for tombstoned actors

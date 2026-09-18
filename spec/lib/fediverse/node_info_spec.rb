@@ -42,7 +42,7 @@ RSpec.describe Fediverse::NodeInfo do
       end
 
       before do
-        allow(Fedipub::Utils::JsonRequest).to receive(:get_json).with(wk_nodeinfo_url, follow_redirects: true).and_return(fake_wk_response).once
+        allow(Fedipub::Utils::JsonRequest).to receive(:get_json).with(wk_nodeinfo_url).and_return(fake_wk_response).once
         allow(Fedipub::Utils::JsonRequest).to receive(:get_json).with(nodeinfo_url).and_return(fake_response).once
       end
 
@@ -106,7 +106,7 @@ RSpec.describe Fediverse::NodeInfo do
 
     context 'when node has no nodeinfo' do
       before do
-        allow(Fedipub::Utils::JsonRequest).to receive(:get_json).with(wk_nodeinfo_url, follow_redirects: true).and_raise(Fedipub::Utils::JsonRequest::UnhandledResponseStatus).once
+        allow(Fedipub::Utils::JsonRequest).to receive(:get_json).with(wk_nodeinfo_url).and_raise(Fedipub::Utils::JsonRequest::UnhandledResponseStatus).once
       end
 
       it 'raises an exception' do

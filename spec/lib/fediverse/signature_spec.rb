@@ -2,51 +2,69 @@ require 'rails_helper'
 require 'fediverse/signature'
 
 RSpec.describe Fediverse::Signature do
-  let(:actor) { FactoryBot.create(:user).fedipub_actor }
+  let(:sender) { 'alice' }
+  let(:request) { 'request' }
 
-  context 'when signing requests' do
-    let(:request) do
-      Faraday.default_connection.build_request(:post) do |req|
-        req.url '/inbox'
-        req.body = 'test'
-        req.headers['Host'] = 'example.com'
-        req.headers['Date'] = Time.now.utc.httpdate
-        req.headers['Digest'] = 'fakedigest'
-      end
-    end
-    let(:signature) { described_class.sign(sender: actor, request: request) }
-    let(:signature_parts) { signature.split(',') }
-
-    context 'when generating signature payload' do
-      let(:payload) { described_class.send(:signature_payload, request: request, headers: '(request-target) host date digest') }
-
-      it 'starts with request target' do
-        expect(payload).to match(%r{\A\(request-target\): post /inbox$})
-      end
-
-      it 'includes host' do
-        expect(payload).to match(/^host: example.com$/)
-      end
-
-      it 'includes date' do
-        expect(payload).to match(/^date: #{request.headers['Date']}$/)
-      end
-
-      it 'ends with digest' do
-        expect(payload).to match(/^digest: fakedigest\Z/)
-      end
+  context 'when signing' do
+    it 'delegates to Rfc9412 by default' do
+      allow(Fediverse::Signature::Rfc9421).to receive(:sign)
+      described_class.sign(sender: sender, request: request)
+      expect(Fediverse::Signature::Rfc9421).to have_received(:sign).with(sender: sender, request: request)
     end
 
-    it 'includes key in signature header' do
-      expect(signature_parts[0]).to eq "keyId=\"#{actor.federated_url}#main-key\""
+    it 'delegates to DraftCavage12 if told to use legacy signatures' do
+      allow(Fediverse::Signature::DraftCavage12).to receive(:sign)
+      described_class.sign(sender: sender, request: request, legacy_signature: true)
+      expect(Fediverse::Signature::DraftCavage12).to have_received(:sign).with(sender: sender, request: request)
+    end
+  end
+
+  context 'when verifying' do
+    it 'delegates to Rfc9421 first' do
+      allow(Fediverse::Signature::Rfc9421).to receive(:verify!).and_return true
+      described_class.verify!(request: request, require_signature: true)
+      expect(Fediverse::Signature::Rfc9421).to have_received(:verify!).with(request: request).once
     end
 
-    it 'includes header list in signature header' do
-      expect(signature_parts[1]).to eq 'headers="(request-target) host date digest"'
+    it 'short-circuits draft-cavage-12 if Rfc9421 throws a bad signature error' do # rubocop:todo RSpec/ExampleLength
+      allow(Fediverse::Signature::Rfc9421).to receive(:verify!).and_raise(Fediverse::Signature::BadSignature)
+      allow(Fediverse::Signature::DraftCavage12).to receive(:verify!).and_return true
+      begin
+        described_class.verify!(request: request, require_signature: true)
+      rescue Fediverse::Signature::BadSignature
+        nil
+      end
+      expect(Fediverse::Signature::DraftCavage12).not_to have_received(:verify!)
     end
 
-    it 'includes signature part in signature header' do
-      expect(signature_parts[2]).to match %r{^signature="[[[:alnum:]]-+/]*={0,3}"$}
+    it 'delegates to DraftCavage12 if Rfc9421 signature not present' do
+      allow(Fediverse::Signature::Rfc9421).to receive(:verify!).and_return false
+      allow(Fediverse::Signature::DraftCavage12).to receive(:verify!).and_return true
+      described_class.verify!(request: request, require_signature: true)
+      expect(Fediverse::Signature::DraftCavage12).to have_received(:verify!).with(request: request).once
+    end
+
+    it 'throws error if neither signature is present and if signatures are required' do
+      allow(Fediverse::Signature::Rfc9421).to receive(:verify!).and_return false
+      allow(Fediverse::Signature::DraftCavage12).to receive(:verify!).and_return false
+      expect { described_class.verify!(request: request, require_signature: true) }.to raise_error(Fediverse::Signature::BadSignature)
+    end
+
+    it 'passes if RFC9421 passes' do
+      allow(Fediverse::Signature::Rfc9421).to receive(:verify!).and_return true
+      expect(described_class.verify!(request: request, require_signature: true)).to be true
+    end
+
+    it 'passes if Rfc9421 signature not present but DraftCavage12 passes' do
+      allow(Fediverse::Signature::Rfc9421).to receive(:verify!).and_return false
+      allow(Fediverse::Signature::DraftCavage12).to receive(:verify!).and_return true
+      expect(described_class.verify!(request: request, require_signature: true)).to be true
+    end
+
+    it 'passes if signature not present for either but signature is not required' do
+      allow(Fediverse::Signature::Rfc9421).to receive(:verify!).and_return false
+      allow(Fediverse::Signature::DraftCavage12).to receive(:verify!).and_return false
+      expect(described_class.verify!(request: request, require_signature: false)).to be true
     end
   end
 

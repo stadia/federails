@@ -8,17 +8,16 @@ module Fedipub
       def find
         skip_authorization
 
-        resource = params.require(:resource)
-        case resource
+        case resource = params.require(:resource)
+        when %r{^https?://#{Fedipub::Utils::Host.localhost}/?$}
+          @actor = Fedipub::Actor.application_actor
         when %r{^https?://.+}
-          @user = Fedipub::Actor.find_by_federation_url!(resource).entity
+          @actor = Fedipub::Actor.find_by_federation_url!(resource) # rubocop:disable Rails/DynamicFindBy
         when /^acct:.+/
-          actor = Fedipub::Actor.find_local_by_username(username)
-          raise Fedipub::Actor::TombstonedError if actor&.tombstoned?
-
-          @user = actor&.entity
+          @actor = Fedipub::Actor.find_local_by_username(username)
+          raise Fedipub::Actor::TombstonedError if @actor&.tombstoned?
         end
-        raise ActiveRecord::RecordNotFound if @user.nil?
+        raise ActiveRecord::RecordNotFound if @actor.nil?
 
         render_serialized(
           Fedipub::Server::WebFingerResource,

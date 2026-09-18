@@ -1,4 +1,8 @@
 ---
+workflow:
+  auto_cancel:
+    on_job_failure: all
+
 stages:
   - prepare
   - test

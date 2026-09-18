@@ -43,7 +43,8 @@ RSpec.describe Fedipub::Server::ActorsController, type: :acceptance do
          liked:              { type: :string, required: false, description: 'URL to the liked collection' },
          featured:           { type: :string, required: false, description: 'URL to the featured collection' },
          featuredTags:       { type: :string, required: false, description: 'URL to the featured tags collection' },
-         attributionDomains: { type: :array, required: false, description: 'Extension used to test custom data' }
+         attributionDomains: { type: :array, required: false, description: 'Extension used to test custom data' },
+         generator:          { type: :string, required: false, description: 'URL of the server\'s application actor' }
 
   entity :actors_ordered_collection_page,
          '@context':   { type: :string, description: 'JSON-LD context' },

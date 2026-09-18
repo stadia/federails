@@ -25,6 +25,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'faraday-follow_redirects'
   spec.add_dependency 'json-ld', '>= 3.2.0'
   spec.add_dependency 'json-ld-preloaded', '>= 3.2.0'
+  spec.add_dependency 'linzer', '~> 0.8'
   spec.add_dependency 'ostruct', '>= 0.6.3'
   spec.add_dependency 'pagy', '>= 43'
   spec.add_dependency 'pundit', '>= 2.3.0'

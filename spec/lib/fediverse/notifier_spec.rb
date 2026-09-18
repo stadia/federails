@@ -26,9 +26,9 @@ module Fediverse
         let(:fake_activity) { FakeActivity.new(id: 1, actor: local_actor, to: [distant_target_actor.federated_url], action: 'Create', entity: fake_entity) }
 
         it 'calls post_to_inbox for each recipient' do
-          allow(described_class).to receive(:post_to_inbox).and_return(instance_double(Faraday::Response, status: 200, body: ''))
+          allow(Fedipub::Utils::JsonRequest).to receive(:post)
           described_class.post_to_inboxes(fake_activity)
-          expect(described_class).to have_received(:post_to_inbox).with(hash_including(inbox_url: distant_target_actor.inbox_url)).once
+          expect(Fedipub::Utils::JsonRequest).to have_received(:post).with(hash_including(url: distant_target_actor.inbox_url)).once
         end
       end
 
@@ -42,9 +42,9 @@ module Fediverse
 
         it 'calls post_to_inbox for each recipient' do
           VCR.use_cassette('fediverse/notifier/get_collection_200') do
-            allow(described_class).to receive(:post_to_inbox).and_return(instance_double(Faraday::Response, status: 200, body: ''))
+            allow(Fedipub::Utils::JsonRequest).to receive(:post)
             described_class.post_to_inboxes(fake_activity)
-            expect(described_class).to have_received(:post_to_inbox).with(hash_including(inbox_url: 'https://3dp.chat/inbox')).once
+            expect(Fedipub::Utils::JsonRequest).to have_received(:post).with(hash_including(url: 'https://3dp.chat/users/manyfold/inbox')).once
           end
         end
       end
@@ -54,9 +54,9 @@ module Fediverse
         let(:fake_activity) { FakeActivity.new(id: 1, actor: local_actor, to: [Fediverse::Collection::PUBLIC], action: 'Create', entity: fake_entity) }
 
         it 'does not post to any specific inboxes' do
-          allow(described_class).to receive(:post_to_inbox)
+          allow(Fedipub::Utils::JsonRequest).to receive(:post)
           described_class.post_to_inboxes(fake_activity)
-          expect(described_class).not_to have_received(:post_to_inbox)
+          expect(Fedipub::Utils::JsonRequest).not_to have_received(:post)
         end
       end
 

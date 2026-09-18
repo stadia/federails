@@ -77,6 +77,11 @@ module Fediverse
 
       private
 
+      # Overridden by Fedipub::Moderation for filtering
+      def post_to_inbox(inbox_url:, message:, from: nil)
+        Fedipub::Utils::JsonRequest.post(url: inbox_url, message: message, from: from)
+      end
+
       # Determines the list of inboxes that the activity should be delivered to
       #
       # @return [Array<Fedipub::Actor>]
@@ -164,36 +169,6 @@ module Fediverse
         json.delete(:bto)
         json.delete(:bcc)
         json.to_json
-      end
-
-      #: (inbox_url: String, message: String, ?from: Fedipub::Actor?) -> Faraday::Response
-      def post_to_inbox(inbox_url:, message:, from: nil)
-        conn = Faraday.default_connection
-        resp = conn.builder.build_response(
-          conn,
-          signed_request(url: inbox_url, message: message, from: from)
-        )
-
-        status = resp.status
-        return resp if status.between?(200, 299)
-
-        if permanent_delivery_status?(status)
-          raise Fedipub::PermanentDeliveryError.new(
-            delivery_error_message(inbox_url: inbox_url, status: status, body: resp.body, retry_after: nil, permanent: true),
-            response_code: status, inbox_url: inbox_url
-          )
-        else
-          retry_after = resp.headers['Retry-After'] if status == 429
-          raise Fedipub::TemporaryDeliveryError.new(
-            delivery_error_message(inbox_url: inbox_url, status: status, body: resp.body, retry_after: retry_after, permanent: false),
-            response_code: status, inbox_url: inbox_url, retry_after: retry_after&.to_i
-          )
-        end
-      rescue Faraday::ConnectionFailed, Faraday::TimeoutError, Faraday::SSLError => e
-        raise Fedipub::TemporaryDeliveryError.new(
-          "Delivery to #{inbox_url} failed: #{e.class} #{e.message}",
-          response_code: nil, inbox_url: inbox_url
-        )
       end
 
       #: (url: String, message: String, from: Fedipub::Actor?) -> Faraday::Request

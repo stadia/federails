@@ -30,6 +30,22 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ## [Unreleased]
 
+### Added
+
+- Sign outgoing POST and GET requests with RFC9421 signatures and fall back to draft-cavage-12 sig on failure
+- Verify signatures on all incoming requests, if they are signed; RFC9421 is checked first, then draft-cavage-12
+- Advertise RFC9421 support via `Accept-Signature` header
+- Automatically create application actor to represent the server and sign outgoing GET requests
+- Dicover application actor via webfinger (FEP-d556) and nodeinfo (FEP-2677)
+- Advertise capabilities via application actor (FEP-844e)
+- RFC9421 uses the `rsa-v1_5-sha256` key algorithm; others will be supported in future
+
+### Changed
+
+- Set "Fedipub/{version}" as the default user agent
+- Change default Accept header in HTTP requests to proper ActivityPub content types
+- Actor following/follower URLs are now optional - application actors often don't have them
+
 ### Fixed
 
 - `Fedipub::Actor.find_by_account` documented `@return [Fedipub::Actor, nil]` while every failure path raises
@@ -38,6 +54,12 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 - Backfill `fedipub_activities.entity_type` on upgrade. The 0.9.0 rename migration only renamed tables and indexes, so
   activities stored before the rename kept `Federails::Actor` / `Federails::Activity` and their `entity` silently
   resolved to `nil`.
+
+### Maintenance
+
+- CI is now interruptible on failure
+- Update rubocop annotation syntax
+- Refactor HTTP signature code
 
 ## [0.9.0] 2026-08-06
 
