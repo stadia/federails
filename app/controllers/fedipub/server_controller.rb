@@ -6,6 +6,7 @@ module Fedipub
     include Pundit::Authorization
     include Fedipub::ServerHelper
 
+    before_action :verify_request_signature!
     after_action :verify_authorized
 
     protect_from_forgery with: :null_session
@@ -16,7 +17,27 @@ module Fedipub
                 Fedipub::DataEntity::TombstonedError,
                 with: :error_gone
 
+    def self.require_signature?
+      false
+    end
+
     private
+
+    def verify_request_signature!
+      return if defined?(Fedipub::Configuration) && Fedipub::Configuration.respond_to?(:verify_signatures) &&
+                Fedipub::Configuration.verify_signatures == false
+
+      Fediverse::Signature.verify!(request: request, require_signature: self.class.require_signature?)
+    rescue Fediverse::Signature::BadSignature => e
+      Fedipub.logger.warn do
+        {
+          message:         "Signature verification failed: #{e.message}",
+          remote_ip:       request.remote_ip,
+          signature_input: request.headers['Signature-Input'],
+        }
+      end
+      head :unauthorized
+    end
 
     def error_fallback(exception, fallback_message, status)
       message = exception&.message || fallback_message

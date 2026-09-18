@@ -9,6 +9,17 @@ RSpec.describe '/well-known', type: :request do
       expect(response).to be_successful
     end
 
+    it 'rejects badly-signed requests' do
+      get fedipub.webfinger_url, params: { resource: "acct:#{user.id}@localhost" }, headers: { signature: 'poop' }
+      expect(response).to have_http_status :unauthorized
+    end
+
+    it 'rejects unsigned requests when signatures are required' do
+      allow(Fedipub::ServerController).to receive(:require_signature?).and_return(true)
+      get fedipub.webfinger_url, params: { resource: "acct:#{user.id}@localhost" }
+      expect(response).to have_http_status :unauthorized
+    end
+
     it 'renders a not found response given an @ address' do
       expect do
         get fedipub.webfinger_url, params: { resource: "@#{user.id}@localhost" }
@@ -40,6 +51,40 @@ RSpec.describe '/well-known', type: :request do
         else
           expect(response.body).to be_blank
         end
+      end
+    end
+
+    context 'when looking up application actor by acct: URI' do
+      before do
+        get fedipub.webfinger_url, params: { resource: Fedipub::Actor.application_actor.at_address(prefix: 'acct:') }
+      end
+
+      it 'renders a successful response' do
+        expect(response).to be_successful
+      end
+    end
+
+    context 'when looking up application actor in line with FEP-d556' do
+      before do
+        get fedipub.webfinger_url, params: { resource: 'http://localhost' }
+      end
+
+      it 'renders a successful response' do
+        expect(response).to be_successful
+      end
+
+      it 'confirms requested subject' do
+        expect(response.parsed_body['subject']).to eq 'http://localhost'
+      end
+
+      it 'has correct rel type' do
+        link = response.parsed_body['links'].find { |link| link['rel'] == 'https://www.w3.org/ns/activitystreams#Service' }
+        expect(link).to be_present
+      end
+
+      it 'includes href to application actor' do
+        link = response.parsed_body['links'].first
+        expect(link['href']).to match(%r{http://localhost/federation/actors/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}})
       end
     end
 
@@ -112,6 +157,17 @@ RSpec.describe '/well-known', type: :request do
 
       expect(response.body).to include('rel="lrdd"')
       expect(response.body).to include('resource={uri}')
+    end
+
+    it 'rejects badly-signed requests' do
+      get fedipub.host_meta_url, headers: { signature: 'poop' }
+      expect(response).to have_http_status :unauthorized
+    end
+
+    it 'rejects unsigned requests when signatures are required' do
+      allow(Fedipub::ServerController).to receive(:require_signature?).and_return(true)
+      get fedipub.host_meta_url
+      expect(response).to have_http_status :unauthorized
     end
 
     ['application/xrd+xml', 'application/xml'].each do |accept|

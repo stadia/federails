@@ -3,7 +3,6 @@
 
 require 'fedipub/utils/host'
 require 'fedipub/utils/json_request'
-require 'fediverse/signature'
 
 module Fediverse
   # Methods related to Webfinger: find accounts, fetch actors,...
@@ -146,16 +145,13 @@ module Fediverse
                            local:            false
       end
 
-      # Performs a signed GET request using a local actor for authentication
+      # Performs a signed GET request using the application actor for authentication
       # Used as fallback when servers require Authorized Fetch (Secure Mode)
       # @return [Hash]
-      # @raise [ActiveRecord::RecordNotFound] when no local actor exists or request fails
+      # @raise [ActiveRecord::RecordNotFound] when request fails
       def signed_get_json(url)
-        actor = Fedipub::Actor.where(local: true).where.not(entity_type: nil).first
-        raise ActiveRecord::RecordNotFound, 'No local actor available for signed fetch' unless actor
-
         Fedipub.logger.debug { "Retrying with signed GET for #{url}" }
-        Fediverse::Signature.signed_get(url, actor: actor)
+        Fedipub::Utils::JsonRequest.get_json(url)
       rescue Fedipub::Utils::JsonRequest::UnhandledResponseStatus => e
         Fedipub.logger.debug { e.message }
         raise ActiveRecord::RecordNotFound
@@ -174,7 +170,7 @@ module Fediverse
       # @return [Hash]
       # @raise [ActiveRecord::RecordNotFound] when the response is invalid
       def get_json(url, params = {})
-        Fedipub::Utils::JsonRequest.get_json(url, params: params, follow_redirects: true, headers: { accept: 'application/json' })
+        Fedipub::Utils::JsonRequest.get_json(url, params: params, headers: { accept: 'application/json' })
       rescue Fedipub::Utils::JsonRequest::UnhandledResponseStatus => e
         Fedipub.logger.debug { e.message }
 

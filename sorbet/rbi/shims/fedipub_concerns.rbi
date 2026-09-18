@@ -8,3 +8,13 @@
 module Fedipub::DataEntity
   requires_ancestor { ActiveRecord::Base }
 end
+
+# `Fedipub::ApplicationActor` defines these via `included`, which Sorbet does not
+# see on `Fedipub::Actor`. Keep the runtime concern unchanged.
+class Fedipub::Actor
+  class << self
+    def application_actor; end
+  end
+
+  def application_actor?; end
+end

@@ -55,10 +55,13 @@ RSpec.describe '/federation/inbox (shared)', type: :request do
     context 'when verify_signatures is true' do
       before { Fedipub::Configuration.verify_signatures = true }
 
-      it 'rejects unsigned POST with 401' do
+      it 'accepts unsigned POST' do
+        allow(Fediverse::Inbox).to receive(:dispatch_request).and_return(true)
+        allow(Fediverse::Inbox).to receive(:maybe_forward)
+
         post fedipub.server_shared_inbox_path, params: payload, headers: { 'Content-Type' => 'application/activity+json' }
 
-        expect(response).to have_http_status(:unauthorized)
+        expect(response).not_to have_http_status(:unauthorized)
       end
     end
   end

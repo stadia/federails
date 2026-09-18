@@ -1,8 +1,6 @@
 # typed: true
 # rbs_inline: enabled
 
-require 'fediverse/signature'
-
 module Fediverse
   class Notifier
     MAX_COLLECTION_DEPTH = 3 #: Integer
@@ -76,6 +74,31 @@ module Fediverse
       end
 
       private
+
+      # Overridden by Fedipub::Moderation for filtering
+      def post_to_inbox(inbox_url:, message:, from: nil)
+        resp = Fedipub::Utils::JsonRequest.post(url: inbox_url, message: message, from: from)
+        status = resp.status
+        return resp if status.between?(200, 299)
+
+        if permanent_delivery_status?(status)
+          raise Fedipub::PermanentDeliveryError.new(
+            delivery_error_message(inbox_url: inbox_url, status: status, body: resp.body, retry_after: nil, permanent: true),
+            response_code: status, inbox_url: inbox_url
+          )
+        else
+          retry_after = resp.headers['Retry-After'] if status == 429
+          raise Fedipub::TemporaryDeliveryError.new(
+            delivery_error_message(inbox_url: inbox_url, status: status, body: resp.body, retry_after: retry_after, permanent: false),
+            response_code: status, inbox_url: inbox_url, retry_after: retry_after&.to_i
+          )
+        end
+      rescue Faraday::ConnectionFailed, Faraday::TimeoutError, Faraday::SSLError => e
+        raise Fedipub::TemporaryDeliveryError.new(
+          "Delivery to #{inbox_url} failed: #{e.class} #{e.message}",
+          response_code: nil, inbox_url: inbox_url
+        )
+      end
 
       # Determines the list of inboxes that the activity should be delivered to
       #
@@ -164,63 +187,6 @@ module Fediverse
         json.delete(:bto)
         json.delete(:bcc)
         json.to_json
-      end
-
-      #: (inbox_url: String, message: String, ?from: Fedipub::Actor?) -> Faraday::Response
-      def post_to_inbox(inbox_url:, message:, from: nil)
-        conn = Faraday.default_connection
-        resp = conn.builder.build_response(
-          conn,
-          signed_request(url: inbox_url, message: message, from: from)
-        )
-
-        status = resp.status
-        return resp if status.between?(200, 299)
-
-        if permanent_delivery_status?(status)
-          raise Fedipub::PermanentDeliveryError.new(
-            delivery_error_message(inbox_url: inbox_url, status: status, body: resp.body, retry_after: nil, permanent: true),
-            response_code: status, inbox_url: inbox_url
-          )
-        else
-          retry_after = resp.headers['Retry-After'] if status == 429
-          raise Fedipub::TemporaryDeliveryError.new(
-            delivery_error_message(inbox_url: inbox_url, status: status, body: resp.body, retry_after: retry_after, permanent: false),
-            response_code: status, inbox_url: inbox_url, retry_after: retry_after&.to_i
-          )
-        end
-      rescue Faraday::ConnectionFailed, Faraday::TimeoutError, Faraday::SSLError => e
-        raise Fedipub::TemporaryDeliveryError.new(
-          "Delivery to #{inbox_url} failed: #{e.class} #{e.message}",
-          response_code: nil, inbox_url: inbox_url
-        )
-      end
-
-      #: (url: String, message: String, from: Fedipub::Actor?) -> Faraday::Request
-      def signed_request(url:, message:, from:)
-        req = request(url: url, message: message)
-        req.headers['Signature'] = Fediverse::Signature.sign(sender: from, request: req) if from
-        req
-      end
-
-      #: (url: String, message: String) -> Faraday::Request
-      def request(url:, message:)
-        Faraday.default_connection.build_request(:post) do |req|
-          req.url url
-          req.body = message
-          req.headers['Content-Type'] = Mime[:activitypub].to_s
-          req.headers['Accept'] = Mime[:activitypub].to_s
-          req.headers['Host'] = URI.parse(url).host
-          req.headers['Date'] = Time.now.utc.httpdate
-          req.headers['Digest'] = digest(message)
-        end
-      end
-
-      #: (String) -> String
-      def digest(message)
-        "SHA-256=#{Base64.strict_encode64(
-          OpenSSL::Digest.new('SHA256').digest(message)
-        )}"
       end
 
       #: (Integer) -> bool

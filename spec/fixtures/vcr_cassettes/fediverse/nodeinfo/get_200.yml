@@ -8,11 +8,11 @@ http_interactions:
       string: ''
     headers:
       Content-Type:
-      - application/json
+      - application/ld+json;profile="https://www.w3.org/ns/activitystreams"
       Accept:
-      - application/json
+      - application/ld+json;profile="https://www.w3.org/ns/activitystreams", application/activity+json, application/json;q=0.5
       User-Agent:
-      - Faraday v2.13.1
+      - Fedipub/0.9.0
   response:
     status:
       code: 301
@@ -43,11 +43,11 @@ http_interactions:
       string: ''
     headers:
       Content-Type:
-      - application/json
+      - application/ld+json;profile="https://www.w3.org/ns/activitystreams"
       Accept:
-      - application/json
+      - application/ld+json;profile="https://www.w3.org/ns/activitystreams", application/activity+json, application/json;q=0.5
       User-Agent:
-      - Faraday v2.13.1
+      - Fedipub/0.9.0
   response:
     status:
       code: 200
@@ -109,11 +109,11 @@ http_interactions:
       string: ''
     headers:
       Content-Type:
-      - application/json
+      - application/ld+json;profile="https://www.w3.org/ns/activitystreams"
       Accept:
-      - application/json
+      - application/ld+json;profile="https://www.w3.org/ns/activitystreams", application/activity+json, application/json;q=0.5
       User-Agent:
-      - Faraday v2.13.1
+      - Fedipub/0.9.0
   response:
     status:
       code: 200

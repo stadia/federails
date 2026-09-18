@@ -9,11 +9,29 @@ module Fedipub
 
       def verify_http_signature!
         return unless Fedipub::Configuration.verify_signatures
+        return if request.headers['Signature'].blank? && request.headers['Signature-Input'].blank?
 
-        @signed_actor = Fediverse::Signature.verify_request!(request)
-      rescue Fediverse::Signature::SignatureVerificationError => e
+        @signed_actor = actor_from_signature_key_id(request)
+      rescue Fediverse::Signature::BadSignature, Fediverse::Signature::SignatureVerificationError => e
         log_signature_failure(e)
         head :unauthorized
+      end
+
+      def actor_from_signature_key_id(request)
+        key_id = signature_key_id(request)
+        raise Fediverse::Signature::BadSignature, 'missing keyId' if key_id.blank?
+
+        actor = Fedipub::Actor.find_or_create_by_federation_url(key_id.split('#', 2).first)
+        raise Fediverse::Signature::BadSignature, "Couldn't find sender" unless actor
+
+        actor
+      end
+
+      def signature_key_id(request)
+        source = request.headers['Signature-Input'].presence || request.headers['Signature'].presence
+        return if source.blank?
+
+        source[/(?:keyid|keyId)="([^"]+)"/, 1]
       end
 
       def log_signature_failure(error)
@@ -37,7 +55,7 @@ module Fedipub
       end
 
       def actor_match?(payload)
-        return true unless Fedipub::Configuration.verify_signatures && @signed_actor
+        return true unless @signed_actor
 
         payload_actor_url = payload['actor'].is_a?(String) ? payload['actor'] : payload.dig('actor', 'id')
         return true if @signed_actor.federated_url == payload_actor_url
