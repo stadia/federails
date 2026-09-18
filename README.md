@@ -54,6 +54,11 @@ Extensions add extra features to Fedipub:
 - [Fedipub Moderation](https://gitlab.com/fedipub/fedipub-moderation/)
   > A gem that provides trust & safety for Fedipub
 
+## Projects using Fedipub
+
+- [Manyfold](https://github.com/manyfold3d/manyfold)
+- [Prismo](https://github.com/mbajur/prismo)
+
 ## License
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
