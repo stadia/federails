@@ -50,6 +50,25 @@ module Fedipub
         }
       end
 
+      attribute :implements do |actor|
+        next unless actor.application_actor?
+
+        [
+          'https://www.w3.org/TR/activitypub/',
+          'https://datatracker.ietf.org/doc/html/rfc9421',
+          'https://datatracker.ietf.org/doc/html/draft-cavage-http-signatures-12',
+          'https://w3id.org/fep/844e',
+          'https://w3id.org/fep/2677',
+          'https://w3id.org/fep/d556',
+        ].map { |url| { 'href' => url } }
+      end
+
+      attribute :generator do |actor|
+        next if actor.application_actor?
+
+        Fedipub::Actor.application_actor.federated_url
+      end
+
       def serializable_hash
         actor_data(object).merge(super)
       end

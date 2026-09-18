@@ -4,7 +4,8 @@ module Fedipub
   module Server
     unless const_defined?(:NodeinfoIndexPayload)
       NodeinfoIndexPayload = Struct.new(
-        :href #: untyped
+        :href,                  #: untyped
+        :application_actor_href #: untyped
       )
     end
 
@@ -14,6 +15,10 @@ module Fedipub
           {
             rel:  'http://nodeinfo.diaspora.software/ns/schema/2.0',
             href: payload.href,
+          },
+          {
+            rel:  'https://www.w3.org/ns/activitystreams#Application',
+            href: payload.application_actor_href,
           },
         ]
       end

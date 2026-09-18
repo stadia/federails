@@ -4,10 +4,11 @@ module Fedipub
   module Server
     unless const_defined?(:WebFingerPayload)
       WebFingerPayload = Struct.new(
-        :subject,           #: untyped
-        :self_href,         #: untyped
-        :profile_href,      #: untyped
-        :remote_follow_url  #: untyped
+        :subject,            #: untyped
+        :self_href,          #: untyped
+        :profile_href,       #: untyped
+        :remote_follow_url,  #: untyped
+        :application_actor   #: untyped
       )
     end
 
@@ -35,6 +36,14 @@ module Fedipub
           links << {
             rel:      'http://ostatus.org/schema/1.0/subscribe',
             template: "#{payload.remote_follow_url}?uri={uri}",
+          }
+        end
+
+        if payload.application_actor
+          links << {
+            rel:  'https://www.w3.org/ns/activitystreams#Service',
+            type: Mime[:activitypub].to_s,
+            href: payload.self_href,
           }
         end
 

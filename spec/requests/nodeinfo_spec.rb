@@ -19,6 +19,17 @@ RSpec.describe '/nodeinfo', type: :request do
       expect(link['href']).to match(%r{http://localhost/federation/actors/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}})
     end
 
+    it 'includes the application actor link' do
+      get '/.well-known/nodeinfo', headers: { 'Accept' => 'application/json' }
+
+      expect(response.parsed_body['links']).to include(
+        hash_including(
+          'rel'  => 'https://www.w3.org/ns/activitystreams#Application',
+          'href' => Fedipub::Actor.application_actor.federated_url
+        )
+      )
+    end
+
     it 'rejects badly-signed requests' do
       get fedipub.node_info_url, headers: { signature: 'poop' }
       expect(response).to have_http_status :unauthorized
