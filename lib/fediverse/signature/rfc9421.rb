@@ -1,3 +1,6 @@
+# typed: true
+# rbs_inline: enabled
+
 require 'linzer'
 require 'linzer/faraday'
 require 'linzer/rack'
@@ -8,6 +11,7 @@ module Fediverse
   module Signature
     class Rfc9421
       class << self
+        #: (sender: Fedipub::Actor, request: untyped) -> untyped
         def sign(sender:, request:)
           request.headers['Content-Digest'] = digest(request.body) if request.body
           Linzer.sign!(
@@ -22,13 +26,14 @@ module Fediverse
           request
         end
 
+        #: (request: untyped) -> untyped
         def verify!(request:)
           # Do we have a signature to verify?
           return false if !request.headers.key?('Signature-Input') || !request.headers.key?('Signature')
 
           # Verify the signature
           Linzer.verify!(request) do |key_id|
-            sender = Fedipub::Actor.find_or_create_by_federation_url(key_id.split('#', 2).first)
+            sender = Fedipub::Actor.find_or_create_by_federation_url(key_id.split('#', 2).first) #: Fedipub::Actor?
             raise Fediverse::Signature::BadSignature if sender.nil?
 
             linzer_public_key(sender)

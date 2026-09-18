@@ -1,9 +1,13 @@
+# typed: true
+# rbs_inline: enabled
+
 require 'fediverse/signature'
 
 module Fediverse
   module Signature
     class DraftCavage12
       class << self
+        #: (sender: Fedipub::Actor, request: untyped) -> untyped
         def sign(sender:, request:)
           request = set_headers(request)
 
@@ -16,6 +20,7 @@ module Fediverse
           request
         end
 
+        #: (request: untyped) -> untyped
         def verify!(request:)
           # Do we have a signature to verify?
           return false unless request.headers.key?('Signature')

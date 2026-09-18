@@ -1,3 +1,6 @@
+# typed: false
+# rbs_inline: enabled
+
 module Fedipub
   # Definition for a single local Application Actor, which represents the instance/server itself.
   #
@@ -12,14 +15,16 @@ module Fedipub
       local:      true,
     }.freeze
 
-    included do
-      def self.application_actor
+    module ClassMethods
+      #: () -> Fedipub::Actor
+      def application_actor
         find_or_create_by!(APPLICATION_ACTOR_ATTRIBUTES)
       end
+    end
 
-      def application_actor?
-        APPLICATION_ACTOR_ATTRIBUTES.all? { |attribute, value| attributes[attribute.to_s] == value }
-      end
+    #: () -> bool
+    def application_actor?
+      APPLICATION_ACTOR_ATTRIBUTES.all? { |attribute, value| attributes[attribute.to_s] == value }
     end
   end
 end

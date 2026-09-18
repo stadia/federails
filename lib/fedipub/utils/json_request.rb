@@ -1,3 +1,6 @@
+# typed: true
+# rbs_inline: enabled
+
 require 'faraday'
 require 'faraday/follow_redirects'
 require 'fediverse/signature'
@@ -7,6 +10,8 @@ module Fedipub
     # Wrapper around HTTP calls which ensures signatures etc are applied.
     class JsonRequest
       include Singleton
+
+      # @rbs @connection: untyped
 
       class << self
         extend Forwardable
@@ -26,6 +31,7 @@ module Fedipub
       # @return The parsed JSON object
       #
       # @raise [UnhandledResponseStatus] when response status is not the expected_status
+      #: (String, ?params: untyped, ?headers: untyped, ?expected_status: Integer?, ?from: Fedipub::Actor?) -> untyped
       def get_json(url, params: {}, headers: {}, expected_status: 200, from: nil)
         response = get url: url, params: params, headers: headers, from: from
         raise UnhandledResponseStatus, "Unhandled status code #{response.status} for GET #{url}" if expected_status && response.status != expected_status
@@ -33,10 +39,12 @@ module Fedipub
         JSON.parse(response.body)
       end
 
+      #: (url: String, ?params: untyped, ?headers: untyped, ?from: Fedipub::Actor?) -> untyped
       def get(url:, params: {}, headers: {}, from: nil)
         execute_request method: :get, url: url, params: params, headers: headers, from: from || Fedipub::Actor.application_actor
       end
 
+      #: (url: String, message: untyped, ?headers: untyped, ?from: Fedipub::Actor?) -> untyped
       def post(url:, message:, headers: {}, from: nil)
         execute_request method: :post, url: url, headers: headers, message: message, from: from
       end
@@ -44,7 +52,7 @@ module Fedipub
       private
 
       # Send to remote server with RFC9421 signature and double-knocking for draft-cavage-12 if that fails
-      def execute_request(method:, url:, params: {}, headers: {}, message: nil, from: nil) # rubocop:disable Metrics/ParameterLists
+      def execute_request(method:, url:, params: {}, headers: {}, message: nil, from: nil)
         req = build_request(method: method, url: url, params: params, headers: headers, message: message)
         response = connection.builder.build_response(
           connection,
