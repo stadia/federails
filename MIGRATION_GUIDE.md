@@ -16,6 +16,10 @@ desired one, do these steps (in the order you see fit)
   ```
 - Follow directions of the migration guide, for every version intermediate version 
 
+## From 0.9.0 to 0.10.0
+
+Update the gem (no migration, no changes on views, ect...).
+
 ## From 0.8.0 to 0.9.0
 
 First of all, read the **[general upgrade steps](#general-steps)**

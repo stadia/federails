@@ -30,6 +30,8 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ## [Unreleased]
 
+## [0.10.0] 2026-09-22
+
 ### Added
 
 - Sign outgoing POST and GET requests with RFC9421 signatures and fall back to draft-cavage-12 sig on failure
