@@ -58,3 +58,4 @@ group :doc do
 end
 
 gem 'ruby-lsp', '~> 0.27.0.beta5'
+gem 'json', '< 3'
