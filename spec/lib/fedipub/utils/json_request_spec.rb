@@ -116,6 +116,27 @@ RSpec.describe Fedipub::Utils::JsonRequest do
   end
 
   describe '#build_request' do
+    context 'when the URL has repeated query parameters' do
+      let(:request) { described_class.instance.send :build_request, method: :get, url: 'https://fedipub.dev/objects?tag=b&tag=a' }
+      let(:sender) { FactoryBot.create(:user).fedipub_actor }
+
+      it 'keeps every value in the URL sent' do
+        url = described_class.instance.send(:connection).build_exclusive_url(request.path, request.params, request.options.params_encoder)
+        expect(url.to_s).to eq 'https://fedipub.dev/objects?tag=b&tag=a'
+      end
+
+      it 'signs the same URL with RFC9421' do
+        Fediverse::Signature.sign(sender: sender, request: request)
+        expect(Linzer::Message.new(request)['@target-uri']).to eq 'https://fedipub.dev/objects?tag=b&tag=a'
+      end
+
+      it 'signs the same URL with draft-cavage-12' do
+        Fediverse::Signature.sign(sender: sender, request: request, legacy_signature: true)
+        expect(Fediverse::Signature::DraftCavage12.send(:signature_payload, request: request))
+          .to start_with("(request-target): get /objects?tag=b&tag=a\n")
+      end
+    end
+
     context 'when POSTing' do
       let(:request) { described_class.instance.send :build_request, method: :post, url: 'https://fedipub.dev/inbox', message: 'test' }
 

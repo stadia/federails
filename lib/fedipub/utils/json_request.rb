@@ -81,16 +81,13 @@ module Fedipub
         connection.builder.build_response(connection, Fediverse::Signature.sign(sender: from, request: build.call, legacy_signature: true))
       end
 
-      def build_request(method:, url:, params: {}, headers: {}, message: nil) # rubocop:todo Metrics/AbcSize, Metrics/MethodLength
-        # Extract params from URL string if they're in there instead of the hash
-        uri = URI(url)
-        params = params.merge Rack::Utils.parse_nested_query(uri.query)
-        uri.query = nil
-        # Build the request
+      def build_request(method:, url:, params: {}, headers: {}, message: nil) # rubocop:todo Metrics/AbcSize
+        # The query string stays in the URL, where the flat params encoder keeps repeated keys (`?tag=a&tag=b`)
+        # intact, as they are part of the resource identifier.
         connection.build_request(method) do |req|
-          req.url uri
+          req.url URI(url)
           req.body = message
-          req.params = params
+          req.params.update(params)
           req.headers = {
             'Content-Type'     => Mime[:activitypub].to_s,
             'Accept'           => [Mime[:activitypub].to_s, Mime[:activitypub].send(:synonyms), "#{Mime[:json]};q=0.5"].flatten.join(', '),
@@ -101,7 +98,7 @@ module Fedipub
       end
 
       def connection
-        @connection ||= Faraday.new do |faraday|
+        @connection ||= Faraday.new(request: { params_encoder: Faraday::FlatParamsEncoder }) do |faraday|
           faraday.adapter Faraday.default_adapter
         end
       end

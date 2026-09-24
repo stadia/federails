@@ -112,7 +112,8 @@ module Fediverse
           return request.fullpath if request.respond_to?(:fullpath)
 
           uri = URI.parse(request.path)
-          query = request.params.present? ? Faraday::Utils.default_params_encoder.encode(request.params) : uri.query
+          encoder = request.options&.params_encoder || Faraday::Utils.default_params_encoder
+          query = request.params.present? ? encoder.encode(request.params) : uri.query
           query.present? ? "#{uri.path}?#{query}" : uri.path
         end
 

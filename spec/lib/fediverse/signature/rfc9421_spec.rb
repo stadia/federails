@@ -188,6 +188,20 @@ RSpec.describe Fediverse::Signature::Rfc9421 do
       allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url).and_raise(ActiveRecord::RecordNotFound)
       expect { described_class.verify!(request: request) }.to raise_error(Fediverse::Signature::BadSignature)
     end
+
+    it 'converts an invalid public key into a bad signature' do
+      allow(described_class).to receive(:linzer_public_key).and_call_original
+      sender.public_key = 'not a key'
+      expect { described_class.verify!(request: request) }.to raise_error(Fediverse::Signature::BadSignature, /Invalid public key/)
+    end
+
+    it 'converts an invalid public key fetched while refreshing into a bad signature' do
+      sender.update_column(:updated_at, 2.days.ago) # rubocop:disable Rails/SkipsModelValidations
+      allow(described_class).to receive(:linzer_public_key).and_call_original
+      allow(Linzer).to receive(:verify).and_raise(Linzer::VerifyError, 'bad')
+      allow(sender).to receive(:sync!) { sender.public_key = 'not a key' }
+      expect { described_class.verify!(request: request) }.to raise_error(Fediverse::Signature::BadSignature, /Invalid public key/)
+    end
   end
 
   context 'when verifying signatures with several labels' do

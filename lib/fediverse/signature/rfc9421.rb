@@ -57,15 +57,17 @@ module Fediverse
           check_created!(signature)
 
           sender = Fediverse::Signature.find_sender(signature.parameters['keyid'])
-          begin
-            Linzer.verify(linzer_public_key(sender), message, signature)
-          rescue Linzer::VerifyError
-            # Only a cryptographic mismatch is worth retrying with a refreshed key
-            raise unless Fediverse::Signature.refresh_stale_sender!(sender)
-
-            Linzer.verify(linzer_public_key(sender), message, signature)
-          end
+          verify_with_key_refresh!(sender, message, signature)
           sender
+        end
+
+        def verify_with_key_refresh!(sender, message, signature)
+          Linzer.verify(linzer_public_key(sender), message, signature)
+        rescue Linzer::VerifyError
+          # Only a cryptographic mismatch is worth retrying with a refreshed key
+          raise unless Fediverse::Signature.refresh_stale_sender!(sender)
+
+          Linzer.verify(linzer_public_key(sender), message, signature)
         end
 
         # Linzer only verifies what the signer chose to cover
@@ -95,6 +97,8 @@ module Fediverse
         def linzer_public_key(sender)
           public_key = OpenSSL::PKey::RSA.new(sender.public_key)
           Linzer.new_rsa_v1_5_sha256_key(public_key.to_pem, sender.key_id)
+        rescue OpenSSL::PKey::PKeyError => e
+          raise Fediverse::Signature::BadSignature, "Invalid public key for #{sender.federated_url}: #{e.message}"
         end
 
         def components(request)
