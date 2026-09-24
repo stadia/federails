@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     fedipub (0.10.0)
-      alba (~> 3.0)
+      alba (>= 3, < 5)
       faraday
       faraday-follow_redirects
       json-ld (>= 3.2.0)
@@ -92,7 +92,7 @@ GEM
       uri (>= 0.13.1)
     addressable (2.9.0)
       public_suffix (>= 2.0.2, < 8.0)
-    alba (3.11.0)
+    alba (4.0.0)
     ast (2.4.3)
     base64 (0.3.0)
     bcp47_spec (0.2.1)
@@ -109,7 +109,6 @@ GEM
       bigdecimal
       rexml
     crass (1.0.7)
-    csv (3.3.6)
     cuprum (1.3.1)
       sleeping_king_studios-tools (~> 1.2, >= 1.2.1)
     database_cleaner (2.1.0)
@@ -195,20 +194,17 @@ GEM
       prism (>= 1.3.0)
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
-    jekyll (4.4.1)
+    jekyll (4.3.4)
       addressable (~> 2.4)
-      base64 (~> 0.2)
       colorator (~> 1.0)
-      csv (~> 3.0)
       em-websocket (~> 0.5)
       i18n (~> 1.0)
       jekyll-sass-converter (>= 2.0, < 4.0)
       jekyll-watch (~> 2.0)
-      json (~> 2.6)
       kramdown (~> 2.3, >= 2.3.1)
       kramdown-parser-gfm (~> 1.0)
       liquid (~> 4.0)
-      mercenary (~> 0.3, >= 0.3.6)
+      mercenary (>= 0.3.6, < 0.5)
       pathutil (~> 0.9)
       rouge (>= 3.0, < 5.0)
       safe_yaml (~> 1.0)
@@ -222,7 +218,7 @@ GEM
       jekyll (>= 3.8, < 5.0)
     jekyll-watch (2.2.1)
       listen (~> 3.0)
-    json (2.21.2)
+    json (3.0.2)
     json-canonicalization (1.0.0)
     json-ld (3.3.2)
       htmlentities (~> 4.3)
@@ -582,7 +578,7 @@ DEPENDENCIES
   guard
   guard-rspec
   jekyll
-  json (< 3)
+  json (< 4)
   just-the-docs
   rspec-rails
   rspec-rails-api (~> 0.8)
