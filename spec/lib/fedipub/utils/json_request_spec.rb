@@ -67,6 +67,21 @@ RSpec.describe Fedipub::Utils::JsonRequest do
       expect(Fediverse::Signature::DraftCavage12).to have_received(:sign).once
     end
 
+    it 'does not reuse the RFC9421-signed request for the draft-cavage-12 retry' do
+      requests = [instance_double(Faraday::Request), instance_double(Faraday::Request)]
+      allow(faraday).to receive(:build_request).and_return(*requests)
+      allow(response).to receive(:status).and_return(401)
+      described_class.post(url: 'https://example.com', message: '{}', from: local_actor)
+      expect(Fediverse::Signature::Rfc9421).to have_received(:sign).with(sender: local_actor, request: requests.first)
+      expect(Fediverse::Signature::DraftCavage12).to have_received(:sign).with(sender: local_actor, request: requests.last)
+    end
+
+    it 'does not follow redirects' do
+      allow(response).to receive(:status).and_return(201)
+      described_class.post(url: 'https://example.com', message: '{}', from: local_actor)
+      expect(described_class.instance).to have_received(:connection).with(follow_redirects: false).at_least(:once)
+    end
+
     it 'tries draft-cavage-12 signing if RFC9421 attempt returns a 401' do
       allow(response).to receive(:status).and_return(401)
       described_class.post(url: 'https://example.com', message: '{}', from: local_actor)

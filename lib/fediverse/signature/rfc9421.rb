@@ -26,18 +26,44 @@ module Fediverse
           # Do we have a signature to verify?
           return false if !request.headers.key?('Signature-Input') || !request.headers.key?('Signature')
 
-          # Verify the signature
-          Linzer.verify!(request) do |key_id|
-            sender = Fedipub::Actor.find_or_create_by_federation_url(key_id.split('#', 2).first)
-            raise Fediverse::Signature::BadSignature if sender.nil?
-
-            linzer_public_key(sender)
-          end
-        rescue Linzer::Error
-          raise Fediverse::Signature::BadSignature
+          check_covered_components!(request)
+          verify_with_key_refresh!(request)
+          true
+        rescue Linzer::Error, ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid, OpenSSL::PKey::PKeyError => e
+          raise Fediverse::Signature::BadSignature, e.message
         end
 
         private
+
+        # Verifies the signature, refreshing the sender's key once if it may have been rotated
+        def verify_with_key_refresh!(request)
+          sender = nil
+          verify = lambda do
+            Linzer.verify!(request) do |key_id|
+              sender = Fedipub::Actor.find_or_create_by_federation_url(key_id.split('#', 2).first)
+              raise Fediverse::Signature::BadSignature if sender.nil?
+
+              linzer_public_key(sender)
+            end
+          end
+          verify.call
+        rescue Linzer::VerifyError
+          raise unless Fediverse::Signature.refresh_stale_sender!(sender)
+
+          verify.call
+        end
+
+        def check_covered_components!(request)
+          message = Linzer::Message.new(request)
+          covered = Linzer::Signature.build(
+            'signature-input' => message.header('signature-input'),
+            'signature'       => message.header('signature')
+          ).components
+          missing = %w[@method @target-uri]
+          missing += ['content-digest'] if Fediverse::Signature.body?(request)
+          missing -= covered
+          raise Fediverse::Signature::BadSignature, "Signature does not cover #{missing.join(', ')}" if missing.any?
+        end
 
         # Converts key to right structure for Linzer to use
         def linzer_private_key(sender)

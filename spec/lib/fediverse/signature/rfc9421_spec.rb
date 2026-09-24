@@ -128,4 +128,69 @@ RSpec.describe Fediverse::Signature::Rfc9421 do
       expect(Linzer).to have_received(:verify!).once
     end
   end
+
+  context 'when checking what an incoming signature covers' do
+    define_method(:incoming_request) do |components:, body: nil|
+      req = ActionDispatch::TestRequest.create('RAW_POST_DATA' => body)
+      req.request_method = body ? 'POST' : 'GET'
+      req.headers['Signature'] = 'sig1=:c2ln:'
+      req.headers['Signature-Input'] = "sig1=(#{components.map { |c| %("#{c}") }.join(' ')});created=#{Time.now.to_i};keyid=\"#{actor.key_id}\""
+      req
+    end
+
+    it 'rejects signatures that do not cover the target URI' do
+      expect { described_class.verify!(request: incoming_request(components: %w[@method])) }
+        .to raise_error(Fediverse::Signature::BadSignature, /@target-uri/)
+    end
+
+    it 'rejects signatures on requests with a body that do not cover the content digest' do
+      expect { described_class.verify!(request: incoming_request(components: %w[@method @target-uri], body: '{}')) }
+        .to raise_error(Fediverse::Signature::BadSignature, /content-digest/)
+    end
+  end
+
+  context 'when the sender key may have been rotated' do
+    let(:sender) { FactoryBot.create :distant_actor }
+    let(:request) do
+      req = ActionDispatch::TestRequest.create
+      req.request_method = 'GET'
+      req.headers['Signature'] = 'sig1=:c2ln:'
+      req.headers['Signature-Input'] = "sig1=(\"@method\" \"@target-uri\");created=#{Time.now.to_i};keyid=\"#{sender.federated_url}#main-key\""
+      req
+    end
+
+    before do
+      allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url).and_return(sender)
+      allow(sender).to receive(:sync!).and_return(true)
+      allow(described_class).to receive(:linzer_public_key).with(sender).and_return(:key)
+    end
+
+    it 'refreshes a stale sender and retries' do
+      sender.update_column(:updated_at, 2.days.ago) # rubocop:disable Rails/SkipsModelValidations
+      calls = 0
+      allow(Linzer).to receive(:verify!) do |_request, &block|
+        block.call("#{sender.federated_url}#main-key")
+        calls += 1
+        raise Linzer::VerifyError, 'bad' if calls == 1
+
+        true
+      end
+      expect(described_class.verify!(request: request)).to be true
+      expect(sender).to have_received(:sync!).once
+    end
+
+    it 'does not refresh a recently updated sender' do
+      allow(Linzer).to receive(:verify!) do |_request, &block|
+        block.call("#{sender.federated_url}#main-key")
+        raise Linzer::VerifyError, 'bad'
+      end
+      expect { described_class.verify!(request: request) }.to raise_error(Fediverse::Signature::BadSignature)
+      expect(sender).not_to have_received(:sync!)
+    end
+
+    it 'converts sender lookup failures into bad signatures' do
+      allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url).and_raise(ActiveRecord::RecordNotFound)
+      expect { described_class.verify!(request: request) }.to raise_error(Fediverse::Signature::BadSignature)
+    end
+  end
 end

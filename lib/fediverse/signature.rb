@@ -19,6 +19,26 @@ module Fediverse
         true
       end
 
+      # Re-fetches a remote sender whose cached data is stale, so a rotated key can be picked up.
+      # Returns true if the sender was refreshed and verification is worth retrying.
+      def refresh_stale_sender!(sender) # rubocop:disable Naming/PredicateMethod
+        return false if sender.nil? || sender.local?
+        return false unless sender.updated_at < Fedipub::Configuration.remote_entities_cache_duration.ago
+
+        sender.sync!
+        true
+      end
+
+      # Whether the request carries a body that the signature must cover
+      def body?(request)
+        body = request.body
+        return body.present? unless body.respond_to?(:read)
+
+        content = body.read
+        body.rewind
+        content.present?
+      end
+
       # Returns the actor who signed the request, based on the RFC9421 or draft-cavage-12 key id.
       # Only meaningful once the signature has been checked with #verify!
       def signer(request:)

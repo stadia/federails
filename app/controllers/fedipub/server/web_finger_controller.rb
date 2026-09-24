@@ -9,7 +9,7 @@ module Fedipub
         skip_authorization
 
         case resource = params.require(:resource)
-        when %r{^https?://#{Fedipub::Utils::Host.localhost}/?$}
+        when %r{^https?://#{Regexp.escape(Fedipub::Utils::Host.localhost)}/?$}
           @actor = Fedipub::Actor.application_actor
         when %r{^https?://.+}
           @actor = Fedipub::Actor.find_by_federation_url!(resource)

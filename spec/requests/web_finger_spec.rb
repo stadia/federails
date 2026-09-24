@@ -88,6 +88,18 @@ RSpec.describe '/well-known', type: :request do
       end
     end
 
+    context 'when the local host contains regexp metacharacters' do
+      before do
+        allow(Fedipub::Utils::Host).to receive(:localhost).and_return('example.com')
+        allow(Fedipub::Actor).to receive(:find_by_federation_url!).and_raise(ActiveRecord::RecordNotFound)
+      end
+
+      it 'does not treat a look-alike host as the application actor' do
+        get fedipub.webfinger_url, params: { resource: 'http://exampleXcom' }, headers: { accept: 'application/jrd+json' }
+        expect(response).to have_http_status :not_found
+      end
+    end
+
     context 'with a tombstoned actor' do
       let(:actor) { user.fedipub_actor.tombstone! }
 

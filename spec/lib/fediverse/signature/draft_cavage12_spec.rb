@@ -129,9 +129,10 @@ RSpec.describe Fediverse::Signature::DraftCavage12 do
       req.request_method = 'GET'
       req.headers['Signature'] = 'keyId="http://activitypub.rocks/actor#mainKey",algorithm="rsa-sha256",headers="(request-target) host date digest",signature="SjWJWbWN7i0wzBvtPl8rbASWz5xQW6mcJmn+ibttBqtifLN7Sazz6m79cNfwwb8DMJ5cou1s7uEGKKCs+FLEEaDV5lp7q25WqS+lavg7T8hc0GppauB6hbgEKTwblDHYGEtbGmtdHgVCk9SuS13F0hZ8FD0k/5OxEPXe5WozsbM="'
       req.headers['Digest'] = 'abc123'
-      req.headers['Date'] = 'date'
+      req.headers['Date'] = date
       req
     end
+    let(:date) { Time.now.utc.httpdate }
     let(:sender) { FactoryBot.create :distant_actor }
 
     before do
@@ -150,8 +151,83 @@ RSpec.describe Fediverse::Signature::DraftCavage12 do
       expect(described_class).to have_received(:do_verification).with(
         'SjWJWbWN7i0wzBvtPl8rbASWz5xQW6mcJmn+ibttBqtifLN7Sazz6m79cNfwwb8DMJ5cou1s7uEGKKCs+FLEEaDV5lp7q25WqS+lavg7T8hc0GppauB6hbgEKTwblDHYGEtbGmtdHgVCk9SuS13F0hZ8FD0k/5OxEPXe5WozsbM=',
         sender,
-        "(request-target): get /\nhost: test.host\ndate: date\ndigest: abc123"
+        "(request-target): get /\nhost: test.host\ndate: #{date}\ndigest: abc123"
       ).once
+    end
+  end
+
+  context 'when checking what an incoming signature covers' do
+    let(:sender) { FactoryBot.create :distant_actor }
+
+    define_method(:incoming_request) do |headers:, date: Time.now.utc.httpdate, body: nil, path: '/'|
+      req = ActionDispatch::TestRequest.create('RAW_POST_DATA' => body, 'PATH_INFO' => path)
+      req.request_method = body ? 'POST' : 'GET'
+      req.headers['Signature'] = %(keyId="#{sender.key_id}",headers="#{headers}",signature="c2ln")
+      req.headers['Date'] = date
+      req
+    end
+
+    before do
+      allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url).and_return(sender)
+    end
+
+    it 'rejects signatures that do not cover the request target' do
+      expect { described_class.verify!(request: incoming_request(headers: 'host date')) }
+        .to raise_error(Fediverse::Signature::BadSignature, /\(request-target\)/)
+    end
+
+    it 'rejects signatures on requests with a body that do not cover the digest' do
+      expect { described_class.verify!(request: incoming_request(headers: '(request-target) host date', body: '{}')) }
+        .to raise_error(Fediverse::Signature::BadSignature, /digest/)
+    end
+
+    it 'rejects signatures with an expired date' do
+      expect { described_class.verify!(request: incoming_request(headers: '(request-target) host date', date: 2.days.ago.httpdate)) }
+        .to raise_error(Fediverse::Signature::BadSignature, /date/)
+    end
+
+    it 'includes the query string in the request target' do
+      allow(described_class).to receive(:do_verification).and_return(true)
+      request = incoming_request(headers: '(request-target) host date')
+      request.set_header('QUERY_STRING', 'page=2')
+      described_class.verify!(request: request)
+      expect(described_class).to have_received(:do_verification).with(anything, sender, a_string_starting_with("(request-target): get /?page=2\n"))
+    end
+
+    it 'refreshes a stale sender and retries when verification fails' do
+      sender.update_column(:updated_at, 2.days.ago) # rubocop:disable Rails/SkipsModelValidations
+      allow(described_class).to receive(:do_verification).and_return(false, true)
+      allow(sender).to receive(:sync!).and_return(true)
+      expect(described_class.verify!(request: incoming_request(headers: '(request-target) host date'))).to be true
+      expect(sender).to have_received(:sync!).once
+    end
+
+    it 'does not refresh a recently updated sender' do
+      allow(described_class).to receive(:do_verification).and_return(false)
+      allow(sender).to receive(:sync!)
+      expect { described_class.verify!(request: incoming_request(headers: '(request-target) host date')) }
+        .to raise_error(Fediverse::Signature::BadSignature)
+      expect(sender).not_to have_received(:sync!)
+    end
+
+    it 'converts sender lookup failures into bad signatures' do
+      allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url).and_raise(ActiveRecord::RecordNotFound)
+      expect { described_class.verify!(request: incoming_request(headers: '(request-target) host date')) }
+        .to raise_error(Fediverse::Signature::BadSignature)
+    end
+  end
+
+  context 'when signing a request with query parameters' do
+    let(:sender) { FactoryBot.create(:user).fedipub_actor }
+
+    it 'includes the query string in the request target' do
+      request = Faraday.default_connection.build_request(:get) do |req|
+        req.url 'https://example.com/.well-known/webfinger'
+        req.params = { 'resource' => 'acct:alice@example.com' }
+      end
+      described_class.sign(sender: sender, request: request)
+      expect(described_class.send(:signature_payload, request: request))
+        .to start_with("(request-target): get /.well-known/webfinger?resource=acct%3Aalice%40example.com\n")
     end
   end
 end

@@ -341,7 +341,6 @@ RSpec.describe '/federation/actors', type: :request do
     end
 
     it 'allows unsigned requests' do
-      pending 'implementation of configuration option for requiring signatures'
       allow(Fedipub::ServerController).to receive(:require_signature?).and_return(true)
       get fedipub.server_actor_url(Fedipub::Actor.application_actor), headers: { accept: Mime[:activitypub] }
       expect(response).to be_successful
@@ -376,6 +375,21 @@ RSpec.describe '/federation/actors', type: :request do
 
       it 'implements FEP-d556 (Server-Level Actor Discovery Using WebFinger)' do
         expect(implemented_hrefs).to include 'https://w3id.org/fep/d556'
+      end
+
+      it 'includes the FEP-844e JSON-LD context' do
+        expect(response.parsed_body['@context']).to include 'https://w3id.org/fep/844e'
+      end
+    end
+
+    context 'when discovery is disabled' do
+      before do
+        allow(Fedipub::Configuration).to receive(:enable_discovery).and_return(false)
+        get fedipub.server_actor_url(Fedipub::Actor.application_actor), headers: { accept: Mime[:activitypub] }
+      end
+
+      it 'does not advertise the discovery FEPs' do
+        expect(response.parsed_body['implements'].pluck('href')).not_to include('https://w3id.org/fep/2677', 'https://w3id.org/fep/d556')
       end
     end
   end

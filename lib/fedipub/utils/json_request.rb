@@ -11,7 +11,7 @@ module Fedipub
     class JsonRequest
       include Singleton
 
-      # @rbs @connection: Faraday::Connection
+      # @rbs @connections: Hash[bool, Faraday::Connection]
 
       class << self
         extend Forwardable
@@ -48,26 +48,22 @@ module Fedipub
 
       private
 
-      # Send to remote server with RFC9421 signature and double-knocking for draft-cavage-12 if that fails
+      # Send to remote server with RFC9421 signature and double-knocking for draft-cavage-12 if that fails.
+      # Only GETs follow redirects: a redirected POST would not be re-signed for its new target.
       def execute_request(method:, url:, params: {}, headers: {}, message: nil, from: nil)
-        req = build_request(method: method, url: url, params: params, headers: headers, message: message)
-        response = connection.builder.build_response(
-          connection,
-          from ? Fediverse::Signature.sign(sender: from, request: req.dup) : req
-        )
-        # If signature was present and rejected, try double-knocking
+        conn = connection(follow_redirects: method == :get)
+        build = -> { build_request(method: method, url: url, params: params, headers: headers, message: message) }
+        response = conn.builder.build_response(conn, from ? Fediverse::Signature.sign(sender: from, request: build.call) : build.call)
+        # If signature was present and rejected, try double-knocking with a fresh request
         return response unless from && response.status.in?([400, 401])
 
-        connection.builder.build_response(
-          connection,
-          Fediverse::Signature.sign(sender: from, request: req, legacy_signature: true)
-        )
+        conn.builder.build_response(conn, Fediverse::Signature.sign(sender: from, request: build.call, legacy_signature: true))
       end
 
       def build_request(method:, url:, params: {}, headers: {}, message: nil) # rubocop:todo Metrics/AbcSize, Metrics/MethodLength
         # Extract params from URL string if they're in there instead of the hash
         uri = URI(url)
-        params.merge! Rack::Utils.parse_nested_query(uri.query)
+        params = params.merge Rack::Utils.parse_nested_query(uri.query)
         uri.query = nil
         # Build the request
         connection.build_request(method) do |req|
@@ -83,9 +79,10 @@ module Fedipub
         end
       end
 
-      def connection
-        @connection ||= Faraday.new do |faraday|
-          faraday.response :follow_redirects
+      def connection(follow_redirects: false)
+        @connections ||= {}
+        @connections[follow_redirects] ||= Faraday.new do |faraday|
+          faraday.response :follow_redirects if follow_redirects
           faraday.adapter Faraday.default_adapter
         end
       end
