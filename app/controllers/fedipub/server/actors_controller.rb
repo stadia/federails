@@ -28,8 +28,8 @@ module Fedipub
         ) { |items| items.map(&:federated_url) }
       end
 
-      # GET /federation/actors/:id/followers
-      # GET /federation/actors/:id/followers.json
+      # GET /federation/actors/:id/following
+      # GET /federation/actors/:id/following.json
       def following
         render_collection(
           collection: @actor.accepted_follows.order(created_at: :desc),
@@ -70,13 +70,13 @@ module Fedipub
 
       private
 
-      # Use callbacks to share common setup or constraints between actions.
       def application_actor_show?
         action_name == 'show' && Actor.find_param(params[:id]).application_actor?
       rescue ActiveRecord::RecordNotFound
         false
       end
 
+      # Use callbacks to share common setup or constraints between actions.
       def set_actor
         @actor = Actor.find_param(params[:id])
         authorize @actor, policy_class: Fedipub::Server::ActorPolicy

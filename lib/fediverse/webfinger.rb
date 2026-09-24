@@ -3,7 +3,6 @@
 
 require 'fedipub/utils/host'
 require 'fedipub/utils/json_request'
-require 'fediverse/signature'
 
 module Fediverse
   # Methods related to Webfinger: find accounts, fetch actors,...
@@ -113,11 +112,12 @@ module Fediverse
         end
       end
 
-      # Builds a +Fedipub::Actor+ from a Webfinger response
-      # @param data [Hash] Webfinger response
+      # Builds an unsaved remote +Fedipub::Actor+ from an ActivityPub actor document
+      # @param data [Hash] ActivityPub actor document
       # @return [Fedipub::Actor]
+      # @raise [ActiveRecord::RecordNotFound] when the payload is not a valid actor document
       def webfinger_to_actor(data)
-        unless data.is_a?(Hash)
+        unless data.is_a?(Hash) && data['id'].present?
           Fedipub.logger.debug { "Invalid actor payload: #{data.inspect}" }
           raise ActiveRecord::RecordNotFound
         end
@@ -141,7 +141,7 @@ module Fediverse
                            local:            false
       end
 
-      # Makes a simple GET request and returns a +Hash+ from the parsed body
+      # Makes a GET request (signed as the application actor) and returns a +Hash+ from the parsed body
       # @return [Hash]
       # @raise [ActiveRecord::RecordNotFound] when the response is invalid
       def get_json(url, params = {})
@@ -150,8 +150,8 @@ module Fediverse
         Fedipub.logger.debug { e.message }
 
         raise ActiveRecord::RecordNotFound
-      rescue Faraday::ConnectionFailed
-        Fedipub.logger.debug { "Failed to reach server for GET #{url}" }
+      rescue Faraday::Error => e
+        Fedipub.logger.debug { "Failed to reach server for GET #{url}: #{e.class}" }
 
         raise ActiveRecord::RecordNotFound
       rescue JSON::ParserError

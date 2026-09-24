@@ -22,47 +22,68 @@ module Fediverse
           request
         end
 
-        def verify!(request:)
+        MAX_AGE = 900 # seconds, same as Linzer's default
+        CLOCK_SKEW_MARGIN = 3600 # seconds a signature may be dated in the future
+
+        # Verifies each signature label in turn and returns the sender of the first valid one.
+        #
+        # @return [Fedipub::Actor, false] the signer, or false if the request has no RFC9421 signature
+        # @raise [Fediverse::Signature::BadSignature] when no signature label is valid
+        def verify!(request:) # rubocop:todo Metrics/AbcSize
           # Do we have a signature to verify?
           return false if !request.headers.key?('Signature-Input') || !request.headers.key?('Signature')
 
-          check_covered_components!(request)
-          verify_with_key_refresh!(request)
-          true
-        rescue Linzer::Error, ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid, OpenSSL::PKey::PKeyError => e
+          message = Linzer::Message.new(request)
+          headers = { 'signature-input' => message.header('signature-input'), 'signature' => message.header('signature') }
+          errors = signature_labels(headers).map do |label|
+            return verify_label!(request, message, headers, label)
+          rescue Fediverse::Signature::BadSignature, Linzer::Error => e
+            "#{label}: #{e.message}"
+          end
+          raise Fediverse::Signature::BadSignature, errors.join('; ')
+        rescue Linzer::Error => e
           raise Fediverse::Signature::BadSignature, e.message
         end
 
         private
 
-        # Verifies the signature, refreshing the sender's key once if it may have been rotated
-        def verify_with_key_refresh!(request)
-          sender = nil
-          verify = lambda do
-            Linzer.verify!(request) do |key_id|
-              sender = Fedipub::Actor.find_or_create_by_federation_url(key_id.split('#', 2).first)
-              raise Fediverse::Signature::BadSignature if sender.nil?
-
-              linzer_public_key(sender)
-            end
-          end
-          verify.call
-        rescue Linzer::VerifyError
-          raise unless Fediverse::Signature.refresh_stale_sender!(sender)
-
-          verify.call
+        def signature_labels(headers)
+          Linzer::HTTP::StructuredField.parse_dictionary(headers['signature-input'], field_name: 'signature-input').keys
         end
 
-        def check_covered_components!(request)
-          message = Linzer::Message.new(request)
-          covered = Linzer::Signature.build(
-            'signature-input' => message.header('signature-input'),
-            'signature'       => message.header('signature')
-          ).components
+        def verify_label!(request, message, headers, label)
+          signature = Linzer::Signature.build(headers.dup, label: label)
+          check_covered_components!(request, signature)
+          check_created!(signature)
+
+          sender = Fediverse::Signature.find_sender(signature.parameters['keyid'])
+          begin
+            Linzer.verify(linzer_public_key(sender), message, signature)
+          rescue Linzer::VerifyError
+            # Only a cryptographic mismatch is worth retrying with a refreshed key
+            raise unless Fediverse::Signature.refresh_stale_sender!(sender)
+
+            Linzer.verify(linzer_public_key(sender), message, signature)
+          end
+          sender
+        end
+
+        # Linzer only verifies what the signer chose to cover
+        def check_covered_components!(request, signature)
           missing = %w[@method @target-uri]
           missing += ['content-digest'] if Fediverse::Signature.body?(request)
-          missing -= covered
+          missing -= signature.components
           raise Fediverse::Signature::BadSignature, "Signature does not cover #{missing.join(', ')}" if missing.any?
+        end
+
+        def check_created!(signature)
+          created = signature.created
+          raise Fediverse::Signature::BadSignature, 'Signature is missing the created parameter' unless created
+
+          age = Time.now.to_i - created
+          raise Fediverse::Signature::BadSignature, "Signature created #{age}s ago" if age > MAX_AGE
+          raise Fediverse::Signature::BadSignature, 'Signature created in the future' if age < -CLOCK_SKEW_MARGIN
+          raise Fediverse::Signature::BadSignature, 'Signature has expired' if signature.expired?
         end
 
         # Converts key to right structure for Linzer to use

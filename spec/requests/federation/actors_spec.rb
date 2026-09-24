@@ -34,6 +34,14 @@ RSpec.describe '/federation/actors', type: :request do
       expect(response).to have_http_status :unauthorized
     end
 
+    it 'logs why a signature was rejected' do
+      allow(Fedipub.logger).to receive(:warn)
+      get fedipub.server_actor_url(user.fedipub_actor), headers: { accept: Mime[:activitypub], signature: 'poop' }
+      expect(Fedipub.logger).to have_received(:warn) do |&block|
+        expect(block.call).to include(message: 'Signature verification failed: Malformed signature', path: a_string_including('/federation/actors/'))
+      end
+    end
+
     it 'rejects unsigned requests when signatures are required' do
       allow(Fedipub::ServerController).to receive(:require_signature?).and_return(true)
       get fedipub.server_actor_url(user.fedipub_actor), headers: { accept: Mime[:activitypub] }
@@ -344,6 +352,17 @@ RSpec.describe '/federation/actors', type: :request do
       allow(Fedipub::ServerController).to receive(:require_signature?).and_return(true)
       get fedipub.server_actor_url(Fedipub::Actor.application_actor), headers: { accept: Mime[:activitypub] }
       expect(response).to be_successful
+    end
+
+    it 'still requires signatures for its collections' do
+      allow(Fedipub::ServerController).to receive(:require_signature?).and_return(true)
+      get fedipub.followers_server_actor_url(Fedipub::Actor.application_actor), headers: { accept: Mime[:activitypub] }
+      expect(response).to have_http_status :unauthorized
+    end
+
+    it 'does not have a generator' do
+      get fedipub.server_actor_url(Fedipub::Actor.application_actor), headers: { accept: Mime[:activitypub] }
+      expect(response.parsed_body).not_to have_key('generator')
     end
 
     context 'when checking "implements" information (FEP-844e)' do

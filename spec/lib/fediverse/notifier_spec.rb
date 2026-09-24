@@ -200,6 +200,20 @@ module Fediverse
         end
       end
 
+      context 'when the inbox redirects' do
+        let(:status) { 301 }
+        let(:headers) { { 'Location' => 'https://elsewhere.example/inbox' } }
+
+        it 'treats the failure as permanent, since signed POSTs are not redirected' do
+          expect do
+            described_class.send(:post_to_inbox, inbox_url: distant_target_actor.inbox_url, message: '{}', from: local_actor)
+          end.to raise_error(
+            Fedipub::PermanentDeliveryError,
+            %r{HTTP 301 - redirected to https://elsewhere.example/inbox}
+          )
+        end
+      end
+
       context 'when the remote server returns a 5xx error' do
         let(:status) { 503 }
         let(:body) { 'maintenance' }

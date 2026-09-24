@@ -195,6 +195,22 @@ module Fediverse
         end.to raise_error ActiveRecord::RecordNotFound
       end
 
+      it 'raises an error on actor payloads without an id' do
+        allow(described_class).to receive(:get_json).and_return('type' => 'Person')
+
+        expect do
+          described_class.fetch_actor_url('https://example.com/users/jdoe')
+        end.to raise_error ActiveRecord::RecordNotFound
+      end
+
+      it 'raises a not found error when the server times out' do
+        allow(Fedipub::Utils::JsonRequest).to receive(:get_json).and_raise(Faraday::TimeoutError)
+
+        expect do
+          described_class.fetch_actor_url('https://example.com/users/jdoe')
+        end.to raise_error ActiveRecord::RecordNotFound
+      end
+
       it 'raises an error on invalid actor payloads' do
         allow(described_class).to receive(:get_json).and_return(nil)
 

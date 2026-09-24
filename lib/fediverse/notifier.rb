@@ -7,7 +7,8 @@ module Fediverse
   class Notifier
     MAX_COLLECTION_DEPTH = 3 #: Integer
     ACTIONS_REQUIRING_OBJECT = %w[Accept Add Announce Block Create Delete Flag Follow Like Move Reject Remove Undo Update].freeze #: Array[String]
-    PERMANENT_DELIVERY_STATUS_CODES = (400..499).to_a.freeze #: Array[Integer]
+    # Redirects are permanent failures too: signed POSTs are never replayed to another target
+    PERMANENT_DELIVERY_STATUS_CODES = (300..499).to_a.freeze #: Array[Integer]
 
     class << self
       # Enqueues a separate delivery job for each recipient inbox.
@@ -79,7 +80,7 @@ module Fediverse
 
       # Determines the list of inboxes that the activity should be delivered to
       #
-      # @return [Array<Fedipub::Actor>]
+      # @return [Array<String>] inbox URLs (preferring shared inboxes), excluding the sender's own and blocking actors' inboxes
       def inboxes_for(activity)
         return [] unless activity.actor.local?
 
@@ -166,7 +167,8 @@ module Fediverse
         json.to_json
       end
 
-      # Overridden by Fedipub::Moderation for filtering
+      # Extension point: host apps may override this to filter deliveries (e.g. moderation).
+      # Must return a Faraday::Response or raise a Fedipub::*DeliveryError.
       #: (inbox_url: String, message: String, ?from: Fedipub::Actor?) -> Faraday::Response
       def post_to_inbox(inbox_url:, message:, from: nil)
         resp = Fedipub::Utils::JsonRequest.post(url: inbox_url, message: message, from: from)
@@ -175,8 +177,9 @@ module Fediverse
         return resp if status.between?(200, 299)
 
         if permanent_delivery_status?(status)
+          body = status < 400 ? "redirected to #{resp.headers['Location']}, not following for POST" : resp.body
           raise Fedipub::PermanentDeliveryError.new(
-            delivery_error_message(inbox_url: inbox_url, status: status, body: resp.body, retry_after: nil, permanent: true),
+            delivery_error_message(inbox_url: inbox_url, status: status, body: body, retry_after: nil, permanent: true),
             response_code: status, inbox_url: inbox_url
           )
         else
@@ -198,7 +201,7 @@ module Fediverse
         PERMANENT_DELIVERY_STATUS_CODES.include?(status) && status != 429
       end
 
-      #: (inbox_url: String, status: Integer, body: String, retry_after: String?, permanent: bool) -> String
+      #: (inbox_url: String, status: Integer, body: String?, retry_after: String?, permanent: bool) -> String
       def delivery_error_message(inbox_url:, status:, body:, retry_after:, permanent:)
         message = "Delivery to #{inbox_url} failed"
         message += ' permanently' if permanent

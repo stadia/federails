@@ -13,9 +13,10 @@ module Fedipub
       def verify_http_signature!
         return unless Fedipub::Configuration.verify_signatures
 
-        Fediverse::Signature.verify!(request: request, require_signature: true)
+        @signed_actor = Fediverse::Signature.verify_sender!(request: request)
+        raise Fediverse::Signature::BadSignature, 'Missing signature' unless @signed_actor
+
         verify_body_digest!
-        @signed_actor = Fediverse::Signature.signer(request: request)
       rescue Fediverse::Signature::BadSignature => e
         log_signature_failure(e)
         head :unauthorized
@@ -49,23 +50,16 @@ module Fedipub
       end
 
       def log_signature_failure(error)
-        Fedipub.logger.warn do
-          {
-            message:         "Signature verification failed: #{error.message}",
-            remote_ip:       request.remote_ip,
-            signature_input: request.headers['Signature-Input'],
-            actor:           extract_payload_actor,
-          }
-        end
+        super(error, actor: extract_payload_actor)
       end
 
       def extract_payload_actor
-        body = request.body.tap(&:rewind).read
-        JSON.parse(body)['actor']
-      rescue StandardError
+        body = request.body&.tap(&:rewind)&.read
+        body.present? ? JSON.parse(body)['actor'] : nil
+      rescue JSON::ParserError, TypeError, NoMethodError
         nil
       ensure
-        request.body.rewind
+        request.body&.rewind
       end
 
       def actor_match?(payload)

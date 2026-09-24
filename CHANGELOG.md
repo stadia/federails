@@ -30,7 +30,27 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ## [Unreleased]
 
+### Changed
+
+- Incoming HTTP signatures must cover `(request-target) host date` for draft-cavage-12, or `@method @target-uri` for
+  RFC9421, plus the body digest (`digest` / `content-digest`) on requests with a body
+- draft-cavage-12 signatures with a `Date` more than 12 hours old or 1 hour in the future are rejected; RFC9421 signatures
+  must carry `created`, no older than 15 minutes and no more than 1 hour in the future
+- Inbox endpoints check that `Content-Digest` / `Digest` match the request body
+- RFC9421 requests with several signature labels are accepted when one of them is valid
+- Signed GETs follow redirects by signing the request again for the new target; POSTs no longer follow redirects, and a
+  redirected inbox is a permanent delivery failure
+- The application actor can be fetched without a signature, advertises the FEP-844e context, and only lists FEP-2677 /
+  FEP-d556 when `enable_discovery` is on
+- `Fediverse::Signature.verify_sender!` returns the actor whose key verified the request
+
 ### Fixed
+
+- A stale remote signer is re-fetched and verification retried once, so rotated keys are picked up
+- Signer lookup, key refresh and network errors during signature verification return 401 instead of 404/500, and
+  verification failures are logged on every federation endpoint
+- draft-cavage-12 `(request-target)` includes the query string
+- The WebFinger application actor lookup escapes the local host in its pattern
 
 - `Fedipub::Actor.find_by_account` documented `@return [Fedipub::Actor, nil]` while every failure path raises
   `ActiveRecord::RecordNotFound`. Documentation now matches the RBS signature; same for `Fediverse::Webfinger.fetch_actor`
@@ -47,7 +67,7 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 - Verify signatures on all incoming requests, if they are signed; RFC9421 is checked first, then draft-cavage-12
 - Advertise RFC9421 support via `Accept-Signature` header
 - Automatically create application actor to represent the server and sign outgoing GET requests
-- Dicover application actor via webfinger (FEP-d556) and nodeinfo (FEP-2677)
+- Discover application actor via webfinger (FEP-d556) and nodeinfo (FEP-2677)
 - Advertise capabilities via application actor (FEP-844e)
 - RFC9421 uses the `rsa-v1_5-sha256` key algorithm; others will be supported in future
 
@@ -93,8 +113,6 @@ Renamed project from "Federails" to "Fedipub". See the migration guide for instr
   rolled back if a subsequent DB step fails.
 - Extracted Follow/Accept/Reject/Undo-Follow inbox handling into `Fediverse::Inbox::FollowHandler` and
   Delete/Undo-Delete handling into `Fediverse::Inbox::DeleteHandler`; registry-based dispatch behavior stays unchanged.
-
-### Fixed
 
 ## [0.8.0] 2026-03-25
 

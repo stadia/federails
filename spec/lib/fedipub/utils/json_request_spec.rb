@@ -77,9 +77,9 @@ RSpec.describe Fedipub::Utils::JsonRequest do
     end
 
     it 'does not follow redirects' do
-      allow(response).to receive(:status).and_return(201)
-      described_class.post(url: 'https://example.com', message: '{}', from: local_actor)
-      expect(described_class.instance).to have_received(:connection).with(follow_redirects: false).at_least(:once)
+      allow(response).to receive_messages(status: 302, headers: { 'Location' => 'https://example.com/elsewhere' })
+      expect(described_class.post(url: 'https://example.com', message: '{}', from: local_actor)).to eq response
+      expect(builder).to have_received(:build_response).once
     end
 
     it 'tries draft-cavage-12 signing if RFC9421 attempt returns a 401' do
@@ -88,6 +88,30 @@ RSpec.describe Fedipub::Utils::JsonRequest do
       expect(builder).to have_received(:build_response).twice
       expect(Fediverse::Signature::Rfc9421).to have_received(:sign).once
       expect(Fediverse::Signature::DraftCavage12).to have_received(:sign).once
+    end
+  end
+
+  describe '#get' do
+    let(:local_actor) { FactoryBot.create(:user).fedipub_actor }
+    let(:faraday) { instance_double(Faraday::Connection) }
+    let(:builder) { instance_double(Faraday::RackBuilder) }
+    let(:redirect) { instance_double(Faraday::Response, status: 302, headers: { 'Location' => '/moved?page=2' }) }
+    let(:success) { instance_double(Faraday::Response, status: 200, headers: {}) }
+
+    before do
+      allow(described_class.instance).to receive(:connection).and_return(faraday)
+      allow(faraday).to receive(:builder).and_return(builder)
+      allow(builder).to receive(:build_response).and_return(redirect, success)
+      allow(Fediverse::Signature::Rfc9421).to receive(:sign) { |request:, **| request }
+      allow(described_class.instance).to receive(:build_request).and_call_original
+      real_connection = Faraday.new
+      allow(faraday).to receive(:build_request) { |method, &block| real_connection.build_request(method, &block) }
+    end
+
+    it 'follows redirects, signing the request again for the new target' do
+      expect(described_class.get(url: 'https://example.com/actor', from: local_actor)).to eq success
+      expect(Fediverse::Signature::Rfc9421).to have_received(:sign).twice
+      expect(described_class.instance).to have_received(:build_request).with(hash_including(url: 'https://example.com/moved?page=2', params: {}))
     end
   end
 

@@ -67,4 +67,83 @@ RSpec.describe Fediverse::Signature do
       expect(described_class.verify!(request: request, require_signature: false)).to be true
     end
   end
+
+  describe '.verify_sender!' do
+    let(:actor) { FactoryBot.create(:user).fedipub_actor }
+
+    it 'returns the actor whose key verified the request' do
+      allow(Fediverse::Signature::Rfc9421).to receive(:verify!).and_return(actor)
+      expect(described_class.verify_sender!(request: request)).to eq actor
+    end
+
+    it 'returns nil for unsigned requests' do
+      allow(Fediverse::Signature::Rfc9421).to receive(:verify!).and_return false
+      allow(Fediverse::Signature::DraftCavage12).to receive(:verify!).and_return false
+      expect(described_class.verify_sender!(request: request)).to be_nil
+    end
+  end
+
+  describe '.find_sender' do
+    let(:remote) { FactoryBot.create :distant_actor, :with_public_key }
+
+    it 'strips the key fragment' do
+      allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url).with(remote.federated_url).and_return(remote)
+      expect(described_class.find_sender("#{remote.federated_url}#main-key")).to eq remote
+    end
+
+    it 'rejects a missing key id' do
+      expect { described_class.find_sender(nil) }.to raise_error(Fediverse::Signature::BadSignature)
+    end
+
+    it 'rejects actors without a public key' do
+      allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url).and_return(FactoryBot.create(:distant_actor))
+      expect { described_class.find_sender('https://example.com/actor#main-key') }.to raise_error(Fediverse::Signature::BadSignature, /no public key/)
+    end
+
+    [Faraday::TimeoutError, Faraday::SSLError, ActiveRecord::RecordNotFound, JSON::ParserError, URI::InvalidURIError].each do |error|
+      it "converts #{error} into a bad signature" do
+        allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url).and_raise(error)
+        expect { described_class.find_sender('https://example.com/actor#main-key') }.to raise_error(Fediverse::Signature::BadSignature, /#{error}/)
+      end
+    end
+  end
+
+  describe '.refresh_stale_sender!' do
+    let(:remote) { FactoryBot.create :distant_actor, :with_public_key, updated_at: 2.days.ago }
+
+    it 'ignores local actors' do
+      expect(described_class.refresh_stale_sender!(FactoryBot.create(:user).fedipub_actor)).to be false
+    end
+
+    it 'ignores recently updated actors' do
+      remote.touch # rubocop:disable Rails/SkipsModelValidations
+      allow(remote).to receive(:sync!)
+      expect(described_class.refresh_stale_sender!(remote)).to be false
+      expect(remote).not_to have_received(:sync!)
+    end
+
+    it 'refreshes stale actors and bumps their timestamp even when nothing changed' do
+      allow(remote).to receive(:sync!).and_return(true)
+      expect(described_class.refresh_stale_sender!(remote)).to be true
+      expect(remote.reload.updated_at).to be > 1.minute.ago
+    end
+
+    it 'converts refresh failures into bad signatures and still bumps the timestamp' do
+      allow(remote).to receive(:sync!).and_raise(Faraday::TimeoutError)
+      expect { described_class.refresh_stale_sender!(remote) }.to raise_error(Fediverse::Signature::BadSignature, /Unable to refresh/)
+      expect(remote.reload.updated_at).to be > 1.minute.ago
+    end
+  end
+
+  describe '.body?' do
+    it 'is false for an empty body' do
+      expect(described_class.body?(Struct.new(:body).new(StringIO.new('')))).to be false
+    end
+
+    it 'is true for a non-empty body, and rewinds it' do
+      body = StringIO.new('{}')
+      expect(described_class.body?(Struct.new(:body).new(body))).to be true
+      expect(body.read).to eq '{}'
+    end
+  end
 end

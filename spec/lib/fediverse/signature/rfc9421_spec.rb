@@ -52,7 +52,7 @@ RSpec.describe Fediverse::Signature::Rfc9421 do
     end
 
     it 'is verifiable' do
-      expect(described_class.verify!(request: signed_request)).to be true
+      expect(described_class.verify!(request: signed_request)).to eq actor
     end
 
     it 'returns false if request is not signed' do
@@ -95,7 +95,7 @@ RSpec.describe Fediverse::Signature::Rfc9421 do
     end
 
     it 'is verifiable' do
-      expect(described_class.verify!(request: signed_request)).to be true
+      expect(described_class.verify!(request: signed_request)).to eq actor
     end
   end
 
@@ -108,7 +108,7 @@ RSpec.describe Fediverse::Signature::Rfc9421 do
       req.headers['Content-Digest'] = 'abc123'
       req
     end
-    let(:sender) { FactoryBot.create :distant_actor }
+    let(:sender) { FactoryBot.create :distant_actor, :with_public_key }
 
     before do
       allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url).and_return(sender)
@@ -123,9 +123,9 @@ RSpec.describe Fediverse::Signature::Rfc9421 do
     # We don't do the actual verification here because the signature isn't valid, but this tests
     # everything else, e.g. all our reading from the request object, etc
     it 'gets as far as verifying' do
-      allow(Linzer).to receive(:verify!).and_return(true)
+      allow(Linzer).to receive(:verify).and_return(true)
       described_class.verify!(request: request)
-      expect(Linzer).to have_received(:verify!).once
+      expect(Linzer).to have_received(:verify).once
     end
   end
 
@@ -150,7 +150,7 @@ RSpec.describe Fediverse::Signature::Rfc9421 do
   end
 
   context 'when the sender key may have been rotated' do
-    let(:sender) { FactoryBot.create :distant_actor }
+    let(:sender) { FactoryBot.create :distant_actor, :with_public_key }
     let(:request) do
       req = ActionDispatch::TestRequest.create
       req.request_method = 'GET'
@@ -168,22 +168,18 @@ RSpec.describe Fediverse::Signature::Rfc9421 do
     it 'refreshes a stale sender and retries' do
       sender.update_column(:updated_at, 2.days.ago) # rubocop:disable Rails/SkipsModelValidations
       calls = 0
-      allow(Linzer).to receive(:verify!) do |_request, &block|
-        block.call("#{sender.federated_url}#main-key")
+      allow(Linzer).to receive(:verify) do
         calls += 1
         raise Linzer::VerifyError, 'bad' if calls == 1
 
         true
       end
-      expect(described_class.verify!(request: request)).to be true
+      expect(described_class.verify!(request: request)).to eq sender
       expect(sender).to have_received(:sync!).once
     end
 
     it 'does not refresh a recently updated sender' do
-      allow(Linzer).to receive(:verify!) do |_request, &block|
-        block.call("#{sender.federated_url}#main-key")
-        raise Linzer::VerifyError, 'bad'
-      end
+      allow(Linzer).to receive(:verify).and_raise(Linzer::VerifyError, 'bad')
       expect { described_class.verify!(request: request) }.to raise_error(Fediverse::Signature::BadSignature)
       expect(sender).not_to have_received(:sync!)
     end
@@ -191,6 +187,32 @@ RSpec.describe Fediverse::Signature::Rfc9421 do
     it 'converts sender lookup failures into bad signatures' do
       allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url).and_raise(ActiveRecord::RecordNotFound)
       expect { described_class.verify!(request: request) }.to raise_error(Fediverse::Signature::BadSignature)
+    end
+  end
+
+  context 'when verifying signatures with several labels' do
+    let(:request) do
+      Faraday.default_connection.build_request(:get) do |req|
+        req.url 'https://example.com/actor'
+      end
+    end
+
+    before { described_class.sign(sender: actor, request: request) }
+
+    it 'accepts the request if one label is valid' do
+      request.headers['Signature-Input'] = %(sig0=("@method" "@target-uri");created=#{Time.now.to_i};keyid="#{actor.key_id}", #{request.headers['Signature-Input']})
+      request.headers['Signature'] = "sig0=:c2ln:, #{request.headers['Signature']}"
+      expect(described_class.verify!(request: request)).to eq actor
+    end
+
+    it 'rejects signatures created too far in the future' do
+      request.headers['Signature-Input'] = request.headers['Signature-Input'].sub(/created=\d+/, "created=#{2.hours.from_now.to_i}")
+      expect { described_class.verify!(request: request) }.to raise_error(Fediverse::Signature::BadSignature, /future/)
+    end
+
+    it 'rejects signatures created too long ago' do
+      request.headers['Signature-Input'] = request.headers['Signature-Input'].sub(/created=\d+/, "created=#{1.hour.ago.to_i}")
+      expect { described_class.verify!(request: request) }.to raise_error(Fediverse::Signature::BadSignature, /ago/)
     end
   end
 end

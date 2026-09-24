@@ -65,7 +65,7 @@ RSpec.describe Fediverse::Signature::DraftCavage12 do
     end
 
     it 'is verifiable' do
-      expect(described_class.verify!(request: signed_request)).to be true
+      expect(described_class.verify!(request: signed_request)).to eq actor
     end
 
     it 'returns false if request is not signed' do
@@ -119,7 +119,7 @@ RSpec.describe Fediverse::Signature::DraftCavage12 do
     end
 
     it 'is verifiable' do
-      expect(described_class.verify!(request: signed_request)).to be true
+      expect(described_class.verify!(request: signed_request)).to eq actor
     end
   end
 
@@ -133,7 +133,7 @@ RSpec.describe Fediverse::Signature::DraftCavage12 do
       req
     end
     let(:date) { Time.now.utc.httpdate }
-    let(:sender) { FactoryBot.create :distant_actor }
+    let(:sender) { FactoryBot.create :distant_actor, :with_public_key }
 
     before do
       allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url).and_return(sender)
@@ -157,7 +157,7 @@ RSpec.describe Fediverse::Signature::DraftCavage12 do
   end
 
   context 'when checking what an incoming signature covers' do
-    let(:sender) { FactoryBot.create :distant_actor }
+    let(:sender) { FactoryBot.create :distant_actor, :with_public_key }
 
     define_method(:incoming_request) do |headers:, date: Time.now.utc.httpdate, body: nil, path: '/'|
       req = ActionDispatch::TestRequest.create('RAW_POST_DATA' => body, 'PATH_INFO' => path)
@@ -198,7 +198,7 @@ RSpec.describe Fediverse::Signature::DraftCavage12 do
       sender.update_column(:updated_at, 2.days.ago) # rubocop:disable Rails/SkipsModelValidations
       allow(described_class).to receive(:do_verification).and_return(false, true)
       allow(sender).to receive(:sync!).and_return(true)
-      expect(described_class.verify!(request: incoming_request(headers: '(request-target) host date'))).to be true
+      expect(described_class.verify!(request: incoming_request(headers: '(request-target) host date'))).to eq sender
       expect(sender).to have_received(:sync!).once
     end
 

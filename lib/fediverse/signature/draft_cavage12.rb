@@ -17,9 +17,12 @@ module Fediverse
         end
 
         REQUIRED_HEADERS = %w[(request-target) host date].freeze
+        # Same limits as Mastodon: accept a Date up to 12h old, and up to 1h in the future for clock skew
         EXPIRATION_WINDOW = 12.hours
         CLOCK_SKEW_MARGIN = 1.hour
 
+        # @return [Fedipub::Actor, false] the signer, or false if the request has no draft-cavage-12 signature
+        # @raise [Fediverse::Signature::BadSignature] when the signature is invalid
         def verify!(request:) # rubocop:todo Metrics/AbcSize, Metrics/MethodLength
           # Do we have a signature to verify?
           return false unless request.headers.key?('Signature')
@@ -31,20 +34,16 @@ module Fediverse
           check_covered_headers!(request, components['headers'].split)
           check_date!(request)
 
-          # Find the sender
-          sender = find_sender_by_key_id(components['keyId'])
-          raise Fediverse::Signature::BadSignature, "Couldn't find sender" unless sender
-
-          # Build the expected payload
+          sender = Fediverse::Signature.find_sender(components['keyId'])
           comparison_string = signature_payload(request: request, headers: components['headers'])
 
           # Verify the payload against the signature, refreshing the sender's key once if it may have been rotated
-          result = do_verification(components['signature'], sender, comparison_string) ||
-                   (Fediverse::Signature.refresh_stale_sender!(sender) && do_verification(components['signature'], sender, comparison_string))
-          raise Fediverse::Signature::BadSignature unless result
+          verified = do_verification(components['signature'], sender, comparison_string) ||
+                     (Fediverse::Signature.refresh_stale_sender!(sender) && do_verification(components['signature'], sender, comparison_string))
+          raise Fediverse::Signature::BadSignature, "Signature mismatch for keyId #{components['keyId']}" unless verified
 
-          result
-        rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid, OpenSSL::PKey::PKeyError => e
+          sender
+        rescue OpenSSL::PKey::PKeyError => e
           raise Fediverse::Signature::BadSignature, e.message
         end
 
@@ -72,14 +71,6 @@ module Fediverse
           key.verify(OpenSSL::Digest.new('SHA256'), signature, comparison_string)
         end
 
-        def find_sender_by_key_id(key_id)
-          return unless key_id
-
-          Fedipub::Actor.find_or_create_by_federation_url(
-            key_id.split('#', 2).first
-          )
-        end
-
         def set_headers(request) #  rubocop:disable Naming/AccessorMethodName
           request.headers['Digest'] = digest(request.body) if request.body
           request.headers['Host'] = URI.parse(request.path).host
@@ -88,10 +79,14 @@ module Fediverse
         end
 
         def signature_components(request)
-          request.headers['Signature'].split(',').to_h do |pair|
-            /\A(?<key>\w+)="(?<value>.*)"\z/ =~ pair
+          pairs = request.headers['Signature'].split(',').map do |pair|
+            /\A(?<key>\w+)="(?<value>.*)"\z/ =~ pair.strip
             [key, value]
           end
+          # Duplicated parameters would make the signature ambiguous
+          raise Fediverse::Signature::BadSignature, 'Malformed signature' if pairs.map(&:first).uniq.size != pairs.size
+
+          pairs.to_h
         end
 
         def digest(message)

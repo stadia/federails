@@ -25,8 +25,22 @@ module Fedipub
 
     def verify_request_signature!
       Fediverse::Signature.verify!(request: request, require_signature: ServerController.require_signature?)
-    rescue Fediverse::Signature::BadSignature
+    rescue Fediverse::Signature::BadSignature => e
+      log_signature_failure(e)
       head :unauthorized
+    end
+
+    def log_signature_failure(error, **details)
+      Fedipub.logger.warn do
+        {
+          message:         "Signature verification failed: #{error.message}",
+          remote_ip:       request.remote_ip,
+          path:            request.fullpath,
+          signature_input: request.headers['Signature-Input'],
+          key_id:          request.headers['Signature'].to_s[/keyId="([^"]*)"/, 1],
+          **details,
+        }
+      end
     end
 
     def error_fallback(exception, fallback_message, status)

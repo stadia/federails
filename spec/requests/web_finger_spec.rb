@@ -83,8 +83,15 @@ RSpec.describe '/well-known', type: :request do
       end
 
       it 'includes href to application actor' do
-        link = response.parsed_body['links'].first
-        expect(link['href']).to match(%r{http://localhost/federation/actors/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}})
+        link = response.parsed_body['links'].find { |l| l['rel'] == 'https://www.w3.org/ns/activitystreams#Service' }
+        expect(link).to include('href' => Fedipub::Actor.application_actor.federated_url, 'type' => Mime[:activitypub].to_s)
+      end
+    end
+
+    context 'when looking up a regular actor' do
+      it 'has no Service link' do
+        get fedipub.webfinger_url, params: { resource: "acct:#{user.id}@localhost" }
+        expect(response.parsed_body['links'].pluck('rel')).not_to include('https://www.w3.org/ns/activitystreams#Service')
       end
     end
 
