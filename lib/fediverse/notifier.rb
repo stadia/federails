@@ -166,13 +166,10 @@ module Fediverse
         json.to_json
       end
 
+      # Overridden by Fedipub::Moderation for filtering
       #: (inbox_url: String, message: String, ?from: Fedipub::Actor?) -> Faraday::Response
       def post_to_inbox(inbox_url:, message:, from: nil)
-        conn = Faraday.default_connection
-        resp = conn.builder.build_response(
-          conn,
-          signed_request(url: inbox_url, message: message, from: from)
-        )
+        resp = Fedipub::Utils::JsonRequest.post(url: inbox_url, message: message, from: from)
 
         status = resp.status
         return resp if status.between?(200, 299)
@@ -194,33 +191,6 @@ module Fediverse
           "Delivery to #{inbox_url} failed: #{e.class} #{e.message}",
           response_code: nil, inbox_url: inbox_url
         )
-      end
-
-      #: (url: String, message: String, from: Fedipub::Actor?) -> Faraday::Request
-      def signed_request(url:, message:, from:)
-        req = request(url: url, message: message)
-        req.headers['Signature'] = Fediverse::Signature.sign(sender: from, request: req) if from
-        req
-      end
-
-      #: (url: String, message: String) -> Faraday::Request
-      def request(url:, message:)
-        Faraday.default_connection.build_request(:post) do |req|
-          req.url url
-          req.body = message
-          req.headers['Content-Type'] = Mime[:activitypub].to_s
-          req.headers['Accept'] = Mime[:activitypub].to_s
-          req.headers['Host'] = URI.parse(url).host
-          req.headers['Date'] = Time.now.utc.httpdate
-          req.headers['Digest'] = digest(message)
-        end
-      end
-
-      #: (String) -> String
-      def digest(message)
-        "SHA-256=#{Base64.strict_encode64(
-          OpenSSL::Digest.new('SHA256').digest(message)
-        )}"
       end
 
       #: (Integer) -> bool

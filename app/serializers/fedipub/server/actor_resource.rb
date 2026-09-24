@@ -3,6 +3,15 @@
 module Fedipub
   module Server
     class ActorResource < BaseResource
+      IMPLEMENTS = [
+        'https://www.w3.org/TR/activitypub/',
+        'https://datatracker.ietf.org/doc/html/rfc9421',
+        'https://datatracker.ietf.org/doc/html/draft-cavage-http-signatures-12',
+        'https://w3id.org/fep/844e',
+        'https://w3id.org/fep/2677',
+        'https://w3id.org/fep/d556',
+      ].freeze
+
       attribute :@context do |actor|
         data = actor_data(actor)
         toot_context = {
@@ -48,6 +57,17 @@ module Fedipub
           owner:        actor.federated_url,
           publicKeyPem: actor.public_key,
         }
+      end
+
+      # FEP-844e capability discovery
+      attribute :implements do |actor|
+        next unless actor.application_actor?
+
+        IMPLEMENTS.map { |url| { 'href' => url } }
+      end
+
+      attribute :generator do |actor|
+        Fedipub::Actor.application_actor.federated_url unless actor.application_actor?
       end
 
       def serializable_hash

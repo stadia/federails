@@ -8,24 +8,24 @@ module Fedipub
       def find
         skip_authorization
 
-        resource = params.require(:resource)
-        case resource
+        case resource = params.require(:resource)
+        when %r{^https?://#{Fedipub::Utils::Host.localhost}/?$}
+          @actor = Fedipub::Actor.application_actor
         when %r{^https?://.+}
-          @user = Fedipub::Actor.find_by_federation_url!(resource).entity
+          @actor = Fedipub::Actor.find_by_federation_url!(resource)
         when /^acct:.+/
-          actor = Fedipub::Actor.find_local_by_username(username)
-          raise Fedipub::Actor::TombstonedError if actor&.tombstoned?
-
-          @user = actor&.entity
+          @actor = Fedipub::Actor.find_local_by_username(username)
+          raise Fedipub::Actor::TombstonedError if @actor&.tombstoned?
         end
-        raise ActiveRecord::RecordNotFound if @user.nil?
+        raise ActiveRecord::RecordNotFound if @actor.nil?
 
         render_serialized(
           Fedipub::Server::WebFingerResource,
           Fedipub::Server::WebFingerPayload.new(
             subject:           resource,
-            self_href:         @user.fedipub_actor.federated_url,
-            profile_href:      @user.fedipub_actor.profile_url,
+            self_href:         @actor.federated_url,
+            service_href:      (@actor.federated_url if @actor.application_actor?),
+            profile_href:      @actor.profile_url,
             remote_follow_url: remote_follow_url
           ),
           content_type: Mime[:jrd]

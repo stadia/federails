@@ -152,6 +152,10 @@ module Fedipub
     end
 
     describe '#find_or_create_by_account' do
+      before do
+        described_class.application_actor # Make sure application actor is created before we look for changes
+      end
+
       it 'creates distant actor' do
         VCR.use_cassette 'actor/find_or_create_by_account_get' do
           expect do
@@ -204,6 +208,10 @@ module Fedipub
     end
 
     describe '#find_or_create_by_federation_url' do
+      before do
+        described_class.application_actor # Make sure application actor is created before we look for changes
+      end
+
       it 'creates distant actor' do
         VCR.use_cassette 'actor/find_or_create_by_federation_url_get' do
           expect do

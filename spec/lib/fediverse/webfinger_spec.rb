@@ -189,7 +189,6 @@ module Fediverse
 
       it 'raises an error when failing' do
         allow(described_class).to receive(:get_json).and_raise(ActiveRecord::RecordNotFound)
-        allow(described_class).to receive(:signed_get_json).with('https://example.com/users/jdoe').and_raise(ActiveRecord::RecordNotFound)
 
         expect do
           described_class.fetch_actor_url('https://example.com/users/jdoe')
@@ -202,24 +201,6 @@ module Fediverse
         expect do
           described_class.fetch_actor_url('https://example.com/users/jdoe')
         end.to raise_error ActiveRecord::RecordNotFound
-      end
-
-      it 'uses signed fetch fallback when unsigned fetch fails' do
-        signed_payload = {
-          'id'                => 'https://example.com/users/jdoe',
-          'preferredUsername' => 'jdoe',
-          'type'              => 'Person',
-          'inbox'             => 'https://example.com/users/jdoe/inbox',
-          'outbox'            => 'https://example.com/users/jdoe/outbox',
-          'followers'         => 'https://example.com/users/jdoe/followers',
-          'following'         => 'https://example.com/users/jdoe/following',
-        }
-        allow(described_class).to receive(:get_json).and_raise(ActiveRecord::RecordNotFound)
-        allow(described_class).to receive(:signed_get_json).with('https://example.com/users/jdoe').and_return(signed_payload)
-
-        actor = described_class.fetch_actor_url('https://example.com/users/jdoe')
-
-        expect(actor.username).to eq('jdoe')
       end
     end
 
@@ -254,51 +235,6 @@ module Fediverse
 
         it 'keeps non-default ports' do
           expect(described_class.send(:server_and_port, 'https://example.com:8443/users/alice')).to eq('example.com:8443')
-        end
-      end
-
-      describe '.signed_get_json' do
-        let(:local_actor) { FactoryBot.create :local_actor }
-        let(:local_scope) { instance_double(ActiveRecord::Relation) }
-        let(:where_chain) { instance_double(ActiveRecord::QueryMethods::WhereChain) }
-
-        before do
-          allow(Fedipub::Actor).to receive(:where).with(local: true).and_return(local_scope)
-          allow(local_scope).to receive(:where).with(no_args).and_return(where_chain)
-          allow(where_chain).to receive(:not).with(entity_type: nil).and_return(local_scope)
-          allow(local_scope).to receive(:first).and_return(local_actor)
-        end
-
-        it 'raises when no local actor is available' do
-          allow(local_scope).to receive(:first).and_return(nil)
-
-          expect do
-            described_class.send(:signed_get_json, 'https://example.com/users/jdoe')
-          end.to raise_error ActiveRecord::RecordNotFound
-        end
-
-        it 'raises when signed get returns an unhandled status' do
-          allow(Fediverse::Signature).to receive(:signed_get).and_raise(Fedipub::Utils::JsonRequest::UnhandledResponseStatus.new('404'))
-
-          expect do
-            described_class.send(:signed_get_json, 'https://example.com/users/jdoe')
-          end.to raise_error ActiveRecord::RecordNotFound
-        end
-
-        it 'raises when signed get cannot connect' do
-          allow(Fediverse::Signature).to receive(:signed_get).and_raise(Faraday::ConnectionFailed.new('boom'))
-
-          expect do
-            described_class.send(:signed_get_json, 'https://example.com/users/jdoe')
-          end.to raise_error ActiveRecord::RecordNotFound
-        end
-
-        it 'raises when signed get returns invalid json' do
-          allow(Fediverse::Signature).to receive(:signed_get).and_raise(JSON::ParserError)
-
-          expect do
-            described_class.send(:signed_get_json, 'https://example.com/users/jdoe')
-          end.to raise_error ActiveRecord::RecordNotFound
         end
       end
     end

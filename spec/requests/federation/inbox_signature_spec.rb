@@ -21,16 +21,16 @@ RSpec.describe 'Inbox HTTP Signature Verification', type: :request do
 
   def build_signature_request(body)
     Faraday.default_connection.build_request(:post) do |r|
-      r.url fedipub.server_actor_inbox_path(actor)
+      r.url "http://www.example.com#{fedipub.server_actor_inbox_path(actor)}"
       r.body = body
       base_signature_headers(body).each { |key, value| r.headers[key] = value }
     end
   end
 
-  def signature_headers_for(signing_actor, body)
+  def signature_headers_for(signing_actor, body, legacy_signature: false)
     request = build_signature_request(body)
-    request.headers['Signature'] = Fediverse::Signature.sign(sender: signing_actor, request: request)
-    request.headers.slice('Host', 'Date', 'Digest', 'Signature', 'Content-Type')
+    Fediverse::Signature.sign(sender: signing_actor, request: request, legacy_signature: legacy_signature)
+    request.headers.to_h
   end
 
   context 'when verify_signatures is true' do
@@ -87,26 +87,40 @@ RSpec.describe 'Inbox HTTP Signature Verification', type: :request do
       end
     end
 
-    it 'accepts a valid signed request whose payload actor matches the signed actor' do
-      signing_actor = FactoryBot.create(:user).fedipub_actor
-      matching_payload = {
-        '@context' => 'https://www.w3.org/ns/activitystreams',
-        'id'       => 'https://remote.example/activity/2',
-        'type'     => 'Follow',
-        'actor'    => signing_actor.federated_url,
-        'object'   => actor.federated_url,
-      }.to_json
+    [false, true].each do |legacy_signature|
+      it "accepts a valid #{legacy_signature ? 'draft-cavage-12' : 'RFC9421'} signed request whose payload actor matches the signed actor" do
+        signing_actor = FactoryBot.create(:user).fedipub_actor
+        matching_payload = {
+          '@context' => 'https://www.w3.org/ns/activitystreams',
+          'id'       => 'https://remote.example/activity/2',
+          'type'     => 'Follow',
+          'actor'    => signing_actor.federated_url,
+          'object'   => actor.federated_url,
+        }.to_json
 
+        allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url)
+          .with(signing_actor.federated_url).and_return(signing_actor)
+        allow(Fediverse::Inbox).to receive_messages(dispatch_request: true, maybe_forward: nil)
+
+        post fedipub.server_actor_inbox_path(actor),
+             params:  matching_payload,
+             headers: signature_headers_for(signing_actor, matching_payload, legacy_signature: legacy_signature)
+
+        expect(response).to have_http_status(:created)
+        expect(Fediverse::Inbox).to have_received(:dispatch_request)
+      end
+    end
+
+    it 'rejects a signed request whose body does not match its digest' do
+      signing_actor = FactoryBot.create(:user).fedipub_actor
       allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url)
         .with(signing_actor.federated_url).and_return(signing_actor)
-      allow(Fediverse::Inbox).to receive_messages(dispatch_request: true, maybe_forward: nil)
 
       post fedipub.server_actor_inbox_path(actor),
-           params:  matching_payload,
-           headers: signature_headers_for(signing_actor, matching_payload)
+           params:  payload.sub('Follow', 'Delete'),
+           headers: signature_headers_for(signing_actor, payload)
 
-      expect(response).to have_http_status(:created)
-      expect(Fediverse::Inbox).to have_received(:dispatch_request)
+      expect(response).to have_http_status(:unauthorized)
     end
   end
 

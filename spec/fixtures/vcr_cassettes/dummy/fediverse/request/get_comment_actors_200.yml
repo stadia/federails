@@ -10,7 +10,7 @@ http_interactions:
       Accept:
       - application/json
       User-Agent:
-      - Faraday v2.9.0
+      - Fedipub/0.9.0
   response:
     status:
       code: 200
@@ -80,7 +80,7 @@ http_interactions:
       Accept:
       - application/json
       User-Agent:
-      - Faraday v2.9.0
+      - Fedipub/0.9.0
   response:
     status:
       code: 200

@@ -48,12 +48,7 @@ module Fediverse
       # @return [Fedipub::Actor]
       # @raise [ActiveRecord::RecordNotFound] when the actor cannot be resolved
       def fetch_actor_url(url)
-        json = begin
-          get_json url
-        rescue ActiveRecord::RecordNotFound
-          signed_get_json(url)
-        end
-        webfinger_to_actor json
+        webfinger_to_actor get_json(url)
       end
 
       # Gets the real actor's federation URL from its username and domain
@@ -146,35 +141,11 @@ module Fediverse
                            local:            false
       end
 
-      # Performs a signed GET request using a local actor for authentication
-      # Used as fallback when servers require Authorized Fetch (Secure Mode)
-      # @return [Hash]
-      # @raise [ActiveRecord::RecordNotFound] when no local actor exists or request fails
-      def signed_get_json(url)
-        actor = Fedipub::Actor.where(local: true).where.not(entity_type: nil).first
-        raise ActiveRecord::RecordNotFound, 'No local actor available for signed fetch' unless actor
-
-        Fedipub.logger.debug { "Retrying with signed GET for #{url}" }
-        Fediverse::Signature.signed_get(url, actor: actor)
-      rescue Fedipub::Utils::JsonRequest::UnhandledResponseStatus => e
-        Fedipub.logger.debug { e.message }
-        raise ActiveRecord::RecordNotFound
-      rescue Faraday::ConnectionFailed
-        Fedipub.logger.debug { "Failed to reach server for signed GET #{url}" }
-        raise ActiveRecord::RecordNotFound
-      rescue JSON::ParserError
-        Fedipub.logger.debug { "Invalid JSON response for signed GET #{url}" }
-        raise ActiveRecord::RecordNotFound
-      rescue URI::InvalidURIError
-        Fedipub.logger.debug { "Invalid URI for signed GET #{url}" }
-        raise ActiveRecord::RecordNotFound
-      end
-
       # Makes a simple GET request and returns a +Hash+ from the parsed body
       # @return [Hash]
       # @raise [ActiveRecord::RecordNotFound] when the response is invalid
       def get_json(url, params = {})
-        Fedipub::Utils::JsonRequest.get_json(url, params: params, follow_redirects: true, headers: { accept: 'application/json' })
+        Fedipub::Utils::JsonRequest.get_json(url, params: params, headers: { accept: 'application/json' })
       rescue Fedipub::Utils::JsonRequest::UnhandledResponseStatus => e
         Fedipub.logger.debug { e.message }
 

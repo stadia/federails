@@ -38,7 +38,7 @@ module Fediverse
 
       #: (String) -> String
       def nodeinfo_url(domain)
-        response = Fedipub::Utils::JsonRequest.get_json "#{base_url(domain)}/.well-known/nodeinfo", follow_redirects: true
+        response = Fedipub::Utils::JsonRequest.get_json "#{base_url(domain)}/.well-known/nodeinfo"
         entry = NODEINFO_SCHEMA_RELS.lazy.map { |rel| response['links']&.find { |link| link['rel'] == rel } }.find(&:itself)
 
         entry['href']
