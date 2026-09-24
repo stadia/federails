@@ -8,4 +8,5 @@
 class Rails::Conductor::BaseController
   include GeneratedUrlHelpersModule
   include GeneratedPathHelpersModule
+  include GeneratedMountedHelpers
 end

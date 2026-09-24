@@ -5,4 +5,7 @@
 # Please instead update this file by running `bin/tapioca dsl Fedipub::ApplicationMailer`.
 
 
-class Fedipub::ApplicationMailer; end
+class Fedipub::ApplicationMailer
+  include GeneratedMountedHelpers
+  include Fedipub::Engine::GeneratedUrlHelpersModule
+end

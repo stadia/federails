@@ -7,4 +7,5 @@
 
 class ApplicationMailer
   include GeneratedUrlHelpersModule
+  include GeneratedMountedHelpers
 end

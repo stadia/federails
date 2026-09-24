@@ -8,4 +8,5 @@
 class ActionDispatch::IntegrationTest
   include GeneratedUrlHelpersModule
   include GeneratedPathHelpersModule
+  include GeneratedMountedHelpers
 end
