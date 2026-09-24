@@ -6,6 +6,7 @@ module Fedipub
       WebFingerPayload = Struct.new(
         :subject,           #: untyped
         :self_href,         #: untyped
+        :service_href,      #: untyped
         :profile_href,      #: untyped
         :remote_follow_url  #: untyped
       )
@@ -23,6 +24,8 @@ module Fedipub
           },
         ]
 
+        links << service_link(payload.service_href) if payload.service_href
+
         if payload.profile_href
           links << {
             rel:  'https://webfinger.net/rel/profile-page',
@@ -39,6 +42,12 @@ module Fedipub
         end
 
         links
+      end
+
+      private
+
+      def service_link(href)
+        { rel: 'https://www.w3.org/ns/activitystreams#Service', type: Mime[:activitypub].to_s, href: href }
       end
     end
   end

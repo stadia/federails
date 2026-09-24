@@ -6,6 +6,10 @@
 
 
 class Fedipub::ServerController
+  include GeneratedMountedHelpers
+  include Fedipub::Engine::GeneratedUrlHelpersModule
+  include Fedipub::Engine::GeneratedPathHelpersModule
+
   sig { returns(HelperProxy) }
   def helpers; end
 

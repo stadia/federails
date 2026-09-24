@@ -8,4 +8,5 @@
 class Devise::FailureApp
   include GeneratedUrlHelpersModule
   include GeneratedPathHelpersModule
+  include GeneratedMountedHelpers
 end

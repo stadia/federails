@@ -8,6 +8,7 @@
 class ApplicationController
   include GeneratedUrlHelpersModule
   include GeneratedPathHelpersModule
+  include GeneratedMountedHelpers
 
   sig { returns(HelperProxy) }
   def helpers; end

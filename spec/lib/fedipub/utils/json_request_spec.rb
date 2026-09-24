@@ -17,5 +17,179 @@ RSpec.describe Fedipub::Utils::JsonRequest do
         end
       end
     end
+
+    it 'signs the request if a sender is specified' do
+      sender = FactoryBot.create(:user).fedipub_actor
+      allow(Fediverse::Signature::Rfc9421).to receive(:sign).and_call_original
+      VCR.use_cassette 'fediverse/request/get_actor_200' do
+        described_class.get_json('https://mamot.fr/users/mtancoigne', from: sender)
+      end
+      expect(Fediverse::Signature::Rfc9421).to have_received(:sign).once
+    end
+
+    it 'signs the request with application actor if sender is not specified' do
+      allow(Fediverse::Signature::Rfc9421).to receive(:sign).and_call_original
+      VCR.use_cassette 'fediverse/request/get_actor_200' do
+        described_class.get_json('https://mamot.fr/users/mtancoigne')
+      end
+      expect(Fediverse::Signature::Rfc9421).to have_received(:sign).once.with(sender: Fedipub::Actor.application_actor, request: anything)
+    end
+  end
+
+  describe '#post' do
+    let(:local_actor) { FactoryBot.create(:user).fedipub_actor }
+    let(:faraday) { instance_double(Faraday::Connection) }
+    let(:builder) { instance_double(Faraday::RackBuilder) }
+    let(:response) { instance_double(Faraday::Response) }
+
+    before do
+      allow(described_class.instance).to receive(:connection).and_return(faraday)
+      allow(faraday).to receive(:builder).and_return(builder)
+      allow(faraday).to receive(:build_request)
+      allow(builder).to receive(:build_response).and_return(response)
+      allow(Fediverse::Signature::Rfc9421).to receive(:sign)
+      allow(Fediverse::Signature::DraftCavage12).to receive(:sign)
+    end
+
+    it 'tries RFC9421 signing first' do
+      allow(response).to receive(:status).and_return(201)
+      described_class.post(url: 'https://example.com', message: '{}', from: local_actor)
+      expect(builder).to have_received(:build_response).once
+      expect(Fediverse::Signature::Rfc9421).to have_received(:sign).once
+      expect(Fediverse::Signature::DraftCavage12).not_to have_received(:sign)
+    end
+
+    it 'tries draft-cavage-12 signing if RFC9421 attempt returns a 400' do
+      allow(response).to receive(:status).and_return(400)
+      described_class.post(url: 'https://example.com', message: '{}', from: local_actor)
+      expect(builder).to have_received(:build_response).twice
+      expect(Fediverse::Signature::Rfc9421).to have_received(:sign).once
+      expect(Fediverse::Signature::DraftCavage12).to have_received(:sign).once
+    end
+
+    it 'does not reuse the RFC9421-signed request for the draft-cavage-12 retry' do
+      requests = [instance_double(Faraday::Request), instance_double(Faraday::Request)]
+      allow(faraday).to receive(:build_request).and_return(*requests)
+      allow(response).to receive(:status).and_return(401)
+      described_class.post(url: 'https://example.com', message: '{}', from: local_actor)
+      expect(Fediverse::Signature::Rfc9421).to have_received(:sign).with(sender: local_actor, request: requests.first)
+      expect(Fediverse::Signature::DraftCavage12).to have_received(:sign).with(sender: local_actor, request: requests.last)
+    end
+
+    it 'does not follow redirects' do
+      allow(response).to receive_messages(status: 302, headers: { 'Location' => 'https://example.com/elsewhere' })
+      expect(described_class.post(url: 'https://example.com', message: '{}', from: local_actor)).to eq response
+      expect(builder).to have_received(:build_response).once
+    end
+
+    it 'tries draft-cavage-12 signing if RFC9421 attempt returns a 401' do
+      allow(response).to receive(:status).and_return(401)
+      described_class.post(url: 'https://example.com', message: '{}', from: local_actor)
+      expect(builder).to have_received(:build_response).twice
+      expect(Fediverse::Signature::Rfc9421).to have_received(:sign).once
+      expect(Fediverse::Signature::DraftCavage12).to have_received(:sign).once
+    end
+  end
+
+  describe '#get' do
+    let(:local_actor) { FactoryBot.create(:user).fedipub_actor }
+    let(:faraday) { instance_double(Faraday::Connection) }
+    let(:builder) { instance_double(Faraday::RackBuilder) }
+    let(:redirect) { instance_double(Faraday::Response, status: 302, headers: { 'Location' => '/moved?page=2' }) }
+    let(:success) { instance_double(Faraday::Response, status: 200, headers: {}) }
+
+    before do
+      allow(described_class.instance).to receive(:connection).and_return(faraday)
+      allow(faraday).to receive(:builder).and_return(builder)
+      allow(builder).to receive(:build_response).and_return(redirect, success)
+      allow(Fediverse::Signature::Rfc9421).to receive(:sign) { |request:, **| request }
+      allow(described_class.instance).to receive(:build_request).and_call_original
+      real_connection = Faraday.new
+      allow(faraday).to receive(:build_request) { |method, &block| real_connection.build_request(method, &block) }
+    end
+
+    it 'follows redirects, signing the request again for the new target' do
+      expect(described_class.get(url: 'https://example.com/actor', from: local_actor)).to eq success
+      expect(Fediverse::Signature::Rfc9421).to have_received(:sign).twice
+      expect(described_class.instance).to have_received(:build_request).with(hash_including(url: 'https://example.com/moved?page=2', params: {}))
+    end
+  end
+
+  describe '#build_request' do
+    context 'when the URL has repeated query parameters' do
+      let(:request) { described_class.instance.send :build_request, method: :get, url: 'https://fedipub.dev/objects?tag=b&tag=a' }
+      let(:sender) { FactoryBot.create(:user).fedipub_actor }
+
+      it 'keeps every value in the URL sent' do
+        url = described_class.instance.send(:connection).build_exclusive_url(request.path, request.params, request.options.params_encoder)
+        expect(url.to_s).to eq 'https://fedipub.dev/objects?tag=b&tag=a'
+      end
+
+      it 'signs the same URL with RFC9421' do
+        Fediverse::Signature.sign(sender: sender, request: request)
+        expect(Linzer::Message.new(request)['@target-uri']).to eq 'https://fedipub.dev/objects?tag=b&tag=a'
+      end
+
+      it 'signs the same URL with draft-cavage-12' do
+        Fediverse::Signature.sign(sender: sender, request: request, legacy_signature: true)
+        expect(Fediverse::Signature::DraftCavage12.send(:signature_payload, request: request))
+          .to start_with("(request-target): get /objects?tag=b&tag=a\n")
+      end
+    end
+
+    context 'when POSTing' do
+      let(:request) { described_class.instance.send :build_request, method: :post, url: 'https://fedipub.dev/inbox', message: 'test' }
+
+      it 'sets correct method' do
+        expect(request.http_method).to eq :post
+      end
+
+      it 'sets correct URL' do
+        # Faraday::Request#path is badly named, it's the full URL without query params
+        expect(request.path.to_s).to eq 'https://fedipub.dev/inbox'
+      end
+
+      it 'sends correct activitypub content type' do
+        expect(request.headers['Content-Type']).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"'
+      end
+
+      it 'accepts correct activitypub content type' do
+        expect(request.headers['Accept']).to eq 'application/ld+json; profile="https://www.w3.org/ns/activitystreams", application/activity+json, application/json;q=0.5'
+      end
+
+      it 'advertises RFC9421 signature support' do
+        expect(request.headers['Accept-Signature']).to eq 'sig1=()'
+      end
+    end
+
+    context 'when providing extra headers' do
+      let(:request) do
+        described_class.instance.send :build_request, method: :post, url: 'https://fedipub.dev/inbox', message: 'test', headers: {
+          'X-Clacks-Overhead' => 'GNU Terry Pratchett',
+          'Content-Type'      => 'text/plain',
+          'Accept'            => 'text/html',
+        }
+      end
+
+      it 'adds arbitrary headers' do
+        expect(request.headers['X-Clacks-Overhead']).to eq 'GNU Terry Pratchett'
+      end
+
+      it 'overrides accept' do
+        expect(request.headers['Accept']).to eq 'text/html'
+      end
+
+      it 'overrides content type' do
+        expect(request.headers['Content-Type']).to eq 'text/plain'
+      end
+    end
+
+    context 'when providing query params' do
+      let(:request) { described_class.instance.send :build_request, method: :get, url: 'https://fedipub.dev/inbox', params: { 'q' => 'test' } }
+
+      it 'adds params to request' do
+        expect(request.params['q']).to eq 'test'
+      end
+    end
   end
 end

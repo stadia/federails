@@ -8,6 +8,7 @@
 module ActionView::Helpers
   include GeneratedUrlHelpersModule
   include GeneratedPathHelpersModule
+  include GeneratedMountedHelpers
 
   mixes_in_class_methods ::ActionView::Helpers::UrlHelper::ClassMethods
   mixes_in_class_methods ::ActionView::Helpers::SanitizeHelper::ClassMethods

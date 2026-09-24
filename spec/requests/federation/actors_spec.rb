@@ -29,6 +29,25 @@ RSpec.describe '/federation/actors', type: :request do
       expect(response).to be_successful
     end
 
+    it 'rejects badly-signed requests' do
+      get fedipub.server_actor_url(user.fedipub_actor), headers: { accept: Mime[:activitypub], signature: 'poop' }
+      expect(response).to have_http_status :unauthorized
+    end
+
+    it 'logs why a signature was rejected' do
+      allow(Fedipub.logger).to receive(:warn)
+      get fedipub.server_actor_url(user.fedipub_actor), headers: { accept: Mime[:activitypub], signature: 'poop' }
+      expect(Fedipub.logger).to have_received(:warn) do |&block|
+        expect(block.call).to include(message: 'Signature verification failed: Malformed signature', path: a_string_including('/federation/actors/'))
+      end
+    end
+
+    it 'rejects unsigned requests when signatures are required' do
+      allow(Fedipub::ServerController).to receive(:require_signature?).and_return(true)
+      get fedipub.server_actor_url(user.fedipub_actor), headers: { accept: Mime[:activitypub] }
+      expect(response).to have_http_status :unauthorized
+    end
+
     it 'includes standard activitypub context' do
       get fedipub.server_actor_url(user.fedipub_actor), headers: { accept: Mime[:activitypub] }
       json = response.parsed_body
@@ -53,6 +72,13 @@ RSpec.describe '/federation/actors', type: :request do
           'toot'               => 'http://joinmastodon.org/ns#',
         }
       )
+    end
+
+    it 'links to generator (the application actor)' do
+      get fedipub.server_actor_url(user.fedipub_actor), headers: { accept: Mime[:activitypub] }
+      # We don't include the implements detail from the application actor,
+      # just provide the link. That's not strictly in line with FEP-844e, but it seems more efficient.
+      expect(response.parsed_body['generator']).to eq Fedipub::Actor.application_actor.federated_url
     end
 
     ACTIVITYPUB_CONTENT_TYPES.each do |accept|
@@ -107,6 +133,17 @@ RSpec.describe '/federation/actors', type: :request do
     it 'renders a successful response' do
       get fedipub.followers_server_actor_url(user.fedipub_actor), headers: { accept: Mime[:activitypub] }
       expect(response).to be_successful
+    end
+
+    it 'rejects badly-signed requests' do
+      get fedipub.followers_server_actor_url(user.fedipub_actor), headers: { accept: Mime[:activitypub], signature: 'poop' }
+      expect(response).to have_http_status :unauthorized
+    end
+
+    it 'rejects unsigned requests when signatures are required' do
+      allow(Fedipub::ServerController).to receive(:require_signature?).and_return(true)
+      get fedipub.followers_server_actor_url(user.fedipub_actor), headers: { accept: Mime[:activitypub] }
+      expect(response).to have_http_status :unauthorized
     end
 
     ACTIVITYPUB_CONTENT_TYPES.each do |accept|
@@ -192,6 +229,17 @@ RSpec.describe '/federation/actors', type: :request do
       expect(response).to be_successful
     end
 
+    it 'rejects badly-signed requests' do
+      get fedipub.following_server_actor_url(user.fedipub_actor), headers: { accept: Mime[:activitypub], signature: 'poop' }
+      expect(response).to have_http_status :unauthorized
+    end
+
+    it 'rejects unsigned requests when signatures are required' do
+      allow(Fedipub::ServerController).to receive(:require_signature?).and_return(true)
+      get fedipub.following_server_actor_url(user.fedipub_actor), headers: { accept: Mime[:activitypub] }
+      expect(response).to have_http_status :unauthorized
+    end
+
     ACTIVITYPUB_CONTENT_TYPES.each do |accept|
       it "responds with LD in response to a #{accept} request" do
         get fedipub.following_server_actor_url(user.fedipub_actor), headers: { accept: accept }
@@ -265,6 +313,102 @@ RSpec.describe '/federation/actors', type: :request do
           json = JSON.parse(response.body) # rubocop:disable Rails/ResponseParsedBody
           expect(json['prev']).to be_present
         end
+      end
+    end
+  end
+
+  describe 'when fetching Application actor' do
+    it 'renders a successful response' do
+      get fedipub.server_actor_url(Fedipub::Actor.application_actor), headers: { accept: Mime[:activitypub] }
+      expect(response).to be_successful
+    end
+
+    it 'fetches the correct application actor' do
+      get fedipub.server_actor_url(Fedipub::Actor.application_actor), headers: { accept: Mime[:activitypub] }
+      expect(response.parsed_body['preferredUsername']).to eq '__application'
+    end
+
+    it 'includes a proper id' do
+      get fedipub.server_actor_url(Fedipub::Actor.application_actor), headers: { accept: Mime[:activitypub] }
+      expect(response.parsed_body['id']).to match(%r{http://localhost/federation/actors/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}})
+    end
+
+    it 'has an inbox' do
+      get fedipub.server_actor_url(Fedipub::Actor.application_actor), headers: { accept: Mime[:activitypub] }
+      expect(response.parsed_body['inbox']).to be_present
+    end
+
+    it 'has an outbox' do
+      get fedipub.server_actor_url(Fedipub::Actor.application_actor), headers: { accept: Mime[:activitypub] }
+      expect(response.parsed_body['outbox']).to be_present
+    end
+
+    it 'fetches the application actor\'s public key' do
+      get fedipub.server_actor_url(Fedipub::Actor.application_actor), headers: { accept: Mime[:activitypub] }
+      expect(response.parsed_body['publicKey']['publicKeyPem']).to be_present
+    end
+
+    it 'allows unsigned requests' do
+      allow(Fedipub::ServerController).to receive(:require_signature?).and_return(true)
+      get fedipub.server_actor_url(Fedipub::Actor.application_actor), headers: { accept: Mime[:activitypub] }
+      expect(response).to be_successful
+    end
+
+    it 'still requires signatures for its collections' do
+      allow(Fedipub::ServerController).to receive(:require_signature?).and_return(true)
+      get fedipub.followers_server_actor_url(Fedipub::Actor.application_actor), headers: { accept: Mime[:activitypub] }
+      expect(response).to have_http_status :unauthorized
+    end
+
+    it 'does not have a generator' do
+      get fedipub.server_actor_url(Fedipub::Actor.application_actor), headers: { accept: Mime[:activitypub] }
+      expect(response.parsed_body).not_to have_key('generator')
+    end
+
+    context 'when checking "implements" information (FEP-844e)' do
+      let(:implemented_hrefs) { response.parsed_body['implements']&.pluck('href') }
+
+      before do
+        get fedipub.server_actor_url(Fedipub::Actor.application_actor), headers: { accept: Mime[:activitypub] }
+      end
+
+      it 'implements ActivityPub' do
+        expect(implemented_hrefs).to include 'https://www.w3.org/TR/activitypub/'
+      end
+
+      it 'implements RFC9421' do
+        expect(implemented_hrefs).to include 'https://datatracker.ietf.org/doc/html/rfc9421'
+      end
+
+      it 'implements draft-cavage-12' do
+        expect(implemented_hrefs).to include 'https://datatracker.ietf.org/doc/html/draft-cavage-http-signatures-12'
+      end
+
+      it 'implements FEP-844e (capability discovery)' do
+        expect(implemented_hrefs).to include 'https://w3id.org/fep/844e'
+      end
+
+      it 'implements FEP-2677 (application actor + nodeinfo discovery)' do
+        expect(implemented_hrefs).to include 'https://w3id.org/fep/2677'
+      end
+
+      it 'implements FEP-d556 (Server-Level Actor Discovery Using WebFinger)' do
+        expect(implemented_hrefs).to include 'https://w3id.org/fep/d556'
+      end
+
+      it 'includes the FEP-844e JSON-LD context' do
+        expect(response.parsed_body['@context']).to include 'https://w3id.org/fep/844e'
+      end
+    end
+
+    context 'when discovery is disabled' do
+      before do
+        allow(Fedipub::Configuration).to receive(:enable_discovery).and_return(false)
+        get fedipub.server_actor_url(Fedipub::Actor.application_actor), headers: { accept: Mime[:activitypub] }
+      end
+
+      it 'does not advertise the discovery FEPs' do
+        expect(response.parsed_body['implements'].pluck('href')).not_to include('https://w3id.org/fep/2677', 'https://w3id.org/fep/d556')
       end
     end
   end

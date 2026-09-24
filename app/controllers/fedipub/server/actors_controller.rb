@@ -5,6 +5,9 @@ module Fedipub
     class ActorsController < Fedipub::ServerController
       include Fedipub::Server::RenderCollections
 
+      # Remote servers must be able to fetch the application actor's key without signing, to verify our signed requests
+      # (`only:` would be OR-ed with `if:` when skipping, so the action is checked in the condition)
+      skip_before_action :verify_request_signature!, if: :application_actor_show?
       before_action :set_actor, only: [:show, :followers, :following, :liked, :featured, :featured_tags]
 
       # GET /federation/actors/1
@@ -25,8 +28,8 @@ module Fedipub
         ) { |items| items.map(&:federated_url) }
       end
 
-      # GET /federation/actors/:id/followers
-      # GET /federation/actors/:id/followers.json
+      # GET /federation/actors/:id/following
+      # GET /federation/actors/:id/following.json
       def following
         render_collection(
           collection: @actor.accepted_follows.order(created_at: :desc),
@@ -66,6 +69,12 @@ module Fedipub
       end
 
       private
+
+      def application_actor_show?
+        action_name == 'show' && Actor.find_param(params[:id]).application_actor?
+      rescue ActiveRecord::RecordNotFound
+        false
+      end
 
       # Use callbacks to share common setup or constraints between actions.
       def set_actor

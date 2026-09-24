@@ -8,7 +8,7 @@ module Fedipub
 
         render_serialized(
           Fedipub::Server::NodeinfoIndexResource,
-          Fedipub::Server::NodeinfoIndexPayload.new(href: show_node_info_url),
+          Fedipub::Server::NodeinfoIndexPayload.new(href: show_node_info_url, application_actor_href: Fedipub::Actor.application_actor.federated_url),
           content_type: Mime[:nodeinfo]
         )
       end

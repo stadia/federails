@@ -9,6 +9,7 @@ module Fedipub
       include Fedipub::Server::InboxPayload
 
       skip_after_action :verify_authorized
+      skip_before_action :verify_request_signature!
       before_action :verify_http_signature!
       before_action :validate_content_type!
 

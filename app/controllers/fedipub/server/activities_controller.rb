@@ -9,6 +9,7 @@ module Fedipub
       include Fedipub::Server::VerifySignature
       include Fedipub::Server::InboxPayload
 
+      skip_before_action :verify_request_signature!, only: :create
       before_action :verify_http_signature!, only: :create
       before_action :set_activity, only: [:show]
 

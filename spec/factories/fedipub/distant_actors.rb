@@ -11,5 +11,9 @@ FactoryBot.define do
     followings_url { "#{federated_url}/followings" }
     profile_url { "https://example.com/users/#{federated_url.split('/').last}" }
     local { false }
+
+    trait :with_public_key do
+      public_key { OpenSSL::PKey::RSA.new(2048).public_to_pem }
+    end
   end
 end

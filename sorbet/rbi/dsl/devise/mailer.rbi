@@ -7,6 +7,7 @@
 
 class Devise::Mailer
   include GeneratedUrlHelpersModule
+  include GeneratedMountedHelpers
 
   class << self
     sig { params(record: T.untyped, token: T.untyped, opts: T.untyped).returns(::ActionMailer::MessageDelivery) }
