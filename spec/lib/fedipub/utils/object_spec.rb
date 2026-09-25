@@ -158,6 +158,22 @@ module Fedipub
           end
         end
 
+        context 'when the object type maps to a class that does not store it' do
+          let(:distant_actor) { FactoryBot.create :distant_actor }
+          let!(:comment) do
+            Comment.create! content: 'the content', federated_url: 'https://example.com/comments/1', fedipub_actor: distant_actor, post: Post.create!(title: 'A post', content: 'Post content', fedipub_actor: distant_actor)
+          end
+
+          it 'returns the entity stored under another class without dereferencing the object' do
+            object = { 'id' => comment.federated_url, 'type' => 'CustomNote', 'content' => 'the content' }
+
+            aggregate_failures do
+              expect(described_class.find_existing(object)).to eq comment
+              expect(Fediverse::Request).not_to have_received(:dereference)
+            end
+          end
+        end
+
         context 'when object is a distant entity unknown locally' do
           let(:object) { { 'id' => 'https://example.com/data/1', 'type' => 'CustomNote', 'content' => 'the content' } }
 
