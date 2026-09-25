@@ -95,7 +95,7 @@ module Fediverse
       private
 
       # Best-effort recording of processed activity for de-duplication.
-      # Uses actor as fallback entity when the actual object cannot be resolved.
+      # Uses actor as fallback entity when the object is not already stored locally.
       # Failures here must not propagate since the activity was already handled successfully.
       #: (Hash[String, untyped], ActiveSupport::TimeWithZone) -> void
       def record_processed_activity(payload, dispatched_at)

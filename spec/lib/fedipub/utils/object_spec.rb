@@ -169,6 +169,15 @@ module Fedipub
           end
         end
 
+        context 'when object is the id of a distant entity unknown locally' do
+          it 'returns nil without dereferencing the id' do
+            aggregate_failures do
+              expect(described_class.find_existing('https://example.com/data/1')).to be_nil
+              expect(Fediverse::Request).not_to have_received(:dereference)
+            end
+          end
+        end
+
         context 'when object has no id' do
           it 'returns nil' do
             expect(described_class.find_existing({ 'type' => 'CustomNote' })).to be_nil

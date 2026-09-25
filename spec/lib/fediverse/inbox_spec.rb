@@ -261,6 +261,19 @@ module Fediverse
             end
           end
 
+          context 'when the distant Note cannot be fetched' do
+            before do
+              allow(Fediverse::Request).to receive(:dereference).with(note_url).and_return(nil)
+            end
+
+            it 'records the activity with the actor as entity without storing the Note' do
+              aggregate_failures do
+                expect { described_class.dispatch_request(payload) }.not_to change(Post, :count)
+                expect(Fedipub::Activity.find_by(federated_url: payload['id'])).to have_attributes(entity: distant_actor)
+              end
+            end
+          end
+
           context 'when the distant Note is already stored locally' do
             let!(:post) { Post.create!(title: 'A post', content: 'Stored content', federated_url: note_url, fedipub_actor: distant_actor) }
 

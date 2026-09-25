@@ -26,10 +26,13 @@ module Fedipub
         # Finds an already stored entity from an object or its ID, without dereferencing distant objects.
         #
         # Unlike .find_or_initialize, this never fetches remote data nor returns unsaved instances.
+        # Hash objects matching a configured data type are only looked up in that type; bare IDs and
+        # other objects are searched in actors, followings and all data entities.
         #
         # @param object_or_id [String, Hash] String identifier or incoming object
         #
-        # @return [ApplicationRecord, nil] Stored entity or nil when not found locally
+        # @return [ActiveRecord::Base, nil] Stored data entity, Fedipub::Actor or Fedipub::Following; nil when not
+        #   found locally
         def find_existing(object_or_id)
           federated_url = object_or_id.is_a?(Hash) ? object_or_id['id'] : object_or_id
           return if federated_url.blank?
