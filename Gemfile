@@ -57,5 +57,5 @@ group :doc do
   gem 'sass-embedded'
 end
 
-gem 'json', '< 3'
+gem 'json', '< 4'
 gem 'ruby-lsp', '~> 0.27.0.beta5'
