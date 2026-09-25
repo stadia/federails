@@ -132,6 +132,50 @@ module Fedipub
         end
       end
 
+      describe '.find_existing' do
+        before do
+          allow(Fediverse::Request).to receive(:dereference)
+        end
+
+        context 'when object is a local entity' do
+          let(:entity) { Fixtures::Classes::FakeDataModel.create! user: FactoryBot.create(:user), title: 'the title', content: 'the content' }
+
+          it 'returns the entity' do
+            expect(described_class.find_existing(entity.federated_url)).to eq entity
+          end
+        end
+
+        context 'when object is a distant entity stored locally' do
+          let(:distant_actor) { FactoryBot.create :distant_actor }
+          let!(:entity) { Fixtures::Classes::FakeArticleDataModel.create! fedipub_actor: distant_actor, federated_url: 'https://example.com/data/1', title: 'A title', content: 'the content' }
+
+          it 'returns the entity from its id' do
+            expect(described_class.find_existing(entity.federated_url)).to eq entity
+          end
+
+          it 'returns the entity from its object' do
+            expect(described_class.find_existing({ 'id' => entity.federated_url, 'type' => 'CustomNote' })).to eq entity
+          end
+        end
+
+        context 'when object is a distant entity unknown locally' do
+          let(:object) { { 'id' => 'https://example.com/data/1', 'type' => 'CustomNote', 'content' => 'the content' } }
+
+          it 'returns nil without dereferencing the object' do
+            aggregate_failures do
+              expect(described_class.find_existing(object)).to be_nil
+              expect(Fediverse::Request).not_to have_received(:dereference)
+            end
+          end
+        end
+
+        context 'when object has no id' do
+          it 'returns nil' do
+            expect(described_class.find_existing({ 'type' => 'CustomNote' })).to be_nil
+          end
+        end
+      end
+
       describe '.find_or_create' do
         context 'when entity does not exist' do
           let(:url) { 'https://example.com/notes/1' }

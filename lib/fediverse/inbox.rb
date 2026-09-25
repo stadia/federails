@@ -202,7 +202,8 @@ module Fediverse
       end
 
       # Resolves the entity (polymorphic object) for a processed activity record.
-      # Falls back to actor when the actual object cannot be resolved.
+      # Only already stored entities are used: the record is a processing log and must not
+      # fetch or persist distant objects (e.g. a boosted distant Note). Falls back to actor otherwise.
       #: (Hash[String, untyped], Fedipub::Actor) -> ActiveRecord::Base?
       def entity_for_processed_activity(payload, actor)
         object = payload['object']
@@ -211,7 +212,7 @@ module Fediverse
         return actor if object.nil?
 
         if object.is_a?(String) || (object.is_a?(Hash) && object['id'].present?)
-          Fedipub::Utils::Object.find_or_initialize(object) || actor
+          Fedipub::Utils::Object.find_existing(object) || actor
         else
           actor
         end
