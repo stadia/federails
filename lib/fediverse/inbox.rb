@@ -95,7 +95,7 @@ module Fediverse
       private
 
       # Best-effort recording of processed activity for de-duplication.
-      # Uses actor as fallback entity when the actual object cannot be resolved.
+      # Uses actor as fallback entity when the object is not already stored locally.
       # Failures here must not propagate since the activity was already handled successfully.
       #: (Hash[String, untyped], ActiveSupport::TimeWithZone) -> void
       def record_processed_activity(payload, dispatched_at)
@@ -202,7 +202,8 @@ module Fediverse
       end
 
       # Resolves the entity (polymorphic object) for a processed activity record.
-      # Falls back to actor when the actual object cannot be resolved.
+      # Only already stored entities are used: the record is a processing log and must not
+      # fetch or persist distant objects (e.g. a boosted distant Note). Falls back to actor otherwise.
       #: (Hash[String, untyped], Fedipub::Actor) -> ActiveRecord::Base?
       def entity_for_processed_activity(payload, actor)
         object = payload['object']
@@ -211,7 +212,7 @@ module Fediverse
         return actor if object.nil?
 
         if object.is_a?(String) || (object.is_a?(Hash) && object['id'].present?)
-          Fedipub::Utils::Object.find_or_initialize(object) || actor
+          Fedipub::Utils::Object.find_existing(object) || actor
         else
           actor
         end

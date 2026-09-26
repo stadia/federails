@@ -217,6 +217,75 @@ module Fediverse
         end
       end
 
+      %w[Announce Like].each do |activity_type|
+        context "when receiving a #{activity_type} of a distant Note unknown locally" do
+          let(:note_url) { 'https://remote.example/notes/1' }
+          let(:note) { { 'id' => note_url, 'type' => 'Note', 'content' => 'Boosted content', 'attributedTo' => distant_actor.federated_url } }
+          let(:payload) do
+            {
+              'id'     => "https://remote.example/activities/#{activity_type.downcase}-1",
+              'type'   => activity_type,
+              'actor'  => distant_actor.federated_url,
+              'object' => note_url,
+            }
+          end
+
+          before do
+            allow(Fediverse::Request).to receive(:dereference).with(note_url).and_return(note)
+            allow(Fediverse::Request).to receive(:dereference).with(note).and_return(note)
+          end
+
+          it 'does not store the distant Note as a data entity' do
+            expect { described_class.dispatch_request(payload) }.not_to change(Post, :count)
+          end
+
+          it 'records the activity with the actor as entity' do
+            described_class.dispatch_request(payload)
+
+            expect(Fedipub::Activity.find_by(federated_url: payload['id'])).to have_attributes(entity: distant_actor, action: activity_type)
+          end
+
+          it 'returns :duplicate when the same activity is received again' do
+            described_class.dispatch_request(payload)
+
+            expect(described_class.dispatch_request(payload)).to eq(:duplicate)
+          end
+
+          context 'when the distant Note would not be a valid entity' do
+            let(:note) { { 'id' => note_url, 'type' => 'Note', 'content' => nil, 'attributedTo' => distant_actor.federated_url } }
+
+            it 'still records the activity' do
+              described_class.dispatch_request(payload)
+
+              expect(Fedipub::Activity.find_by(federated_url: payload['id'])).to have_attributes(entity: distant_actor)
+            end
+          end
+
+          context 'when the distant Note cannot be fetched' do
+            before do
+              allow(Fediverse::Request).to receive(:dereference).with(note_url).and_return(nil)
+            end
+
+            it 'records the activity with the actor as entity without storing the Note' do
+              aggregate_failures do
+                expect { described_class.dispatch_request(payload) }.not_to change(Post, :count)
+                expect(Fedipub::Activity.find_by(federated_url: payload['id'])).to have_attributes(entity: distant_actor)
+              end
+            end
+          end
+
+          context 'when the distant Note is already stored locally' do
+            let!(:post) { Post.create!(title: 'A post', content: 'Stored content', federated_url: note_url, fedipub_actor: distant_actor) }
+
+            it 'records the activity with the stored entity' do
+              described_class.dispatch_request(payload)
+
+              expect(Fedipub::Activity.find_by(federated_url: payload['id'])).to have_attributes(entity: post)
+            end
+          end
+        end
+      end
+
       context 'when a host app overrides a built-in handler' do
         let(:payload) do
           {

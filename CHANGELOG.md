@@ -46,6 +46,10 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ### Fixed
 
+- [#36](https://github.com/stadia/federails/issues/36) - Recording a processed activity (e.g. `Announce` / `Like`) of a
+  distant object no longer stores that object as a data entity, nor fails with a `NOT NULL` violation on
+  `fedipub_activities.entity_id` when it would be invalid, which left the activity unrecorded for de-duplication; only
+  already stored entities are used, falling back to the actor
 - A stale remote signer is re-fetched and verification retried once, so rotated keys are picked up
 - Signer lookup, key refresh and network errors during signature verification return 401 instead of 404/500, and
   verification failures are logged on every federation endpoint

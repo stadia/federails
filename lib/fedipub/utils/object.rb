@@ -23,6 +23,30 @@ module Fedipub
           from_distant_server(object_or_id)
         end
 
+        # Finds an already stored entity from an object or its ID, without dereferencing distant objects.
+        #
+        # Unlike .find_or_initialize, this never fetches remote data nor returns unsaved instances.
+        # Hash objects matching a configured data type are looked up in that type first; every lookup
+        # also searches actors, followings and all data entities, so an entity stored under another
+        # class than the current type handler is still found.
+        #
+        # @param object_or_id [String, Hash] String identifier or incoming object
+        #
+        # @return [ActiveRecord::Base, nil] Stored data entity, Fedipub::Actor or Fedipub::Following; nil when not
+        #   found locally
+        def find_existing(object_or_id)
+          federated_url = object_or_id.is_a?(Hash) ? object_or_id['id'] : object_or_id
+          return if federated_url.blank?
+
+          route = local_route(federated_url)
+          return from_local_route(route) if route
+
+          handler = Fedipub.data_entity_handler_for(object_or_id) if object_or_id.is_a?(Hash)
+          return handler[:class].find_by(federated_url: federated_url) || find_distant_object_in_all(federated_url) if handler
+
+          find_distant_object_in_all(federated_url)
+        end
+
         # Search for a distant object in actors and configured data entities.
         #
         # This is useful to find something when the type is unknown, as an object from a Delete activity.
