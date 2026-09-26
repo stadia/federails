@@ -7,8 +7,11 @@ module Fediverse
         def sign(sender:, request:)
           request = set_headers(request)
 
+          # `algorithm` is optional in draft-cavage-12, but Misskey's parser (@peertube/http-signature) rejects
+          # signatures without it
           parts = {
             keyId:     sender.key_id,
+            algorithm: ALGORITHM,
             headers:   signature_headers(request).join(' '),
             signature: signature(sender: sender, request: request),
           }
@@ -16,6 +19,8 @@ module Fediverse
           request
         end
 
+        # Signatures are RSA with SHA-256, see .signature
+        ALGORITHM = 'rsa-sha256'.freeze #: String
         REQUIRED_HEADERS = %w[(request-target) host date].freeze
         # Same limits as Mastodon: accept a Date up to 12h old, and up to 1h in the future for clock skew
         EXPIRATION_WINDOW = 12.hours

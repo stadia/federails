@@ -56,12 +56,16 @@ RSpec.describe Fediverse::Signature::DraftCavage12 do
       expect(signature.split(',')[0]).to eq "keyId=\"#{actor.federated_url}#main-key\""
     end
 
+    it 'includes algorithm in signature header' do
+      expect(signature.split(',')[1]).to eq 'algorithm="rsa-sha256"'
+    end
+
     it 'includes header list in signature header' do
-      expect(signature.split(',')[1]).to eq 'headers="(request-target) host date digest"'
+      expect(signature.split(',')[2]).to eq 'headers="(request-target) host date digest"'
     end
 
     it 'includes signature part in signature header' do
-      expect(signature.split(',')[2]).to match %r{^signature="[[[:alnum:]]-+/]*={0,3}"$}
+      expect(signature.split(',')[3]).to match %r{^signature="[[[:alnum:]]-+/]*={0,3}"$}
     end
 
     it 'is verifiable' do

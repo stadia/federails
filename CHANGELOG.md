@@ -46,6 +46,8 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ### Fixed
 
+- draft-cavage-12 signatures include `algorithm="rsa-sha256"`: Misskey's inbox (@peertube/http-signature) rejected
+  signatures without it with 401, and it doesn't accept RFC9421 either, so every delivery to Misskey servers failed
 - Distant actors without a `url` (e.g. Fedify instance actors such as Hackers' Pub's) are stored instead of failing
   with "Profile url can't be blank"
 - When signatures are optional, GET/HEAD requests skip signature verification and are served as unsigned requests
