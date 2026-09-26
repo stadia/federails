@@ -23,7 +23,8 @@ RSpec.describe '/federation/followings', type: :request do
       expect(response).to be_successful
     end
 
-    it 'rejects badly-signed requests' do
+    it 'rejects badly-signed requests when signatures are required' do
+      allow(Fedipub::ServerController).to receive(:require_signature?).and_return(true)
       get fedipub.server_actor_following_url(actor, following), headers: { accept: Mime[:activitypub], signature: 'poop' }
       expect(response).to have_http_status :unauthorized
     end

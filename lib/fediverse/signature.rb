@@ -20,7 +20,7 @@ module Fediverse
       # Verifies the request's signature, if it has one.
       #
       # @return [true] when the signature is valid, or when the request is unsigned and signatures are optional
-      # @raise [BadSignature] when the signature is invalid, or missing while required
+      # @raise [BadSignature] when the signature is invalid, missing while required, or its signer cannot be fetched
       def verify!(request:, require_signature: false) # rubocop:disable Naming/PredicateMethod
         sender = verify_sender!(request: request)
         raise(BadSignature, 'Missing signature') if require_signature && !sender
@@ -32,7 +32,7 @@ module Fediverse
       # key was used to verify it, so callers never have to parse the key id again.
       #
       # @return [Fedipub::Actor, nil] the signer, or nil when the request is unsigned
-      # @raise [BadSignature] when the signature is invalid
+      # @raise [BadSignature] when the signature is invalid or its signer cannot be fetched
       def verify_sender!(request:)
         Fediverse::Signature::Rfc9421.verify!(request: request) ||
           Fediverse::Signature::DraftCavage12.verify!(request: request) ||
