@@ -27,7 +27,8 @@ RSpec.describe '/federation/activities', type: :request do
       expect(response).to be_successful
     end
 
-    it 'rejects badly-signed requests' do
+    it 'rejects badly-signed requests when signatures are required' do
+      allow(Fedipub::ServerController).to receive(:require_signature?).and_return(true)
       get fedipub.server_actor_outbox_url(local_actor), headers: { accept: Mime[:activitypub], signature: 'poop' }
       expect(response).to have_http_status :unauthorized
     end
@@ -124,7 +125,8 @@ RSpec.describe '/federation/activities', type: :request do
       expect(response).to be_successful
     end
 
-    it 'rejects badly-signed requests' do
+    it 'rejects badly-signed requests when signatures are required' do
+      allow(Fedipub::ServerController).to receive(:require_signature?).and_return(true)
       get fedipub.server_actor_activity_url(activity.actor.to_param, activity.to_param), headers: { accept: Mime[:activitypub], signature: 'poop' }
       expect(response).to have_http_status :unauthorized
     end

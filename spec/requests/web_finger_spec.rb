@@ -9,7 +9,8 @@ RSpec.describe '/well-known', type: :request do
       expect(response).to be_successful
     end
 
-    it 'rejects badly-signed requests' do
+    it 'rejects badly-signed requests when signatures are required' do
+      allow(Fedipub::ServerController).to receive(:require_signature?).and_return(true)
       get fedipub.webfinger_url, params: { resource: "acct:#{user.id}@localhost" }, headers: { signature: 'poop' }
       expect(response).to have_http_status :unauthorized
     end
@@ -178,7 +179,8 @@ RSpec.describe '/well-known', type: :request do
       expect(response.body).to include('resource={uri}')
     end
 
-    it 'rejects badly-signed requests' do
+    it 'rejects badly-signed requests when signatures are required' do
+      allow(Fedipub::ServerController).to receive(:require_signature?).and_return(true)
       get fedipub.host_meta_url, headers: { signature: 'poop' }
       expect(response).to have_http_status :unauthorized
     end

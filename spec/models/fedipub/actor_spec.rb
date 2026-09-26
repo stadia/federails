@@ -229,6 +229,21 @@ module Fedipub
         end
       end
 
+      it 'creates a distant actor without a profile URL' do
+        url = 'https://hackers.pub/ap/actors/hackers.pub'
+        instance_actor = {
+          'id'                => url,
+          'type'              => 'Application',
+          'preferredUsername' => 'hackers.pub',
+          'inbox'             => "#{url}/inbox",
+          'outbox'            => "#{url}/outbox",
+          'publicKey'         => { 'id' => "#{url}#main-key", 'owner' => url, 'publicKeyPem' => 'PEM' },
+        }
+        allow(Fedipub::Utils::JsonRequest).to receive(:get_json).with(url, anything).and_return(instance_actor)
+
+        expect(described_class.find_or_create_by_federation_url(url)).to be_persisted.and(have_attributes(profile_url: nil))
+      end
+
       it 'treats acct URIs as account lookups' do
         actor = existing_distant_actor
 

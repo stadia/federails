@@ -19,7 +19,8 @@ RSpec.describe '/nodeinfo', type: :request do
       expect(link['href']).to match(%r{http://localhost/federation/actors/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}})
     end
 
-    it 'rejects badly-signed requests' do
+    it 'rejects badly-signed requests when signatures are required' do
+      allow(Fedipub::ServerController).to receive(:require_signature?).and_return(true)
       get fedipub.node_info_url, headers: { signature: 'poop' }
       expect(response).to have_http_status :unauthorized
     end
@@ -37,7 +38,8 @@ RSpec.describe '/nodeinfo', type: :request do
       expect(response).to be_successful
     end
 
-    it 'rejects badly-signed requests' do
+    it 'rejects badly-signed requests when signatures are required' do
+      allow(Fedipub::ServerController).to receive(:require_signature?).and_return(true)
       get fedipub.show_node_info_url, headers: { signature: 'poop' }
       expect(response).to have_http_status :unauthorized
     end

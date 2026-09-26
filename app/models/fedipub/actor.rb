@@ -26,7 +26,6 @@ module Fedipub
     validates :server, presence: { unless: :local? }
     validates :inbox_url, presence: { unless: :local? }
     validates :outbox_url, presence: { unless: :local? }
-    validates :profile_url, presence: { unless: :local? }
     validates :actor_type, presence: { unless: -> { local? && !application_actor? } }
     validates :entity_id, uniqueness: { scope: :entity_type }, if: :entity_type
     validates :entity, presence: true, if: -> { local? && !tombstoned? && !application_actor? }

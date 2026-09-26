@@ -29,9 +29,21 @@ RSpec.describe '/federation/actors', type: :request do
       expect(response).to be_successful
     end
 
-    it 'rejects badly-signed requests' do
+    it 'rejects badly-signed requests when signatures are required' do
+      allow(Fedipub::ServerController).to receive(:require_signature?).and_return(true)
       get fedipub.server_actor_url(user.fedipub_actor), headers: { accept: Mime[:activitypub], signature: 'poop' }
       expect(response).to have_http_status :unauthorized
+    end
+
+    it 'serves badly-signed requests as unsigned ones when signatures are optional' do
+      get fedipub.server_actor_url(user.fedipub_actor), headers: { accept: Mime[:activitypub], signature: 'poop' }
+      expect(response).to be_successful
+    end
+
+    it 'serves requests whose signer cannot be fetched when signatures are optional' do
+      allow(Fediverse::Signature).to receive(:verify_sender!).and_raise(Fediverse::Signature::BadSignature, 'Unable to fetch signer')
+      get fedipub.server_actor_url(user.fedipub_actor), headers: { accept: Mime[:activitypub] }
+      expect(response).to be_successful
     end
 
     it 'logs why a signature was rejected' do
@@ -135,7 +147,8 @@ RSpec.describe '/federation/actors', type: :request do
       expect(response).to be_successful
     end
 
-    it 'rejects badly-signed requests' do
+    it 'rejects badly-signed requests when signatures are required' do
+      allow(Fedipub::ServerController).to receive(:require_signature?).and_return(true)
       get fedipub.followers_server_actor_url(user.fedipub_actor), headers: { accept: Mime[:activitypub], signature: 'poop' }
       expect(response).to have_http_status :unauthorized
     end
@@ -229,7 +242,8 @@ RSpec.describe '/federation/actors', type: :request do
       expect(response).to be_successful
     end
 
-    it 'rejects badly-signed requests' do
+    it 'rejects badly-signed requests when signatures are required' do
+      allow(Fedipub::ServerController).to receive(:require_signature?).and_return(true)
       get fedipub.following_server_actor_url(user.fedipub_actor), headers: { accept: Mime[:activitypub], signature: 'poop' }
       expect(response).to have_http_status :unauthorized
     end

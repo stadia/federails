@@ -46,6 +46,11 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ### Fixed
 
+- Distant actors without a `url` (e.g. Fedify instance actors such as Hackers' Pub's) are stored instead of failing
+  with "Profile url can't be blank"
+- When signatures are optional, a signed GET/HEAD whose signature can't be verified is served as an unsigned request
+  instead of 401. Fedify fetches the sender's actor with a signed request to confirm key ownership, so failing to fetch
+  its signer made every delivery to it fail with "401 The signer and the actor do not match."
 - [#36](https://github.com/stadia/federails/issues/36) - Recording a processed activity (e.g. `Announce` / `Like`) of a
   distant object no longer stores that object as a data entity, nor fails with a `NOT NULL` violation on
   `fedipub_activities.entity_id` when it would be invalid, which left the activity unrecorded for de-duplication; only

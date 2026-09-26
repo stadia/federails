@@ -7,7 +7,8 @@ RSpec.describe '/federation/published', type: :request do
     let(:actor) { user.fedipub_actor }
     let(:entity) { Fixtures::Classes::FakeArticleDataModel.create! fedipub_actor: actor, title: 'title', content: 'content', user: user }
 
-    it 'rejects badly-signed requests' do
+    it 'rejects badly-signed requests when signatures are required' do
+      allow(Fedipub::ServerController).to receive(:require_signature?).and_return(true)
       get fedipub.server_published_url(:articles, entity), headers: { accept: Mime[:activitypub], signature: 'poop' }
       expect(response).to have_http_status :unauthorized
     end
