@@ -9,6 +9,10 @@ module Fediverse
 
           parts = {
             keyId:     sender.key_id,
+            # Optional in draft-cavage-12, but parsers derived from joyent/http-signature reject signatures without it,
+            # e.g. `@peertube/http-signature` in Misskey's inbox
+            # (packages/backend/src/server/ActivityPubServerService.ts), which doesn't accept RFC9421 either.
+            algorithm: ALGORITHM,
             headers:   signature_headers(request).join(' '),
             signature: signature(sender: sender, request: request),
           }
@@ -16,6 +20,9 @@ module Fediverse
           request
         end
 
+        # Must match how .signature signs (RSA PKCS#1 v1.5 with SHA-256). `rsa-sha256` rather than the newer `hs2019`
+        # because it is what Mastodon sends, so every implementation accepts it.
+        ALGORITHM = 'rsa-sha256'.freeze #: String
         REQUIRED_HEADERS = %w[(request-target) host date].freeze
         # Same limits as Mastodon: accept a Date up to 12h old, and up to 1h in the future for clock skew
         EXPIRATION_WINDOW = 12.hours

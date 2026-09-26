@@ -8,6 +8,25 @@ RSpec.describe Fediverse::Signature::DraftCavage12 do
     actor.send :ensure_key_pair_exists!
   end
 
+  # Misskey's inbox parses signatures with @peertube/http-signature, which rejects them (401) before any key lookup
+  # unless keyId, algorithm and signature are all present
+  shared_examples 'a signature header Misskey accepts' do |covered_headers|
+    # Signature header parameters, whatever their order
+    let(:signature_params) { signature.scan(/(\w+)="([^"]*)"/).to_h }
+
+    it 'includes keyId, algorithm and the covered headers' do
+      expect(signature_params).to include(
+        'keyId'     => "#{actor.federated_url}#main-key",
+        'algorithm' => 'rsa-sha256',
+        'headers'   => covered_headers
+      )
+    end
+
+    it 'includes the signature' do
+      expect(signature_params['signature']).to match %r{\A[[:alnum:]+/]+={0,3}\z}
+    end
+  end
+
   context 'when signing POST requests' do
     let(:request) do
       Faraday.default_connection.build_request(:post) do |req|
@@ -52,17 +71,7 @@ RSpec.describe Fediverse::Signature::DraftCavage12 do
       end
     end
 
-    it 'includes key in signature header' do
-      expect(signature.split(',')[0]).to eq "keyId=\"#{actor.federated_url}#main-key\""
-    end
-
-    it 'includes header list in signature header' do
-      expect(signature.split(',')[1]).to eq 'headers="(request-target) host date digest"'
-    end
-
-    it 'includes signature part in signature header' do
-      expect(signature.split(',')[2]).to match %r{^signature="[[[:alnum:]]-+/]*={0,3}"$}
-    end
+    it_behaves_like 'a signature header Misskey accepts', '(request-target) host date digest'
 
     it 'is verifiable' do
       expect(described_class.verify!(request: signed_request)).to eq actor
@@ -96,6 +105,8 @@ RSpec.describe Fediverse::Signature::DraftCavage12 do
     it 'does not add Digest header' do
       expect(signed_request.headers['Digest']).not_to be_present
     end
+
+    it_behaves_like 'a signature header Misskey accepts', '(request-target) host date'
 
     context 'when generating signature payload' do
       let(:payload) { described_class.send(:signature_payload, request: request) }
