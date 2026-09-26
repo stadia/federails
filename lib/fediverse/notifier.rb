@@ -9,6 +9,10 @@ module Fediverse
     ACTIONS_REQUIRING_OBJECT = %w[Accept Add Announce Block Create Delete Flag Follow Like Move Reject Remove Undo Update].freeze #: Array[String]
     # Redirects are permanent failures too: signed POSTs are never replayed to another target
     PERMANENT_DELIVERY_STATUS_CODES = (300..499).to_a.freeze #: Array[Integer]
+    # Client errors that can clear on their own, as in Mastodon's DeliveryWorker.
+    # 401: Fedify rejects with "The signer and the actor do not match." whenever it cannot fetch
+    # the sender's actor document to confirm key ownership, including on a timeout.
+    RETRYABLE_CLIENT_ERROR_STATUS_CODES = [401, 408, 429].freeze #: Array[Integer]
 
     class << self
       # Enqueues a separate delivery job for each recipient inbox.
@@ -198,7 +202,7 @@ module Fediverse
 
       #: (Integer) -> bool
       def permanent_delivery_status?(status)
-        PERMANENT_DELIVERY_STATUS_CODES.include?(status) && status != 429
+        PERMANENT_DELIVERY_STATUS_CODES.include?(status) && RETRYABLE_CLIENT_ERROR_STATUS_CODES.exclude?(status)
       end
 
       #: (inbox_url: String, status: Integer, body: String?, retry_after: String?, permanent: bool) -> String
