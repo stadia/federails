@@ -23,14 +23,17 @@ module Fedipub
 
     private
 
-    # When signatures are optional, a signed GET that can't be verified is served as an unsigned one: remote servers
-    # (e.g. Fedify) fetch our actors with signed requests to confirm key ownership, and rejecting them because we can't
-    # fetch *their* signer makes every delivery to them fail.
+    # Optional GET/HEAD requests have only unsigned-request permissions and do not use signer identity for access.
+    # Skip verification entirely to avoid fetching or storing an untrusted signer for these public reads.
+    # Required signatures and non-GET/HEAD requests are verified; a verification failure returns 401.
     def verify_request_signature!
-      Fediverse::Signature.verify!(request: request, require_signature: ServerController.require_signature?)
+      require_signature = ServerController.require_signature?
+      return if !require_signature && (request.get? || request.head?)
+
+      Fediverse::Signature.verify!(request: request, require_signature: require_signature)
     rescue Fediverse::Signature::BadSignature => e
       log_signature_failure(e)
-      head :unauthorized if ServerController.require_signature? || !(request.get? || request.head?)
+      head :unauthorized
     end
 
     def log_signature_failure(error, **details)
