@@ -200,6 +200,36 @@ module Fediverse
         end
       end
 
+      # Fedify answers 401 when it cannot fetch the sender's actor document to confirm key
+      # ownership (e.g. a timeout), so 401 is not proof the signature is bad. Mastodon also retries it.
+      context 'when the remote server cannot confirm the signer yet' do
+        let(:status) { 401 }
+        let(:body) { 'The signer and the actor do not match.' }
+
+        it 'treats the failure as temporary' do
+          expect do
+            described_class.send(:post_to_inbox, inbox_url: distant_target_actor.inbox_url, message: '{}', from: local_actor)
+          end.to raise_error(
+            Fedipub::TemporaryDeliveryError,
+            /HTTP 401 - The signer and the actor do not match\./
+          )
+        end
+      end
+
+      context 'when the remote server times out the request' do
+        let(:status) { 408 }
+        let(:body) { 'Request Timeout' }
+
+        it 'treats the failure as temporary' do
+          expect do
+            described_class.send(:post_to_inbox, inbox_url: distant_target_actor.inbox_url, message: '{}', from: local_actor)
+          end.to raise_error(
+            Fedipub::TemporaryDeliveryError,
+            /HTTP 408 - Request Timeout/
+          )
+        end
+      end
+
       context 'when the inbox redirects' do
         let(:status) { 301 }
         let(:headers) { { 'Location' => 'https://elsewhere.example/inbox' } }
