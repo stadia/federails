@@ -1,4 +1,5 @@
 require 'rails_helper'
+require 'webmock/rspec'
 
 RSpec.describe Fedipub::Utils::JsonRequest do
   describe '.get_json' do
@@ -33,6 +34,28 @@ RSpec.describe Fedipub::Utils::JsonRequest do
         described_class.get_json('https://mamot.fr/users/mtancoigne')
       end
       expect(Fediverse::Signature::Rfc9421).to have_received(:sign).once.with(sender: Fedipub::Actor.application_actor, request: anything)
+    end
+  end
+
+  describe '.post to a server rejecting RFC9421 signatures (e.g. Misskey)' do
+    let(:local_actor) { FactoryBot.create(:user).fedipub_actor }
+    let(:inbox_url) { 'https://misskey.example/inbox' }
+
+    around { |example| VCR.turned_off { example.run } }
+
+    it 'retries with a draft-cavage-12 signature carrying an algorithm' do
+      signatures = []
+      statuses = [401, 202]
+      stub_request(:post, inbox_url).to_return do |request|
+        signatures << request.headers['Signature']
+        { status: statuses.shift }
+      end
+
+      response = described_class.post(url: inbox_url, message: '{}', from: local_actor)
+
+      expect(response.status).to eq 202
+      expect(signatures.size).to eq 2
+      expect(signatures.last).to include('algorithm="rsa-sha256"', 'headers="(request-target) host date digest"')
     end
   end
 
