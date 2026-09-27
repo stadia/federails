@@ -21,7 +21,9 @@ module Fedipub
         def_delegators :instance, :get_json, :get, :post
       end
 
+      # The response did not match the expected status, or a collection resource was missing.
       class UnhandledResponseStatus < StandardError
+        # @return [Integer, nil] HTTP status, or nil when no response status was supplied (e.g. Collection)
         #: Integer?
         attr_reader :status
 
@@ -41,7 +43,9 @@ module Fedipub
       #
       # @return [Hash, Array] The parsed JSON object
       #
-      # @raise [UnhandledResponseStatus] when response status is not the expected_status
+      # @raise [UnhandledResponseStatus] when response status differs from expected_status; carries the actual status
+      # @raise [Faraday::Error] when the server cannot be reached
+      # @raise [JSON::ParserError] when the response body is not valid JSON
       def get_json(url, params: {}, headers: {}, expected_status: 200, from: nil)
         response = get url: url, params: params, headers: headers, from: from
         raise UnhandledResponseStatus.new("Unhandled status code #{response.status} for GET #{url}", status: response.status) if expected_status && response.status != expected_status

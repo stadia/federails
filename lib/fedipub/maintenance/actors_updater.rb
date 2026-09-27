@@ -7,23 +7,24 @@ module Fedipub
       class << self
         # Fetches all distant actors again and update their local copy
         #
-        # A block can be passed with two arguments: the actor being updated and the update status
+        # A block receives the actor and one of :updated, :tombstoned, :not_found, :failed, :ignored_local.
+        # :failed covers unexpected exceptions or an unsuccessful sync without a tombstone.
         #
         # @param actors [Integer, Fedipub::Actor, Array<Fedipub::Actor>, nil] Actor ID, Actor or list of actors to update.
         #   If nothing is passed, all distant actors are processed
         # @example
         #   Update all distant actors
-        #     Fedipub::Maintenance::ActorUpdater.run
+        #     Fedipub::Maintenance::ActorsUpdater.run
         #   With an actor id:
-        #     Fedipub::Maintenance::ActorUpdater.run 1
+        #     Fedipub::Maintenance::ActorsUpdater.run 1
         #   With a federated URL:
-        #     Fedipub::Maintenance::ActorUpdater.run 'https://example.com/actor'
+        #     Fedipub::Maintenance::ActorsUpdater.run 'https://example.com/actor'
         #   With a federated URL:
-        #     Fedipub::Maintenance::ActorUpdater.run ['https://example.com/actors/1', 'https://example.com/actors/1']
+        #     Fedipub::Maintenance::ActorsUpdater.run ['https://example.com/actors/1', 'https://example.com/actors/1']
         #   With actors:
-        #     Fedipub::Maintenance::ActorUpdater.run Fedipub::Actor.last(10)
+        #     Fedipub::Maintenance::ActorsUpdater.run Fedipub::Actor.last(10)
         #   Update all distant actors and puts status for each actor
-        #     Fedipub::Maintenance::ActorUpdater.run {|actor, status| puts "#{actor.federated_url}: #{status}"}
+        #     Fedipub::Maintenance::ActorsUpdater.run {|actor, status| puts "#{actor.federated_url}: #{status}"}
         def run(actors = nil, &block)
           actors_list(actors).each do |actor|
             status = update(actor)
@@ -62,7 +63,8 @@ module Fedipub
           actor.tombstoned? ? :tombstoned : :failed
         rescue ActiveRecord::RecordNotFound
           :not_found
-        rescue StandardError
+        rescue StandardError => e
+          Fedipub.logger.warn { "Unable to sync #{actor.federated_url}: #{e.class}: #{e.message}" }
           :failed
         end
       end

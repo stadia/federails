@@ -7,7 +7,7 @@ require 'fedipub/utils/json_request'
 module Fediverse
   # Methods related to Webfinger: find accounts, fetch actors,...
   class Webfinger
-    # Raised when the remote server answers 410 Gone: the document was deleted for good.
+    # Raised when the remote server answers 410 Gone: the requested resource is reported as gone.
     # A RecordNotFound, so callers that don't care about the difference keep working.
     class GoneError < ActiveRecord::RecordNotFound; end
 
@@ -49,7 +49,8 @@ module Fediverse
       # @param url [String] Actor's federation URL
       #
       # @return [Fedipub::Actor]
-      # @raise [ActiveRecord::RecordNotFound] when the actor cannot be resolved
+      # @raise [GoneError] when the requested actor resource answers HTTP 410
+      # @raise [ActiveRecord::RecordNotFound] when the actor cannot be resolved for another reason
       def fetch_actor_url(url)
         webfinger_to_actor get_json(url)
       end

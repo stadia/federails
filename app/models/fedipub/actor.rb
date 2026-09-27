@@ -193,8 +193,10 @@ module Fedipub
     #
     # When the distant server answers 410 Gone, the actor is tombstoned instead.
     #
-    # @return [Boolean] true when the actor was updated, false when it is local or was tombstoned
-    # @raise [ActiveRecord::RecordNotFound] when distant data was not found
+    # A successful fetch also clears an existing tombstone. A 410 is handled without raising GoneError.
+    # @return [Boolean] true when updated, false for local actors or an HTTP 410 response
+    # @raise [ActiveRecord::RecordNotFound] when distant data could not be fetched (except HTTP 410)
+    # @raise [ActiveRecord::RecordInvalid] when updating or tombstoning fails validation
     #: () -> bool
     def sync!
       if local?
@@ -205,11 +207,12 @@ module Fedipub
       response = Fediverse::Webfinger.fetch_actor_url(federated_url)
       new_attributes = response.attributes.except 'id', 'uuid', 'created_at', 'updated_at', 'local', 'entity_id', 'entity_type'
 
+      was_tombstoned = tombstoned?
       update! new_attributes
+      Fedipub.logger.info { "Restored #{federated_url} after successful synchronization" } if was_tombstoned && !tombstoned?
+      true
     rescue Fediverse::Webfinger::GoneError
-      Fedipub.logger.info { "Tombstoning #{federated_url}: its server says it is gone" }
-      tombstone! unless tombstoned?
-      false
+      tombstone_from_sync!
     end
 
     #: () -> bool
@@ -222,7 +225,8 @@ module Fedipub
       Fedipub::Utils::Actor.tombstone! self
     end
 
-    #: () -> void
+    # @return [Boolean, Fedipub::Activity, nil] remote restoration result, or local Undo activity when created
+    #: () -> (bool | Fedipub::Activity | nil)
     def untombstone!
       Fedipub::Utils::Actor.untombstone! self
     end
@@ -347,6 +351,17 @@ module Fedipub
     end
 
     private
+
+    #: () -> bool
+    def tombstone_from_sync! # rubocop:disable Naming/PredicateMethod
+      if tombstoned?
+        Fedipub.logger.warn { "Still tombstoned #{federated_url}: its server answers 410 Gone" }
+      else
+        tombstone!
+        Fedipub.logger.warn { "Tombstoned #{federated_url}: its server answers 410 Gone" }
+      end
+      false
+    end
 
     #: () -> void
     def ensure_key_pair_exists!

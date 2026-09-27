@@ -58,14 +58,15 @@ module Fediverse
       # The sender is touched even when nothing changed, so failing requests can't trigger a fetch every time.
       #
       # @return [Boolean] true if the sender was refreshed and verification is worth retrying
-      # @raise [BadSignature] when the refresh fails
+      # @raise [BadSignature] when the refresh fails or the signer answers 410 Gone
       def refresh_stale_sender!(sender)
         return false if sender.nil? || sender.local?
         return false unless sender.updated_at < Fedipub::Configuration.remote_entities_cache_duration.ago
 
         Fedipub.logger.info { "[Signature] Refreshing #{sender.federated_url} after a failed verification" }
         begin
-          sender.sync!
+          refreshed = sender.sync!
+          raise BadSignature, "Signer #{sender.federated_url} is gone" if !refreshed && sender.tombstoned?
         ensure
           sender.touch # rubocop:disable Rails/SkipsModelValidations
         end

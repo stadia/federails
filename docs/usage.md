@@ -368,3 +368,15 @@ If you want to override the client's views, copy them in your application:
 ```sh
 rails generate fedipub:copy_client_views
 ```
+
+## Refreshing remote actors
+
+Run `bundle exec rake fedipub:sync_actors` in the host application to refresh all stored remote actors.
+Each line reports the actor URL and `updated`, `tombstoned`, `not_found`, `failed`, or `ignored_local`.
+HTTP 410 marks the actor as tombstoned; HTTP 404 and transient fetch failures do not mark it as deleted.
+A later successful fetch restores a tombstoned actor and logs the restoration.
+Failed restoration preserves its original deletion date.
+
+A 410 is treated as the remote server's report that the actor is gone, including responses after redirects.
+This uses the HTTP status without requiring a Tombstone body; a CDN, WAF, or suspended account can therefore
+cause a false tombstone. After correcting the remote response, run the refresh task again to restore the actor.

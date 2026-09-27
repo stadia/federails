@@ -66,12 +66,16 @@ RSpec.describe Fedipub::Maintenance::ActorsUpdater do
     end
 
     it 'returns failed when sync raises an unexpected error' do
-      allow(distant_actor).to receive(:sync!).and_raise(StandardError)
+      allow(distant_actor).to receive(:sync!).and_raise(StandardError, 'sync failed')
+      allow(Fedipub.logger).to receive(:warn)
       result = nil
 
       described_class.run(distant_actor) { |_actor, status| result = status }
 
       expect(result).to eq(:failed)
+      expect(Fedipub.logger).to have_received(:warn) do |&block|
+        expect(block.call).to include(actor_url, 'StandardError', 'sync failed')
+      end
     end
   end
 

@@ -1,4 +1,5 @@
 require 'rails_helper'
+require 'webmock/rspec'
 
 module Fedipub
   RSpec.describe Actor, type: :model do
@@ -84,7 +85,7 @@ module Fedipub
       describe 'on_fedipub_undelete_requested' do
         it 'un-tombstones the actor' do
           actor = FactoryBot.create :distant_actor, tombstoned_at: Time.current
-          allow(actor).to receive(:sync!)
+          allow(actor).to receive(:sync!).and_return(true)
 
           expect(actor).to be_tombstoned
 
@@ -484,6 +485,20 @@ module Fedipub
           end
         end
 
+        it 'restores a tombstoned actor after a successful fetch and logs the restoration' do
+          existing_distant_actor.update! tombstoned_at: 2.days.ago
+          allow(Fedipub.logger).to receive(:info)
+
+          VCR.use_cassette 'actor/find_or_create_by_federation_url_get' do
+            expect(existing_distant_actor.sync!).to be true
+          end
+
+          expect(existing_distant_actor.reload).not_to be_tombstoned
+          expect(Fedipub.logger).to have_received(:info) do |&block|
+            expect(block.call).to include('Restored', distant_url)
+          end
+        end
+
         it 'returns true' do
           VCR.use_cassette 'actor/find_or_create_by_federation_url_get' do
             expect(existing_distant_actor.sync!).to be true
@@ -492,9 +507,10 @@ module Fedipub
       end
 
       context 'with a distant actor its server says is gone' do
+        around { |example| VCR.turned_off { example.run } }
+
         before do
-          gone = Fedipub::Utils::JsonRequest::UnhandledResponseStatus.new('Unhandled status code 410', status: 410)
-          allow(Fedipub::Utils::JsonRequest).to receive(:get_json).with(distant_url, anything).and_raise(gone)
+          stub_request(:get, distant_url).to_return(status: 410)
         end
 
         it 'tombstones the actor' do
@@ -505,10 +521,54 @@ module Fedipub
           expect(existing_distant_actor.sync!).to be false
         end
 
+        it 'logs the completed tombstone at warning level' do
+          allow(Fedipub.logger).to receive(:warn)
+          existing_distant_actor.sync!
+
+          expect(Fedipub.logger).to have_received(:warn) do |&block|
+            expect(block.call).to include('Tombstoned', distant_url)
+            expect(existing_distant_actor.reload).to be_tombstoned
+          end
+        end
+
+        it 'does not log success when tombstoning fails validation' do
+          existing_distant_actor.username = nil
+          allow(Fedipub.logger).to receive(:warn)
+
+          expect { existing_distant_actor.sync! }.to raise_error ActiveRecord::RecordInvalid
+          expect(Fedipub.logger).not_to have_received(:warn)
+          expect(existing_distant_actor.reload).not_to be_tombstoned
+        end
+
         it 'keeps the original tombstone date of an already tombstoned actor' do
           existing_distant_actor.update! tombstoned_at: 2.days.ago
 
           expect { existing_distant_actor.sync! }.not_to(change { existing_distant_actor.reload.tombstoned_at })
+        end
+      end
+
+      context 'when restoring an actor whose server still answers 410' do
+        around { |example| VCR.turned_off { example.run } }
+
+        before do
+          existing_distant_actor.update! tombstoned_at: 2.days.ago
+          stub_request(:get, distant_url).to_return(status: 410)
+        end
+
+        it 'returns false and preserves the original deletion date in memory and storage' do
+          original_date = existing_distant_actor.tombstoned_at
+
+          expect(existing_distant_actor.untombstone!).to be false
+          expect(existing_distant_actor.tombstoned_at).to eq original_date
+          expect(existing_distant_actor.reload.tombstoned_at).to eq original_date
+        end
+
+        it 'warns that restoration failed' do
+          messages = []
+          allow(Fedipub.logger).to receive(:warn) { |&block| messages << block.call }
+          existing_distant_actor.untombstone!
+
+          expect(messages).to include(a_string_including('Unable to restore', distant_url))
         end
       end
 

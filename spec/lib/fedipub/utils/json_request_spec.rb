@@ -2,11 +2,17 @@ require 'rails_helper'
 require 'webmock/rspec'
 
 RSpec.describe Fedipub::Utils::JsonRequest do
+  describe 'UnhandledResponseStatus' do
+    it 'has no status when none was supplied' do
+      expect(described_class::UnhandledResponseStatus.new('Missing collection').status).to be_nil
+    end
+  end
+
   describe '.get_json' do
     context 'when status code is unexpected' do
       it 'raises an error' do
         VCR.use_cassette 'fediverse/request/get_404' do
-          expect { described_class.get_json('http://example.com/something.json') }.to raise_error described_class::UnhandledResponseStatus
+          expect { described_class.get_json('http://example.com/something.json') }.to raise_error(described_class::UnhandledResponseStatus) { |error| expect(error.status).to eq 404 }
         end
       end
     end

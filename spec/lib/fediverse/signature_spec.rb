@@ -128,6 +128,14 @@ RSpec.describe Fediverse::Signature do
       expect(remote.reload.updated_at).to be > 1.minute.ago
     end
 
+    it 'reports a gone signer instead of retrying its unchanged key' do
+      allow(Fediverse::Webfinger).to receive(:fetch_actor_url).with(remote.federated_url).and_raise(Fediverse::Webfinger::GoneError)
+
+      expect { described_class.refresh_stale_sender!(remote) }.to raise_error(Fediverse::Signature::BadSignature, /Signer .* is gone/)
+      expect(remote.reload).to be_tombstoned
+      expect(remote.updated_at).to be > 1.minute.ago
+    end
+
     it 'converts refresh failures into bad signatures and still bumps the timestamp' do
       allow(remote).to receive(:sync!).and_raise(Faraday::TimeoutError)
       expect { described_class.refresh_stale_sender!(remote) }.to raise_error(Fediverse::Signature::BadSignature, /Unable to refresh/)
