@@ -21,7 +21,15 @@ module Fedipub
         def_delegators :instance, :get_json, :get, :post
       end
 
-      class UnhandledResponseStatus < StandardError; end
+      class UnhandledResponseStatus < StandardError
+        #: Integer?
+        attr_reader :status
+
+        def initialize(message = nil, status: nil)
+          @status = status
+          super(message)
+        end
+      end
 
       # Makes a GET request and returns a +Hash+ from the parsed body
       #
@@ -36,7 +44,7 @@ module Fedipub
       # @raise [UnhandledResponseStatus] when response status is not the expected_status
       def get_json(url, params: {}, headers: {}, expected_status: 200, from: nil)
         response = get url: url, params: params, headers: headers, from: from
-        raise UnhandledResponseStatus, "Unhandled status code #{response.status} for GET #{url}" if expected_status && response.status != expected_status
+        raise UnhandledResponseStatus.new("Unhandled status code #{response.status} for GET #{url}", status: response.status) if expected_status && response.status != expected_status
 
         JSON.parse(response.body)
       end

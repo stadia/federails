@@ -57,7 +57,9 @@ module Fedipub
         def update(actor)
           return :ignored_local if actor.local?
 
-          actor.sync! ? :updated : :failed
+          return :updated if actor.sync!
+
+          actor.tombstoned? ? :tombstoned : :failed
         rescue ActiveRecord::RecordNotFound
           :not_found
         rescue StandardError

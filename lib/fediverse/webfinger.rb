@@ -7,6 +7,10 @@ require 'fedipub/utils/json_request'
 module Fediverse
   # Methods related to Webfinger: find accounts, fetch actors,...
   class Webfinger
+    # Raised when the remote server answers 410 Gone: the document was deleted for good.
+    # A RecordNotFound, so callers that don't care about the difference keep working.
+    class GoneError < ActiveRecord::RecordNotFound; end
+
     class << self
       ACCOUNT_REGEX = /(?<username>[a-z0-9\-_.]+)(?:@(?<domain>.*))?/i
 
@@ -143,11 +147,13 @@ module Fediverse
 
       # Makes a GET request (signed as the application actor) and returns a +Hash+ from the parsed body
       # @return [Hash]
+      # @raise [GoneError] when the server answers 410 Gone
       # @raise [ActiveRecord::RecordNotFound] when the response is invalid
       def get_json(url, params = {})
         Fedipub::Utils::JsonRequest.get_json(url, params: params, headers: { accept: 'application/json' })
       rescue Fedipub::Utils::JsonRequest::UnhandledResponseStatus => e
         Fedipub.logger.debug { e.message }
+        raise GoneError, "#{url} is gone" if e.status == 410
 
         raise ActiveRecord::RecordNotFound
       rescue Faraday::Error => e

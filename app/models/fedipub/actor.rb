@@ -191,6 +191,9 @@ module Fedipub
 
     # Synchronizes actor with distant data
     #
+    # When the distant server answers 410 Gone, the actor is tombstoned instead.
+    #
+    # @return [Boolean] true when the actor was updated, false when it is local or was tombstoned
     # @raise [ActiveRecord::RecordNotFound] when distant data was not found
     #: () -> bool
     def sync!
@@ -203,6 +206,10 @@ module Fedipub
       new_attributes = response.attributes.except 'id', 'uuid', 'created_at', 'updated_at', 'local', 'entity_id', 'entity_type'
 
       update! new_attributes
+    rescue Fediverse::Webfinger::GoneError
+      Fedipub.logger.info { "Tombstoning #{federated_url}: its server says it is gone" }
+      tombstone! unless tombstoned?
+      false
     end
 
     #: () -> bool

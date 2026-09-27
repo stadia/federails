@@ -1,4 +1,5 @@
 require 'rails_helper'
+require 'webmock/rspec'
 require 'fediverse/webfinger'
 
 module Fediverse
@@ -184,6 +185,24 @@ module Fediverse
       it 'returns a valid actor' do
         VCR.use_cassette 'fediverse/webfinger/fetch_actor_url_get' do
           expect(described_class.fetch_actor_url('https://mamot.fr/users/mtancoigne')).to be_valid
+        end
+      end
+
+      context 'when the server answers with an error status' do
+        let(:url) { 'https://example.com/users/jdoe' }
+
+        around { |example| VCR.turned_off { example.run } }
+
+        it 'raises GoneError on 410 Gone' do
+          stub_request(:get, url).to_return(status: 410)
+
+          expect { described_class.fetch_actor_url(url) }.to raise_error Webfinger::GoneError
+        end
+
+        it 'raises a plain RecordNotFound on 404' do
+          stub_request(:get, url).to_return(status: 404)
+
+          expect { described_class.fetch_actor_url(url) }.to raise_error(ActiveRecord::RecordNotFound) { |error| expect(error).not_to be_a Webfinger::GoneError }
         end
       end
 

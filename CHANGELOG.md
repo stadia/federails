@@ -46,6 +46,8 @@ Breaking changes should be prefixed by `[**BREAKING**]` (without the quotes), to
 
 ### Fixed
 
+- [#13](https://github.com/stadia/federails/issues/13) - `Fedipub::Actor#sync!` tombstones a distant actor whose
+  server answers 410 Gone instead of raising `ActiveRecord::RecordNotFound`; `ActorsUpdater` reports it as `:tombstoned`
 - draft-cavage-12 signatures include `algorithm="rsa-sha256"`. Misskey (seen on 2026.7.0), and forks sharing its inbox,
   parse signatures with `@peertube/http-signature`, which doesn't support RFC9421 and rejects draft-cavage-12
   signatures without `algorithm`, so both double-knock attempts of signed requests to them got a 401

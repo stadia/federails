@@ -490,6 +490,39 @@ module Fedipub
           end
         end
       end
+
+      context 'with a distant actor its server says is gone' do
+        before do
+          gone = Fedipub::Utils::JsonRequest::UnhandledResponseStatus.new('Unhandled status code 410', status: 410)
+          allow(Fedipub::Utils::JsonRequest).to receive(:get_json).with(distant_url, anything).and_raise(gone)
+        end
+
+        it 'tombstones the actor' do
+          expect { existing_distant_actor.sync! }.to change { existing_distant_actor.reload.tombstoned? }.from(false).to(true)
+        end
+
+        it 'returns false' do
+          expect(existing_distant_actor.sync!).to be false
+        end
+
+        it 'keeps the original tombstone date of an already tombstoned actor' do
+          existing_distant_actor.update! tombstoned_at: 2.days.ago
+
+          expect { existing_distant_actor.sync! }.not_to(change { existing_distant_actor.reload.tombstoned_at })
+        end
+      end
+
+      context 'with a distant actor that cannot be found' do
+        before do
+          not_found = Fedipub::Utils::JsonRequest::UnhandledResponseStatus.new('Unhandled status code 404', status: 404)
+          allow(Fedipub::Utils::JsonRequest).to receive(:get_json).with(distant_url, anything).and_raise(not_found)
+        end
+
+        it 'raises RecordNotFound without tombstoning the actor' do
+          expect { existing_distant_actor.sync! }.to raise_error ActiveRecord::RecordNotFound
+          expect(existing_distant_actor.reload).not_to be_tombstoned
+        end
+      end
     end
 
     describe '.follows?' do
