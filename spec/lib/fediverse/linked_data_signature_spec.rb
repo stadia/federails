@@ -66,6 +66,23 @@ RSpec.describe Fediverse::LinkedDataSignature do
       end
     end
 
+    context 'when the stale signer is gone' do
+      let(:actor) { FactoryBot.create :distant_actor }
+
+      it 'returns the deletion reason after a failed verification' do
+        signed = sign_document(document)
+        signed['object']['content'] = 'Tampered!'
+        actor.update! updated_at: 2.days.ago
+        allow(Fedipub::Actor).to receive(:find_or_create_by_federation_url).and_return(actor)
+        allow(Fediverse::Webfinger).to receive(:fetch_actor_url).with(actor.federated_url).and_raise(Fediverse::Webfinger::GoneError)
+
+        result = described_class.verify(signed)
+
+        expect(result).to include(verified: false, error: "Signer #{actor.federated_url} is gone")
+        expect(actor.reload).to be_tombstoned
+      end
+    end
+
     context 'with no signature block' do
       it 'returns verified false with error' do
         result = described_class.verify(document)

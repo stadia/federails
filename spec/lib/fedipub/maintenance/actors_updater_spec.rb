@@ -46,6 +46,16 @@ RSpec.describe Fedipub::Maintenance::ActorsUpdater do
       expect(result).to eq(:ignored_local)
     end
 
+    it 'returns tombstoned when the actor is gone' do
+      allow(Fediverse::Webfinger).to receive(:fetch_actor_url).with(actor_url).and_raise(Fediverse::Webfinger::GoneError)
+      result = nil
+
+      described_class.run(distant_actor) { |_actor, status| result = status }
+
+      expect(result).to eq(:tombstoned)
+      expect(distant_actor.reload).to be_tombstoned
+    end
+
     it 'returns not_found when sync raises ActiveRecord::RecordNotFound' do
       allow(distant_actor).to receive(:sync!).and_raise(ActiveRecord::RecordNotFound)
       result = nil
@@ -56,12 +66,16 @@ RSpec.describe Fedipub::Maintenance::ActorsUpdater do
     end
 
     it 'returns failed when sync raises an unexpected error' do
-      allow(distant_actor).to receive(:sync!).and_raise(StandardError)
+      allow(distant_actor).to receive(:sync!).and_raise(StandardError, 'sync failed')
+      allow(Fedipub.logger).to receive(:warn)
       result = nil
 
       described_class.run(distant_actor) { |_actor, status| result = status }
 
       expect(result).to eq(:failed)
+      expect(Fedipub.logger).to have_received(:warn) do |&block|
+        expect(block.call).to include(actor_url, 'StandardError', 'sync failed')
+      end
     end
   end
 

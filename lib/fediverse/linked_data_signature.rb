@@ -37,7 +37,9 @@ module Fediverse
         return verified if verified || !actor.respond_to?(:sync!)
         return false unless actor.updated_at < Fedipub::Configuration.remote_entities_cache_duration.ago
 
-        actor.sync!
+        refreshed = actor.sync!
+        raise Fediverse::Signature::BadSignature, "Signer #{actor.federated_url} is gone" if !refreshed && actor.tombstoned?
+
         check_signature(actor, signature_value, to_verify)
       end
 

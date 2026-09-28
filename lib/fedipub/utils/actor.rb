@@ -30,7 +30,7 @@ module Fedipub
           actor
         end
 
-        #: (Fedipub::Actor) -> void
+        #: (Fedipub::Actor) -> (bool | Fedipub::Activity | nil)
         def untombstone!(actor)
           if actor.local?
             untombstone_local_actor actor
@@ -57,7 +57,7 @@ module Fedipub
           end
         end
 
-        #: (Fedipub::Actor) -> void
+        #: (Fedipub::Actor) -> Fedipub::Activity?
         def untombstone_local_actor(actor)
           return unless actor.tombstoned?
           raise 'Cannot restore a local actor without an entity' if actor.entity.blank?
@@ -81,11 +81,14 @@ module Fedipub
           actor.update! tombstoned_at: Time.current
         end
 
-        #: (Fedipub::Actor) -> void
+        #: (Fedipub::Actor) -> bool
         def untombstone_distant_actor(actor)
-          actor.tombstoned_at = nil
-          actor.sync!
-          actor.save
+          unless actor.sync!
+            Fedipub.logger.warn { "Unable to restore #{actor.federated_url}: synchronization failed" }
+            return false
+          end
+
+          actor.update! tombstoned_at: nil
         end
       end
     end

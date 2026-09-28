@@ -191,7 +191,12 @@ module Fedipub
 
     # Synchronizes actor with distant data
     #
-    # @raise [ActiveRecord::RecordNotFound] when distant data was not found
+    # When the distant server answers 410 Gone, the actor is tombstoned instead.
+    #
+    # A successful fetch also clears an existing tombstone. A 410 is handled without raising GoneError.
+    # @return [Boolean] true when updated, false for local actors or an HTTP 410 response
+    # @raise [ActiveRecord::RecordNotFound] when distant data could not be fetched (except HTTP 410)
+    # @raise [ActiveRecord::RecordInvalid] when updating or tombstoning fails validation
     #: () -> bool
     def sync!
       if local?
@@ -202,7 +207,12 @@ module Fedipub
       response = Fediverse::Webfinger.fetch_actor_url(federated_url)
       new_attributes = response.attributes.except 'id', 'uuid', 'created_at', 'updated_at', 'local', 'entity_id', 'entity_type'
 
+      was_tombstoned = tombstoned?
       update! new_attributes
+      Fedipub.logger.info { "Restored #{federated_url} after successful synchronization" } if was_tombstoned && !tombstoned?
+      true
+    rescue Fediverse::Webfinger::GoneError
+      tombstone_from_sync!
     end
 
     #: () -> bool
@@ -215,7 +225,8 @@ module Fedipub
       Fedipub::Utils::Actor.tombstone! self
     end
 
-    #: () -> void
+    # @return [Boolean, Fedipub::Activity, nil] remote restoration result, or local Undo activity when created
+    #: () -> (bool | Fedipub::Activity | nil)
     def untombstone!
       Fedipub::Utils::Actor.untombstone! self
     end
@@ -340,6 +351,23 @@ module Fedipub
     end
 
     private
+
+    # Tombstones with a conditional update rather than from the in-memory state, so a tombstone stored by another
+    # process since this instance was loaded keeps its original date.
+    #: () -> bool
+    def tombstone_from_sync! # rubocop:disable Naming/PredicateMethod
+      now = Time.current
+      rows = self.class.where(id: id, tombstoned_at: nil).update_all(tombstoned_at: now, updated_at: now) # rubocop:disable Rails/SkipsModelValidations
+      self[:tombstoned_at] = rows.positive? ? now : self.class.where(id: id).pick(:tombstoned_at)
+      clear_attribute_changes [:tombstoned_at]
+
+      if rows.positive?
+        Fedipub.logger.warn { "Tombstoned #{federated_url}: its server answers 410 Gone" }
+      else
+        Fedipub.logger.warn { "Still tombstoned #{federated_url}: its server answers 410 Gone" }
+      end
+      false
+    end
 
     #: () -> void
     def ensure_key_pair_exists!
