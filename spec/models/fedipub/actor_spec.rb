@@ -531,19 +531,32 @@ module Fedipub
           end
         end
 
-        it 'does not log success when tombstoning fails validation' do
-          existing_distant_actor.username = nil
-          allow(Fedipub.logger).to receive(:warn)
-
-          expect { existing_distant_actor.sync! }.to raise_error ActiveRecord::RecordInvalid
-          expect(Fedipub.logger).not_to have_received(:warn)
-          expect(existing_distant_actor.reload).not_to be_tombstoned
-        end
-
         it 'keeps the original tombstone date of an already tombstoned actor' do
           existing_distant_actor.update! tombstoned_at: 2.days.ago
 
           expect { existing_distant_actor.sync! }.not_to(change { existing_distant_actor.reload.tombstoned_at })
+        end
+
+        context 'when another process tombstoned the actor after this instance was loaded' do
+          let!(:stale_actor) { described_class.find(existing_distant_actor.id) }
+          let(:original_date) { 2.days.ago.change(usec: 0) }
+
+          before { existing_distant_actor.update! tombstoned_at: original_date }
+
+          it 'keeps the stored tombstone date' do
+            stale_actor.sync!
+
+            expect(existing_distant_actor.reload.tombstoned_at).to eq original_date
+            expect(stale_actor.tombstoned_at).to eq original_date
+          end
+
+          it 'logs that the actor was already tombstoned' do
+            messages = []
+            allow(Fedipub.logger).to receive(:warn) { |&block| messages << block.call }
+            stale_actor.sync!
+
+            expect(messages).to contain_exactly(a_string_including('Still tombstoned', distant_url))
+          end
         end
       end
 

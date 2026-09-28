@@ -352,13 +352,19 @@ module Fedipub
 
     private
 
+    # Tombstones with a conditional update rather than from the in-memory state, so a tombstone stored by another
+    # process since this instance was loaded keeps its original date.
     #: () -> bool
     def tombstone_from_sync! # rubocop:disable Naming/PredicateMethod
-      if tombstoned?
-        Fedipub.logger.warn { "Still tombstoned #{federated_url}: its server answers 410 Gone" }
-      else
-        tombstone!
+      now = Time.current
+      rows = self.class.where(id: id, tombstoned_at: nil).update_all(tombstoned_at: now, updated_at: now) # rubocop:disable Rails/SkipsModelValidations
+      self[:tombstoned_at] = rows.positive? ? now : self.class.where(id: id).pick(:tombstoned_at)
+      clear_attribute_changes [:tombstoned_at]
+
+      if rows.positive?
         Fedipub.logger.warn { "Tombstoned #{federated_url}: its server answers 410 Gone" }
+      else
+        Fedipub.logger.warn { "Still tombstoned #{federated_url}: its server answers 410 Gone" }
       end
       false
     end
